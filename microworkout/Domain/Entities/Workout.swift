@@ -6,3 +6,9 @@
 //
 
 import Foundation
+
+struct Workout {
+    let exercise: Exercise
+    let results: [Serie]
+    let serie: Serie
+}
