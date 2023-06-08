@@ -7,7 +7,8 @@
 
 import Foundation
 
-struct WorkoutPlan {
+struct WorkoutPlan: Identifiable {
+    let id: String
     let name: String
     let workout: [Workout]
 }

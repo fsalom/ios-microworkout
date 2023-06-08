@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C15590FD2A31CB1C00E30886 /* WorkoutRepositoryProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15590FC2A31CB1C00E30886 /* WorkoutRepositoryProtocol.swift */; };
+		C15590FF2A31CB2A00E30886 /* WorkoutRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15590FE2A31CB2A00E30886 /* WorkoutRepository.swift */; };
+		C15591012A31D0B700E30886 /* HomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15591002A31D0B700E30886 /* HomeViewModel.swift */; };
+		C15591032A31D0E000E30886 /* HomeProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15591022A31D0E000E30886 /* HomeProtocols.swift */; };
+		C15591082A31D1F100E30886 /* HomeWorkoutPlanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15591072A31D1F100E30886 /* HomeWorkoutPlanView.swift */; };
+		C155910A2A31D3E400E30886 /* HomeBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15591092A31D3E400E30886 /* HomeBuilder.swift */; };
 		C1742E462A2F31DA0020354D /* Workout.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1742E452A2F31DA0020354D /* Workout.swift */; };
 		C1742E482A2F31F00020354D /* WorkoutUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1742E472A2F31F00020354D /* WorkoutUseCase.swift */; };
 		C1742E4B2A2F32260020354D /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1742E4A2A2F32260020354D /* HomeView.swift */; };
@@ -44,6 +50,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		C15590FC2A31CB1C00E30886 /* WorkoutRepositoryProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutRepositoryProtocol.swift; sourceTree = "<group>"; };
+		C15590FE2A31CB2A00E30886 /* WorkoutRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutRepository.swift; sourceTree = "<group>"; };
+		C15591002A31D0B700E30886 /* HomeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewModel.swift; sourceTree = "<group>"; };
+		C15591022A31D0E000E30886 /* HomeProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeProtocols.swift; sourceTree = "<group>"; };
+		C15591072A31D1F100E30886 /* HomeWorkoutPlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeWorkoutPlanView.swift; sourceTree = "<group>"; };
+		C15591092A31D3E400E30886 /* HomeBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeBuilder.swift; sourceTree = "<group>"; };
 		C1742E452A2F31DA0020354D /* Workout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Workout.swift; sourceTree = "<group>"; };
 		C1742E472A2F31F00020354D /* WorkoutUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutUseCase.swift; sourceTree = "<group>"; };
 		C1742E4A2A2F32260020354D /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
@@ -91,6 +103,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		C15591042A31D1C200E30886 /* CustomViews */ = {
+			isa = PBXGroup;
+			children = (
+				C15591072A31D1F100E30886 /* HomeWorkoutPlanView.swift */,
+			);
+			path = CustomViews;
+			sourceTree = "<group>";
+		};
 		C1742E3D2A2F31360020354D /* Data */ = {
 			isa = PBXGroup;
 			children = (
@@ -167,7 +187,11 @@
 		C1742E492A2F32140020354D /* Home */ = {
 			isa = PBXGroup;
 			children = (
+				C15591042A31D1C200E30886 /* CustomViews */,
 				C1742E4A2A2F32260020354D /* HomeView.swift */,
+				C15591002A31D0B700E30886 /* HomeViewModel.swift */,
+				C15591022A31D0E000E30886 /* HomeProtocols.swift */,
+				C15591092A31D3E400E30886 /* HomeBuilder.swift */,
 			);
 			path = Home;
 			sourceTree = "<group>";
@@ -191,6 +215,8 @@
 		C1742E562A309FC50020354D /* Repository */ = {
 			isa = PBXGroup;
 			children = (
+				C15590FC2A31CB1C00E30886 /* WorkoutRepositoryProtocol.swift */,
+				C15590FE2A31CB2A00E30886 /* WorkoutRepository.swift */,
 			);
 			path = Repository;
 			sourceTree = "<group>";
@@ -393,15 +419,21 @@
 			files = (
 				C192BF252A2A976C00982F33 /* Persistence.swift in Sources */,
 				C1742E512A3099550020354D /* Exercise.swift in Sources */,
+				C15591082A31D1F100E30886 /* HomeWorkoutPlanView.swift in Sources */,
 				C1742E4B2A2F32260020354D /* HomeView.swift in Sources */,
 				C1742E532A309A0C0020354D /* WorkoutPlan.swift in Sources */,
 				C1742E552A309EDE0020354D /* Serie.swift in Sources */,
+				C155910A2A31D3E400E30886 /* HomeBuilder.swift in Sources */,
 				C192BF282A2A976C00982F33 /* microworkout.xcdatamodeld in Sources */,
 				C1742E462A2F31DA0020354D /* Workout.swift in Sources */,
+				C15590FD2A31CB1C00E30886 /* WorkoutRepositoryProtocol.swift in Sources */,
 				C1742E592A309FDC0020354D /* WorkoutDataSourceProtocol.swift in Sources */,
 				C192BF1C2A2A976A00982F33 /* microworkoutApp.swift in Sources */,
 				C1742E5B2A30A0400020354D /* WorkoutCoreDataSource.swift in Sources */,
+				C15590FF2A31CB2A00E30886 /* WorkoutRepository.swift in Sources */,
+				C15591032A31D0E000E30886 /* HomeProtocols.swift in Sources */,
 				C1742E482A2F31F00020354D /* WorkoutUseCase.swift in Sources */,
+				C15591012A31D0B700E30886 /* HomeViewModel.swift in Sources */,
 				C1742E4F2A2FC8D60020354D /* SplashView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

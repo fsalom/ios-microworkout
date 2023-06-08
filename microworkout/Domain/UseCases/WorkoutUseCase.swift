@@ -6,3 +6,14 @@
 //
 
 import Foundation
+
+protocol WorkoutUseCaseProtocol {
+    func getWorkouts() async throws -> [WorkoutPlan]
+}
+
+
+class WorkoutUseCase: WorkoutUseCaseProtocol {
+    func getWorkouts() async throws -> [WorkoutPlan] {
+        return [WorkoutPlan(id: "", name: "ejemplo", workout: [])]
+    }
+}
