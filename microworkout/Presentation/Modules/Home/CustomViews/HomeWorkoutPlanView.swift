@@ -12,7 +12,10 @@ struct HomeWorkoutPlanView: View {
     var workout: WorkoutPlan
 
     var body: some View {
-        Text(workout.name)
+        VStack {
+            Text(workout.name)
+            Text("\(workout.workout.count)")
+        }
     }
 }
 

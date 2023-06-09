@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C13C47BE2A33AAE5005C90AB /* TimerBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = C13C47BD2A33AAE5005C90AB /* TimerBuilder.swift */; };
+		C13C47C02A33AAF0005C90AB /* TimerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C13C47BF2A33AAF0005C90AB /* TimerView.swift */; };
+		C13C47C22A33AB00005C90AB /* TimerProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = C13C47C12A33AB00005C90AB /* TimerProtocols.swift */; };
+		C13C47C42A33AB0B005C90AB /* TimerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C13C47C32A33AB0B005C90AB /* TimerViewModel.swift */; };
 		C15590FD2A31CB1C00E30886 /* WorkoutRepositoryProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15590FC2A31CB1C00E30886 /* WorkoutRepositoryProtocol.swift */; };
 		C15590FF2A31CB2A00E30886 /* WorkoutRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15590FE2A31CB2A00E30886 /* WorkoutRepository.swift */; };
 		C15591012A31D0B700E30886 /* HomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15591002A31D0B700E30886 /* HomeViewModel.swift */; };
@@ -50,6 +54,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		C13C47BD2A33AAE5005C90AB /* TimerBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerBuilder.swift; sourceTree = "<group>"; };
+		C13C47BF2A33AAF0005C90AB /* TimerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerView.swift; sourceTree = "<group>"; };
+		C13C47C12A33AB00005C90AB /* TimerProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerProtocols.swift; sourceTree = "<group>"; };
+		C13C47C32A33AB0B005C90AB /* TimerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerViewModel.swift; sourceTree = "<group>"; };
 		C15590FC2A31CB1C00E30886 /* WorkoutRepositoryProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutRepositoryProtocol.swift; sourceTree = "<group>"; };
 		C15590FE2A31CB2A00E30886 /* WorkoutRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutRepository.swift; sourceTree = "<group>"; };
 		C15591002A31D0B700E30886 /* HomeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewModel.swift; sourceTree = "<group>"; };
@@ -103,6 +111,17 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		C13C47BC2A33AAD5005C90AB /* Timer */ = {
+			isa = PBXGroup;
+			children = (
+				C13C47BD2A33AAE5005C90AB /* TimerBuilder.swift */,
+				C13C47BF2A33AAF0005C90AB /* TimerView.swift */,
+				C13C47C12A33AB00005C90AB /* TimerProtocols.swift */,
+				C13C47C32A33AB0B005C90AB /* TimerViewModel.swift */,
+			);
+			path = Timer;
+			sourceTree = "<group>";
+		};
 		C15591042A31D1C200E30886 /* CustomViews */ = {
 			isa = PBXGroup;
 			children = (
@@ -150,6 +169,7 @@
 		C1742E412A2F317C0020354D /* Modules */ = {
 			isa = PBXGroup;
 			children = (
+				C13C47BC2A33AAD5005C90AB /* Timer */,
 				C1742E4D2A2FC8C10020354D /* Splash */,
 				C1742E492A2F32140020354D /* Home */,
 			);
@@ -425,14 +445,18 @@
 				C1742E552A309EDE0020354D /* Serie.swift in Sources */,
 				C155910A2A31D3E400E30886 /* HomeBuilder.swift in Sources */,
 				C192BF282A2A976C00982F33 /* microworkout.xcdatamodeld in Sources */,
+				C13C47C42A33AB0B005C90AB /* TimerViewModel.swift in Sources */,
 				C1742E462A2F31DA0020354D /* Workout.swift in Sources */,
 				C15590FD2A31CB1C00E30886 /* WorkoutRepositoryProtocol.swift in Sources */,
+				C13C47C02A33AAF0005C90AB /* TimerView.swift in Sources */,
 				C1742E592A309FDC0020354D /* WorkoutDataSourceProtocol.swift in Sources */,
 				C192BF1C2A2A976A00982F33 /* microworkoutApp.swift in Sources */,
 				C1742E5B2A30A0400020354D /* WorkoutCoreDataSource.swift in Sources */,
 				C15590FF2A31CB2A00E30886 /* WorkoutRepository.swift in Sources */,
+				C13C47BE2A33AAE5005C90AB /* TimerBuilder.swift in Sources */,
 				C15591032A31D0E000E30886 /* HomeProtocols.swift in Sources */,
 				C1742E482A2F31F00020354D /* WorkoutUseCase.swift in Sources */,
+				C13C47C22A33AB00005C90AB /* TimerProtocols.swift in Sources */,
 				C15591012A31D0B700E30886 /* HomeViewModel.swift in Sources */,
 				C1742E4F2A2FC8D60020354D /* SplashView.swift in Sources */,
 			);
