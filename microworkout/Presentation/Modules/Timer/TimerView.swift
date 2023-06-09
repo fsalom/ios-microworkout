@@ -10,7 +10,7 @@ import SwiftUI
 struct TimerView<VM>: View where VM: TimerViewModelProtocol {
     @ObservedObject var viewModel: VM
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        CountDownView(progressValue: viewModel.progression)
     }
 }
 
@@ -22,6 +22,6 @@ struct TimerView_Previews: PreviewProvider {
                               results: [],
                               serie: Serie(reps: 10, distance: 400.0)
         )
-        TimerView(viewModel: TimerViewModel(useCase: useCase, workout: workout))
+        TimerView(viewModel: TimerViewModel(useCase: useCase, workout: workout, seconds: 60))
     }
 }

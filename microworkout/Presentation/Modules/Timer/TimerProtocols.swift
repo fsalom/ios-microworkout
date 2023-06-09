@@ -9,5 +9,6 @@ import Foundation
 
 protocol TimerViewModelProtocol: ObservableObject  {
     var workout: Workout { get set }
+    var progression: Float { get set }
     func load()
 }

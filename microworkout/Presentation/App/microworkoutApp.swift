@@ -13,7 +13,12 @@ struct microworkoutApp: App {
 
     var body: some Scene {
         WindowGroup {
-            SplashView()
+            let workout = Workout(exercise: Exercise(name: "ejemplo",
+                                                     type: .distance),
+                                  results: [],
+                                  serie: Serie(reps: 10, distance: 400.0)
+            )
+            TimerBuilder().build(this: workout)
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
         }
     }
