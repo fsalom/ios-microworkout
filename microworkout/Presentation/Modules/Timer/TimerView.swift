@@ -9,9 +9,34 @@ import SwiftUI
 
 struct TimerView<VM>: View where VM: TimerViewModelProtocol {
     @ObservedObject var viewModel: VM
-
+    @State var isStarted: Bool = false
+    @State var hasTimerFinish: Bool = false
     var body: some View {
-        CountDownView(seconds: viewModel.seconds)
+        if hasTimerFinish {
+            Button {
+                isStarted = false
+                hasTimerFinish = false
+            } label: {
+                Label {
+                    Text("Restart")
+                } icon: {
+                    Image(systemName: "play")
+                }
+            }
+        }
+        if !isStarted {
+            Button {
+                isStarted = true
+            } label: {
+                Label {
+                    Text("Empezar")
+                } icon: {
+                    Image(systemName: "play")
+                }
+            }
+        } else {
+            CountDownView(seconds: viewModel.seconds, hasFinish: $hasTimerFinish)
+        }
     }
 }
 

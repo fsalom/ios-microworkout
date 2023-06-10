@@ -7,8 +7,6 @@
 
 import SwiftUI
 
-import SwiftUI
-
 let timer = Timer
     .publish(every: 1, on: .main, in: .common)
     .autoconnect()
@@ -16,27 +14,28 @@ let timer = Timer
 struct CountDownView: View {
     @State var progressValue: Float
     @State var seconds: Int
+    @Binding var hasFinish: Bool
     var progression: Float = 0.0
 
-    init(seconds: Int) {
-        self.seconds = seconds
-        self.progression = Float(Float(seconds) / 100)
+    init(seconds: Int, hasFinish: Binding<Bool>) {
+        self.progression = Float(1/Float(seconds))
         self.progressValue = 1.0
+        self.seconds = seconds
+        self._hasFinish = hasFinish
     }
 
     var body: some View {
         ZStack {
-            Color.yellow
-                .opacity(0.1)
-                .edgesIgnoringSafeArea(.all)
-
             VStack {
-                ProgressBar(progress: self.$progressValue, seconds: self.seconds)
+                ProgressBar(progress: self.$progressValue,
+                            seconds: self.$seconds)
                     .frame(width: 150.0, height: 150.0)
                     .padding(40.0)
                     .onReceive(timer) { input in
                         progressValue -= progression
-                        if progressValue < 0 {
+                        seconds -= 1
+                        if seconds == 0 {
+                            hasFinish = true
                             timer.upstream.connect().cancel()
                         }
                     }
@@ -47,7 +46,7 @@ struct CountDownView: View {
 
 struct ProgressBar: View {
     @Binding var progress: Float
-    var seconds: Int
+    @Binding var seconds: Int
 
     var body: some View {
         ZStack {
@@ -63,7 +62,21 @@ struct ProgressBar: View {
                 .rotationEffect(Angle(degrees: 270.0))
                 .animation(.linear)
 
-            Text(String(setTime(with: Int(round(Float(self.seconds) * self.progress)) )))
+            TimerTitleView(seconds: self.$seconds)
+        }
+    }
+}
+
+struct TimerTitleView: View {
+    @Binding var seconds: Int
+
+    var body: some View {
+        if seconds == 0 {
+            Text("FIN")
+                .font(.largeTitle)
+                .bold()
+        } else {
+            Text(String(setTime(with: self.seconds)))
                 .font(.largeTitle)
                 .bold()
         }
@@ -77,6 +90,7 @@ struct ProgressBar: View {
 
 struct CountDownView_Previews: PreviewProvider {
     static var previews: some View {
-        CountDownView(seconds: 10)
+        @State var hasTimerFinished = false
+        CountDownView(seconds: 10, hasFinish: $hasTimerFinished)
     }
 }
