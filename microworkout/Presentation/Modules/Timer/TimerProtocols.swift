@@ -8,7 +8,7 @@
 import Foundation
 
 protocol TimerViewModelProtocol: ObservableObject  {
-    var workout: Workout { get set }
-    var progression: Float { get set }
+    var workout: Workout { get set }    
+    var seconds: Int { get set }
     func load()
 }

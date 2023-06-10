@@ -15,6 +15,14 @@ let timer = Timer
 
 struct CountDownView: View {
     @State var progressValue: Float
+    @State var seconds: Int
+    var progression: Float = 0.0
+
+    init(seconds: Int) {
+        self.seconds = seconds
+        self.progression = Float(Float(seconds) / 100)
+        self.progressValue = 1.0
+    }
 
     var body: some View {
         ZStack {
@@ -23,12 +31,12 @@ struct CountDownView: View {
                 .edgesIgnoringSafeArea(.all)
 
             VStack {
-                ProgressBar(progress: self.$progressValue)
+                ProgressBar(progress: self.$progressValue, seconds: self.seconds)
                     .frame(width: 150.0, height: 150.0)
                     .padding(40.0)
                     .onReceive(timer) { input in
-                        progressValue -= 0.01
-                        if progressValue == 0 {
+                        progressValue -= progression
+                        if progressValue < 0 {
                             timer.upstream.connect().cancel()
                         }
                     }
@@ -39,6 +47,7 @@ struct CountDownView: View {
 
 struct ProgressBar: View {
     @Binding var progress: Float
+    var seconds: Int
 
     var body: some View {
         ZStack {
@@ -54,15 +63,20 @@ struct ProgressBar: View {
                 .rotationEffect(Angle(degrees: 270.0))
                 .animation(.linear)
 
-            Text(String(format: "%.0f %%", min(self.progress, 1.0)*100.0))
+            Text(String(setTime(with: Int(round(Float(self.seconds) * self.progress)) )))
                 .font(.largeTitle)
                 .bold()
         }
+    }
+
+    func setTime(with seconds: Int) -> String {
+        let (m, s) = ((seconds % 3600) / 60, (seconds % 3600) % 60)
+        return String(format: "%02d:%02d", arguments: [m,s])
     }
 }
 
 struct CountDownView_Previews: PreviewProvider {
     static var previews: some View {
-        CountDownView(progressValue: 0.02)
+        CountDownView(seconds: 10)
     }
 }

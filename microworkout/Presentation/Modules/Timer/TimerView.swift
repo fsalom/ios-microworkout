@@ -9,8 +9,9 @@ import SwiftUI
 
 struct TimerView<VM>: View where VM: TimerViewModelProtocol {
     @ObservedObject var viewModel: VM
+
     var body: some View {
-        CountDownView(progressValue: viewModel.progression)
+        CountDownView(seconds: viewModel.seconds)
     }
 }
 

@@ -9,13 +9,14 @@ import Foundation
 
 class TimerViewModel: ObservableObject, TimerViewModelProtocol {
     @Published var workout: Workout
-
+    var seconds: Int
     var useCase: WorkoutUseCaseProtocol!
     var progression: Float
 
     init(useCase: WorkoutUseCaseProtocol, workout: Workout, seconds: Int) {
         self.useCase = useCase
         self.workout = workout
+        self.seconds = seconds
         self.progression = Float(seconds / 100)
     }
 
