@@ -10,6 +10,29 @@ import SwiftUI
 struct HomeView<VM>: View where VM: HomeViewModelProtocol {
     @ObservedObject var viewModel: VM
     var body: some View {
+        HStack(alignment: .top) {
+            ZStack {
+                Circle()
+                    .frame(width: 50, height: 50, alignment: .top)
+                    .foregroundColor(.gray)
+                Image(systemName: "photo")
+                    .foregroundColor(.white)
+                    .imageScale(.small)
+                    .frame(width: 44, height: 40)
+            }
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Wellcome back")
+                    .font(.footnote)
+                    .lineLimit(2)
+                Text("chat.name")
+                    .fontWeight(.bold)
+            }
+            Spacer()
+            VStack(alignment: .leading) {
+                Image(systemName: "bell")                    
+            }
+
+        }.padding(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
         NavigationView {
             ScrollView {
                 ScrollViewReader { value in

@@ -15,7 +15,7 @@ struct HomeWorkoutPlanView: View {
         VStack {
             Text(workout.name)
             Text("\(workout.workout.count)")
-        }
+        }.padding(10)
     }
 }
 
