@@ -14,6 +14,9 @@ protocol WorkoutUseCaseProtocol {
 
 class WorkoutUseCase: WorkoutUseCaseProtocol {
     func getWorkouts() async throws -> [WorkoutPlan] {
-        return [WorkoutPlan(id: "", name: "ejemplo", workout: [])]
+        return [WorkoutPlan(id: "", name: "ejemplo", workout: []),
+                WorkoutPlan(id: "", name: "ejemplo", workout: []),
+                WorkoutPlan(id: "", name: "ejemplo", workout: []),
+                WorkoutPlan(id: "", name: "ejemplo", workout: [])]
     }
 }

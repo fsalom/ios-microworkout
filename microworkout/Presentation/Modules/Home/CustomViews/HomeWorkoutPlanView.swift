@@ -12,10 +12,13 @@ struct HomeWorkoutPlanView: View {
     var workout: WorkoutPlan
 
     var body: some View {
-        VStack {
-            Text(workout.name)
-            Text("\(workout.workout.count)")
-        }.padding(10)
+        HStack {
+            VStack {
+                Text(workout.name)
+                Text("\(workout.workout.count)")
+            }.padding(10)
+        }.frame(maxWidth: .infinity)
+        .padding(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
     }
 }
 

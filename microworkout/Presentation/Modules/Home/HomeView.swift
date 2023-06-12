@@ -21,7 +21,7 @@ struct HomeView<VM>: View where VM: HomeViewModelProtocol {
                     .frame(width: 44, height: 40)
             }
             VStack(alignment: .leading, spacing: 2) {
-                Text("Wellcome back")
+                Text("Welcome back")
                     .font(.footnote)
                     .lineLimit(2)
                 Text("chat.name")
@@ -29,12 +29,14 @@ struct HomeView<VM>: View where VM: HomeViewModelProtocol {
             }
             Spacer()
             VStack(alignment: .leading) {
-                Image(systemName: "bell")                    
+                Image(systemName: "bell")
             }
 
         }.padding(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
         NavigationView {
-            ScrollView {
+            List {
+                Text("Entrenamientos")
+                    .font(.subheadline)
                 ScrollViewReader { value in
                     ForEach(viewModel.workouts, id: \.id) { workout in
                         HomeWorkoutPlanView(workout: workout)
@@ -42,7 +44,9 @@ struct HomeView<VM>: View where VM: HomeViewModelProtocol {
                         viewModel.load()
                     }
                 }
-            }
+            }.listStyle(.plain)
+                .cornerRadius(10)
+                .padding(10)
         }
     }
 }
