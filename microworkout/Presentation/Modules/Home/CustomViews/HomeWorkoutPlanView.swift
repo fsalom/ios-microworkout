@@ -13,12 +13,28 @@ struct HomeWorkoutPlanView: View {
 
     var body: some View {
         HStack {
-            VStack {
-                Text(workout.name)
-                Text("\(workout.workout.count)")
-            }.padding(10)
-        }.frame(maxWidth: .infinity)
-        .padding(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
+            HStack {
+                ZStack {
+                    Circle()
+                        .frame(width: 50, height: 50, alignment: .top)
+                        .foregroundColor(.gray)
+                    Image(systemName: "figure.strengthtraining.traditional")
+                        .foregroundColor(.white)
+                        .imageScale(.small)
+                        .frame(width: 44, height: 40)
+                }
+                VStack(alignment: .leading, spacing: 10) {
+                    Text(workout.name)
+                    HStack {
+                        Text("Nº de ejercicios").fontWeight(.bold)
+                        Text("\(workout.workout.count)")
+                        Text("Nº de series").fontWeight(.bold)
+                        Text("\(workout.workout.count)")
+                    }.font(.footnote)
+
+                }
+            }
+        }
     }
 }
 
