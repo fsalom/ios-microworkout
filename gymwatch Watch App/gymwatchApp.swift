@@ -11,7 +11,11 @@ import SwiftUI
 struct gymwatch_Watch_AppApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ChronoBuilder().build()
+            /*
+            TimerBuilder().build(this: Workout(exercise: Exercise(name: "example",
+                                                                  type: .distance),
+                                               results: [], serie: Serie(reps: 10, distance: 10.0)))*/
         }
     }
 }

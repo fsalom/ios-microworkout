@@ -43,6 +43,30 @@
 		C1F34F7D2A38CD4500233D66 /* gymwatch_Watch_AppUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1F34F7C2A38CD4500233D66 /* gymwatch_Watch_AppUITests.swift */; };
 		C1F34F7F2A38CD4500233D66 /* gymwatch_Watch_AppUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1F34F7E2A38CD4500233D66 /* gymwatch_Watch_AppUITestsLaunchTests.swift */; };
 		C1F34F822A38CD4500233D66 /* gymwatch Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = C1F34F5F2A38CD4300233D66 /* gymwatch Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		C1F34F8D2A38FB9D00233D66 /* TimerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C13C47BF2A33AAF0005C90AB /* TimerView.swift */; };
+		C1F34F8E2A38FB9D00233D66 /* TimerBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = C13C47BD2A33AAE5005C90AB /* TimerBuilder.swift */; };
+		C1F34F8F2A38FB9D00233D66 /* TimerProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = C13C47C12A33AB00005C90AB /* TimerProtocols.swift */; };
+		C1F34F902A38FB9D00233D66 /* CountDownView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C13C47C62A33B00C005C90AB /* CountDownView.swift */; };
+		C1F34F912A38FB9D00233D66 /* TimerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C13C47C32A33AB0B005C90AB /* TimerViewModel.swift */; };
+		C1F34F922A38FBBF00233D66 /* WorkoutPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1742E522A309A0C0020354D /* WorkoutPlan.swift */; };
+		C1F34F932A38FBBF00233D66 /* Serie.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1742E542A309EDE0020354D /* Serie.swift */; };
+		C1F34F942A38FBBF00233D66 /* Exercise.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1742E502A3099550020354D /* Exercise.swift */; };
+		C1F34F952A38FBBF00233D66 /* Workout.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1742E452A2F31DA0020354D /* Workout.swift */; };
+		C1F34F962A38FC0A00233D66 /* WorkoutUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1742E472A2F31F00020354D /* WorkoutUseCase.swift */; };
+		C1F34F972A38FC1100233D66 /* WorkoutRepositoryProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15590FC2A31CB1C00E30886 /* WorkoutRepositoryProtocol.swift */; };
+		C1F34F982A38FC1100233D66 /* WorkoutRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15590FE2A31CB2A00E30886 /* WorkoutRepository.swift */; };
+		C1F34F992A38FC1400233D66 /* WorkoutCoreDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1742E5A2A30A0400020354D /* WorkoutCoreDataSource.swift */; };
+		C1F34F9A2A38FC1400233D66 /* WorkoutDataSourceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1742E582A309FDC0020354D /* WorkoutDataSourceProtocol.swift */; };
+		C1F34FA22A38FC6D00233D66 /* ChronoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1F34F9C2A38FC6D00233D66 /* ChronoView.swift */; };
+		C1F34FA32A38FC6D00233D66 /* ChronoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1F34F9C2A38FC6D00233D66 /* ChronoView.swift */; };
+		C1F34FA42A38FC6D00233D66 /* ChronoViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1F34F9D2A38FC6D00233D66 /* ChronoViewModel.swift */; };
+		C1F34FA52A38FC6D00233D66 /* ChronoViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1F34F9D2A38FC6D00233D66 /* ChronoViewModel.swift */; };
+		C1F34FA62A38FC6D00233D66 /* ChronoTimerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1F34F9F2A38FC6D00233D66 /* ChronoTimerView.swift */; };
+		C1F34FA72A38FC6D00233D66 /* ChronoTimerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1F34F9F2A38FC6D00233D66 /* ChronoTimerView.swift */; };
+		C1F34FA82A38FC6D00233D66 /* ChronoBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1F34FA02A38FC6D00233D66 /* ChronoBuilder.swift */; };
+		C1F34FA92A38FC6D00233D66 /* ChronoBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1F34FA02A38FC6D00233D66 /* ChronoBuilder.swift */; };
+		C1F34FAA2A38FC6D00233D66 /* ChronoProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1F34FA12A38FC6D00233D66 /* ChronoProtocols.swift */; };
+		C1F34FAB2A38FC6D00233D66 /* ChronoProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1F34FA12A38FC6D00233D66 /* ChronoProtocols.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -139,6 +163,11 @@
 		C1F34F782A38CD4500233D66 /* gymwatch Watch AppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "gymwatch Watch AppUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C1F34F7C2A38CD4500233D66 /* gymwatch_Watch_AppUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = gymwatch_Watch_AppUITests.swift; sourceTree = "<group>"; };
 		C1F34F7E2A38CD4500233D66 /* gymwatch_Watch_AppUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = gymwatch_Watch_AppUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		C1F34F9C2A38FC6D00233D66 /* ChronoView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChronoView.swift; sourceTree = "<group>"; };
+		C1F34F9D2A38FC6D00233D66 /* ChronoViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChronoViewModel.swift; sourceTree = "<group>"; };
+		C1F34F9F2A38FC6D00233D66 /* ChronoTimerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChronoTimerView.swift; sourceTree = "<group>"; };
+		C1F34FA02A38FC6D00233D66 /* ChronoBuilder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChronoBuilder.swift; sourceTree = "<group>"; };
+		C1F34FA12A38FC6D00233D66 /* ChronoProtocols.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChronoProtocols.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -254,6 +283,7 @@
 		C1742E412A2F317C0020354D /* Modules */ = {
 			isa = PBXGroup;
 			children = (
+				C1F34F9B2A38FC4600233D66 /* Chrono */,
 				C13C47BC2A33AAD5005C90AB /* Timer */,
 				C1742E4D2A2FC8C10020354D /* Splash */,
 				C1742E492A2F32140020354D /* Home */,
@@ -432,6 +462,26 @@
 				C1F34F7E2A38CD4500233D66 /* gymwatch_Watch_AppUITestsLaunchTests.swift */,
 			);
 			path = "gymwatch Watch AppUITests";
+			sourceTree = "<group>";
+		};
+		C1F34F9B2A38FC4600233D66 /* Chrono */ = {
+			isa = PBXGroup;
+			children = (
+				C1F34F9E2A38FC6D00233D66 /* Component */,
+				C1F34FA02A38FC6D00233D66 /* ChronoBuilder.swift */,
+				C1F34FA12A38FC6D00233D66 /* ChronoProtocols.swift */,
+				C1F34F9C2A38FC6D00233D66 /* ChronoView.swift */,
+				C1F34F9D2A38FC6D00233D66 /* ChronoViewModel.swift */,
+			);
+			path = Chrono;
+			sourceTree = "<group>";
+		};
+		C1F34F9E2A38FC6D00233D66 /* Component */ = {
+			isa = PBXGroup;
+			children = (
+				C1F34F9F2A38FC6D00233D66 /* ChronoTimerView.swift */,
+			);
+			path = Component;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -662,21 +712,26 @@
 				C15591082A31D1F100E30886 /* HomeWorkoutPlanView.swift in Sources */,
 				C1742E4B2A2F32260020354D /* HomeView.swift in Sources */,
 				C1742E532A309A0C0020354D /* WorkoutPlan.swift in Sources */,
+				C1F34FA22A38FC6D00233D66 /* ChronoView.swift in Sources */,
 				C1742E552A309EDE0020354D /* Serie.swift in Sources */,
 				C155910A2A31D3E400E30886 /* HomeBuilder.swift in Sources */,
 				C192BF282A2A976C00982F33 /* microworkout.xcdatamodeld in Sources */,
+				C1F34FA62A38FC6D00233D66 /* ChronoTimerView.swift in Sources */,
 				C13C47C42A33AB0B005C90AB /* TimerViewModel.swift in Sources */,
 				C1742E462A2F31DA0020354D /* Workout.swift in Sources */,
 				C15590FD2A31CB1C00E30886 /* WorkoutRepositoryProtocol.swift in Sources */,
 				C13C47C02A33AAF0005C90AB /* TimerView.swift in Sources */,
 				C1742E592A309FDC0020354D /* WorkoutDataSourceProtocol.swift in Sources */,
+				C1F34FA82A38FC6D00233D66 /* ChronoBuilder.swift in Sources */,
 				C192BF1C2A2A976A00982F33 /* microworkoutApp.swift in Sources */,
 				C1742E5B2A30A0400020354D /* WorkoutCoreDataSource.swift in Sources */,
 				C15590FF2A31CB2A00E30886 /* WorkoutRepository.swift in Sources */,
 				C13C47BE2A33AAE5005C90AB /* TimerBuilder.swift in Sources */,
 				C15591032A31D0E000E30886 /* HomeProtocols.swift in Sources */,
+				C1F34FA42A38FC6D00233D66 /* ChronoViewModel.swift in Sources */,
 				C1742E482A2F31F00020354D /* WorkoutUseCase.swift in Sources */,
 				C13C47C22A33AB00005C90AB /* TimerProtocols.swift in Sources */,
+				C1F34FAA2A38FC6D00233D66 /* ChronoProtocols.swift in Sources */,
 				C15591012A31D0B700E30886 /* HomeViewModel.swift in Sources */,
 				C1742E4F2A2FC8D60020354D /* SplashView.swift in Sources */,
 			);
@@ -703,8 +758,27 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C1F34FA72A38FC6D00233D66 /* ChronoTimerView.swift in Sources */,
+				C1F34F912A38FB9D00233D66 /* TimerViewModel.swift in Sources */,
+				C1F34F8D2A38FB9D00233D66 /* TimerView.swift in Sources */,
+				C1F34F9A2A38FC1400233D66 /* WorkoutDataSourceProtocol.swift in Sources */,
+				C1F34F922A38FBBF00233D66 /* WorkoutPlan.swift in Sources */,
+				C1F34F8E2A38FB9D00233D66 /* TimerBuilder.swift in Sources */,
+				C1F34F902A38FB9D00233D66 /* CountDownView.swift in Sources */,
+				C1F34F942A38FBBF00233D66 /* Exercise.swift in Sources */,
+				C1F34FA32A38FC6D00233D66 /* ChronoView.swift in Sources */,
+				C1F34F952A38FBBF00233D66 /* Workout.swift in Sources */,
+				C1F34F972A38FC1100233D66 /* WorkoutRepositoryProtocol.swift in Sources */,
+				C1F34FA52A38FC6D00233D66 /* ChronoViewModel.swift in Sources */,
+				C1F34F932A38FBBF00233D66 /* Serie.swift in Sources */,
+				C1F34FA92A38FC6D00233D66 /* ChronoBuilder.swift in Sources */,
 				C1F34F642A38CD4300233D66 /* ContentView.swift in Sources */,
 				C1F34F622A38CD4300233D66 /* gymwatchApp.swift in Sources */,
+				C1F34F982A38FC1100233D66 /* WorkoutRepository.swift in Sources */,
+				C1F34F992A38FC1400233D66 /* WorkoutCoreDataSource.swift in Sources */,
+				C1F34FAB2A38FC6D00233D66 /* ChronoProtocols.swift in Sources */,
+				C1F34F8F2A38FB9D00233D66 /* TimerProtocols.swift in Sources */,
+				C1F34F962A38FC0A00233D66 /* WorkoutUseCase.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
