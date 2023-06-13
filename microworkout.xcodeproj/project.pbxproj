@@ -35,6 +35,14 @@
 		C192BF322A2A976C00982F33 /* microworkoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C192BF312A2A976C00982F33 /* microworkoutTests.swift */; };
 		C192BF3C2A2A976C00982F33 /* microworkoutUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C192BF3B2A2A976C00982F33 /* microworkoutUITests.swift */; };
 		C192BF3E2A2A976C00982F33 /* microworkoutUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C192BF3D2A2A976C00982F33 /* microworkoutUITestsLaunchTests.swift */; };
+		C1F34F622A38CD4300233D66 /* gymwatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1F34F612A38CD4300233D66 /* gymwatchApp.swift */; };
+		C1F34F642A38CD4300233D66 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1F34F632A38CD4300233D66 /* ContentView.swift */; };
+		C1F34F662A38CD4500233D66 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C1F34F652A38CD4500233D66 /* Assets.xcassets */; };
+		C1F34F692A38CD4500233D66 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C1F34F682A38CD4500233D66 /* Preview Assets.xcassets */; };
+		C1F34F732A38CD4500233D66 /* gymwatch_Watch_AppTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1F34F722A38CD4500233D66 /* gymwatch_Watch_AppTests.swift */; };
+		C1F34F7D2A38CD4500233D66 /* gymwatch_Watch_AppUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1F34F7C2A38CD4500233D66 /* gymwatch_Watch_AppUITests.swift */; };
+		C1F34F7F2A38CD4500233D66 /* gymwatch_Watch_AppUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1F34F7E2A38CD4500233D66 /* gymwatch_Watch_AppUITestsLaunchTests.swift */; };
+		C1F34F822A38CD4500233D66 /* gymwatch Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = C1F34F5F2A38CD4300233D66 /* gymwatch Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -52,7 +60,42 @@
 			remoteGlobalIDString = C192BF172A2A976A00982F33;
 			remoteInfo = microworkout;
 		};
+		C1F34F6F2A38CD4500233D66 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C192BF102A2A976A00982F33 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C1F34F5E2A38CD4200233D66;
+			remoteInfo = "gymwatch Watch App";
+		};
+		C1F34F792A38CD4500233D66 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C192BF102A2A976A00982F33 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C1F34F5E2A38CD4200233D66;
+			remoteInfo = "gymwatch Watch App";
+		};
+		C1F34F802A38CD4500233D66 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C192BF102A2A976A00982F33 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C1F34F5E2A38CD4200233D66;
+			remoteInfo = "gymwatch Watch App";
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		C1F34F832A38CD4500233D66 /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				C1F34F822A38CD4500233D66 /* gymwatch Watch App.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		C13C47BD2A33AAE5005C90AB /* TimerBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerBuilder.swift; sourceTree = "<group>"; };
@@ -86,6 +129,16 @@
 		C192BF372A2A976C00982F33 /* microworkoutUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = microworkoutUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C192BF3B2A2A976C00982F33 /* microworkoutUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = microworkoutUITests.swift; sourceTree = "<group>"; };
 		C192BF3D2A2A976C00982F33 /* microworkoutUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = microworkoutUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		C1F34F5F2A38CD4300233D66 /* gymwatch Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "gymwatch Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C1F34F612A38CD4300233D66 /* gymwatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = gymwatchApp.swift; sourceTree = "<group>"; };
+		C1F34F632A38CD4300233D66 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		C1F34F652A38CD4500233D66 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		C1F34F682A38CD4500233D66 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		C1F34F6E2A38CD4500233D66 /* gymwatch Watch AppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "gymwatch Watch AppTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C1F34F722A38CD4500233D66 /* gymwatch_Watch_AppTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = gymwatch_Watch_AppTests.swift; sourceTree = "<group>"; };
+		C1F34F782A38CD4500233D66 /* gymwatch Watch AppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "gymwatch Watch AppUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C1F34F7C2A38CD4500233D66 /* gymwatch_Watch_AppUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = gymwatch_Watch_AppUITests.swift; sourceTree = "<group>"; };
+		C1F34F7E2A38CD4500233D66 /* gymwatch_Watch_AppUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = gymwatch_Watch_AppUITestsLaunchTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -104,6 +157,27 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		C192BF342A2A976C00982F33 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C1F34F5C2A38CD4200233D66 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C1F34F6B2A38CD4500233D66 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C1F34F752A38CD4500233D66 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -267,6 +341,9 @@
 				C192BF1A2A2A976A00982F33 /* microworkout */,
 				C192BF302A2A976C00982F33 /* microworkoutTests */,
 				C192BF3A2A2A976C00982F33 /* microworkoutUITests */,
+				C1F34F602A38CD4300233D66 /* gymwatch Watch App */,
+				C1F34F712A38CD4500233D66 /* gymwatch Watch AppTests */,
+				C1F34F7B2A38CD4500233D66 /* gymwatch Watch AppUITests */,
 				C192BF192A2A976A00982F33 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -277,6 +354,9 @@
 				C192BF182A2A976A00982F33 /* microworkout.app */,
 				C192BF2D2A2A976C00982F33 /* microworkoutTests.xctest */,
 				C192BF372A2A976C00982F33 /* microworkoutUITests.xctest */,
+				C1F34F5F2A38CD4300233D66 /* gymwatch Watch App.app */,
+				C1F34F6E2A38CD4500233D66 /* gymwatch Watch AppTests.xctest */,
+				C1F34F782A38CD4500233D66 /* gymwatch Watch AppUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -318,6 +398,42 @@
 			path = microworkoutUITests;
 			sourceTree = "<group>";
 		};
+		C1F34F602A38CD4300233D66 /* gymwatch Watch App */ = {
+			isa = PBXGroup;
+			children = (
+				C1F34F612A38CD4300233D66 /* gymwatchApp.swift */,
+				C1F34F632A38CD4300233D66 /* ContentView.swift */,
+				C1F34F652A38CD4500233D66 /* Assets.xcassets */,
+				C1F34F672A38CD4500233D66 /* Preview Content */,
+			);
+			path = "gymwatch Watch App";
+			sourceTree = "<group>";
+		};
+		C1F34F672A38CD4500233D66 /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				C1F34F682A38CD4500233D66 /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		C1F34F712A38CD4500233D66 /* gymwatch Watch AppTests */ = {
+			isa = PBXGroup;
+			children = (
+				C1F34F722A38CD4500233D66 /* gymwatch_Watch_AppTests.swift */,
+			);
+			path = "gymwatch Watch AppTests";
+			sourceTree = "<group>";
+		};
+		C1F34F7B2A38CD4500233D66 /* gymwatch Watch AppUITests */ = {
+			isa = PBXGroup;
+			children = (
+				C1F34F7C2A38CD4500233D66 /* gymwatch_Watch_AppUITests.swift */,
+				C1F34F7E2A38CD4500233D66 /* gymwatch_Watch_AppUITestsLaunchTests.swift */,
+			);
+			path = "gymwatch Watch AppUITests";
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -328,10 +444,12 @@
 				C192BF142A2A976A00982F33 /* Sources */,
 				C192BF152A2A976A00982F33 /* Frameworks */,
 				C192BF162A2A976A00982F33 /* Resources */,
+				C1F34F832A38CD4500233D66 /* Embed Watch Content */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				C1F34F812A38CD4500233D66 /* PBXTargetDependency */,
 			);
 			name = microworkout;
 			productName = microworkout;
@@ -374,6 +492,59 @@
 			productReference = C192BF372A2A976C00982F33 /* microworkoutUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		C1F34F5E2A38CD4200233D66 /* gymwatch Watch App */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C1F34F8A2A38CD4500233D66 /* Build configuration list for PBXNativeTarget "gymwatch Watch App" */;
+			buildPhases = (
+				C1F34F5B2A38CD4200233D66 /* Sources */,
+				C1F34F5C2A38CD4200233D66 /* Frameworks */,
+				C1F34F5D2A38CD4200233D66 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "gymwatch Watch App";
+			productName = "gymwatch Watch App";
+			productReference = C1F34F5F2A38CD4300233D66 /* gymwatch Watch App.app */;
+			productType = "com.apple.product-type.application";
+		};
+		C1F34F6D2A38CD4500233D66 /* gymwatch Watch AppTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C1F34F8B2A38CD4500233D66 /* Build configuration list for PBXNativeTarget "gymwatch Watch AppTests" */;
+			buildPhases = (
+				C1F34F6A2A38CD4500233D66 /* Sources */,
+				C1F34F6B2A38CD4500233D66 /* Frameworks */,
+				C1F34F6C2A38CD4500233D66 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C1F34F702A38CD4500233D66 /* PBXTargetDependency */,
+			);
+			name = "gymwatch Watch AppTests";
+			productName = "gymwatch Watch AppTests";
+			productReference = C1F34F6E2A38CD4500233D66 /* gymwatch Watch AppTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		C1F34F772A38CD4500233D66 /* gymwatch Watch AppUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C1F34F8C2A38CD4500233D66 /* Build configuration list for PBXNativeTarget "gymwatch Watch AppUITests" */;
+			buildPhases = (
+				C1F34F742A38CD4500233D66 /* Sources */,
+				C1F34F752A38CD4500233D66 /* Frameworks */,
+				C1F34F762A38CD4500233D66 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C1F34F7A2A38CD4500233D66 /* PBXTargetDependency */,
+			);
+			name = "gymwatch Watch AppUITests";
+			productName = "gymwatch Watch AppUITests";
+			productReference = C1F34F782A38CD4500233D66 /* gymwatch Watch AppUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -395,6 +566,17 @@
 						CreatedOnToolsVersion = 14.3.1;
 						TestTargetID = C192BF172A2A976A00982F33;
 					};
+					C1F34F5E2A38CD4200233D66 = {
+						CreatedOnToolsVersion = 14.3.1;
+					};
+					C1F34F6D2A38CD4500233D66 = {
+						CreatedOnToolsVersion = 14.3.1;
+						TestTargetID = C1F34F5E2A38CD4200233D66;
+					};
+					C1F34F772A38CD4500233D66 = {
+						CreatedOnToolsVersion = 14.3.1;
+						TestTargetID = C1F34F5E2A38CD4200233D66;
+					};
 				};
 			};
 			buildConfigurationList = C192BF132A2A976A00982F33 /* Build configuration list for PBXProject "microworkout" */;
@@ -413,6 +595,9 @@
 				C192BF172A2A976A00982F33 /* microworkout */,
 				C192BF2C2A2A976C00982F33 /* microworkoutTests */,
 				C192BF362A2A976C00982F33 /* microworkoutUITests */,
+				C1F34F5E2A38CD4200233D66 /* gymwatch Watch App */,
+				C1F34F6D2A38CD4500233D66 /* gymwatch Watch AppTests */,
+				C1F34F772A38CD4500233D66 /* gymwatch Watch AppUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -435,6 +620,29 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		C192BF352A2A976C00982F33 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C1F34F5D2A38CD4200233D66 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C1F34F692A38CD4500233D66 /* Preview Assets.xcassets in Resources */,
+				C1F34F662A38CD4500233D66 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C1F34F6C2A38CD4500233D66 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C1F34F762A38CD4500233D66 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -491,6 +699,32 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C1F34F5B2A38CD4200233D66 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C1F34F642A38CD4300233D66 /* ContentView.swift in Sources */,
+				C1F34F622A38CD4300233D66 /* gymwatchApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C1F34F6A2A38CD4500233D66 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C1F34F732A38CD4500233D66 /* gymwatch_Watch_AppTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C1F34F742A38CD4500233D66 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C1F34F7F2A38CD4500233D66 /* gymwatch_Watch_AppUITestsLaunchTests.swift in Sources */,
+				C1F34F7D2A38CD4500233D66 /* gymwatch_Watch_AppUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -503,6 +737,21 @@
 			isa = PBXTargetDependency;
 			target = C192BF172A2A976A00982F33 /* microworkout */;
 			targetProxy = C192BF382A2A976C00982F33 /* PBXContainerItemProxy */;
+		};
+		C1F34F702A38CD4500233D66 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C1F34F5E2A38CD4200233D66 /* gymwatch Watch App */;
+			targetProxy = C1F34F6F2A38CD4500233D66 /* PBXContainerItemProxy */;
+		};
+		C1F34F7A2A38CD4500233D66 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C1F34F5E2A38CD4200233D66 /* gymwatch Watch App */;
+			targetProxy = C1F34F792A38CD4500233D66 /* PBXContainerItemProxy */;
+		};
+		C1F34F812A38CD4500233D66 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C1F34F5E2A38CD4200233D66 /* gymwatch Watch App */;
+			targetProxy = C1F34F802A38CD4500233D66 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -624,6 +873,7 @@
 		C192BF422A2A976C00982F33 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
@@ -653,6 +903,7 @@
 		C192BF432A2A976C00982F33 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
@@ -755,6 +1006,148 @@
 			};
 			name = Release;
 		};
+		C1F34F842A38CD4500233D66 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"gymwatch Watch App/Preview Content\"";
+				DEVELOPMENT_TEAM = X8Z657K235;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = gymwatch;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = es.fernandosalom.microworkout;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = es.fernandosalom.microworkout.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 9.4;
+			};
+			name = Debug;
+		};
+		C1F34F852A38CD4500233D66 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"gymwatch Watch App/Preview Content\"";
+				DEVELOPMENT_TEAM = X8Z657K235;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = gymwatch;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = es.fernandosalom.microworkout;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = es.fernandosalom.microworkout.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 9.4;
+			};
+			name = Release;
+		};
+		C1F34F862A38CD4500233D66 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = X8Z657K235;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "es.fernandosalom.microworkout.gymwatch-Watch-AppTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/gymwatch Watch App.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/gymwatch Watch App";
+				WATCHOS_DEPLOYMENT_TARGET = 9.4;
+			};
+			name = Debug;
+		};
+		C1F34F872A38CD4500233D66 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = X8Z657K235;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "es.fernandosalom.microworkout.gymwatch-Watch-AppTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/gymwatch Watch App.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/gymwatch Watch App";
+				WATCHOS_DEPLOYMENT_TARGET = 9.4;
+			};
+			name = Release;
+		};
+		C1F34F882A38CD4500233D66 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = X8Z657K235;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "es.fernandosalom.microworkout.gymwatch-Watch-AppUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_TARGET_NAME = "gymwatch Watch App";
+				WATCHOS_DEPLOYMENT_TARGET = 9.4;
+			};
+			name = Debug;
+		};
+		C1F34F892A38CD4500233D66 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = X8Z657K235;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "es.fernandosalom.microworkout.gymwatch-Watch-AppUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_TARGET_NAME = "gymwatch Watch App";
+				WATCHOS_DEPLOYMENT_TARGET = 9.4;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -790,6 +1183,33 @@
 			buildConfigurations = (
 				C192BF482A2A976C00982F33 /* Debug */,
 				C192BF492A2A976C00982F33 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C1F34F8A2A38CD4500233D66 /* Build configuration list for PBXNativeTarget "gymwatch Watch App" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C1F34F842A38CD4500233D66 /* Debug */,
+				C1F34F852A38CD4500233D66 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C1F34F8B2A38CD4500233D66 /* Build configuration list for PBXNativeTarget "gymwatch Watch AppTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C1F34F862A38CD4500233D66 /* Debug */,
+				C1F34F872A38CD4500233D66 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C1F34F8C2A38CD4500233D66 /* Build configuration list for PBXNativeTarget "gymwatch Watch AppUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C1F34F882A38CD4500233D66 /* Debug */,
+				C1F34F892A38CD4500233D66 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
