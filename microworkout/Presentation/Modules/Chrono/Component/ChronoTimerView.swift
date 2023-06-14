@@ -26,55 +26,51 @@ struct ChronoTimerView: View {
             VStack {
                 ChronoProgressBar(seconds: self.$seconds,
                                   isAnimating: self.$isAnimating)
-                    .frame(width: 150.0, height: 150.0)
-                    .padding(40.0)
-                    .onReceive(chronoTimer) { input in
-                        if isAnimating {
-                            seconds += 1
-                            timer.upstream.connect().cancel()
-                        }
+                .frame(width: 150.0, height: 150.0)
+                .padding(40.0)
+                .onReceive(chronoTimer) { input in
+                    if isAnimating {
+                        seconds += 1
+                        timer.upstream.connect().cancel()
                     }
+                }
             }
         }.onTapGesture {
             isAnimating.toggle()
-        }
+        }.simultaneousGesture(
+            TapGesture(count: 2)
+                .onEnded { _ in
+                    seconds = 0
+                }
+        )
     }
 }
 
 struct ChronoProgressBar: View {
     @Binding var seconds: Int
     @Binding var isAnimating: Bool
-    @State var degrees: Int = 360
+
+    let animation = Animation
+        .easeOut(duration: 1)
+        .repeatForever(autoreverses: false)
 
     var body: some View {
         ZStack {
             Circle()
-                .stroke(lineWidth: 20.0)
-                .opacity(0.3)
-                .foregroundColor(Color.red)
-
-
-            Circle()
-                .trim(from: 0, to: 0.05)
-                .stroke(style: StrokeStyle(lineWidth: 20.0,
-                                           lineCap: .round,
-                                           lineJoin: .round))
-                .foregroundColor(.red)
-                .rotationEffect(Angle(degrees: Double(degrees)))
-                .onChange(of: seconds, perform: { newValue in
-                    let animation = Animation.easeInOut(duration: 1).repeatForever()
-                    withAnimation(animation) {
-                        if isAnimating {
-                            degrees = degrees == 0 ? 360 : 0
-                        }
-                    }
-                })
-                .animation(Animation.linear(duration: 1),
-                           value: UUID())
+                .stroke(style: StrokeStyle(lineWidth: 20))
+                .foregroundStyle(.tertiary)
+                .overlay {
+                    Circle()
+                        .trim(from: 0,
+                              to: isAnimating ? 1 : 0)
+                        .stroke(.red,
+                                style: StrokeStyle(lineWidth: 20,
+                                                   lineCap: .round))
+                }
+                .rotationEffect(.degrees(-90))
 
             ChronoTitleView(seconds: self.$seconds)
         }
-        
     }
 }
 
