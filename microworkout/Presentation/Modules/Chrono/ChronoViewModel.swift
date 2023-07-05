@@ -8,11 +8,11 @@
 import Foundation
 
 class ChronoViewModel: ObservableObject, ChronoViewModelProtocol {
-    var seconds: Int
+    var seconds: Double
     var useCase: WorkoutUseCaseProtocol!
     var progression: Float
 
-    init(useCase: WorkoutUseCaseProtocol, seconds: Int) {
+    init(useCase: WorkoutUseCaseProtocol, seconds: Double) {
         self.useCase = useCase
         self.seconds = seconds
         self.progression = Float(seconds / 100)

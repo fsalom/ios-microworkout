@@ -8,6 +8,6 @@
 import Foundation
 
 protocol ChronoViewModelProtocol: ObservableObject  {    
-    var seconds: Int { get set }
+    var seconds: Double { get set }
     func load()
 }

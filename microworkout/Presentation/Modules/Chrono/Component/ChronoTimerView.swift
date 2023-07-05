@@ -8,15 +8,15 @@
 import SwiftUI
 
 let chronoTimer = Timer
-    .publish(every: 1, on: .main, in: .common)
+    .publish(every: 0.001, on: .main, in: .common)
     .autoconnect()
 
 struct ChronoTimerView: View {
-    @State var seconds: Int
+    @State var seconds: Double
     @State var isAnimating: Bool = false
     @Binding var hasFinish: Bool
 
-    init(seconds: Int, hasFinish: Binding<Bool>) {
+    init(seconds: Double, hasFinish: Binding<Bool>) {
         self.seconds = 0
         self._hasFinish = hasFinish
     }
@@ -30,7 +30,7 @@ struct ChronoTimerView: View {
                 .padding(40.0)
                 .onReceive(chronoTimer) { input in
                     if isAnimating {
-                        seconds += 1
+                        seconds += 0.001
                         timer.upstream.connect().cancel()
                     }
                 }
@@ -47,7 +47,7 @@ struct ChronoTimerView: View {
 }
 
 struct ChronoProgressBar: View {
-    @Binding var seconds: Int
+    @Binding var seconds: Double
     @Binding var isAnimating: Bool
 
     let animation = Animation
@@ -75,17 +75,33 @@ struct ChronoProgressBar: View {
 }
 
 struct ChronoTitleView: View {
-    @Binding var seconds: Int
+    @Binding var seconds: Double
 
     var body: some View {
-        Text(String(setTime(with: self.seconds)))
-            .font(.largeTitle)
-            .bold()
+        let (m, s, ms) = setTime(with: self.seconds)
+        HStack {
+            Text(String(format: "%02d", m))
+                .font(.system(size: 25))
+                .bold()
+                .frame(width: 30)
+            Text(":")
+            Text(String(format: "%02d", s))
+                .font(.system(size: 25))
+                .bold()
+                .frame(width: 30)
+            Text(":")
+            Text(String(format: "%02d", ms))
+                .font(.system(size: 25))
+                .bold()
+                .frame(width: 30)
+        }
     }
 
-    func setTime(with seconds: Int) -> String {
-        let (m, s) = ((seconds % 3600) / 60, (seconds % 3600) % 60)
-        return String(format: "%02d:%02d", arguments: [m,s])
+    func setTime(with miliseconds: Double) -> (Int, Int, Int) {
+        let minutes = Int((miliseconds/60).truncatingRemainder(dividingBy: 60))
+        let seconds = Int(miliseconds.truncatingRemainder(dividingBy: 60))
+        let milliseconds = Int((Double(miliseconds) * 100).truncatingRemainder(dividingBy: 100))
+        return (minutes, seconds, milliseconds)
     }
 }
 

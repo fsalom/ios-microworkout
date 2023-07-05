@@ -49,7 +49,7 @@ struct HomeView<VM>: View where VM: HomeViewModelProtocol {
                 viewModel.load()
             }
             .edgesIgnoringSafeArea(.all)
-            .scrollBounceBehavior(.basedOnSize)
+            //.scrollBounceBehavior(.basedOnSize)
     }
 }
 
