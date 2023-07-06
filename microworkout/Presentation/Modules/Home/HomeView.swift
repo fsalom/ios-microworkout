@@ -7,8 +7,8 @@
 
 import SwiftUI
 
-struct HomeView<VM>: View where VM: HomeViewModelProtocol {
-    @ObservedObject var viewModel: VM
+struct HomeView: View {
+    @ObservedObject var viewModel: HomeViewModel
     var body: some View {
         NavigationView {
             ScrollView {
@@ -40,7 +40,7 @@ struct HomeView<VM>: View where VM: HomeViewModelProtocol {
                     Text("Entrenamientos")
                         .font(.headline)
                     ForEach(viewModel.workouts, id: \.id) { workout in
-                        HomeWorkoutPlanView(workout: workout)
+                        HomeWorkoutPlanView(plan: workout)
                     }
                 }
             }

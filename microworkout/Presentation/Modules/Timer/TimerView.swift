@@ -45,6 +45,7 @@ struct TimerView_Previews: PreviewProvider {
         let useCase = WorkoutUseCase()
         let workout = Workout(exercise: Exercise(name: "ejemplo",
                                                  type: .distance),
+                              numberOfSeries: 4,
                               results: [],
                               serie: Serie(reps: 10, distance: 400.0)
         )

@@ -9,7 +9,7 @@ import SwiftUI
 
 struct HomeWorkoutPlanView: View {
 
-    var workout: WorkoutPlan
+    var plan: WorkoutPlan
 
     var body: some View {
         HStack {
@@ -24,12 +24,12 @@ struct HomeWorkoutPlanView: View {
                         .frame(width: 44, height: 40)
                 }
                 VStack(alignment: .leading, spacing: 10) {
-                    Text(workout.name)
+                    Text(plan.name)
                     HStack {
                         Text("Nº de ejercicios").fontWeight(.bold)
-                        Text("\(workout.workout.count)")
+                        Text("\(plan.workouts.count)")
                         Text("Nº de series").fontWeight(.bold)
-                        Text("\(workout.workout.count)")
+                        Text("\(plan.totalNumberOfSeries)")
                     }.font(.footnote)
 
                 }
@@ -40,6 +40,6 @@ struct HomeWorkoutPlanView: View {
 
 struct HomeWorkoutPlanView_Previews: PreviewProvider {
     static var previews: some View {
-        HomeWorkoutPlanView(workout: WorkoutPlan(id: "", name: "Ejemplo", workout: []))
+        HomeWorkoutPlanView(plan: WorkoutPlan(id: "", name: "Ejemplo", workouts: []))
     }
 }

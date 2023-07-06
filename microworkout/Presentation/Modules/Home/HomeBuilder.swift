@@ -8,7 +8,7 @@
 import Foundation
 
 class HomeBuilder {
-    func build() -> HomeView<HomeViewModel> {
+    func build() -> HomeView {
         let useCase = WorkoutUseCase()
 
         let viewModel = HomeViewModel(useCase: useCase)
