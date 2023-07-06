@@ -17,14 +17,4 @@ class ChronoViewModel: ObservableObject, ChronoViewModelProtocol {
         self.seconds = seconds
         self.progression = Float(seconds / 100)
     }
-
-    func setRestTime() {
-        
-    }
-
-    func load() {
-        Task {
-
-        }
-    }
 }

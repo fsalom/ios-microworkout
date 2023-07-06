@@ -18,6 +18,10 @@
 		C15591032A31D0E000E30886 /* HomeProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15591022A31D0E000E30886 /* HomeProtocols.swift */; };
 		C15591082A31D1F100E30886 /* HomeWorkoutPlanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15591072A31D1F100E30886 /* HomeWorkoutPlanView.swift */; };
 		C155910A2A31D3E400E30886 /* HomeBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15591092A31D3E400E30886 /* HomeBuilder.swift */; };
+		C15B7EE12A572BB70067B28E /* DetailWorkoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15B7EE02A572BB70067B28E /* DetailWorkoutView.swift */; };
+		C15B7EE32A572BC70067B28E /* DetailWorkoutBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15B7EE22A572BC70067B28E /* DetailWorkoutBuilder.swift */; };
+		C15B7EE52A572C370067B28E /* DetailWorkoutProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15B7EE42A572C370067B28E /* DetailWorkoutProtocols.swift */; };
+		C15B7EE72A572CAE0067B28E /* DetailWorkoutViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15B7EE62A572CAE0067B28E /* DetailWorkoutViewModel.swift */; };
 		C1742E462A2F31DA0020354D /* Workout.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1742E452A2F31DA0020354D /* Workout.swift */; };
 		C1742E482A2F31F00020354D /* WorkoutUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1742E472A2F31F00020354D /* WorkoutUseCase.swift */; };
 		C1742E4B2A2F32260020354D /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1742E4A2A2F32260020354D /* HomeView.swift */; };
@@ -133,6 +137,10 @@
 		C15591022A31D0E000E30886 /* HomeProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeProtocols.swift; sourceTree = "<group>"; };
 		C15591072A31D1F100E30886 /* HomeWorkoutPlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeWorkoutPlanView.swift; sourceTree = "<group>"; };
 		C15591092A31D3E400E30886 /* HomeBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeBuilder.swift; sourceTree = "<group>"; };
+		C15B7EE02A572BB70067B28E /* DetailWorkoutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailWorkoutView.swift; sourceTree = "<group>"; };
+		C15B7EE22A572BC70067B28E /* DetailWorkoutBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailWorkoutBuilder.swift; sourceTree = "<group>"; };
+		C15B7EE42A572C370067B28E /* DetailWorkoutProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailWorkoutProtocols.swift; sourceTree = "<group>"; };
+		C15B7EE62A572CAE0067B28E /* DetailWorkoutViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailWorkoutViewModel.swift; sourceTree = "<group>"; };
 		C1742E452A2F31DA0020354D /* Workout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Workout.swift; sourceTree = "<group>"; };
 		C1742E472A2F31F00020354D /* WorkoutUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutUseCase.swift; sourceTree = "<group>"; };
 		C1742E4A2A2F32260020354D /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
@@ -244,6 +252,17 @@
 			path = CustomViews;
 			sourceTree = "<group>";
 		};
+		C15B7EDF2A572B800067B28E /* Detail */ = {
+			isa = PBXGroup;
+			children = (
+				C15B7EE22A572BC70067B28E /* DetailWorkoutBuilder.swift */,
+				C15B7EE02A572BB70067B28E /* DetailWorkoutView.swift */,
+				C15B7EE42A572C370067B28E /* DetailWorkoutProtocols.swift */,
+				C15B7EE62A572CAE0067B28E /* DetailWorkoutViewModel.swift */,
+			);
+			path = Detail;
+			sourceTree = "<group>";
+		};
 		C1742E3D2A2F31360020354D /* Data */ = {
 			isa = PBXGroup;
 			children = (
@@ -286,6 +305,7 @@
 				C1F34F9B2A38FC4600233D66 /* Chrono */,
 				C13C47BC2A33AAD5005C90AB /* Timer */,
 				C1742E4D2A2FC8C10020354D /* Splash */,
+				C15B7EDF2A572B800067B28E /* Detail */,
 				C1742E492A2F32140020354D /* Home */,
 			);
 			path = Modules;
@@ -718,17 +738,21 @@
 				C192BF282A2A976C00982F33 /* microworkout.xcdatamodeld in Sources */,
 				C1F34FA62A38FC6D00233D66 /* ChronoTimerView.swift in Sources */,
 				C13C47C42A33AB0B005C90AB /* TimerViewModel.swift in Sources */,
+				C15B7EE12A572BB70067B28E /* DetailWorkoutView.swift in Sources */,
 				C1742E462A2F31DA0020354D /* Workout.swift in Sources */,
 				C15590FD2A31CB1C00E30886 /* WorkoutRepositoryProtocol.swift in Sources */,
 				C13C47C02A33AAF0005C90AB /* TimerView.swift in Sources */,
 				C1742E592A309FDC0020354D /* WorkoutDataSourceProtocol.swift in Sources */,
+				C15B7EE72A572CAE0067B28E /* DetailWorkoutViewModel.swift in Sources */,
 				C1F34FA82A38FC6D00233D66 /* ChronoBuilder.swift in Sources */,
 				C192BF1C2A2A976A00982F33 /* microworkoutApp.swift in Sources */,
 				C1742E5B2A30A0400020354D /* WorkoutCoreDataSource.swift in Sources */,
 				C15590FF2A31CB2A00E30886 /* WorkoutRepository.swift in Sources */,
 				C13C47BE2A33AAE5005C90AB /* TimerBuilder.swift in Sources */,
+				C15B7EE52A572C370067B28E /* DetailWorkoutProtocols.swift in Sources */,
 				C15591032A31D0E000E30886 /* HomeProtocols.swift in Sources */,
 				C1F34FA42A38FC6D00233D66 /* ChronoViewModel.swift in Sources */,
+				C15B7EE32A572BC70067B28E /* DetailWorkoutBuilder.swift in Sources */,
 				C1742E482A2F31F00020354D /* WorkoutUseCase.swift in Sources */,
 				C13C47C22A33AB00005C90AB /* TimerProtocols.swift in Sources */,
 				C1F34FAA2A38FC6D00233D66 /* ChronoProtocols.swift in Sources */,
