@@ -11,14 +11,18 @@ struct DetailWorkoutView: View {
     @ObservedObject var viewModel: DetailWorkoutViewModel
     
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        ScrollView {
+            ForEach(viewModel.plan.workouts) { workout in
+                ExerciseRow(workout: workout)
+            }
+        }
     }
 }
 
 struct DetailWorkoutView_Previews: PreviewProvider {
     static var previews: some View {
         DetailWorkoutView(viewModel: DetailWorkoutViewModel(useCase: WorkoutUseCase(),
-                                                            workout: WorkoutPlan(id: "-", name: "test", workouts: [])))
+                                                            plan: WorkoutPlan(id: "-", name: "test", workouts: [])))
     }
 }
 

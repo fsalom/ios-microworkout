@@ -8,13 +8,13 @@
 import Foundation
 
 class DetailWorkoutViewModel: ObservableObject {
-    @Published var workout: WorkoutPlan
+    @Published var plan: WorkoutPlan
 
     var useCase: WorkoutUseCaseProtocol!
 
-    init(useCase: WorkoutUseCaseProtocol, workout: WorkoutPlan) {
+    init(useCase: WorkoutUseCaseProtocol, plan: WorkoutPlan) {
         self.useCase = useCase
-        self.workout = workout
+        self.plan = plan
     }
 
     func load() {

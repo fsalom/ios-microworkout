@@ -8,9 +8,9 @@
 import Foundation
 
 class DetailWorkoutBuilder {
-    func build(with workout: WorkoutPlan) -> DetailWorkoutView {
+    func build(with plan: WorkoutPlan) -> DetailWorkoutView {
         let usecase = WorkoutUseCase()
-        let viewModel = DetailWorkoutViewModel(useCase: usecase, workout: workout)
+        let viewModel = DetailWorkoutViewModel(useCase: usecase, plan: plan)
         let view = DetailWorkoutView(viewModel: viewModel)
         return view
     }
