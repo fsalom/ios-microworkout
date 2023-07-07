@@ -10,5 +10,12 @@ import Foundation
 struct WorkoutPlan: Identifiable {
     let id: String
     let name: String
-    let workout: [Workout]
+    var totalNumberOfSeries: Int {
+        var total = 0
+        for workout in workouts {
+            total += workout.numberOfSeries
+        }
+        return total
+    }
+    var workouts: [Workout] = []
 }

@@ -7,8 +7,10 @@
 
 import Foundation
 
-struct Workout {
+struct Workout: Identifiable {
+    let id: String = UUID().uuidString
     let exercise: Exercise
+    let numberOfSeries: Int
     let results: [Serie]
     let serie: Serie
 }
