@@ -12,20 +12,21 @@ struct SplashView: View {
     @State var isActive: Bool = false
 
     var body: some View {
-        ZStack {
-            Color.white
-            if self.isActive {
-                HomeBuilder().build()
-            } else {
+        if self.isActive {
+            HomeBuilder().build()
+        } else {
+            ZStack {
+                Color.white
+
                 Image("splash")
                     .resizable()
                     .scaledToFill()
                     .edgesIgnoringSafeArea(.all)
-            }
-        }.onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                withAnimation {
-                    self.isActive = true
+            }.onAppear {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    withAnimation {
+                        self.isActive = true
+                    }
                 }
             }
         }
