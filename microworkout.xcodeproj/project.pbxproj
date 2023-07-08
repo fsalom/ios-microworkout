@@ -127,6 +127,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		C11B9F342A5845BE00FC656F /* microworkout.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = microworkout.entitlements; sourceTree = "<group>"; };
 		C13C47BD2A33AAE5005C90AB /* TimerBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerBuilder.swift; sourceTree = "<group>"; };
 		C13C47BF2A33AAF0005C90AB /* TimerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerView.swift; sourceTree = "<group>"; };
 		C13C47C12A33AB00005C90AB /* TimerProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerProtocols.swift; sourceTree = "<group>"; };
@@ -425,6 +426,7 @@
 		C192BF1A2A2A976A00982F33 /* microworkout */ = {
 			isa = PBXGroup;
 			children = (
+				C11B9F342A5845BE00FC656F /* microworkout.entitlements */,
 				C1742E3D2A2F31360020354D /* Data */,
 				C1742E3E2A2F31420020354D /* Domain */,
 				C1742E3F2A2F314A0020354D /* Presentation */,
@@ -986,6 +988,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = microworkout/microworkout.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"microworkout/Preview Content\"";
@@ -1017,6 +1020,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = microworkout/microworkout.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"microworkout/Preview Content\"";

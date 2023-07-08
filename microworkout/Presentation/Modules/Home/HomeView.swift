@@ -12,7 +12,6 @@ struct HomeView: View {
     var body: some View {
         NavigationView {
             ScrollView {
-
                     VStack(alignment: .leading) {
                         HStack(alignment: .top) {
                             ZStack {

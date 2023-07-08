@@ -17,5 +17,14 @@ struct WorkoutPlan: Identifiable {
         }
         return total
     }
+    var completed: Float {
+        var numberOfSeriesCompleted: Float = 0
+        var numberOfSeries: Float = 0
+        workouts.forEach { workout in
+            numberOfSeries += Float(workout.numberOfSeries)
+            numberOfSeriesCompleted += Float(workout.results.count)
+        }
+        return Float(numberOfSeriesCompleted / numberOfSeries)
+    }
     var workouts: [Workout] = []
 }

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import HealthKit
 
 class HomeViewModel: ObservableObject, HomeViewModelProtocol {
     @Published var workouts: [WorkoutPlan]
