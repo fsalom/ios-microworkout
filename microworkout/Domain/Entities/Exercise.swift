@@ -12,9 +12,10 @@ enum ExerciseType {
     case weight
     case kcal
     case reps
+
 }
 
 struct Exercise {
     let name: String
-    let type: ExerciseType
+    var type: ExerciseType
 }

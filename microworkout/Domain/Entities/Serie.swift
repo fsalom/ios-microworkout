@@ -7,7 +7,8 @@
 
 import Foundation
 
-struct Serie {
+struct Serie: Identifiable {
+    var id: String = UUID().uuidString
     var reps: Int = 0
     var weight: Float = 0.0
     var rpe: Float = 0.0
@@ -25,5 +26,11 @@ struct Serie {
     init(reps: Int, distance: Float){
         self.reps = reps
         self.distance = distance
+    }
+}
+
+extension Float {
+    var formatted: String {
+        return self.truncatingRemainder(dividingBy: 1) == 0 ? String(format: "%.0f", self) : String(self)
     }
 }

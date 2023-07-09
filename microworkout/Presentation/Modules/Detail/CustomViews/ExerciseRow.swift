@@ -10,11 +10,45 @@ import SwiftUI
 struct ExerciseRow: View {
     var workout: Workout
     var body: some View {
-        Text(workout.exercise.name)
-        if workout.exercise.type == .reps {
-            Text("Número de repeticiones: \(workout.serie.reps)")
-            Text("Peso: \(workout.serie.weight)")
-        }
+        VStack(alignment: .leading) {
+            Text(workout.exercise.name)
+            HStack {
+                Text("\(workout.numberOfSeries) x")
+                switch workout.exercise.type {
+                case .weight:
+                    Text("\(workout.serie.reps) x ")
+                    Text("\(workout.serie.weight.formatted) Kg ")
+                case .distance:
+                    Text("\(workout.serie.distance.formatted) m")
+                case .kcal:
+                    Text("\(workout.serie.kcal) kcal")
+                case .reps:
+                    Text("\(workout.serie.reps) repeticiones")
+                }
+
+                Text("\(workout.exercise.name)")
+                Spacer()
+            }
+            Text("Series:")
+            ForEach(workout.results){ result in
+                HStack {
+                    switch workout.exercise.type {
+                    case .weight:
+                        Text("\(result.reps) x ")
+                        Text("\(result.weight.formatted) Kg")
+                        Text("\(result.rpe.formatted)")
+                    case .distance:
+                        Text("\(workout.serie.distance.formatted) m")
+                    case .kcal:
+                        Text("\(workout.serie.kcal) kcal")
+                    case .reps:
+                        Text("\(workout.serie.reps) repeticiones")
+                    }
+                    Spacer()
+                }
+            }
+
+        }.padding(16)
     }
 }
 
