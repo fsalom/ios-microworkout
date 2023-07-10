@@ -12,7 +12,6 @@ enum ExerciseType {
     case weight
     case kcal
     case reps
-
 }
 
 struct Exercise {

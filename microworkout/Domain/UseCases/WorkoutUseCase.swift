@@ -14,39 +14,19 @@ protocol WorkoutUseCaseProtocol {
 
 class WorkoutUseCase: WorkoutUseCaseProtocol {
     func getWorkouts() async throws -> [WorkoutPlan] {
-        let workout = Workout(exercise: .init(name: "Sentadilla",
-                                              type: .weight),
-                              numberOfSeries: 4,
-                              results: [Serie(reps: 10,
-                                              weight: 81.25,
-                                              rpe: 8.0,
-                                              rir: 9.0),
-                                        Serie(reps: 10,
-                                              weight: 85.0,
-                                              rpe: 8.0,
-                                              rir: 9.0),
-                                        Serie(reps: 10,
-                                              weight: 81.25,
-                                              rpe: 8.0,
-                                              rir: 9.0)],
-                              serie: Serie(reps: 10,
-                                           weight: 80.0,
-                                           rpe: 8.0,
-                                           rir: 9.0))
-        let workout1 = Workout(exercise: .init(name: "Sentadilla",
-                                               type: .reps),
-                               numberOfSeries: 1,
-                               results: [Serie(reps: 10,
-                                               weight: 80.0,
-                                               rpe: 8.0,
-                                               rir: 9.0)],
-                               serie: Serie(reps: 10,
-                                            weight: 80.0,
-                                            rpe: 8.0,
-                                            rir: 9.0))
-        return [WorkoutPlan(id: "1", name: "ejemplo", workouts: [workout, workout, workout]),
-                WorkoutPlan(id: "2", name: "ejemplo", workouts: [workout]),
-                WorkoutPlan(id: "3", name: "ejemplo", workouts: [workout1]),
-                WorkoutPlan(id: "4", name: "ejemplo", workouts: [workout])]
+        return [WorkoutPlan(id: "1",
+                            name: "ejemplo",
+                            workouts: [Workout(name: "Sentadilla"),
+                                       Workout(name: "Press banca"),
+                                       Workout(name: "Peso muerto")]),
+                WorkoutPlan(id: "2",
+                            name: "ejemplo",
+                            workouts: [Workout(name: "Press Militar")]),
+                WorkoutPlan(id: "3",
+                            name: "ejemplo",
+                            workouts: [Workout(name: "Zancadas")]),
+                WorkoutPlan(id: "4",
+                            name: "ejemplo",
+                            workouts: [Workout(name: "Curl Biceps")])]
     }
 }
