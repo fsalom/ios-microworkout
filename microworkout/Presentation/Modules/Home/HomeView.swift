@@ -16,7 +16,7 @@ struct HomeView: View {
                         HStack(alignment: .top) {
                             ZStack {
                                 Circle()
-                                    .frame(width: 50, height: 50, alignment: .top)
+                                    .frame(width: 60, height: 60, alignment: .top)
                                     .foregroundColor(.gray)
                                 Image(systemName: "photo")
                                     .foregroundColor(.white)
@@ -28,6 +28,7 @@ struct HomeView: View {
                                     .font(.footnote)
                                     .lineLimit(2)
                                 Text("Fernando!")
+                                    .font(.largeTitle)
                                     .fontWeight(.bold)
                             }
                             Spacer()
@@ -36,15 +37,18 @@ struct HomeView: View {
                             }
                         }
 
-                        Text("Entrenamientos")
-                            .font(.headline)
+
+                        Text("Progresión de la semana")
+                            .font(.footnote)
+                        ProgressView(value: 0.4).progressViewStyle(.linear)
                         ForEach(viewModel.workouts, id: \.id) { workout in
                             NavigationLink(destination:  DetailWorkoutBuilder().build(with: workout)) {
                                 HomeWorkoutPlanView(plan: workout)
                             }
                         }
                     }.padding(16)
-            }
+            }.navigationTitle("Entrenamientos")
+                .navigationBarTitleDisplayMode(.inline)
         }
             .onAppear {
                 viewModel.load()
