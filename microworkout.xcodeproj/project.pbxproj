@@ -42,6 +42,8 @@
 		C192BF322A2A976C00982F33 /* microworkoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C192BF312A2A976C00982F33 /* microworkoutTests.swift */; };
 		C192BF3C2A2A976C00982F33 /* microworkoutUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C192BF3B2A2A976C00982F33 /* microworkoutUITests.swift */; };
 		C192BF3E2A2A976C00982F33 /* microworkoutUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C192BF3D2A2A976C00982F33 /* microworkoutUITestsLaunchTests.swift */; };
+		C1A953142A5D4B3900A2A010 /* AddWorkoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A953132A5D4B3900A2A010 /* AddWorkoutView.swift */; };
+		C1A953192A5D571D00A2A010 /* Float+CGFloat.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A953182A5D571D00A2A010 /* Float+CGFloat.swift */; };
 		C1F34F622A38CD4300233D66 /* gymwatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1F34F612A38CD4300233D66 /* gymwatchApp.swift */; };
 		C1F34F642A38CD4300233D66 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1F34F632A38CD4300233D66 /* ContentView.swift */; };
 		C1F34F662A38CD4500233D66 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C1F34F652A38CD4500233D66 /* Assets.xcassets */; };
@@ -168,6 +170,8 @@
 		C192BF372A2A976C00982F33 /* microworkoutUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = microworkoutUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C192BF3B2A2A976C00982F33 /* microworkoutUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = microworkoutUITests.swift; sourceTree = "<group>"; };
 		C192BF3D2A2A976C00982F33 /* microworkoutUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = microworkoutUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		C1A953132A5D4B3900A2A010 /* AddWorkoutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddWorkoutView.swift; sourceTree = "<group>"; };
+		C1A953182A5D571D00A2A010 /* Float+CGFloat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Float+CGFloat.swift"; sourceTree = "<group>"; };
 		C1F34F5F2A38CD4300233D66 /* gymwatch Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "gymwatch Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C1F34F612A38CD4300233D66 /* gymwatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = gymwatchApp.swift; sourceTree = "<group>"; };
 		C1F34F632A38CD4300233D66 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -339,6 +343,7 @@
 				C1F34F9B2A38FC4600233D66 /* Chrono */,
 				C13C47BC2A33AAD5005C90AB /* Timer */,
 				C1742E4D2A2FC8C10020354D /* Splash */,
+				C1A953122A5D4B1E00A2A010 /* AddWorkout */,
 				C15B7EDF2A572B800067B28E /* Detail */,
 				C1742E492A2F32140020354D /* Home */,
 			);
@@ -448,6 +453,7 @@
 		C192BF1A2A2A976A00982F33 /* microworkout */ = {
 			isa = PBXGroup;
 			children = (
+				C1A953152A5D56E200A2A010 /* Helper */,
 				C11B9F342A5845BE00FC656F /* microworkout.entitlements */,
 				C1742E3D2A2F31360020354D /* Data */,
 				C1742E3E2A2F31420020354D /* Domain */,
@@ -481,6 +487,30 @@
 				C192BF3D2A2A976C00982F33 /* microworkoutUITestsLaunchTests.swift */,
 			);
 			path = microworkoutUITests;
+			sourceTree = "<group>";
+		};
+		C1A953122A5D4B1E00A2A010 /* AddWorkout */ = {
+			isa = PBXGroup;
+			children = (
+				C1A953132A5D4B3900A2A010 /* AddWorkoutView.swift */,
+			);
+			path = AddWorkout;
+			sourceTree = "<group>";
+		};
+		C1A953152A5D56E200A2A010 /* Helper */ = {
+			isa = PBXGroup;
+			children = (
+				C1A953162A5D56F800A2A010 /* Extensions */,
+			);
+			path = Helper;
+			sourceTree = "<group>";
+		};
+		C1A953162A5D56F800A2A010 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				C1A953182A5D571D00A2A010 /* Float+CGFloat.swift */,
+			);
+			path = Extensions;
 			sourceTree = "<group>";
 		};
 		C1F34F602A38CD4300233D66 /* gymwatch Watch App */ = {
@@ -783,6 +813,7 @@
 				C15B7EE72A572CAE0067B28E /* DetailWorkoutViewModel.swift in Sources */,
 				C1F34FA82A38FC6D00233D66 /* ChronoBuilder.swift in Sources */,
 				C192BF1C2A2A976A00982F33 /* microworkoutApp.swift in Sources */,
+				C1A953142A5D4B3900A2A010 /* AddWorkoutView.swift in Sources */,
 				C1742E5B2A30A0400020354D /* WorkoutCoreDataSource.swift in Sources */,
 				C15590FF2A31CB2A00E30886 /* WorkoutRepository.swift in Sources */,
 				C13C47BE2A33AAE5005C90AB /* TimerBuilder.swift in Sources */,
@@ -791,6 +822,7 @@
 				C11B9F372A5C372100FC656F /* ProfileView.swift in Sources */,
 				C1F34FA42A38FC6D00233D66 /* ChronoViewModel.swift in Sources */,
 				C15B7EE32A572BC70067B28E /* DetailWorkoutBuilder.swift in Sources */,
+				C1A953192A5D571D00A2A010 /* Float+CGFloat.swift in Sources */,
 				C1742E482A2F31F00020354D /* WorkoutUseCase.swift in Sources */,
 				C13C47C22A33AB00005C90AB /* TimerProtocols.swift in Sources */,
 				C1F34FAA2A38FC6D00233D66 /* ChronoProtocols.swift in Sources */,
@@ -1024,7 +1056,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1056,7 +1088,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

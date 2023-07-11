@@ -43,12 +43,7 @@ struct TimerView<VM>: View where VM: TimerViewModelProtocol {
 struct TimerView_Previews: PreviewProvider {
     static var previews: some View {
         let useCase = WorkoutUseCase()
-        let workout = Workout(exercise: Exercise(name: "ejemplo",
-                                                 type: .distance),
-                              numberOfSeries: 4,
-                              results: [],
-                              serie: Serie(reps: 10, distance: 400.0)
-        )
+        let workout = Workout(name: "Sentadilla")
         TimerView(viewModel: TimerViewModel(useCase: useCase, workout: workout, seconds: 60))
     }
 }

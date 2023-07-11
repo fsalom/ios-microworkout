@@ -28,9 +28,3 @@ struct Serie: Identifiable {
         self.distance = distance
     }
 }
-
-extension Float {
-    var formatted: String {
-        return self.truncatingRemainder(dividingBy: 1) == 0 ? String(format: "%.0f", self) : String(self)
-    }
-}

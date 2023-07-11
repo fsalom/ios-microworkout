@@ -12,17 +12,13 @@ struct HomeView: View {
     var body: some View {
         NavigationView {
             ScrollView {
-                    VStack(alignment: .leading) {
+                    VStack(alignment: .leading, spacing: 10) {
                         HStack(alignment: .top) {
-                            ZStack {
-                                Circle()
-                                    .frame(width: 60, height: 60, alignment: .top)
-                                    .foregroundColor(.gray)
-                                Image(systemName: "photo")
-                                    .foregroundColor(.white)
-                                    .imageScale(.small)
-                                    .frame(width: 44, height: 40)
-                            }
+                            Image("splash")
+                                .resizable()
+                                .foregroundColor(.white)
+                                .frame(width: 60, height: 60)
+                                .clipShape(Circle())
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("Welcome back")
                                     .font(.footnote)
