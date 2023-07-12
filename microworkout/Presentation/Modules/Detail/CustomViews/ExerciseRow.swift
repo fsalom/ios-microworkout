@@ -8,55 +8,89 @@
 import SwiftUI
 
 struct ExerciseRow: View {
-    var workout: Workout
+    @State var workout: Workout
     var body: some View {
         VStack(alignment: .leading) {
-            Text(workout.exercise.name)
             HStack {
-                Text("\(workout.numberOfSeries) x")
-                switch workout.exercise.type {
-                case .weight:
-                    Text("\(workout.serie.reps) x ")
-                    Text("\(workout.serie.weight.formatted) Kg ")
-                case .distance:
-                    Text("\(workout.serie.distance.formatted) m")
-                case .kcal:
-                    Text("\(workout.serie.kcal) kcal")
-                case .reps:
-                    Text("\(workout.serie.reps) repeticiones")
-                }
-
-                Text("\(workout.exercise.name)")
-                Spacer()
-            }
-            Text("Series:")
-            ForEach(workout.results){ result in
-                HStack {
-                    switch workout.exercise.type {
-                    case .weight:
-                        Text("\(result.reps) x ")
-                        Text("\(result.weight.formatted) Kg")
-                        Text("\(result.rpe.formatted)")
-                    case .distance:
-                        Text("\(workout.serie.distance.formatted) m")
-                    case .kcal:
-                        Text("\(workout.serie.kcal) kcal")
-                    case .reps:
-                        Text("\(workout.serie.reps) repeticiones")
+                Text("\(workout.numberOfSeries)")
+                    .fontWeight(.heavy)
+                    .padding(10)
+                    .foregroundColor(.white)
+                    .background(.gray)
+                    .clipShape(Circle())
+                VStack(alignment: .leading){
+                    Text(workout.exercise.name)
+                        .font(.system(size: 20))
+                        .fontWeight(.bold)
+                    HStack {
+                        switch workout.exercise.type {
+                        case .weight:
+                            Text("\(workout.serie.reps) x")
+                            Text("\(workout.serie.weight.formatted)Kg ").bold()
+                        case .distance:
+                            Text("\(workout.serie.distance.formatted)m").bold()
+                        case .kcal:
+                            Text("\(workout.serie.kcal)kcal").bold()
+                        case .reps:
+                            Text("\(workout.serie.reps) repeticiones").bold()
+                        }
+                        Spacer()
                     }
-                    Spacer()
+                }
+                Spacer()
+                Button(action: {
+
+                }, label: {
+                    Image(systemName: "plus")
+                        .foregroundColor(.white)
+                        .padding(10)
+                        .background(.green)
+                        .clipShape(Circle())
+                })
+            }.onTapGesture(perform: {
+                withAnimation {
+                    workout.isCollapsed.toggle()
+                }
+            })
+        }.padding(16)
+        if !workout.isCollapsed {
+            Divider()
+            HStack{
+                VStack(alignment: .leading) {
+                    Text("Series:").bold()
+                    ForEach(workout.results){ result in
+                        HStack {
+                            switch workout.exercise.type {
+                            case .weight:
+                                Text("\(result.reps) x ")
+                                Text("\(result.weight.formatted) Kg")
+                                    .bold()
+                                Text("\(result.rpe.formatted)")
+                            case .distance:
+                                Text("\(workout.serie.distance.formatted) m")
+                            case .kcal:
+                                Text("\(workout.serie.kcal) kcal")
+                            case .reps:
+                                Text("\(workout.serie.reps) repeticiones")
+                            }
+                            Spacer()
+                        }
+                    }
                 }
             }
-
-        }.padding(16)
+            .padding(EdgeInsets(top: 10, leading: 56, bottom: 10, trailing: 16))
+            Divider()
+        }
     }
 }
 
-struct ExerciseRow_Previews: PreviewProvider {
-    static var previews: some View {
-        ExerciseRow(workout: Workout(exercise: .init(name: "sentadilla", type: .reps),
-                                     numberOfSeries: 4,
-                                     results: [],
-                                     serie: Serie(reps: 10, weight: 8.0, rpe: 8.0, rir: 9.0)))
-    }
-}
+/*
+ struct ExerciseRow_Previews: PreviewProvider {
+ static var previews: some View {
+ ExerciseRow(workout: Workout(exercise: .init(name: "sentadilla", type: .reps),
+ numberOfSeries: 4,
+ results: [],
+ serie: Serie(reps: 10, weight: 8.0, rpe: 8.0, rir: 9.0)))
+ }
+ }
+ */
