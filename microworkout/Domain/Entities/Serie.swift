@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Serie: Identifiable {
+struct Serie: Identifiable, Hashable {
     var id: String = UUID().uuidString
     var reps: Int = 0
     var weight: Float = 0.0

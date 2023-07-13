@@ -9,9 +9,9 @@ import Foundation
 
 struct Workout: Identifiable {
     let id: String = UUID().uuidString
-    let exercise: Exercise
+    var exercise: Exercise
     let numberOfSeries: Int
-    let results: [Serie]
+    var results: [Serie]
     let serie: Serie
     var isCollapsed: Bool = true
 
