@@ -83,17 +83,17 @@ struct ChronoTitleView: View {
             Text(String(format: "%02d", m))
                 .font(.system(size: 25))
                 .bold()
-                .frame(width: 30)
+                .monospaced()
             Text(":")
             Text(String(format: "%02d", s))
                 .font(.system(size: 25))
                 .bold()
-                .frame(width: 30)
+                .monospaced()
             Text(":")
             Text(String(format: "%02d", ms))
                 .font(.system(size: 25))
                 .bold()
-                .frame(width: 30)
+                .monospaced()
         }
     }
 

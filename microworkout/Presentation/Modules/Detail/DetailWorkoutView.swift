@@ -9,7 +9,6 @@ import SwiftUI
 
 struct DetailWorkoutView: View {
     @ObservedObject var viewModel: DetailWorkoutViewModel
-    
     var body: some View {
         ScrollView {
             ForEach(viewModel.plan.workouts) { workout in

@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct ExerciseRow: View {
+    @State var hasPressedAdd: Bool = false
     @State var workout: Workout
     var body: some View {
         VStack(alignment: .leading) {
@@ -39,13 +40,21 @@ struct ExerciseRow: View {
                 }
                 Spacer()
                 Button(action: {
-
+                    hasPressedAdd.toggle()
                 }, label: {
-                    Image(systemName: "plus")
-                        .foregroundColor(.white)
-                        .padding(10)
-                        .background(.green)
-                        .clipShape(Circle())
+                    if !hasPressedAdd {
+                        Image(systemName: "plus")
+                            .foregroundColor(.white)
+                            .padding(10)
+                            .background(.green)
+                            .clipShape(Circle())
+                    } else {
+                        Image(systemName: "xmark")
+                            .foregroundColor(.white)
+                            .padding(10)
+                            .background(.red)
+                            .clipShape(Circle())
+                    }
                 })
             }.onTapGesture(perform: {
                 withAnimation {
@@ -53,32 +62,33 @@ struct ExerciseRow: View {
                 }
             })
         }.padding(16)
+        if hasPressedAdd {
+            AddWorkoutView(weight: 100.0, rep: 10, RIR: 7)
+        }
         if !workout.isCollapsed {
             Divider()
-            HStack{
-                VStack(alignment: .leading) {
-                    Text("Series:").bold()
-                    ForEach(workout.results){ result in
-                        HStack {
-                            switch workout.exercise.type {
-                            case .weight:
-                                Text("\(result.reps) x ")
-                                Text("\(result.weight.formatted) Kg")
-                                    .bold()
-                                Text("\(result.rpe.formatted)")
-                            case .distance:
-                                Text("\(workout.serie.distance.formatted) m")
-                            case .kcal:
-                                Text("\(workout.serie.kcal) kcal")
-                            case .reps:
-                                Text("\(workout.serie.reps) repeticiones")
-                            }
-                            Spacer()
+
+            VStack(alignment: .leading) {
+                Text("Series:").bold()
+                ForEach(workout.results) { result in
+                    HStack {
+                        switch workout.exercise.type {
+                        case .weight:
+                            Text("\(result.reps) x ")
+                            Text("\(result.weight.formatted) Kg")
+                                .bold()
+                            Text("\(result.rpe.formatted)")
+                        case .distance:
+                            Text("\(workout.serie.distance.formatted) m")
+                        case .kcal:
+                            Text("\(workout.serie.kcal) kcal")
+                        case .reps:
+                            Text("\(workout.serie.reps) repeticiones")
                         }
+                        Spacer()
                     }
                 }
-            }
-            .padding(EdgeInsets(top: 10, leading: 56, bottom: 10, trailing: 16))
+            }.padding(16)
             Divider()
         }
     }

@@ -42,24 +42,37 @@ struct AddWorkoutView: View {
     }
     @State private var selectedWeight: Float = 80.0
     @State private var selectedRep: Int = 1
+    @State private var selectedRIR: Int = 5
     var body: some View {
-        HStack {
+        HStack(spacing: 10) {
             Picker("REP", selection: $selectedRep) {
                 ForEach(reps, id: \.self) {
                     Text($0 == 0 ? "Fallo" : "\($0)")
                 }
-            }.pickerStyle(.inline)
+            }.pickerStyle(.menu)
             Picker("KG", selection: $selectedWeight) {
                 ForEach(weights, id: \.self) {
                     Text("\($0.formatted) Kg")
                 }
-            }.pickerStyle(.inline)
-            Picker("RIR", selection: $selectedWeight) {
+            }.pickerStyle(.menu)
+            Picker("RIR", selection: $selectedRIR) {
                 ForEach(RIRs, id: \.self) {
                     Text("\($0)")
                 }
-            }.pickerStyle(.inline)
-        }
+            }.pickerStyle(.menu)
+            Spacer()
+            
+            Button {
+
+            } label: {
+                Image(systemName: "checkmark")
+                    .foregroundColor(.white)
+                    .padding(10)
+                    .background(.blue)
+                    .clipShape(Circle())
+            }.buttonStyle(.plain)
+
+        }.padding(16)
     }
 }
 
