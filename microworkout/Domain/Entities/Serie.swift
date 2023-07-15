@@ -27,4 +27,6 @@ struct Serie: Identifiable, Hashable {
         self.reps = reps
         self.distance = distance
     }
+
+    init() { }
 }

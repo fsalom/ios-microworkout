@@ -8,62 +8,68 @@
 import SwiftUI
 
 struct AddWorkoutView: View {
-    var weight: Float
+    @Binding var workout: Workout
+    @Binding var hasPressedAdd: Bool
+    @State var serie: Serie = Serie()
+
     var weights: [Float] {
-        var weight: Float = self.weight
+        var minWeight: Float = self.workout.serie.weight * 0.5
+        var maxWeight: Float = self.workout.serie.weight * 1.5
         var weights = [Float]()
-        while weight <= 120.0 {
-            weights.append(weight)
-            weight += 1.25
+        while minWeight <= maxWeight {
+            weights.append(minWeight)
+            minWeight += 1.25
         }
         return weights
     }
 
-    var rep: Int
     var reps: [Int] {
-        var rep: Int = 0
+        var minRep: Int = Int(Double(self.workout.serie.reps) * 0.5)
+        var maxRep: Int = Int(Double(self.workout.serie.reps) * 1.5)
         var reps = [Int]()
-        while rep <= 10 {
-            reps.append(rep)
-            rep += 1
+        while minRep <= maxRep {
+            reps.append(minRep)
+            minRep += 1
         }
         return reps
     }
 
-    var RIR: Int
-    var RIRs: [Int] {
-        var rir: Int = 5
-        var rirs = [Int]()
-        while rir <= 10 {
-            rirs.append(rir)
-            rir += 1
+    var RIRs: [Float] {
+        var minRIR: Float = 1
+        let maxRIR: Float = 10
+        var rirs = [Float]()
+        while minRIR <= maxRIR {
+            rirs.append(minRIR)
+            minRIR += 0.5
         }
         return rirs
     }
-    @State private var selectedWeight: Float = 80.0
-    @State private var selectedRep: Int = 1
-    @State private var selectedRIR: Int = 5
+
     var body: some View {
         HStack(spacing: 10) {
-            Picker("REP", selection: $selectedRep) {
+            Picker("REP", selection: $serie.reps) {
                 ForEach(reps, id: \.self) {
                     Text($0 == 0 ? "Fallo" : "\($0)")
                 }
             }.pickerStyle(.menu)
-            Picker("KG", selection: $selectedWeight) {
+            Picker("KG", selection: $serie.weight) {
                 ForEach(weights, id: \.self) {
                     Text("\($0.formatted) Kg")
                 }
             }.pickerStyle(.menu)
-            Picker("RIR", selection: $selectedRIR) {
+            Picker("RIR", selection: $serie.rir) {
                 ForEach(RIRs, id: \.self) {
-                    Text("\($0)")
+                    Text("\($0.formatted)")
                 }
             }.pickerStyle(.menu)
             Spacer()
             
             Button {
-
+                workout.results.append(Serie(reps: serie.reps,
+                                             weight: serie.weight,
+                                             rpe: 0,
+                                             rir: serie.rir))
+                hasPressedAdd = false
             } label: {
                 Image(systemName: "checkmark")
                     .foregroundColor(.white)
@@ -73,9 +79,14 @@ struct AddWorkoutView: View {
             }.buttonStyle(.plain)
 
         }.padding(16)
+            .onAppear {
+                serie = workout.serie
+            }
     }
 }
 
+/*
 #Preview {
     AddWorkoutView(weight: 60, rep: 6, RIR: 5)
 }
+*/

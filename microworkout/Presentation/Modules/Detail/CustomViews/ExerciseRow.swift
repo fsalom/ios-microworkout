@@ -10,6 +10,7 @@ import SwiftUI
 struct ExerciseRow: View {
     @State var hasPressedAdd: Bool = false
     @State var workout: Workout
+
     var body: some View {
         VStack(alignment: .leading) {
             HStack {
@@ -40,7 +41,9 @@ struct ExerciseRow: View {
                 }
                 Spacer()
                 Button(action: {
-                    hasPressedAdd.toggle()
+                    withAnimation {
+                        hasPressedAdd.toggle()
+                    }
                 }, label: {
                     if !hasPressedAdd {
                         Image(systemName: "plus")
@@ -63,7 +66,8 @@ struct ExerciseRow: View {
             })
         }.padding(16)
         if hasPressedAdd {
-            AddWorkoutView(weight: 100.0, rep: 10, RIR: 7)
+            AddWorkoutView(workout: $workout,
+                           hasPressedAdd: $hasPressedAdd)
         }
         if !workout.isCollapsed {
             Divider()
@@ -77,7 +81,7 @@ struct ExerciseRow: View {
                             Text("\(result.reps) x ")
                             Text("\(result.weight.formatted) Kg")
                                 .bold()
-                            Text("\(result.rpe.formatted)")
+                            Text("\(result.rir.formatted)")
                         case .distance:
                             Text("\(workout.serie.distance.formatted) m")
                         case .kcal:
