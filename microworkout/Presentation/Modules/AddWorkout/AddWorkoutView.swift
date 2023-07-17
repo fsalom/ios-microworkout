@@ -8,13 +8,17 @@
 import SwiftUI
 
 struct AddWorkoutView: View {
-    @Binding var workout: Workout
+    @Binding var workout: Workout {
+        didSet {
+            serie = Serie(reps: workout.serie.reps, weight: workout.serie.weight, rpe: workout.serie.rpe, rir: workout.serie.rir)
+        }
+    }
     @Binding var hasPressedAdd: Bool
-    @State var serie: Serie = Serie()
+    @State var serie: Serie = Serie(reps: 5, weight: 40, rpe: 5, rir: 5)
 
     var weights: [Float] {
         var minWeight: Float = self.workout.serie.weight * 0.5
-        var maxWeight: Float = self.workout.serie.weight * 1.5
+        let maxWeight: Float = self.workout.serie.weight * 1.5
         var weights = [Float]()
         while minWeight <= maxWeight {
             weights.append(minWeight)
@@ -25,7 +29,7 @@ struct AddWorkoutView: View {
 
     var reps: [Int] {
         var minRep: Int = Int(Double(self.workout.serie.reps) * 0.5)
-        var maxRep: Int = Int(Double(self.workout.serie.reps) * 1.5)
+        let maxRep: Int = Int(Double(self.workout.serie.reps) * 1.5)
         var reps = [Int]()
         while minRep <= maxRep {
             reps.append(minRep)
@@ -57,7 +61,7 @@ struct AddWorkoutView: View {
                     Text("\($0.formatted) Kg")
                 }
             }.pickerStyle(.menu)
-            Picker("RIR", selection: $serie.rir) {
+            Picker("RPE", selection: $serie.rpe) {
                 ForEach(RIRs, id: \.self) {
                     Text("\($0.formatted)")
                 }
@@ -65,11 +69,13 @@ struct AddWorkoutView: View {
             Spacer()
             
             Button {
-                workout.results.append(Serie(reps: serie.reps,
-                                             weight: serie.weight,
-                                             rpe: 0,
-                                             rir: serie.rir))
-                hasPressedAdd = false
+                withAnimation {
+                    workout.results.append(Serie(reps: serie.reps,
+                                                 weight: serie.weight,
+                                                 rpe: serie.rpe,
+                                                 rir: 0))
+                    hasPressedAdd = false
+                }
             } label: {
                 Image(systemName: "checkmark")
                     .foregroundColor(.white)
