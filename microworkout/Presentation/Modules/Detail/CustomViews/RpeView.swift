@@ -33,10 +33,10 @@ struct RpeView: View {
 
     func getColor(of rpe: Float) -> Color {
         switch rpe {
-        case 0...4: return .white
-        case 4...6: return .green
-        case 6...8.5: return .orange
-        case 8.5...10: return .red
+        case 0...4: return .gray
+        case 4...6.5: return .green
+        case 6.5...8: return .orange
+        case 8...10: return .red
         default:
             return .gray
         }
