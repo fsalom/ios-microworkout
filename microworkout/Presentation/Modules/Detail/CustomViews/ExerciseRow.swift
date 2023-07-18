@@ -9,17 +9,13 @@ import SwiftUI
 
 struct ExerciseRow: View {
     @State var hasPressedAdd: Bool = false
-    @State var workout: Workout
+    @Binding var workout: Workout
+    @Binding var isEditing: Bool
 
     var body: some View {
         VStack(alignment: .leading) {
             HStack {
-                Text("\(workout.numberOfSeries)")
-                    .fontWeight(.heavy)
-                    .padding(10)
-                    .foregroundColor(.white)
-                    .background(.gray)
-                    .clipShape(Circle())
+                NumberOfSeriesView(workout: $workout)
                 VStack(alignment: .leading){
                     Text(workout.exercise.name)
                         .font(.system(size: 20))
@@ -73,7 +69,6 @@ struct ExerciseRow: View {
             Divider()
 
             VStack(alignment: .leading) {
-                Text("Series:").bold()
                 ForEach(workout.results) { result in
                     HStack {
                         switch workout.exercise.type {
@@ -81,7 +76,8 @@ struct ExerciseRow: View {
                             Text("\(result.reps) x ")
                             Text("\(result.weight.formatted) Kg")
                                 .bold()
-                            Text("\(result.rir.formatted)")
+                            Spacer()
+                            RpeView(rpe: result.rpe)
                         case .distance:
                             Text("\(workout.serie.distance.formatted) m")
                         case .kcal:
@@ -89,7 +85,19 @@ struct ExerciseRow: View {
                         case .reps:
                             Text("\(workout.serie.reps) repeticiones")
                         }
-                        Spacer()
+                        if isEditing {
+                            Button(action: {
+                                withAnimation {
+                                    workout.results.removeAll(where: {$0.id == result.id})
+                                }
+                            }, label: {
+                                Image(systemName: "xmark")
+                                    .foregroundColor(.white)
+                                    .padding(10)
+                                    .background(.red)
+                                    .clipShape(Circle())
+                            })
+                        }
                     }
                 }
             }.padding(16)

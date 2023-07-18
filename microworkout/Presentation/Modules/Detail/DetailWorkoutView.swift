@@ -8,13 +8,23 @@
 import SwiftUI
 
 struct DetailWorkoutView: View {
+    @State var isEditing: Bool = false
     @ObservedObject var viewModel: DetailWorkoutViewModel
     var body: some View {
         ScrollView {
-            ForEach(viewModel.plan.workouts) { workout in
-                ExerciseRow(workout: workout)
+            ForEach($viewModel.plan.workouts) { $workout in
+                ExerciseRow(workout: $workout,
+                            isEditing: $isEditing)
             }
-        }
+        }.toolbar(content: {
+            Button(action: {
+                withAnimation {
+                    isEditing.toggle()
+                }
+            }, label: {
+                Text(isEditing ? "Ok" : "Editar")
+            })
+        })
     }
 }
 
