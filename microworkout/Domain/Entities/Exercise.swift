@@ -7,11 +7,14 @@
 
 import Foundation
 
-enum ExerciseType {
+enum ExerciseType: CaseIterable, Identifiable {
     case distance
     case weight
     case kcal
     case reps
+    case none
+
+    var id: Self { self }
 }
 
 struct Exercise {
