@@ -31,6 +31,8 @@ struct ExerciseRow: View {
                             Text("\(workout.serie.kcal)kcal").bold()
                         case .reps:
                             Text("\(workout.serie.reps) repeticiones").bold()
+                        case .none:
+                            Text("no definido")
                         }
                         Spacer()
                     }
@@ -84,6 +86,8 @@ struct ExerciseRow: View {
                             Text("\(workout.serie.kcal) kcal")
                         case .reps:
                             Text("\(workout.serie.reps) repeticiones")
+                        case .none:
+                            Text("no definido")
                         }
                         if isEditing {
                             Button(action: {

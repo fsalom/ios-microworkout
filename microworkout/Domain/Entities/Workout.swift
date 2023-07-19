@@ -23,4 +23,11 @@ struct Workout: Identifiable {
                    Serie(reps: 10, weight: 82.5, rpe: 8.0, rir: 9.0)]
         serie =  Serie(reps: 10, weight: 80.0, rpe: 8.0, rir: 9.0)
     }
+
+    init() {
+        self.exercise = .init(name: "Correr", type: .none)
+        numberOfSeries = 4
+        results = []
+        serie =  Serie()
+    }
 }

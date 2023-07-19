@@ -27,6 +27,6 @@ class WorkoutUseCase: WorkoutUseCaseProtocol {
                             workouts: [Workout(name: "Zancadas")]),
                 WorkoutPlan(id: "4",
                             name: "ejemplo",
-                            workouts: [Workout(name: "Curl Biceps")])]
+                            workouts: [Workout()])]
     }
 }
