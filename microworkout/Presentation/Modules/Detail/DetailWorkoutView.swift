@@ -9,10 +9,11 @@ import SwiftUI
 
 struct DetailWorkoutView: View {
     @State var isEditing: Bool = false
+    @Binding var plan: WorkoutPlan
     @ObservedObject var viewModel: DetailWorkoutViewModel
     var body: some View {
         ScrollView {
-            ForEach($viewModel.plan.workouts) { $workout in
+            ForEach($plan.workouts) { $workout in
                 ExerciseRow(workout: $workout,
                             isEditing: $isEditing)
             }
@@ -30,8 +31,8 @@ struct DetailWorkoutView: View {
 
 struct DetailWorkoutView_Previews: PreviewProvider {
     static var previews: some View {
-        DetailWorkoutView(viewModel: DetailWorkoutViewModel(useCase: WorkoutUseCase(),
-                                                            plan: WorkoutPlan(id: "-", name: "test", workouts: [])))
+        @State var workout = WorkoutPlan(id: "-", name: "test", workouts: [])
+        DetailWorkoutView(plan: $workout, viewModel: DetailWorkoutViewModel(useCase: WorkoutUseCase()))
     }
 }
 

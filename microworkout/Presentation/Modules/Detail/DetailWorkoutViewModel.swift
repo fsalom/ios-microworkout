@@ -6,15 +6,14 @@
 //
 
 import Foundation
+import SwiftUI
 
 class DetailWorkoutViewModel: ObservableObject {
-    @Published var plan: WorkoutPlan
 
     var useCase: WorkoutUseCaseProtocol!
 
-    init(useCase: WorkoutUseCaseProtocol, plan: WorkoutPlan) {
+    init(useCase: WorkoutUseCaseProtocol) {
         self.useCase = useCase
-        self.plan = plan
     }
 
     func load() {

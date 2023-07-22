@@ -37,8 +37,8 @@ struct HomeView: View {
                         Text("Progresión de la semana")
                             .font(.footnote)
                         ProgressView(value: 0.4).progressViewStyle(.linear)
-                        ForEach(viewModel.workouts, id: \.id) { workout in
-                            NavigationLink(destination:  DetailWorkoutBuilder().build(with: workout)) {
+                        ForEach($viewModel.workouts, id: \.id) { $workout in
+                            NavigationLink(destination:  DetailWorkoutBuilder().build(with: $workout)) {
                                 HomeWorkoutPlanView(plan: workout)
                             }
                         }
