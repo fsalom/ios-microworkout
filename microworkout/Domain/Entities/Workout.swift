@@ -12,7 +12,7 @@ struct Workout: Identifiable {
     var exercise: Exercise
     let numberOfSeries: Int
     var results: [Serie]
-    let serie: Serie
+    var serie: Serie
     var isCollapsed: Bool = true
 
     init(name: String) {

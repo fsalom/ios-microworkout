@@ -14,7 +14,7 @@ struct Serie: Identifiable, Hashable {
     var weight: Float = 0.0
     var rpe: Float = 0.0
     var rir: Float = 0.0
-    var distance: Float = 0.0
+    var distance: Int = 0
     var kcal: Int = 0
 
     init(reps: Int, weight: Float, rpe: Float, rir: Float){
@@ -25,7 +25,7 @@ struct Serie: Identifiable, Hashable {
         self.rir = rir
     }
 
-    init(reps: Int, distance: Float){
+    init(reps: Int, distance: Int){
         self.exercise = .distance
         self.reps = reps
         self.distance = distance
