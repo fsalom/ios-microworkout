@@ -17,6 +17,10 @@ struct Serie: Identifiable, Hashable {
     var distance: Int = 0
     var kcal: Int = 0
 
+    var isEmpty: Bool {
+        return reps == 0 && weight == 0 && distance == 0 && kcal == 0
+    }
+
     init(reps: Int, weight: Float, rpe: Float, rir: Float){
         self.exercise = .weight
         self.reps = reps
