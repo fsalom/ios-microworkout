@@ -20,13 +20,17 @@ struct ExerciseRow: View {
                     Text(workout.exercise.name)
                         .font(.system(size: 20))
                         .fontWeight(.bold)
-                    HStack {
+                    HStack {                       
                         switch workout.exercise.type {
                         case .weight:
                             Text("\(workout.serie.reps) x")
                             Text("\(workout.serie.weight.formatted)Kg ").bold()
                         case .distance:
-                            Text("\(workout.serie.distance.formatted)m").bold()
+                            if workout.serie.distance == 0 {
+                                Text("No definido").bold()
+                            } else {
+                                Text("\(workout.serie.distance.formatted)m").bold()
+                            }
                         case .kcal:
                             Text("\(workout.serie.kcal)kcal").bold()
                         case .reps:
@@ -65,7 +69,8 @@ struct ExerciseRow: View {
         }.padding(16)
         if hasPressedAdd {
             AddWorkoutView(workout: $workout,
-                           hasPressedAdd: $hasPressedAdd)
+                           hasPressedAdd: $hasPressedAdd,
+                           serie: Serie())
         }
         if !workout.isCollapsed {
             Divider()
@@ -81,11 +86,13 @@ struct ExerciseRow: View {
                             Spacer()
                             RpeView(rpe: result.rpe)
                         case .distance:
-                            Text("\(workout.serie.distance.formatted) m")
+                            Text("\(result.reps) x ")
+                            Text("\(result.distance.formatted) m")
+                            Spacer()
                         case .kcal:
-                            Text("\(workout.serie.kcal) kcal")
+                            Text("\(result.kcal) kcal")
                         case .reps:
-                            Text("\(workout.serie.reps) repeticiones")
+                            Text("\(result.reps) repeticiones")
                         case .none:
                             Text("no definido")
                         }
