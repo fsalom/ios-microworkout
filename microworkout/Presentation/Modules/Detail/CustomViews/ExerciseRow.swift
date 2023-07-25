@@ -70,7 +70,7 @@ struct ExerciseRow: View {
         if hasPressedAdd {
             AddWorkoutView(workout: $workout,
                            hasPressedAdd: $hasPressedAdd,
-                           serie: Serie())
+                           serie: Set())
         }
         if !workout.isCollapsed {
             Divider()
