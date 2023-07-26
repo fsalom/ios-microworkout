@@ -23,18 +23,18 @@ struct ExerciseRow: View {
                     HStack {                       
                         switch workout.exercise.type {
                         case .weight:
-                            Text("\(workout.serie.reps) x")
-                            Text("\(workout.serie.weight.formatted)Kg ").bold()
+                            Text("\(workout.set.reps) x")
+                            Text("\(workout.set.weight.formatted)Kg ").bold()
                         case .distance:
-                            if workout.serie.distance == 0 {
+                            if workout.set.distance == 0 {
                                 Text("No definido").bold()
                             } else {
-                                Text("\(workout.serie.distance.formatted)m").bold()
+                                Text("\(workout.set.distance.formatted)m").bold()
                             }
                         case .kcal:
-                            Text("\(workout.serie.kcal)kcal").bold()
+                            Text("\(workout.set.kcal)kcal").bold()
                         case .reps:
-                            Text("\(workout.serie.reps) repeticiones").bold()
+                            Text("\(workout.set.reps) repeticiones").bold()
                         case .none:
                             Text("no definido")
                         }
@@ -70,7 +70,7 @@ struct ExerciseRow: View {
         if hasPressedAdd {
             AddWorkoutView(workout: $workout,
                            hasPressedAdd: $hasPressedAdd,
-                           serie: Set())
+                           set: Set())
         }
         if !workout.isCollapsed {
             Divider()

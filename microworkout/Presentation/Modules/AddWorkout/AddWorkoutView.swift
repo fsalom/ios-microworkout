@@ -8,52 +8,42 @@
 import SwiftUI
 
 struct AddWorkoutView: View {
-    @Binding var workout: Workout {
-        didSet {
-            serie = Serie(reps: workout.serie.reps,
-                          weight: workout.serie.weight,
-                          rpe: workout.serie.rpe,
-                          rir: workout.serie.rir)
-            isNew = workout.exercise.type == .none ? true : false
-        }
-    }
-    @State var isNew: Bool = false
+    @Binding var workout: Workout
     @Binding var hasPressedAdd: Bool
-    @State var serie: Serie = Serie(reps: 5, weight: 40, rpe: 5, rir: 5)
+    @State var hasAset: Bool = false
+    @State var set: Set
+    @State var hours: Int = 0
+    @State var minutes: Int = 0
 
     @State var weightsValue: String = ""{
         didSet {
-            serie.weight = transformToFloat(this: weightsValue)
+            set.weight = transformToFloat(this: weightsValue)
         }
     }
 
     @State var repsValue: String = "" {
         didSet {
-            serie.reps = transformToInt(this: repsValue)
+            set.reps = transformToInt(this: repsValue)
         }
     }
 
-    @State var distancesValue: String = "" {
-        didSet {
-            serie.distance = transformToFloat(this: distancesValue)
-        }
-    }
+    @State var distancesValue: String = ""
 
     @State var kcalsValue: String = "" {
         didSet {
-            serie.kcal = transformToInt(this: kcalsValue)
+            set.kcal = transformToInt(this: kcalsValue)
         }
     }
 
     @State var rirsValue: String = "" {
         didSet {
-            serie.rir = transformToFloat(this: rirsValue)
+            set.rir = transformToFloat(this: rirsValue)
         }
     }
 
     var weights: [Float] {
-        var min: Float = self.workout.serie.weight * 0.5
-        let max: Float = self.workout.serie.weight * 1.5
+        var min: Float = self.workout.set.weight * 0.5
+        let max: Float = self.workout.set.weight * 1.5
         var weights = [Float]()
         while min <= max {
             weights.append(min)
@@ -63,8 +53,8 @@ struct AddWorkoutView: View {
     }
 
     var reps: [Int] {
-        var min: Int = Int(Double(self.workout.serie.reps) * 0.5)
-        let max: Int = Int(Double(self.workout.serie.reps) * 1.5)
+        var min: Int = Int(Double(self.workout.set.reps) * 0.5)
+        let max: Int = Int(Double(self.workout.set.reps) * 1.5)
         var reps = [Int]()
         while min <= max {
             reps.append(min)
@@ -74,8 +64,8 @@ struct AddWorkoutView: View {
     }
 
     var distances: [Int] {
-        var min: Int = Int(Double(self.workout.serie.distance) * 0.5)
-        let max: Int = Int(Double(self.workout.serie.distance) * 1.5)
+        var min: Int = Int(Double(self.workout.set.distance) * 0.5)
+        let max: Int = Int(Double(self.workout.set.distance) * 1.5)
         var distances = [Int]()
         while min <= max {
             distances.append(min)
@@ -85,8 +75,8 @@ struct AddWorkoutView: View {
     }
 
     var kcals: [Int] {
-        var min: Int = Int(Double(self.workout.serie.distance) * 0.5)
-        let max: Int = Int(Double(self.workout.serie.distance) * 1.5)
+        var min: Int = Int(Double(self.workout.set.distance) * 0.5)
+        let max: Int = Int(Double(self.workout.set.distance) * 1.5)
         var kcals = [Int]()
         while min <= max {
             kcals.append(min)
@@ -108,30 +98,49 @@ struct AddWorkoutView: View {
 
     var body: some View {
         HStack(spacing: 10) {
-            switch serie.exercise {
+            switch set.exercise {
             case .distance:
-                if isNew {
-                    Picker("REP", selection: $serie.reps) {
+                if hasAset {
+                    Picker("REP", selection: $set.reps) {
                         ForEach(reps, id: \.self) {
                             Text($0 == 0 ? "Fallo" : "\($0)")
                         }
                     }.pickerStyle(.menu)
-                    Picker("m", selection: $serie.distance) {
+                    Picker("m", selection: $set.distance) {
                         ForEach(distances, id: \.self) {
                             Text("\($0.formatted) m")
                         }
                     }.pickerStyle(.menu)
                     Spacer()
                 } else {
-                    TextField("series", text: $repsValue)
+                    TextField("sets", text: $repsValue)
+                        .padding(10)
+                        .overlay(RoundedRectangle(cornerRadius: 10)
+                            .stroke(Color.gray))
+                        .keyboardType(.numberPad)
                     TextField("metros", text: $distancesValue)
+                        .padding(10)
+                        .overlay(RoundedRectangle(cornerRadius: 10)
+                            .stroke(Color.gray))
+                        .keyboardType(.numberPad)
+                    HStack {
+                        Picker("", selection: $hours){
+                            ForEach(0..<4, id: \.self) { i in
+                                Text("\(i) hours").tag(i)
+                            }
+                        }.pickerStyle(WheelPickerStyle())
+                        Picker("", selection: $minutes){
+                            ForEach(0..<60, id: \.self) { i in
+                                Text("\(i) min").tag(i)
+                            }
+                        }.pickerStyle(WheelPickerStyle())
+                    }
                 }
                 Button {
                     withAnimation {
-                        workout.results.append(Serie(reps: serie.reps,
-                                                     weight: serie.weight,
-                                                     rpe: serie.rpe,
-                                                     rir: 0))
+                        workout.exercise.type = set.exercise
+                        self.workout.set.exercise = set.exercise
+                        workout.results.append(set)
                         hasPressedAdd = false
                     }
                 } label: {
@@ -142,18 +151,18 @@ struct AddWorkoutView: View {
                         .clipShape(Circle())
                 }.buttonStyle(.plain)
             case .weight:
-                if isNew {
-                    Picker("REP", selection: $serie.reps) {
+                if hasAset {
+                    Picker("REP", selection: $set.reps) {
                         ForEach(reps, id: \.self) {
                             Text($0 == 0 ? "Fallo" : "\($0)")
                         }
                     }.pickerStyle(.menu)
-                    Picker("KG", selection: $serie.weight) {
+                    Picker("KG", selection: $set.weight) {
                         ForEach(weights, id: \.self) {
                             Text("\($0.formatted) Kg")
                         }
                     }.pickerStyle(.menu)
-                    Picker("RPE", selection: $serie.rpe) {
+                    Picker("RPE", selection: $set.rpe) {
                         ForEach(RIRs, id: \.self) {
                             Text("\($0.formatted)")
                         }
@@ -165,10 +174,10 @@ struct AddWorkoutView: View {
                 }
                 Button {
                     withAnimation {
-                        workout.results.append(Serie(reps: serie.reps,
-                                                     weight: serie.weight,
-                                                     rpe: serie.rpe,
-                                                     rir: 0))
+                        workout.results.append(Set(reps: set.reps,
+                                                   weight: set.weight,
+                                                   rpe: set.rpe,
+                                                   rir: 0))
                         hasPressedAdd = false
                     }
                 } label: {
@@ -179,7 +188,7 @@ struct AddWorkoutView: View {
                         .clipShape(Circle())
                 }.buttonStyle(.plain)
             case .kcal:
-                Picker("KCAL", selection: $serie.kcal) {
+                Picker("KCAL", selection: $set.kcal) {
                     ForEach(kcals, id: \.self) {
                         Text($0 == 0 ? "Fallo" : "\($0)")
                     }
@@ -187,7 +196,7 @@ struct AddWorkoutView: View {
                 Spacer()
                 Button {
                     withAnimation {
-                        workout.results.append(Serie(kcal: serie.kcal))
+                        workout.results.append(Set(kcal: set.kcal))
                         hasPressedAdd = false
                     }
                 } label: {
@@ -198,7 +207,7 @@ struct AddWorkoutView: View {
                         .clipShape(Circle())
                 }.buttonStyle(.plain)
             case .reps:
-                Picker("REPS", selection: $serie.reps) {
+                Picker("REPS", selection: $set.reps) {
                     ForEach(reps, id: \.self) {
                         Text($0 == 0 ? "Fallo" : "\($0)")
                     }
@@ -206,7 +215,7 @@ struct AddWorkoutView: View {
                 Spacer()
                 Button {
                     withAnimation {
-                        workout.results.append(Serie(reps: serie.reps))
+                        workout.results.append(Set(reps: set.reps))
                         hasPressedAdd = false
                     }
                 } label: {
@@ -217,7 +226,7 @@ struct AddWorkoutView: View {
                         .clipShape(Circle())
                 }.buttonStyle(.plain)
             case .none:
-                Picker("REPS", selection: $serie.exercise) {
+                Picker("REPS", selection: $set.exercise) {
                     ForEach(ExerciseType.allCases, id:  \.id) {
                         Text(String(describing: $0))
                     }
@@ -225,7 +234,15 @@ struct AddWorkoutView: View {
             }
         }.padding(16)
             .onAppear {
-                serie = workout.serie
+                hasAset = workout.set.isEmpty ? false : true
+                if workout.set.exercise != .none {
+                    set = workout.set
+                }
+            }.onChange(of: distancesValue) {
+                set.distance = transformToInt(this: distancesValue)
+            }
+            .onChange(of: repsValue) {
+                set.reps = transformToInt(this: repsValue)
             }
     }
 
