@@ -123,18 +123,7 @@ struct AddWorkoutView: View {
                         .overlay(RoundedRectangle(cornerRadius: 10)
                             .stroke(Color.gray))
                         .keyboardType(.numberPad)
-                    HStack {
-                        Picker("", selection: $hours){
-                            ForEach(0..<4, id: \.self) { i in
-                                Text("\(i) hours").tag(i)
-                            }
-                        }.pickerStyle(WheelPickerStyle())
-                        Picker("", selection: $minutes){
-                            ForEach(0..<60, id: \.self) { i in
-                                Text("\(i) min").tag(i)
-                            }
-                        }.pickerStyle(WheelPickerStyle())
-                    }
+                    // TODO: add time but we have to decide how
                 }
                 Button {
                     withAnimation {

@@ -15,18 +15,18 @@ protocol WorkoutUseCaseProtocol {
 class WorkoutUseCase: WorkoutUseCaseProtocol {
     func getWorkouts() async throws -> [WorkoutPlan] {
         return [WorkoutPlan(id: "1",
-                            name: "ejemplo",
+                            name: "Pierna",
                             workouts: [Workout(name: "Sentadilla"),
                                        Workout(name: "Press banca"),
                                        Workout(name: "Peso muerto")]),
                 WorkoutPlan(id: "2",
-                            name: "ejemplo",
+                            name: "Pecho + Biceps",
                             workouts: [Workout(name: "Press Militar")]),
                 WorkoutPlan(id: "3",
-                            name: "ejemplo",
+                            name: "Espalda + Triceps",
                             workouts: [Workout(name: "Zancadas")]),
                 WorkoutPlan(id: "4",
-                            name: "ejemplo",
+                            name: "Accesorios",
                             workouts: [Workout()])]
     }
 }

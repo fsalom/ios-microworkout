@@ -12,6 +12,7 @@ struct DetailWorkoutView: View {
     @Binding var plan: WorkoutPlan
     @ObservedObject var viewModel: DetailWorkoutViewModel
     var body: some View {
+        Text(plan.name).font(.title).fontWeight(.bold)
         ScrollView {
             ForEach($plan.workouts) { $workout in
                 ExerciseRow(workout: $workout,
