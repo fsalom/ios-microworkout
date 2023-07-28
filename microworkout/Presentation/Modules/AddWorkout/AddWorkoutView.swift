@@ -35,6 +35,12 @@ struct AddWorkoutView: View {
         }
     }
 
+    @State var rpeValue: String = "" {
+        didSet {
+            set.rpe = transformToFloat(this: rpeValue)
+        }
+    }
+
     @State var rirsValue: String = "" {
         didSet {
             set.rir = transformToFloat(this: rirsValue)
@@ -159,7 +165,20 @@ struct AddWorkoutView: View {
                     Spacer()
                 } else {
                     TextField("repeticiones", text: $repsValue)
+                        .padding(10)
+                        .overlay(RoundedRectangle(cornerRadius: 10)
+                            .stroke(Color.gray))
+                        .keyboardType(.numberPad)
                     TextField("Kg", text: $weightsValue)
+                        .padding(10)
+                        .overlay(RoundedRectangle(cornerRadius: 10)
+                            .stroke(Color.gray))
+                        .keyboardType(.numberPad)
+                    TextField("RPE", text: $rpeValue)
+                        .padding(10)
+                        .overlay(RoundedRectangle(cornerRadius: 10)
+                            .stroke(Color.gray))
+                        .keyboardType(.numberPad)
                 }
                 Button {
                     withAnimation {
@@ -177,12 +196,20 @@ struct AddWorkoutView: View {
                         .clipShape(Circle())
                 }.buttonStyle(.plain)
             case .kcal:
-                Picker("KCAL", selection: $set.kcal) {
-                    ForEach(kcals, id: \.self) {
-                        Text($0 == 0 ? "Fallo" : "\($0)")
-                    }
-                }.pickerStyle(.menu)
-                Spacer()
+                if hasAset {
+                    Picker("KCAL", selection: $set.kcal) {
+                        ForEach(kcals, id: \.self) {
+                            Text($0 == 0 ? "Fallo" : "\($0)")
+                        }
+                    }.pickerStyle(.menu)
+                    Spacer()
+                } else {
+                    TextField("KCAL", text: $kcalsValue)
+                        .padding(10)
+                        .overlay(RoundedRectangle(cornerRadius: 10)
+                            .stroke(Color.gray))
+                        .keyboardType(.numberPad)
+                }
                 Button {
                     withAnimation {
                         workout.results.append(Set(kcal: set.kcal))
@@ -196,12 +223,20 @@ struct AddWorkoutView: View {
                         .clipShape(Circle())
                 }.buttonStyle(.plain)
             case .reps:
+                if hasAset {
                 Picker("REPS", selection: $set.reps) {
                     ForEach(reps, id: \.self) {
                         Text($0 == 0 ? "Fallo" : "\($0)")
                     }
                 }.pickerStyle(.menu)
                 Spacer()
+                } else {
+                    TextField("REPS", text: $repsValue)
+                        .padding(10)
+                        .overlay(RoundedRectangle(cornerRadius: 10)
+                            .stroke(Color.gray))
+                        .keyboardType(.numberPad)
+                }
                 Button {
                     withAnimation {
                         workout.results.append(Set(reps: set.reps))
