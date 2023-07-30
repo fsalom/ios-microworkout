@@ -34,6 +34,8 @@
 		C1742E552A309EDE0020354D /* Set.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1742E542A309EDE0020354D /* Set.swift */; };
 		C1742E592A309FDC0020354D /* WorkoutDataSourceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1742E582A309FDC0020354D /* WorkoutDataSourceProtocol.swift */; };
 		C1742E5B2A30A0400020354D /* WorkoutCoreDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1742E5A2A30A0400020354D /* WorkoutCoreDataSource.swift */; };
+		C18FEDB12A76F926005519BE /* ListPlanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C18FEDB02A76F926005519BE /* ListPlanView.swift */; };
+		C18FEDB32A76F9A5005519BE /* ListPlanViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C18FEDB22A76F9A5005519BE /* ListPlanViewModel.swift */; };
 		C192BF1C2A2A976A00982F33 /* microworkoutApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C192BF1B2A2A976A00982F33 /* microworkoutApp.swift */; };
 		C192BF202A2A976C00982F33 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C192BF1F2A2A976C00982F33 /* Assets.xcassets */; };
 		C192BF232A2A976C00982F33 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C192BF222A2A976C00982F33 /* Preview Assets.xcassets */; };
@@ -163,6 +165,8 @@
 		C1742E542A309EDE0020354D /* Set.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Set.swift; sourceTree = "<group>"; };
 		C1742E582A309FDC0020354D /* WorkoutDataSourceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutDataSourceProtocol.swift; sourceTree = "<group>"; };
 		C1742E5A2A30A0400020354D /* WorkoutCoreDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutCoreDataSource.swift; sourceTree = "<group>"; };
+		C18FEDB02A76F926005519BE /* ListPlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListPlanView.swift; sourceTree = "<group>"; };
+		C18FEDB22A76F9A5005519BE /* ListPlanViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListPlanViewModel.swift; sourceTree = "<group>"; };
 		C192BF182A2A976A00982F33 /* microworkout.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = microworkout.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C192BF1B2A2A976A00982F33 /* microworkoutApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = microworkoutApp.swift; sourceTree = "<group>"; };
 		C192BF1F2A2A976C00982F33 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -435,6 +439,15 @@
 			path = Datasource;
 			sourceTree = "<group>";
 		};
+		C18FEDAF2A76F90D005519BE /* List */ = {
+			isa = PBXGroup;
+			children = (
+				C18FEDB22A76F9A5005519BE /* ListPlanViewModel.swift */,
+				C18FEDB02A76F926005519BE /* ListPlanView.swift */,
+			);
+			path = List;
+			sourceTree = "<group>";
+		};
 		C192BF0F2A2A976A00982F33 = {
 			isa = PBXGroup;
 			children = (
@@ -536,6 +549,7 @@
 		C1F34F602A38CD4300233D66 /* gymwatch Watch App */ = {
 			isa = PBXGroup;
 			children = (
+				C18FEDAF2A76F90D005519BE /* List */,
 				C1F34F612A38CD4300233D66 /* gymwatchApp.swift */,
 				C1F34F632A38CD4300233D66 /* ContentView.swift */,
 				C1F34F652A38CD4500233D66 /* Assets.xcassets */,
@@ -882,8 +896,10 @@
 				C1F34F9A2A38FC1400233D66 /* WorkoutDataSourceProtocol.swift in Sources */,
 				C1F34F922A38FBBF00233D66 /* WorkoutPlan.swift in Sources */,
 				C1F34F8E2A38FB9D00233D66 /* TimerBuilder.swift in Sources */,
+				C18FEDB32A76F9A5005519BE /* ListPlanViewModel.swift in Sources */,
 				C1F34F902A38FB9D00233D66 /* CountDownView.swift in Sources */,
 				C1F34F942A38FBBF00233D66 /* Exercise.swift in Sources */,
+				C18FEDB12A76F926005519BE /* ListPlanView.swift in Sources */,
 				C1F34FA32A38FC6D00233D66 /* ChronoView.swift in Sources */,
 				C1F34F952A38FBBF00233D66 /* Workout.swift in Sources */,
 				C1F34F972A38FC1100233D66 /* WorkoutRepositoryProtocol.swift in Sources */,
