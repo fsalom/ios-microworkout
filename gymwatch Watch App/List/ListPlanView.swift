@@ -7,20 +7,30 @@
 
 import SwiftUI
 
-struct ListView: View {
+struct ListPlanView: View {
     @ObservedObject var viewModel: ListPlanViewModel
 
     var body: some View {
-        VStack {
-            ForEach($viewModel.workouts, id: \.id) { $workout in
-                Text(workout.name)
+        NavigationStack {
+            List {
+                ForEach(viewModel.workouts) { workout in
+                    NavigationLink {
+                        DetailWorkoutBuilder().build(with: workout)
+                    } label: {
+                        VStack {
+                            Text(workout.name)
+                            Text("otro")
+                        }
+                    }
+                }
             }
         }.task {
             await viewModel.load()
         }
     }
 }
-
-#Preview {
-    ListView(viewModel: ListPlanViewModel(useCase: WorkoutUseCase()))
-}
+/*
+ #Preview {
+ ListView(viewModel: ListPlanViewModel(useCase: WorkoutUseCase()))
+ }
+ */
