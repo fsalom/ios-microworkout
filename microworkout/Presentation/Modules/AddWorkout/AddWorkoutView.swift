@@ -14,6 +14,7 @@ struct AddWorkoutView: View {
     @State var set: Set
     @State var hours: Int = 0
     @State var minutes: Int = 0
+    @State var seconds: Int = 0
 
     @State var weightsValue: String = ""{
         didSet {
@@ -45,6 +46,26 @@ struct AddWorkoutView: View {
         didSet {
             set.rir = transformToFloat(this: rirsValue)
         }
+    }
+
+    var time24: [Int] {
+        var time24 = [Int]()
+        var time = 0
+        while time <= 60 {
+            time24.append(time)
+            time += 1
+        }
+        return time24
+    }
+
+    var time60: [Int] {
+        var time60 = [Int]()
+        var time = 0
+        while time <= 60 {
+            time60.append(time)
+            time += 1
+        }
+        return time60
     }
 
     var weights: [Float] {
@@ -119,16 +140,37 @@ struct AddWorkoutView: View {
                     }.pickerStyle(.menu)
                     Spacer()
                 } else {
-                    TextField("sets", text: $repsValue)
-                        .padding(10)
-                        .overlay(RoundedRectangle(cornerRadius: 10)
-                            .stroke(Color.gray))
-                        .keyboardType(.numberPad)
-                    TextField("metros", text: $distancesValue)
-                        .padding(10)
-                        .overlay(RoundedRectangle(cornerRadius: 10)
-                            .stroke(Color.gray))
-                        .keyboardType(.numberPad)
+                    VStack {
+                        HStack {
+                            TextField("sets", text: $repsValue)
+                                .padding(10)
+                                .overlay(RoundedRectangle(cornerRadius: 10)
+                                    .stroke(Color.gray))
+                                .keyboardType(.numberPad)
+                            TextField("metros", text: $distancesValue)
+                                .padding(10)
+                                .overlay(RoundedRectangle(cornerRadius: 10)
+                                    .stroke(Color.gray))
+                                .keyboardType(.numberPad)
+                        }
+                        HStack {
+                            Picker("horas", selection: $hours) {
+                                ForEach(time24, id: \.self) {
+                                    Text("\($0.formatted) h")
+                                }
+                            }.pickerStyle(.wheel)
+                            Picker("minutos", selection: $minutes) {
+                                ForEach(time60, id: \.self) {
+                                    Text("\($0.formatted) m")
+                                }
+                            }.pickerStyle(.wheel)
+                            Picker("segundos", selection: $seconds) {
+                                ForEach(time60, id: \.self) {
+                                    Text("\($0.formatted) s")
+                                }
+                            }.pickerStyle(.wheel)
+                        }
+                    }
                     // TODO: add time but we have to decide how
                 }
                 Button {
