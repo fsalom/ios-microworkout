@@ -48,6 +48,10 @@
 		C192BF322A2A976C00982F33 /* microworkoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C192BF312A2A976C00982F33 /* microworkoutTests.swift */; };
 		C192BF3C2A2A976C00982F33 /* microworkoutUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C192BF3B2A2A976C00982F33 /* microworkoutUITests.swift */; };
 		C192BF3E2A2A976C00982F33 /* microworkoutUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C192BF3D2A2A976C00982F33 /* microworkoutUITestsLaunchTests.swift */; };
+		C19788C62A7EDE4B0031648B /* HealthKitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C19788C52A7EDE4B0031648B /* HealthKitView.swift */; };
+		C19788C82A7EDF160031648B /* HealthKitViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C19788C72A7EDF160031648B /* HealthKitViewModel.swift */; };
+		C19788CA2A7EDF390031648B /* HealthKitBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = C19788C92A7EDF390031648B /* HealthKitBuilder.swift */; };
+		C19788CC2A7EDF4D0031648B /* HealthKitProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = C19788CB2A7EDF4D0031648B /* HealthKitProtocols.swift */; };
 		C1A85E142A6AA43C005EC274 /* Int.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A85E132A6AA43C005EC274 /* Int.swift */; };
 		C1A953142A5D4B3900A2A010 /* AddWorkoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A953132A5D4B3900A2A010 /* AddWorkoutView.swift */; };
 		C1A953192A5D571D00A2A010 /* Float+CGFloat.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A953182A5D571D00A2A010 /* Float+CGFloat.swift */; };
@@ -186,6 +190,10 @@
 		C192BF372A2A976C00982F33 /* microworkoutUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = microworkoutUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C192BF3B2A2A976C00982F33 /* microworkoutUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = microworkoutUITests.swift; sourceTree = "<group>"; };
 		C192BF3D2A2A976C00982F33 /* microworkoutUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = microworkoutUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		C19788C52A7EDE4B0031648B /* HealthKitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitView.swift; sourceTree = "<group>"; };
+		C19788C72A7EDF160031648B /* HealthKitViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitViewModel.swift; sourceTree = "<group>"; };
+		C19788C92A7EDF390031648B /* HealthKitBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitBuilder.swift; sourceTree = "<group>"; };
+		C19788CB2A7EDF4D0031648B /* HealthKitProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitProtocols.swift; sourceTree = "<group>"; };
 		C1A85E132A6AA43C005EC274 /* Int.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Int.swift; sourceTree = "<group>"; };
 		C1A953132A5D4B3900A2A010 /* AddWorkoutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddWorkoutView.swift; sourceTree = "<group>"; };
 		C1A953182A5D571D00A2A010 /* Float+CGFloat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Float+CGFloat.swift"; sourceTree = "<group>"; };
@@ -314,6 +322,7 @@
 		C15B7EE82A57400A0067B28E /* CustomViews */ = {
 			isa = PBXGroup;
 			children = (
+				C1A953122A5D4B1E00A2A010 /* AddWorkout */,
 				C15B7EE92A57402F0067B28E /* ExerciseRow.swift */,
 				C1DE682A2A63F86F000DE4C8 /* NumberOfSeriesView.swift */,
 				C1DE682C2A63FC83000DE4C8 /* RpeView.swift */,
@@ -361,12 +370,12 @@
 		C1742E412A2F317C0020354D /* Modules */ = {
 			isa = PBXGroup;
 			children = (
+				C19788C42A7EDE1D0031648B /* HealthKit */,
 				C11B9F382A5C37A400FC656F /* Tabbar */,
 				C11B9F352A5C370D00FC656F /* Profile */,
 				C1F34F9B2A38FC4600233D66 /* Chrono */,
 				C13C47BC2A33AAD5005C90AB /* Timer */,
 				C1742E4D2A2FC8C10020354D /* Splash */,
-				C1A953122A5D4B1E00A2A010 /* AddWorkout */,
 				C15B7EDF2A572B800067B28E /* Detail */,
 				C1742E492A2F32140020354D /* Home */,
 			);
@@ -530,6 +539,17 @@
 				C192BF3D2A2A976C00982F33 /* microworkoutUITestsLaunchTests.swift */,
 			);
 			path = microworkoutUITests;
+			sourceTree = "<group>";
+		};
+		C19788C42A7EDE1D0031648B /* HealthKit */ = {
+			isa = PBXGroup;
+			children = (
+				C19788C52A7EDE4B0031648B /* HealthKitView.swift */,
+				C19788C72A7EDF160031648B /* HealthKitViewModel.swift */,
+				C19788C92A7EDF390031648B /* HealthKitBuilder.swift */,
+				C19788CB2A7EDF4D0031648B /* HealthKitProtocols.swift */,
+			);
+			path = HealthKit;
 			sourceTree = "<group>";
 		};
 		C1A953122A5D4B1E00A2A010 /* AddWorkout */ = {
@@ -859,11 +879,14 @@
 				C192BF282A2A976C00982F33 /* microworkout.xcdatamodeld in Sources */,
 				C15B7EEA2A57402F0067B28E /* ExerciseRow.swift in Sources */,
 				C1F34FA62A38FC6D00233D66 /* ChronoTimerView.swift in Sources */,
+				C19788C82A7EDF160031648B /* HealthKitViewModel.swift in Sources */,
 				C13C47C42A33AB0B005C90AB /* TimerViewModel.swift in Sources */,
 				C15B7EE12A572BB70067B28E /* DetailWorkoutView.swift in Sources */,
 				C1742E462A2F31DA0020354D /* Workout.swift in Sources */,
+				C19788CA2A7EDF390031648B /* HealthKitBuilder.swift in Sources */,
 				C15590FD2A31CB1C00E30886 /* WorkoutRepositoryProtocol.swift in Sources */,
 				C13C47C02A33AAF0005C90AB /* TimerView.swift in Sources */,
+				C19788C62A7EDE4B0031648B /* HealthKitView.swift in Sources */,
 				C1742E592A309FDC0020354D /* WorkoutDataSourceProtocol.swift in Sources */,
 				C15B7EE72A572CAE0067B28E /* DetailWorkoutViewModel.swift in Sources */,
 				C1F34FA82A38FC6D00233D66 /* ChronoBuilder.swift in Sources */,
@@ -880,6 +903,7 @@
 				C1A85E142A6AA43C005EC274 /* Int.swift in Sources */,
 				C1F34FA42A38FC6D00233D66 /* ChronoViewModel.swift in Sources */,
 				C15B7EE32A572BC70067B28E /* DetailWorkoutBuilder.swift in Sources */,
+				C19788CC2A7EDF4D0031648B /* HealthKitProtocols.swift in Sources */,
 				C1A953192A5D571D00A2A010 /* Float+CGFloat.swift in Sources */,
 				C1742E482A2F31F00020354D /* WorkoutUseCase.swift in Sources */,
 				C13C47C22A33AB00005C90AB /* TimerProtocols.swift in Sources */,
