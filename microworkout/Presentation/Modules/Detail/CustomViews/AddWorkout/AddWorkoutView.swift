@@ -11,7 +11,7 @@ struct AddWorkoutView: View {
     @Binding var workout: Workout
     @Binding var hasPressedAdd: Bool
     @State var hasAset: Bool = false
-    @State var set: Set
+    @State var set: WorkoutSet
     @State var hours: Int = 0
     @State var minutes: Int = 0
     @State var seconds: Int = 0
@@ -224,7 +224,7 @@ struct AddWorkoutView: View {
                 }
                 Button {
                     withAnimation {
-                        workout.results.append(Set(reps: set.reps,
+                        workout.results.append(WorkoutSet(reps: set.reps,
                                                    weight: set.weight,
                                                    rpe: set.rpe,
                                                    rir: 0))
@@ -254,7 +254,7 @@ struct AddWorkoutView: View {
                 }
                 Button {
                     withAnimation {
-                        workout.results.append(Set(kcal: set.kcal))
+                        workout.results.append(WorkoutSet(kcal: set.kcal))
                         hasPressedAdd = false
                     }
                 } label: {
@@ -281,7 +281,7 @@ struct AddWorkoutView: View {
                 }
                 Button {
                     withAnimation {
-                        workout.results.append(Set(reps: set.reps))
+                        workout.results.append(WorkoutSet(reps: set.reps))
                         hasPressedAdd = false
                     }
                 } label: {

@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Set: Identifiable, Hashable {
+struct WorkoutSet: Identifiable, Hashable {
     var id: String = UUID().uuidString
     var exercise: ExerciseType
     var reps: Int = 0

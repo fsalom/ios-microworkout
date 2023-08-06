@@ -15,6 +15,11 @@ struct TabbarView: View {
                     Label("Entrenamiento", systemImage: "dumbbell.fill")
                 }
 
+            HealthKitBuilder().build()
+                .tabItem {
+                    Label("Salud", systemImage: "health")
+                }
+
             ProfileView()
                 .tabItem {
                     Label("Perfil", systemImage: "person.fill")

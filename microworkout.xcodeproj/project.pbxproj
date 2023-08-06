@@ -31,7 +31,7 @@
 		C1742E4F2A2FC8D60020354D /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1742E4E2A2FC8D60020354D /* SplashView.swift */; };
 		C1742E512A3099550020354D /* Exercise.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1742E502A3099550020354D /* Exercise.swift */; };
 		C1742E532A309A0C0020354D /* WorkoutPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1742E522A309A0C0020354D /* WorkoutPlan.swift */; };
-		C1742E552A309EDE0020354D /* Set.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1742E542A309EDE0020354D /* Set.swift */; };
+		C1742E552A309EDE0020354D /* WorkoutSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1742E542A309EDE0020354D /* WorkoutSet.swift */; };
 		C1742E592A309FDC0020354D /* WorkoutDataSourceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1742E582A309FDC0020354D /* WorkoutDataSourceProtocol.swift */; };
 		C1742E5B2A30A0400020354D /* WorkoutCoreDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1742E5A2A30A0400020354D /* WorkoutCoreDataSource.swift */; };
 		C18FEDB12A76F926005519BE /* ListPlanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C18FEDB02A76F926005519BE /* ListPlanView.swift */; };
@@ -72,7 +72,7 @@
 		C1F34F902A38FB9D00233D66 /* CountDownView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C13C47C62A33B00C005C90AB /* CountDownView.swift */; };
 		C1F34F912A38FB9D00233D66 /* TimerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C13C47C32A33AB0B005C90AB /* TimerViewModel.swift */; };
 		C1F34F922A38FBBF00233D66 /* WorkoutPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1742E522A309A0C0020354D /* WorkoutPlan.swift */; };
-		C1F34F932A38FBBF00233D66 /* Set.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1742E542A309EDE0020354D /* Set.swift */; };
+		C1F34F932A38FBBF00233D66 /* WorkoutSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1742E542A309EDE0020354D /* WorkoutSet.swift */; };
 		C1F34F942A38FBBF00233D66 /* Exercise.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1742E502A3099550020354D /* Exercise.swift */; };
 		C1F34F952A38FBBF00233D66 /* Workout.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1742E452A2F31DA0020354D /* Workout.swift */; };
 		C1F34F962A38FC0A00233D66 /* WorkoutUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1742E472A2F31F00020354D /* WorkoutUseCase.swift */; };
@@ -170,7 +170,7 @@
 		C1742E4E2A2FC8D60020354D /* SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
 		C1742E502A3099550020354D /* Exercise.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Exercise.swift; sourceTree = "<group>"; };
 		C1742E522A309A0C0020354D /* WorkoutPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutPlan.swift; sourceTree = "<group>"; };
-		C1742E542A309EDE0020354D /* Set.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Set.swift; sourceTree = "<group>"; };
+		C1742E542A309EDE0020354D /* WorkoutSet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutSet.swift; sourceTree = "<group>"; };
 		C1742E582A309FDC0020354D /* WorkoutDataSourceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutDataSourceProtocol.swift; sourceTree = "<group>"; };
 		C1742E5A2A30A0400020354D /* WorkoutCoreDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutCoreDataSource.swift; sourceTree = "<group>"; };
 		C18FEDB02A76F926005519BE /* ListPlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListPlanView.swift; sourceTree = "<group>"; };
@@ -405,7 +405,7 @@
 				C1742E522A309A0C0020354D /* WorkoutPlan.swift */,
 				C1742E452A2F31DA0020354D /* Workout.swift */,
 				C1742E502A3099550020354D /* Exercise.swift */,
-				C1742E542A309EDE0020354D /* Set.swift */,
+				C1742E542A309EDE0020354D /* WorkoutSet.swift */,
 			);
 			path = Entities;
 			sourceTree = "<group>";
@@ -873,7 +873,7 @@
 				C1742E532A309A0C0020354D /* WorkoutPlan.swift in Sources */,
 				C1DE682B2A63F86F000DE4C8 /* NumberOfSeriesView.swift in Sources */,
 				C1F34FA22A38FC6D00233D66 /* ChronoView.swift in Sources */,
-				C1742E552A309EDE0020354D /* Set.swift in Sources */,
+				C1742E552A309EDE0020354D /* WorkoutSet.swift in Sources */,
 				C11B9F3A2A5C37B300FC656F /* TabbarView.swift in Sources */,
 				C155910A2A31D3E400E30886 /* HomeBuilder.swift in Sources */,
 				C192BF282A2A976C00982F33 /* microworkout.xcdatamodeld in Sources */,
@@ -949,7 +949,7 @@
 				C1F34F952A38FBBF00233D66 /* Workout.swift in Sources */,
 				C1F34F972A38FC1100233D66 /* WorkoutRepositoryProtocol.swift in Sources */,
 				C1F34FA52A38FC6D00233D66 /* ChronoViewModel.swift in Sources */,
-				C1F34F932A38FBBF00233D66 /* Set.swift in Sources */,
+				C1F34F932A38FBBF00233D66 /* WorkoutSet.swift in Sources */,
 				C1F34FA92A38FC6D00233D66 /* ChronoBuilder.swift in Sources */,
 				C1F34F642A38CD4300233D66 /* ContentView.swift in Sources */,
 				C1F34F622A38CD4300233D66 /* gymwatchApp.swift in Sources */,
@@ -1139,6 +1139,7 @@
 				DEVELOPMENT_TEAM = 96W3Z42U5V;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Obtenemos información de tu entrenamiento para registrarla y mejorar tus futuros entrenamientos";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -1171,6 +1172,7 @@
 				DEVELOPMENT_TEAM = 96W3Z42U5V;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Obtenemos información de tu entrenamiento para registrarla y mejorar tus futuros entrenamientos";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
