@@ -9,5 +9,6 @@ import Foundation
 
 protocol HealthKitViewModelProtocol: ObservableObject  {
     var workouts: [WorkoutPlan] { get set }
-    func load()
+    var beats: [Beat] { get set }
+    func load() async
 }

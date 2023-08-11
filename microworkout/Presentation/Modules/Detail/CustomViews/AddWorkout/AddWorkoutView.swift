@@ -304,12 +304,12 @@ struct AddWorkoutView: View {
                 if workout.set.exercise != .none {
                     set = workout.set
                 }
-            }.onChange(of: distancesValue) {
+            }.onChange(of: distancesValue, perform: { newValue in
                 set.distance = transformToInt(this: distancesValue)
-            }
-            .onChange(of: repsValue) {
+            })
+            .onChange(of: repsValue, perform: { newValue in
                 set.reps = transformToInt(this: repsValue)
-            }
+            })
     }
 
     func transformToInt(this value: String) -> Int {

@@ -17,7 +17,7 @@ struct TabbarView: View {
 
             HealthKitBuilder().build()
                 .tabItem {
-                    Label("Salud", systemImage: "health")
+                    Label("Salud", systemImage: "heart.fill")
                 }
 
             ProfileView()

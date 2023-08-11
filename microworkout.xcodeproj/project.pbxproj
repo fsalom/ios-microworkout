@@ -34,6 +34,10 @@
 		C1742E552A309EDE0020354D /* WorkoutSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1742E542A309EDE0020354D /* WorkoutSet.swift */; };
 		C1742E592A309FDC0020354D /* WorkoutDataSourceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1742E582A309FDC0020354D /* WorkoutDataSourceProtocol.swift */; };
 		C1742E5B2A30A0400020354D /* WorkoutCoreDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1742E5A2A30A0400020354D /* WorkoutCoreDataSource.swift */; };
+		C18F6F552A8160B700914A0A /* HeartBeatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C18F6F542A8160B700914A0A /* HeartBeatView.swift */; };
+		C18F6F572A8160CE00914A0A /* HeartBeatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C18F6F562A8160CE00914A0A /* HeartBeatViewModel.swift */; };
+		C18F6F592A8160DC00914A0A /* HeartBeatBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = C18F6F582A8160DC00914A0A /* HeartBeatBuilder.swift */; };
+		C18F6F632A83EAE000914A0A /* Beat.swift in Sources */ = {isa = PBXBuildFile; fileRef = C18F6F622A83EAE000914A0A /* Beat.swift */; };
 		C18FEDB12A76F926005519BE /* ListPlanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C18FEDB02A76F926005519BE /* ListPlanView.swift */; };
 		C18FEDB32A76F9A5005519BE /* ListPlanViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C18FEDB22A76F9A5005519BE /* ListPlanViewModel.swift */; };
 		C18FEDB52A779DE1005519BE /* ListPlanBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = C18FEDB42A779DE1005519BE /* ListPlanBuilder.swift */; };
@@ -173,6 +177,11 @@
 		C1742E542A309EDE0020354D /* WorkoutSet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutSet.swift; sourceTree = "<group>"; };
 		C1742E582A309FDC0020354D /* WorkoutDataSourceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutDataSourceProtocol.swift; sourceTree = "<group>"; };
 		C1742E5A2A30A0400020354D /* WorkoutCoreDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutCoreDataSource.swift; sourceTree = "<group>"; };
+		C18F6F542A8160B700914A0A /* HeartBeatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeartBeatView.swift; sourceTree = "<group>"; };
+		C18F6F562A8160CE00914A0A /* HeartBeatViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeartBeatViewModel.swift; sourceTree = "<group>"; };
+		C18F6F582A8160DC00914A0A /* HeartBeatBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeartBeatBuilder.swift; sourceTree = "<group>"; };
+		C18F6F5A2A822F7A00914A0A /* gymwatch Watch App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "gymwatch Watch App.entitlements"; sourceTree = "<group>"; };
+		C18F6F622A83EAE000914A0A /* Beat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Beat.swift; sourceTree = "<group>"; };
 		C18FEDB02A76F926005519BE /* ListPlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListPlanView.swift; sourceTree = "<group>"; };
 		C18FEDB22A76F9A5005519BE /* ListPlanViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListPlanViewModel.swift; sourceTree = "<group>"; };
 		C18FEDB42A779DE1005519BE /* ListPlanBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListPlanBuilder.swift; sourceTree = "<group>"; };
@@ -406,6 +415,7 @@
 				C1742E452A2F31DA0020354D /* Workout.swift */,
 				C1742E502A3099550020354D /* Exercise.swift */,
 				C1742E542A309EDE0020354D /* WorkoutSet.swift */,
+				C18F6F622A83EAE000914A0A /* Beat.swift */,
 			);
 			path = Entities;
 			sourceTree = "<group>";
@@ -454,6 +464,16 @@
 				C1742E5A2A30A0400020354D /* WorkoutCoreDataSource.swift */,
 			);
 			path = Datasource;
+			sourceTree = "<group>";
+		};
+		C18F6F532A81608700914A0A /* HeartBeat */ = {
+			isa = PBXGroup;
+			children = (
+				C18F6F542A8160B700914A0A /* HeartBeatView.swift */,
+				C18F6F562A8160CE00914A0A /* HeartBeatViewModel.swift */,
+				C18F6F582A8160DC00914A0A /* HeartBeatBuilder.swift */,
+			);
+			path = HeartBeat;
 			sourceTree = "<group>";
 		};
 		C18FEDAF2A76F90D005519BE /* List */ = {
@@ -588,6 +608,8 @@
 		C1F34F602A38CD4300233D66 /* gymwatch Watch App */ = {
 			isa = PBXGroup;
 			children = (
+				C18F6F5A2A822F7A00914A0A /* gymwatch Watch App.entitlements */,
+				C18F6F532A81608700914A0A /* HeartBeat */,
 				C18FEDB62A77A61F005519BE /* DetailWorkout */,
 				C18FEDAF2A76F90D005519BE /* List */,
 				C1F34F612A38CD4300233D66 /* gymwatchApp.swift */,
@@ -874,6 +896,7 @@
 				C1DE682B2A63F86F000DE4C8 /* NumberOfSeriesView.swift in Sources */,
 				C1F34FA22A38FC6D00233D66 /* ChronoView.swift in Sources */,
 				C1742E552A309EDE0020354D /* WorkoutSet.swift in Sources */,
+				C18F6F632A83EAE000914A0A /* Beat.swift in Sources */,
 				C11B9F3A2A5C37B300FC656F /* TabbarView.swift in Sources */,
 				C155910A2A31D3E400E30886 /* HomeBuilder.swift in Sources */,
 				C192BF282A2A976C00982F33 /* microworkout.xcdatamodeld in Sources */,
@@ -951,11 +974,14 @@
 				C1F34FA52A38FC6D00233D66 /* ChronoViewModel.swift in Sources */,
 				C1F34F932A38FBBF00233D66 /* WorkoutSet.swift in Sources */,
 				C1F34FA92A38FC6D00233D66 /* ChronoBuilder.swift in Sources */,
+				C18F6F552A8160B700914A0A /* HeartBeatView.swift in Sources */,
 				C1F34F642A38CD4300233D66 /* ContentView.swift in Sources */,
 				C1F34F622A38CD4300233D66 /* gymwatchApp.swift in Sources */,
 				C1F34F982A38FC1100233D66 /* WorkoutRepository.swift in Sources */,
 				C18FEDBB2A77A658005519BE /* DetailWorkoutViewModel.swift in Sources */,
+				C18F6F572A8160CE00914A0A /* HeartBeatViewModel.swift in Sources */,
 				C1F34F992A38FC1400233D66 /* WorkoutCoreDataSource.swift in Sources */,
+				C18F6F592A8160DC00914A0A /* HeartBeatBuilder.swift in Sources */,
 				C1F34FAB2A38FC6D00233D66 /* ChronoProtocols.swift in Sources */,
 				C1F34F8F2A38FB9D00233D66 /* TimerProtocols.swift in Sources */,
 				C18FEDB52A779DE1005519BE /* ListPlanBuilder.swift in Sources */,
@@ -1145,7 +1171,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1178,7 +1204,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1273,6 +1299,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "gymwatch Watch App/gymwatch Watch App.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"gymwatch Watch App/Preview Content\"";
@@ -1280,6 +1307,8 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = gymwatch;
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Solicitamos datos de salud para mejorar tus entrenamientos";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Solicitamos la actualización de información para mejorar tus entrenamientos";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = es.fernandosalom.microworkoutapp;
 				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = YES;
@@ -1304,6 +1333,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "gymwatch Watch App/gymwatch Watch App.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"gymwatch Watch App/Preview Content\"";
@@ -1311,6 +1341,8 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = gymwatch;
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Solicitamos datos de salud para mejorar tus entrenamientos";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Solicitamos la actualización de información para mejorar tus entrenamientos";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = es.fernandosalom.microworkoutapp;
 				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = YES;

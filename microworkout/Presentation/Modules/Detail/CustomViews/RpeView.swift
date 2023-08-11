@@ -22,7 +22,6 @@ struct RpeView: View {
                 .font(.footnote)
                 .fontWeight(.bold)
                 .frame(width: 28)
-                .contentMargins(10)
                 .background(.white)
                 .clipShape(RoundedRectangle(cornerRadius: 4))
                 .padding(10)
@@ -43,6 +42,4 @@ struct RpeView: View {
     }
 }
 
-#Preview {
-    RpeView(rpe: 6.5)
-}
+

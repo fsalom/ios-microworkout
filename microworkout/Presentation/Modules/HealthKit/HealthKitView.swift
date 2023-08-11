@@ -6,11 +6,24 @@
 //
 
 import SwiftUI
+import Charts
 
 struct HealthKitView: View {
     @ObservedObject var viewModel: HealthKitViewModel
 
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        VStack {
+
+            Chart(viewModel.beats) { beat in
+                BarMark(
+                    x: .value("Category", beat.start),
+                    y: .value("Value", beat.value)
+                )
+            }
+            Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        }.task {
+            await viewModel.load()
+        }
+
     }
 }

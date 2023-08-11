@@ -21,22 +21,17 @@ class HeartBeatViewModel: ObservableObject {
     func autorizeHealthKit() {
         let healthKitTypes: Set = [
             HKObjectType.quantityType(forIdentifier: HKQuantityTypeIdentifier.heartRate)!]
-        
-        healthStore.requestAuthorization(toShare: healthKitTypes, read: healthKitTypes) { x, y in
-            print(x)
-            print(y)
+
+        healthStore.requestAuthorization(toShare: healthKitTypes, read: healthKitTypes) { hasAuthorization, error in
+            print(hasAuthorization)
+            print(error)
         }
     }
     
     private func startHeartRateQuery(quantityTypeIdentifier: HKQuantityTypeIdentifier) {
-        
-        // 1
         let devicePredicate = HKQuery.predicateForObjects(from: [HKDevice.local()])
-        // 2
         let updateHandler: (HKAnchoredObjectQuery, [HKSample]?, [HKDeletedObject]?, HKQueryAnchor?, Error?) -> Void = {
             query, samples, deletedObjects, queryAnchor, error in
-            
-            // 3
             guard let samples = samples as? [HKQuantitySample] else {
                 return
             }
@@ -45,14 +40,12 @@ class HeartBeatViewModel: ObservableObject {
             }
             
         }
-        
-        // 4
-        let query = HKAnchoredObjectQuery(type: HKObjectType.quantityType(forIdentifier: quantityTypeIdentifier)!, predicate: devicePredicate, anchor: nil, limit: HKObjectQueryNoLimit, resultsHandler: updateHandler)
-        
+        let query = HKAnchoredObjectQuery(type: HKObjectType.quantityType(forIdentifier: quantityTypeIdentifier)!,
+                                          predicate: devicePredicate,
+                                          anchor: nil,
+                                          limit: HKObjectQueryNoLimit,
+                                          resultsHandler: updateHandler)
         query.updateHandler = updateHandler
-        
-        // 5
-        
         healthStore.execute(query)
     }
     

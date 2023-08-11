@@ -53,7 +53,3 @@ struct CustomSlider: View {
         }.padding(16)
     }
 }
-
-#Preview {
-    CustomSlider(weight: 80.0)
-}
