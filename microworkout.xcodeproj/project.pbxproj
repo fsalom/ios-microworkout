@@ -57,6 +57,7 @@
 		C19788C82A7EDF160031648B /* HealthKitViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C19788C72A7EDF160031648B /* HealthKitViewModel.swift */; };
 		C19788CA2A7EDF390031648B /* HealthKitBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = C19788C92A7EDF390031648B /* HealthKitBuilder.swift */; };
 		C19788CC2A7EDF4D0031648B /* HealthKitProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = C19788CB2A7EDF4D0031648B /* HealthKitProtocols.swift */; };
+		C1A230412B0A95BC00E10FCF /* WorkoutUseCaseProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1762ACE2B0A913F0035318F /* WorkoutUseCaseProtocol.swift */; };
 		C1A85E142A6AA43C005EC274 /* Int.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A85E132A6AA43C005EC274 /* Int.swift */; };
 		C1A953142A5D4B3900A2A010 /* AddWorkoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A953132A5D4B3900A2A010 /* AddWorkoutView.swift */; };
 		C1A953192A5D571D00A2A010 /* Float+CGFloat.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A953182A5D571D00A2A010 /* Float+CGFloat.swift */; };
@@ -977,6 +978,7 @@
 				C1F34F922A38FBBF00233D66 /* WorkoutPlan.swift in Sources */,
 				C1F34F8E2A38FB9D00233D66 /* TimerBuilder.swift in Sources */,
 				C18FEDB32A76F9A5005519BE /* ListPlanViewModel.swift in Sources */,
+				C1A230412B0A95BC00E10FCF /* WorkoutUseCaseProtocol.swift in Sources */,
 				C1F34F902A38FB9D00233D66 /* CountDownView.swift in Sources */,
 				C1F34F942A38FBBF00233D66 /* Exercise.swift in Sources */,
 				C18FEDB12A76F926005519BE /* ListPlanView.swift in Sources */,
