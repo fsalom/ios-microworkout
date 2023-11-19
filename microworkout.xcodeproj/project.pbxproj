@@ -34,6 +34,7 @@
 		C1742E552A309EDE0020354D /* WorkoutSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1742E542A309EDE0020354D /* WorkoutSet.swift */; };
 		C1742E592A309FDC0020354D /* WorkoutDataSourceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1742E582A309FDC0020354D /* WorkoutDataSourceProtocol.swift */; };
 		C1742E5B2A30A0400020354D /* WorkoutCoreDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1742E5A2A30A0400020354D /* WorkoutCoreDataSource.swift */; };
+		C1762ACF2B0A913F0035318F /* WorkoutUseCaseProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1762ACE2B0A913F0035318F /* WorkoutUseCaseProtocol.swift */; };
 		C18F6F552A8160B700914A0A /* HeartBeatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C18F6F542A8160B700914A0A /* HeartBeatView.swift */; };
 		C18F6F572A8160CE00914A0A /* HeartBeatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C18F6F562A8160CE00914A0A /* HeartBeatViewModel.swift */; };
 		C18F6F592A8160DC00914A0A /* HeartBeatBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = C18F6F582A8160DC00914A0A /* HeartBeatBuilder.swift */; };
@@ -177,6 +178,7 @@
 		C1742E542A309EDE0020354D /* WorkoutSet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutSet.swift; sourceTree = "<group>"; };
 		C1742E582A309FDC0020354D /* WorkoutDataSourceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutDataSourceProtocol.swift; sourceTree = "<group>"; };
 		C1742E5A2A30A0400020354D /* WorkoutCoreDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutCoreDataSource.swift; sourceTree = "<group>"; };
+		C1762ACE2B0A913F0035318F /* WorkoutUseCaseProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutUseCaseProtocol.swift; sourceTree = "<group>"; };
 		C18F6F542A8160B700914A0A /* HeartBeatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeartBeatView.swift; sourceTree = "<group>"; };
 		C18F6F562A8160CE00914A0A /* HeartBeatViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeartBeatViewModel.swift; sourceTree = "<group>"; };
 		C18F6F582A8160DC00914A0A /* HeartBeatBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeartBeatBuilder.swift; sourceTree = "<group>"; };
@@ -403,7 +405,7 @@
 		C1742E432A2F31A50020354D /* UseCases */ = {
 			isa = PBXGroup;
 			children = (
-				C1742E472A2F31F00020354D /* WorkoutUseCase.swift */,
+				C1762ACD2B0A912D0035318F /* Workout */,
 			);
 			path = UseCases;
 			sourceTree = "<group>";
@@ -464,6 +466,15 @@
 				C1742E5A2A30A0400020354D /* WorkoutCoreDataSource.swift */,
 			);
 			path = Datasource;
+			sourceTree = "<group>";
+		};
+		C1762ACD2B0A912D0035318F /* Workout */ = {
+			isa = PBXGroup;
+			children = (
+				C1742E472A2F31F00020354D /* WorkoutUseCase.swift */,
+				C1762ACE2B0A913F0035318F /* WorkoutUseCaseProtocol.swift */,
+			);
+			path = Workout;
 			sourceTree = "<group>";
 		};
 		C18F6F532A81608700914A0A /* HeartBeat */ = {
@@ -915,6 +926,7 @@
 				C1F34FA82A38FC6D00233D66 /* ChronoBuilder.swift in Sources */,
 				C1CF26BB2A5DDAA800521884 /* CustomSlider.swift in Sources */,
 				C192BF1C2A2A976A00982F33 /* microworkoutApp.swift in Sources */,
+				C1762ACF2B0A913F0035318F /* WorkoutUseCaseProtocol.swift in Sources */,
 				C1DE682D2A63FC83000DE4C8 /* RpeView.swift in Sources */,
 				C1A953142A5D4B3900A2A010 /* AddWorkoutView.swift in Sources */,
 				C1742E5B2A30A0400020354D /* WorkoutCoreDataSource.swift in Sources */,
@@ -1303,7 +1315,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"gymwatch Watch App/Preview Content\"";
-				DEVELOPMENT_TEAM = 96W3Z42U5V;
+				DEVELOPMENT_TEAM = 3BJD5A7BSQ;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = gymwatch;
@@ -1337,7 +1349,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"gymwatch Watch App/Preview Content\"";
-				DEVELOPMENT_TEAM = 96W3Z42U5V;
+				DEVELOPMENT_TEAM = 3BJD5A7BSQ;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = gymwatch;
