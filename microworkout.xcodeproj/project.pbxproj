@@ -342,6 +342,32 @@
 			path = CustomViews;
 			sourceTree = "<group>";
 		};
+		C15DC9452B0CBA5700F408B7 /* Workout */ = {
+			isa = PBXGroup;
+			children = (
+				C1742E582A309FDC0020354D /* WorkoutDataSourceProtocol.swift */,
+				C15DC9462B0CBA6300F408B7 /* Remote */,
+			);
+			path = Workout;
+			sourceTree = "<group>";
+		};
+		C15DC9462B0CBA6300F408B7 /* Remote */ = {
+			isa = PBXGroup;
+			children = (
+				C1742E5A2A30A0400020354D /* WorkoutCoreDataSource.swift */,
+			);
+			path = Remote;
+			sourceTree = "<group>";
+		};
+		C15DC9472B0CBA9200F408B7 /* Workout */ = {
+			isa = PBXGroup;
+			children = (
+				C15590FC2A31CB1C00E30886 /* WorkoutRepositoryProtocol.swift */,
+				C15590FE2A31CB2A00E30886 /* WorkoutRepository.swift */,
+			);
+			path = Workout;
+			sourceTree = "<group>";
+		};
 		C1742E3D2A2F31360020354D /* Data */ = {
 			isa = PBXGroup;
 			children = (
@@ -454,8 +480,7 @@
 		C1742E562A309FC50020354D /* Repository */ = {
 			isa = PBXGroup;
 			children = (
-				C15590FC2A31CB1C00E30886 /* WorkoutRepositoryProtocol.swift */,
-				C15590FE2A31CB2A00E30886 /* WorkoutRepository.swift */,
+				C15DC9472B0CBA9200F408B7 /* Workout */,
 			);
 			path = Repository;
 			sourceTree = "<group>";
@@ -463,8 +488,7 @@
 		C1742E572A309FCA0020354D /* Datasource */ = {
 			isa = PBXGroup;
 			children = (
-				C1742E582A309FDC0020354D /* WorkoutDataSourceProtocol.swift */,
-				C1742E5A2A30A0400020354D /* WorkoutCoreDataSource.swift */,
+				C15DC9452B0CBA5700F408B7 /* Workout */,
 			);
 			path = Datasource;
 			sourceTree = "<group>";
@@ -1176,7 +1200,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"microworkout/Preview Content\"";
-				DEVELOPMENT_TEAM = 96W3Z42U5V;
+				DEVELOPMENT_TEAM = 3BJD5A7BSQ;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Obtenemos información de tu entrenamiento para registrarla y mejorar tus futuros entrenamientos";
@@ -1209,7 +1233,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"microworkout/Preview Content\"";
-				DEVELOPMENT_TEAM = 96W3Z42U5V;
+				DEVELOPMENT_TEAM = 3BJD5A7BSQ;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Obtenemos información de tu entrenamiento para registrarla y mejorar tus futuros entrenamientos";
