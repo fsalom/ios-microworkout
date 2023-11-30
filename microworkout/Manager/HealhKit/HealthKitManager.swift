@@ -64,6 +64,7 @@ class HealthKitManager: HealthKitManagerProtocol {
     }
 
     func log() {
+        /*
         for sample in samples {
             print("[\(sample)]")
             print("Heart Rate: \(sample.quantity.doubleValue(for: self.heartRateUnit))")
@@ -76,5 +77,6 @@ class HealthKitManager: HealthKitManagerProtocol {
             print("Device: \(sample.device)")
             print("---------------------------------\n")
         }
+         */
     }
 }

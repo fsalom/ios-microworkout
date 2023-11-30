@@ -11,8 +11,8 @@ import SwiftUI
 struct gymwatch_Watch_AppApp: App {
     var body: some Scene {
         WindowGroup {
-            HeartBeatBuilder().build()
-            //ListPlanBuilder().build()
+            //HeartBeatBuilder().build()
+            ListPlanBuilder().build()
             /*
             TimerBuilder().build(this: Workout(exercise: Exercise(name: "example",
                                                                   type: .distance),
