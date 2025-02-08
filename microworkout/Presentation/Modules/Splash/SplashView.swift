@@ -13,7 +13,7 @@ struct SplashView: View {
 
     var body: some View {
         if self.isActive {
-            TabbarView()
+            
         } else {
             ZStack {
                 Color.white
