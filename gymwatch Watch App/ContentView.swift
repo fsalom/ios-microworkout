@@ -1,23 +1,20 @@
-//
-//  ContentView.swift
-//  gymwatch Watch App
-//
-//  Created by Fernando Salom Carratala on 13/6/23.
-//
-
 import SwiftUI
 
 struct ContentView: View {
-    var body: some View {
-        VStack {
-           
+    @State var navigator: NavigatorProtocol
+    let rootTransition: AnyTransition = .opacity
+
+    public init(navigator: NavigatorProtocol = Navigator.shared, root: any View) {
+        self.navigator = navigator
+        navigator.initialize(root: root)
+    }
+
+    public var body: some View {
+        ZStack {
+            if let root = navigator.root {
+                root
+            }
         }
-        .padding()
     }
 }
 
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
-    }
-}
