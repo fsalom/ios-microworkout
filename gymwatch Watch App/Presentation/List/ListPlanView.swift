@@ -11,16 +11,14 @@ struct ListPlanView: View {
     @ObservedObject var viewModel: ListPlanViewModel
 
     var body: some View {
-        NavigationStack {
-            List {
-                ForEach(viewModel.workouts) { workout in
-                    NavigationLink {
-                        DetailWorkoutBuilder().build(with: workout)
-                    } label: {
-                        VStack {
-                            Text(workout.name)
-                            Text("otro")
-                        }
+        List {
+            ForEach(viewModel.workouts) { workout in
+                NavigationLink {
+                    DetailWorkoutBuilder().build(with: workout)
+                } label: {
+                    VStack {
+                        Text(workout.name)
+                        Text("otro")
                     }
                 }
             }
