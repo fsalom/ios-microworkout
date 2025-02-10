@@ -13,7 +13,8 @@ final class MenuViewModel: ObservableObject {
     private func loadMenuItems() {
         self.menuOptions = [
             MenuItem(title: "Home", destination: .home),
-            MenuItem(title: "ML de Squats ", destination: .squatDataCollector),
+            MenuItem(title: "ML de Squats", destination: .squatDataCollector),
+            MenuItem(title: "Microworkout", destination: .microworkout),
         ]
     }
 
