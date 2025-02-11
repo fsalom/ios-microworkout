@@ -11,6 +11,8 @@ class MenuRouter {
             navigator.push(to: ListPlanBuilder().build())
         case .squatDataCollector:
             navigator.push(to: SquatDataCollectorView())
+        case .microworkout:
+            navigator.push(to: SquatDataCollectorView())
         }
     }
 }
