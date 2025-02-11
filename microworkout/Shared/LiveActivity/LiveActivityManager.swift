@@ -21,7 +21,7 @@ final class LiveActivityManager: ObservableObject {
     var timer: Timer?
 
     func startUpdatingLiveActivity() {
-        guard let _ = Activity<rudowidgetAttributes>.activities.first else { return }
+        guard let _ = Activity<GymWidgetAttributes>.activities.first else { return }
 
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
             self.updateCurrentActivity()
@@ -36,11 +36,11 @@ final class LiveActivityManager: ObservableObject {
     func updateCurrentActivity() {
         Task {
             guard let activityID = await activityID,
-                  let runningActivity = Activity<rudowidgetAttributes>.activities.first(where: { $0.id == activityID }) else {
+                  let runningActivity = Activity<GymWidgetAttributes>.activities.first(where: { $0.id == activityID }) else {
                 return
             }
 
-            let update = rudowidgetAttributes.ContentState()
+            let update = GymWidgetAttributes.ContentState()
 
             let staleDate = Date(timeIntervalSinceNow: 60 * 2)
             await runningActivity.update(ActivityContent(state: update, staleDate: staleDate))
@@ -50,11 +50,11 @@ final class LiveActivityManager: ObservableObject {
     func endActivity() {
         Task {
             guard let activityID = await activityID,
-                  let runningActivity = Activity<rudowidgetAttributes>.activities.first(where: { $0.id == activityID }) else {
+                  let runningActivity = Activity<GymWidgetAttributes>.activities.first(where: { $0.id == activityID }) else {
                 return
             }
 
-            let endContent = rudowidgetAttributes.ContentState()
+            let endContent = GymWidgetAttributes.ContentState()
             await runningActivity.end(
                 ActivityContent(state: endContent, staleDate: Date.distantFuture),
                 dismissalPolicy: .immediate
@@ -67,8 +67,8 @@ final class LiveActivityManager: ObservableObject {
     // MARK: Private Methods
 
     func cancelAllRunningActivities() async {
-        for activity in Activity<rudowidgetAttributes>.activities {
-            let endState = rudowidgetAttributes.ContentState()
+        for activity in Activity<GymWidgetAttributes>.activities {
+            let endState = GymWidgetAttributes.ContentState()
             await activity.end(
                 ActivityContent(state: endState, staleDate: Date()),
                 dismissalPolicy: .immediate
@@ -81,12 +81,12 @@ final class LiveActivityManager: ObservableObject {
     }
 
     private func startActivity(with startDate: Date) async {
-        let content = rudowidgetAttributes.ContentState()
+        let content = GymWidgetAttributes.ContentState()
         let staleDate = Date(timeIntervalSinceNow: 1)
 
         do {
             let activity = try Activity.request(
-                attributes: rudowidgetAttributes(startDate: startDate),
+                attributes: GymWidgetAttributes(startDate: startDate),
                 content: ActivityContent(
                     state: content,
                     staleDate: staleDate,
