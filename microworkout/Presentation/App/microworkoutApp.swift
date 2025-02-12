@@ -1,11 +1,11 @@
 import SwiftUI
 
 @main
-struct microworkoutApp: App {
+struct MicroWorkoutApp: App {
 
     var body: some Scene {
-        WindowGroup {            
-            SplashView()
+        WindowGroup {
+            RootView(root: TrainingListBuilder().build())
         }
     }
 }
