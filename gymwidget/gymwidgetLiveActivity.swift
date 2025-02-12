@@ -9,72 +9,77 @@ import ActivityKit
 import WidgetKit
 import SwiftUI
 
-struct gymwidgetAttributes: ActivityAttributes {
+struct GymWidgetAttributes: ActivityAttributes {
     public struct ContentState: Codable, Hashable {
         // Dynamic stateful properties about your activity go here!
-        var emoji: String
     }
 
     // Fixed non-changing properties about your activity go here!
-    var name: String
+    var startDate: Date
 }
 
-struct gymwidgetLiveActivity: Widget {
+struct LiveActivityWidget: Widget {
     var body: some WidgetConfiguration {
-        ActivityConfiguration(for: gymwidgetAttributes.self) { context in
-            // Lock screen/banner UI goes here
-            VStack {
-                Text("Hello \(context.state.emoji)")
+        ActivityConfiguration(for: GymWidgetAttributes.self)     { context in
+            VStack(alignment: .center, spacing: 0) {
+                HStack {
+                    Image(systemName: "arrow.triangle.2.circlepath")
+                        .resizable()
+                        .frame(width: 25, height: 25)
+                        .clipShape(Circle())
+                    Text("Este es el tiempo que llevas fuera:")
+                        .font(.system(size: 14, weight: .regular))
+                        .foregroundStyle(.white)
+                    Spacer()
+                }
+                Text(context.attributes.startDate, style: .timer)
+                    .font(.system(size: 40, weight: .bold, design: .monospaced))
+                    .foregroundStyle(.white)
+                    .multilineTextAlignment(.center)
+                    .frame(minWidth: 0, maxWidth: .infinity)
             }
-            .activityBackgroundTint(Color.cyan)
-            .activitySystemActionForegroundColor(Color.black)
-
+            .padding()
+            .activityBackgroundTint(.black)
+            .activitySystemActionForegroundColor(Color.white)
         } dynamicIsland: { context in
             DynamicIsland {
-                // Expanded UI goes here.  Compose the expanded UI through
-                // various regions, like leading/trailing/center/bottom
                 DynamicIslandExpandedRegion(.leading) {
-                    Text("Leading")
+                    EmptyView()
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    Text("Trailing")
+                    EmptyView()
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    Text("Bottom \(context.state.emoji)")
-                    // more content
+                    Text(context.attributes.startDate, style: .timer)
+                        .font(.system(size: 40, weight: .bold, design: .monospaced))
+                        .foregroundStyle(.white)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: .infinity)
                 }
             } compactLeading: {
-                Text("L")
+                Image(systemName: "arrow.triangle.2.circlepath")
+                    .resizable()
+
+                    .frame(width: 20, height: 20)
+                    .clipShape(Circle())
             } compactTrailing: {
-                Text("T \(context.state.emoji)")
+                Text(context.attributes.startDate, style: .timer)
+                    .frame(width: 46)
             } minimal: {
-                Text(context.state.emoji)
+                Image(systemName: "arrow.triangle.2.circlepath")
+                    .resizable()
+                    .renderingMode(.template)
+                    .foregroundColor(.orange)
+                    .frame(width: 20, height: 20)
+                    .clipShape(Circle())
             }
-            .widgetURL(URL(string: "http://www.apple.com"))
             .keylineTint(Color.red)
         }
     }
 }
 
-extension gymwidgetAttributes {
-    fileprivate static var preview: gymwidgetAttributes {
-        gymwidgetAttributes(name: "World")
-    }
-}
-
-extension gymwidgetAttributes.ContentState {
-    fileprivate static var smiley: gymwidgetAttributes.ContentState {
-        gymwidgetAttributes.ContentState(emoji: "😀")
-     }
-     
-     fileprivate static var starEyes: gymwidgetAttributes.ContentState {
-         gymwidgetAttributes.ContentState(emoji: "🤩")
-     }
-}
-
-#Preview("Notification", as: .content, using: gymwidgetAttributes.preview) {
-   gymwidgetLiveActivity()
+#Preview("Notification", as: .content, using: GymWidgetAttributes.init(startDate: .now)) {
+    LiveActivityWidget()
 } contentStates: {
-    gymwidgetAttributes.ContentState.smiley
-    gymwidgetAttributes.ContentState.starEyes
+    GymWidgetAttributes.ContentState.init()
 }
