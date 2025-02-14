@@ -1,8 +1,8 @@
 import SwiftUI
 
 struct DynamicGridView: View {
-    @State private var columnCount: Int
-    @State private var rowCount: Int
+    @State var columnCount: Int
+    @State var rowCount: Int
     @State private var selection: Int = 0
 
     private let colors: [Color] = [.red, .blue, .green, .yellow, .orange, .purple, .pink, .gray, .cyan]
