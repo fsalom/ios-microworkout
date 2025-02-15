@@ -8,6 +8,6 @@ class TrainingListRouter {
     }
 
     func goToWorkoutList() {
-        navigator.push(to: TrainingDetailBuilder().build())
+        navigator.push(to: TrackingDayBuilder().build())
     }
 }
