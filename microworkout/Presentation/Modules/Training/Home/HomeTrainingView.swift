@@ -7,8 +7,8 @@
 
 import SwiftUI
 
-struct HomeView: View {
-    @ObservedObject var viewModel: HomeViewModel
+struct HomeTrainingView: View {
+    @ObservedObject var viewModel: HomeTrainingViewModel
     var body: some View {
         NavigationView {
             ScrollView {
@@ -54,9 +54,9 @@ struct HomeView: View {
     }
 }
 
-struct HomeView_Previews: PreviewProvider {
+struct HomeTrainingView_Previews: PreviewProvider {
     static var previews: some View {
         let useCase = WorkoutUseCase()
-        HomeView(viewModel: HomeViewModel(useCase: useCase))
+        HomeTrainingView(viewModel: HomeTrainingViewModel(useCase: useCase))
     }
 }

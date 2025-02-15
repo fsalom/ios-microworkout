@@ -8,7 +8,7 @@
 import Foundation
 import HealthKit
 
-class HomeViewModel: ObservableObject, HomeViewModelProtocol {
+class HomeTrainingViewModel: ObservableObject, HomeTrainingViewModelProtocol {
     @Published var workouts: [WorkoutPlan]
 
     var useCase: WorkoutUseCaseProtocol!

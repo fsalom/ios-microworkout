@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol HomeViewModelProtocol: ObservableObject  {
+protocol HomeTrainingViewModelProtocol: ObservableObject  {
     var workouts: [WorkoutPlan] { get set }
     func load()
 }
