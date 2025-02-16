@@ -37,7 +37,6 @@ struct DynamicGridView: View {
                 }
             }
         }
-        .padding()
         .animation(.default, value: columnCount)
         .animation(.default, value: rowCount)
     }
