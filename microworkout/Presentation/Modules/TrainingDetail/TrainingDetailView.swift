@@ -6,6 +6,9 @@ struct TrainingDetailView: View {
 
     var body: some View {
         Text("To be implemented")
+        SliderView(onFinish: {
+
+        }, isWaitingResponse: false)
     }
 }
 
