@@ -22,6 +22,8 @@ struct RootView: View {
                 StackView(root: {
                     root
                 })
+                .navigationBarBackButtonHidden(false)
+                .tint(.black)
             }
         }
     }
