@@ -20,4 +20,9 @@ struct Training: Identifiable {
         get { Double(numberOfReps) }
         set { numberOfReps = Int(newValue) }
     }
+    var numberOfMinutesPerSet: Int
+    var numberOfMinutesPerSetForSlider: Double {
+        get { Double(numberOfMinutesPerSet) }
+        set { numberOfMinutesPerSet = Int(newValue) }
+    }
 }
