@@ -7,7 +7,7 @@ class TrainingListRouter {
         self.navigator = navigator
     }
 
-    func goToWorkoutList() {
-        navigator.push(to: TrackingDayBuilder().build())
+    func goTo(_ training: Training) {
+        navigator.push(to: TrainingDetailBuilder().build(this: training))
     }
 }

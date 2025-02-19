@@ -11,8 +11,8 @@ struct Training: Identifiable {
     var image: String
     var type: TrainingType
     var numberOfSets: Int
-    var numberOfSetsForSlider: CGFloat {
-        get { CGFloat(numberOfSets) }
+    var numberOfSetsForSlider: Double {
+        get { Double(numberOfSets) }
         set { numberOfSets = Int(newValue) }
     }
     var numberOfReps: Int

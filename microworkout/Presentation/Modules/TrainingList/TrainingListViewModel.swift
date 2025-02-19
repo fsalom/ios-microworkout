@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUICore
 
 final class TrainingListViewModel: ObservableObject {
     enum TypeOfList {
@@ -8,6 +9,7 @@ final class TrainingListViewModel: ObservableObject {
 
     @Published var trainings: [Training] = []
     @Published var typeOfList: TypeOfList = .horizontal
+    @Published var selectedTraining: Training = .init(name: "", image: "", type: .strength, numberOfSets: 0, numberOfReps: 0)
 
     private var router: TrainingListRouter
     
@@ -30,8 +32,8 @@ final class TrainingListViewModel: ObservableObject {
         }
     }
 
-    func goToWorkout() {
-        router.goToWorkoutList()
+    func goTo(_ training: Training) {
+        router.goTo(training)
     }
 
     func changeListType() {
