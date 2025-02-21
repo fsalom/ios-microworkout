@@ -32,8 +32,8 @@ final class TrainingListViewModel: ObservableObject {
         }
     }
 
-    func goTo(_ training: Training) {
-        router.goTo(training)
+    func goTo(_ training: Training, and namespace: Namespace.ID) {
+        router.goTo(training, and: namespace)
     }
 
     func changeListType() {
