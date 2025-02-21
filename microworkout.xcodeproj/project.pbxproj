@@ -9,6 +9,11 @@
 /* Begin PBXBuildFile section */
 		C11B9F372A5C372100FC656F /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C11B9F362A5C372100FC656F /* ProfileView.swift */; };
 		C11B9F3A2A5C37B300FC656F /* TabbarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C11B9F392A5C37B300FC656F /* TabbarView.swift */; };
+		C12315AC2D68CD3000802707 /* TrainingListV2View.swift in Sources */ = {isa = PBXBuildFile; fileRef = C12315A92D68CD3000802707 /* TrainingListV2View.swift */; };
+		C12315AD2D68CD3000802707 /* TrainingListV2Builder.swift in Sources */ = {isa = PBXBuildFile; fileRef = C12315A72D68CD3000802707 /* TrainingListV2Builder.swift */; };
+		C12315AE2D68CD3000802707 /* TrainingListV2Router.swift in Sources */ = {isa = PBXBuildFile; fileRef = C12315A82D68CD3000802707 /* TrainingListV2Router.swift */; };
+		C12315AF2D68CD3000802707 /* TrainingListV2ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C12315AA2D68CD3000802707 /* TrainingListV2ViewModel.swift */; };
+		C12315B12D68D36C00802707 /* DetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C12315B02D68D36C00802707 /* DetailView.swift */; };
 		C13C47BE2A33AAE5005C90AB /* TimerBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = C13C47BD2A33AAE5005C90AB /* TimerBuilder.swift */; };
 		C13C47C02A33AAF0005C90AB /* TimerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C13C47BF2A33AAF0005C90AB /* TimerView.swift */; };
 		C13C47C22A33AB00005C90AB /* TimerProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = C13C47C12A33AB00005C90AB /* TimerProtocols.swift */; };
@@ -252,6 +257,11 @@
 		C11B9F342A5845BE00FC656F /* microworkout.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = microworkout.entitlements; sourceTree = "<group>"; };
 		C11B9F362A5C372100FC656F /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		C11B9F392A5C37B300FC656F /* TabbarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabbarView.swift; sourceTree = "<group>"; };
+		C12315A72D68CD3000802707 /* TrainingListV2Builder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingListV2Builder.swift; sourceTree = "<group>"; };
+		C12315A82D68CD3000802707 /* TrainingListV2Router.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingListV2Router.swift; sourceTree = "<group>"; };
+		C12315A92D68CD3000802707 /* TrainingListV2View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingListV2View.swift; sourceTree = "<group>"; };
+		C12315AA2D68CD3000802707 /* TrainingListV2ViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingListV2ViewModel.swift; sourceTree = "<group>"; };
+		C12315B02D68D36C00802707 /* DetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailView.swift; sourceTree = "<group>"; };
 		C13C47BD2A33AAE5005C90AB /* TimerBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerBuilder.swift; sourceTree = "<group>"; };
 		C13C47BF2A33AAF0005C90AB /* TimerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerView.swift; sourceTree = "<group>"; };
 		C13C47C12A33AB00005C90AB /* TimerProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerProtocols.swift; sourceTree = "<group>"; };
@@ -487,6 +497,17 @@
 			path = Tabbar;
 			sourceTree = "<group>";
 		};
+		C12315AB2D68CD3000802707 /* TrainingV2List */ = {
+			isa = PBXGroup;
+			children = (
+				C12315A72D68CD3000802707 /* TrainingListV2Builder.swift */,
+				C12315A82D68CD3000802707 /* TrainingListV2Router.swift */,
+				C12315A92D68CD3000802707 /* TrainingListV2View.swift */,
+				C12315AA2D68CD3000802707 /* TrainingListV2ViewModel.swift */,
+			);
+			path = TrainingV2List;
+			sourceTree = "<group>";
+		};
 		C13C47BC2A33AAD5005C90AB /* Timer */ = {
 			isa = PBXGroup;
 			children = (
@@ -716,6 +737,7 @@
 		C1742E412A2F317C0020354D /* Modules */ = {
 			isa = PBXGroup;
 			children = (
+				C12315AB2D68CD3000802707 /* TrainingV2List */,
 				C1B670DA2D5FD69E005E9173 /* Home */,
 				C19D17FB2D5DF82F000CCCEF /* TrackingDay */,
 				C19D17F22D5DE508000CCCEF /* TrainingDetail */,
@@ -1127,6 +1149,7 @@
 		C19D18022D5DFB28000CCCEF /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				C12315B02D68D36C00802707 /* DetailView.swift */,
 				C154B26C2D63BE5800B2A89F /* SliderView.swift */,
 				C19D18032D5DFB2E000CCCEF /* DynamicGridView.swift */,
 				C1CF26BA2A5DDAA800521884 /* CustomSlider.swift */,
@@ -1533,6 +1556,7 @@
 				C183FEAC2D57D8B2009EE8B5 /* Navigator.swift in Sources */,
 				C183FEAD2D57D8B2009EE8B5 /* StackView.swift in Sources */,
 				C183FEAE2D57D8B2009EE8B5 /* ConfirmationDialogConfig.swift in Sources */,
+				C12315B12D68D36C00802707 /* DetailView.swift in Sources */,
 				C183FEAF2D57D8B2009EE8B5 /* NavigatorProtocol.swift in Sources */,
 				C183FEB02D57D8B2009EE8B5 /* AlertConfig.swift in Sources */,
 				C1F34FA62A38FC6D00233D66 /* ChronoTimerView.swift in Sources */,
@@ -1560,6 +1584,10 @@
 				C1CF26BB2A5DDAA800521884 /* CustomSlider.swift in Sources */,
 				C162D66B2B0E176800CDCA26 /* HealthRepositoryProtocol.swift in Sources */,
 				C192BF1C2A2A976A00982F33 /* MicroWorkoutApp.swift in Sources */,
+				C12315AC2D68CD3000802707 /* TrainingListV2View.swift in Sources */,
+				C12315AD2D68CD3000802707 /* TrainingListV2Builder.swift in Sources */,
+				C12315AE2D68CD3000802707 /* TrainingListV2Router.swift in Sources */,
+				C12315AF2D68CD3000802707 /* TrainingListV2ViewModel.swift in Sources */,
 				C16D03E52B18A2540014F906 /* WorkoutPlanModel.swift in Sources */,
 				C183FEBC2D57DB2B009EE8B5 /* ToastView.swift in Sources */,
 				C162D6752B0E236600CDCA26 /* HealthKit.swift in Sources */,
