@@ -4,45 +4,55 @@ struct DetailView: View {
     var animation: Namespace.ID
     @Binding var showDetail: Bool
     @Binding var training: Training
+    @State var hasTrainingStarted: Bool = false
 
     var body: some View {
-        VStack{
-            ZStack(alignment: .top) {
-                GeometryReader { geometry in
-                    Image(training.image)
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: geometry.size.width, height: 300)
-                        .matchedGeometryEffect(id: training.image, in: animation, isSource: showDetail)
-                        .clipShape(RoundedRectangle(cornerRadius: 20.0)) // Aplica el redondeo correctamente
+        if hasTrainingStarted {
+            CurrentTrainingView(isPresented: $hasTrainingStarted, training: $training, animation: animation)
+        } else {
+            VStack{
+                ZStack(alignment: .top) {
+                    GeometryReader { geometry in
+                        Image(training.image)
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: geometry.size.width, height: 300)
+                            .matchedGeometryEffect(id: training.image, in: animation, isSource: showDetail)
+                            .clipShape(RoundedRectangle(cornerRadius: 20.0)) // Aplica el redondeo correctamente
+                    }
+                    .frame(height: 300)
+                    Text(training.name)
+                        .font(.system(size: 40))
+                        .fontWeight(.bold)
+                        .padding(.top, 150)
+                        .foregroundStyle(.white)
+                        .shadow(radius: 10)
+                    dismissButton
                 }
-                .frame(height: 300)
-                Text(training.name)
-                    .font(.system(size: 40))
-                    .fontWeight(.bold)
-                    .padding(.top, 150)
-                    .foregroundStyle(.white)
-                    .shadow(radius: 10)
-                dismissButton
-            }
-            VStack {
-                VStack(alignment: .leading, spacing: 8) {
-                    getSlidersView()
-                    getTextTotal()
-                        .padding()
-                        .background(
-                            RoundedRectangle(cornerRadius: 15)
-                                .fill(Color.gray.opacity(0.2)) // Color de fondo
-                        )
-                    Spacer()
-                    SliderView(onFinish: {}, isWaitingResponse: false)
+                VStack {
+                    VStack(alignment: .leading, spacing: 8) {
+                        getSlidersView()
+                        getTextTotal()
+                            .padding()
+                            .background(
+                                RoundedRectangle(cornerRadius: 15)
+                                    .fill(Color.gray.opacity(0.2)) // Color de fondo
+                            )
+                        Spacer()
+                        SliderView(onFinish: {
+                            withAnimation {
+                                hasTrainingStarted = true
+                            }
+                        }, isWaitingResponse: false)
+                        .matchedGeometryEffect(id: "background", in: animation)
+                    }
+                    .padding(16)
                 }
-                .padding(16)
+                .padding(.bottom, 60)
             }
-            .padding(.bottom, 60)
+            .navigationBarBackButtonHidden()
+            .edgesIgnoringSafeArea(.all)
         }
-        .navigationBarBackButtonHidden()
-        .edgesIgnoringSafeArea(.all)
     }
 
     @ViewBuilder
