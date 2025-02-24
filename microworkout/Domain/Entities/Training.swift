@@ -10,6 +10,15 @@ struct Training: Identifiable {
     var name: String
     var image: String
     var type: TrainingType
+    var startedAt: Date?
+    var completedAt: Date?
+    var sets: [Date] = []
+    var numberOfSetsCompleted: Int = 0 {
+        didSet {
+            sets.append(Date())
+        }
+    }
+
     var numberOfSets: Int
     var numberOfSetsForSlider: Double {
         get { Double(numberOfSets) }
@@ -24,5 +33,16 @@ struct Training: Identifiable {
     var numberOfMinutesPerSetForSlider: Double {
         get { Double(numberOfMinutesPerSet) }
         set { numberOfMinutesPerSet = Int(newValue) }
+    }
+
+    func mock() -> Training {
+        return Training(
+            name: "Mock Training",
+            image: "mock",
+            type: .cardio,
+            numberOfSets: 1,
+            numberOfReps: 1,
+            numberOfMinutesPerSet: 1
+        )
     }
 }
