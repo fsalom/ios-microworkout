@@ -3,7 +3,9 @@ import SwiftUI
 struct SliderView: View {
     @State private var offset: CGFloat = 5
     @State private var isComplete: Bool = false
-
+    var message: String = "Desliza para iniciar"
+    var backgroundColor: Color = .gray
+    var frontColor: Color = .black
     let sliderHeight: CGFloat = 60
     @State private var offsetAnimation: CGFloat = 200
 
@@ -19,13 +21,13 @@ struct SliderView: View {
 
                 // Background track
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(isComplete ? .green  : Color.gray.opacity(0.3))
+                    .fill(isComplete ? .green  : backgroundColor.opacity(0.3))
                     .frame(height: sliderHeight)
 
                 // Label
                 HStack {
-                    Text(isComplete ? "Cargando..." : (isWaitingResponse ? "Cargando..." : "Desliza para iniciar"))
-                        .foregroundColor(.black)
+                    Text(isComplete ? "Cargando..." : (isWaitingResponse ? "Cargando..." : message))
+                        .foregroundColor(frontColor)
                         .font(.system(size: 17, weight: .bold))
                 }
                 // Draggable button
@@ -75,17 +77,19 @@ struct SliderView: View {
     func button() -> some View {
         ZStack {
             RoundedRectangle(cornerRadius: 8)
-                .fill(isComplete ? .green : .gray)
+                .fill(isComplete ? .green : backgroundColor)
                 .frame(width: sliderHeight, height: sliderHeight - 10)
             if isWaitingResponse {
                 ProgressView()
                     .frame(width: 25, height: 25, alignment: .center)
             } else {
                 Image("ic_slide_arrow")
+                    .renderingMode(.template)
                     .resizable()
                     //.opacity(0.5)
                     .frame(width: 25, height: 25, alignment: .center)
-                    .foregroundColor(.white)
+                    .tint(frontColor)
+                    .foregroundColor(frontColor)
             }
 
         }
