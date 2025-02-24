@@ -1,3 +1,5 @@
+import SwiftUI
+
 class HomeRouter {
     private var navigator: NavigatorProtocol
 
@@ -6,10 +8,10 @@ class HomeRouter {
     }
 
     func goToWorkoutList() {
-        navigator.push(to: TrainingListBuilder().build())
+        navigator.push(to: TrainingListV2Builder().build())
     }
 
-    func goToStart(this training: Training) {
-        navigator.push(to: TrainingDetailBuilder().build(this: training))
+    func goToStart(this training: Training, and namespace: Namespace.ID) {
+        navigator.push(to: TrainingDetailBuilder().build(this: training, and: namespace))
     }
 }
