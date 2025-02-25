@@ -1,21 +1,22 @@
-//
-//  CountdownView.swift
-//  microworkout
-//
-//  Created by Fernando Salom Carratala on 23/2/25.
-//
-
-
 import SwiftUI
+import Combine
 
 struct CountdownView: View {
-    @State private var remainingTime: Int
-    @State private var timerRunning = true
-    let totalTime: Int
-    
-    init(minutes: Int) {
-        self.totalTime = minutes * 60
-        self._remainingTime = State(initialValue: minutes * 60)
+    @State private var remainingTime: Int = 0
+    @Binding var hasToResetTimer: Bool
+    let startDate: Date
+    let totalMinutes: Int
+
+    private var endDate: Date {
+        startDate.addingTimeInterval(TimeInterval(totalMinutes * 60))
+    }
+
+    @State private var timerSubscription: Cancellable?
+
+    init(startDate: Date, totalMinutes: Int, hasToResetTimer: Binding<Bool>) {
+        self.startDate = startDate
+        self.totalMinutes = totalMinutes
+        self._hasToResetTimer = hasToResetTimer
     }
 
     var body: some View {
@@ -24,52 +25,57 @@ struct CountdownView: View {
                 .font(.largeTitle)
                 .fontWeight(.bold)
                 .foregroundColor(.blue)
-                .padding()
                 .background(Circle().fill(Color.white).frame(width: 200, height: 200))
-                .padding(.bottom, 100)
-
-            HStack {
-                Button(action: { timerRunning.toggle() }) {
-                    Text(timerRunning ? "Pausar" : "Reanudar")
-                        .padding()
-                        .background(Color.white)
-                        .foregroundColor(.blue)
-                        .cornerRadius(10)
-                }
-                
-                Button(action: resetTimer) {
-                    Text("Reiniciar")
-                        .padding()
-                        .background(Color.white)
-                        .foregroundColor(.red)
-                        .cornerRadius(10)
-                }
-            }
         }
+        .background(
+            Circle().fill(Color.white.opacity(0.3)).frame(width: 220, height: 220)
+        )
         .onAppear {
             startTimer()
         }
-    }
-
-    func startTimer() {
-        Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { timer in
-            if timerRunning {
-                if remainingTime > 0 {
-                    remainingTime -= 1
-                } else {
-                    timer.invalidate()
-                    timerRunning = false
-                }
+        .onDisappear {
+            stopTimer()
+        }
+        .onChange(of: hasToResetTimer) { _, newValue in
+            if newValue {
+                resetTimer()
+                hasToResetTimer = false
             }
         }
     }
 
-    func resetTimer() {
-        remainingTime = totalTime
-        timerRunning = true
+    private func startTimer() {
+        updateRemainingTime()
+        if timerSubscription == nil {
+            timerSubscription = Timer.publish(every: 1, on: .main, in: .common)
+                .autoconnect()
+                .sink { _ in
+                    updateRemainingTime()
+                }
+        }
     }
 
-    func timeFormatted(_ totalSeconds: Int) -> String {
+    private func stopTimer() {
+        timerSubscription?.cancel()
+        timerSubscription = nil
+    }
+
+    private func resetTimer() {
+        stopTimer()
+        startTimer()
+    }
+
+    private func updateRemainingTime() {
+        let now = Date()
+        let timeLeft = Int(endDate.timeIntervalSince(now))
+        remainingTime = max(timeLeft, 0)
+
+        if remainingTime == 0 {
+            stopTimer()
+        }
+    }
+
+    private func timeFormatted(_ totalSeconds: Int) -> String {
         let minutes = totalSeconds / 60
         let seconds = totalSeconds % 60
         return String(format: "%02d:%02d", minutes, seconds)
