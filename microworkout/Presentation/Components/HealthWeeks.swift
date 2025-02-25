@@ -26,8 +26,9 @@ struct HealthWeeksView: View {
             // Encabezado de días
             LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 7), spacing: 5) {
                 ForEach(daysOfWeek, id: \.self) { day in
-                    Text(day)
-                        .font(.headline)
+                    Text("\(day)")
+                        .font(.caption)
+                        .fontWeight(.bold)
                         .frame(width: 40, height: 40)
                 }
             }
