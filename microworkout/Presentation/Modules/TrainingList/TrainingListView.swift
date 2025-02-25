@@ -4,7 +4,7 @@ import SwiftUI
 struct TrainingListView: View {
     @ObservedObject var viewModel: TrainingListViewModel
     @Namespace var animation
-    @State var selectedTraining = Training(name: "", image: "", type: .cardio, numberOfSets: 0, numberOfReps: 0, numberOfMinutesPerSet: 0)
+    @State var selectedTraining = Training.mock()
     @State var showDetail: Bool = false
     @State private var scrollOffset: CGFloat = 0
     @State private var scrollPosition: UUID? = nil

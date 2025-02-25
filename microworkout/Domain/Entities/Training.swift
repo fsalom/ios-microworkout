@@ -35,7 +35,7 @@ struct Training: Identifiable {
         set { numberOfMinutesPerSet = Int(newValue) }
     }
 
-    func mock() -> Training {
+    static func mock() -> Training {
         return Training(
             name: "Mock Training",
             image: "mock",
