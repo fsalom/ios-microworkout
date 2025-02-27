@@ -1,6 +1,6 @@
 import Foundation
 
-enum TrainingType {
+enum TrainingType: String, Codable {
     case cardio
     case strength
 }
