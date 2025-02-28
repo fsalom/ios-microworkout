@@ -2,16 +2,16 @@ import SwiftUI
 
 struct HomeView: View {
     @ObservedObject var viewModel: HomeViewModel
+    @Namespace var animation
+    @State private var selectedTraining: Training? = nil
+    @State private var showDetail = false
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 10) {
+        if showDetail {
+            DetailView(animation: animation, showDetail: $showDetail, training: $selectedTraining)
+        } else {
+            ScrollView {
                 HStack(alignment: .top) {
-                    Image("splash")
-                        .resizable()
-                        .foregroundColor(.white)
-                        .frame(width: 60, height: 60)
-                        .clipShape(Circle())
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Welcome back")
                             .font(.footnote)
@@ -21,26 +21,36 @@ struct HomeView: View {
                             .fontWeight(.bold)
                     }
                     Spacer()
-                    VStack(alignment: .leading) {
-                        Image(systemName: "bell")
-                    }
                 }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
                 Text("Últimos entrenamientos")
-                    .font(.footnote)
-                ListLastTrainings()
-                Text("Progresión de la semana")
-                    .font(.footnote)
-                DynamicGridView(columnCount: 7, rowCount: 4)
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
 
+                ListLastTrainings()
+
+                Divider()
+                    .padding(.horizontal, 16)
+
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Progresión ejercicio")
+                        .font(.title2)
+                        .fontWeight(.bold)
+
+                    HealthWeeksView(weeks: self.$viewModel.weeks)
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
             }
-            .padding()
+            .onAppear {
+                //viewModel.load()
+            }
+            .edgesIgnoringSafeArea(.bottom)
         }
-        .navigationTitle("Entrenamientos")
-        .navigationBarTitleDisplayMode(.inline)
-        .onAppear {
-            //viewModel.load()
-        }
-        .edgesIgnoringSafeArea(.bottom)
     }
 
     @ViewBuilder
@@ -58,10 +68,17 @@ struct HomeView: View {
                 ForEach(viewModel.trainings, id: \.id) { training in
                     Image(training.image)
                         .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(maxWidth: 100, maxHeight: 100)
-                        .opacity(1.0)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .scaledToFill()
+                        .frame(width: 100, height: 100)
+                        .clipped()
+                        .matchedGeometryEffect(id: training.image, in: animation, isSource: !showDetail)
+                        .mask(RoundedRectangle(cornerRadius: 20.0))
+                        .onTapGesture {
+                            withAnimation(.spring()) {
+                                selectedTraining = training
+                                showDetail = true
+                            }
+                        }
                 }
             }
             .padding()
