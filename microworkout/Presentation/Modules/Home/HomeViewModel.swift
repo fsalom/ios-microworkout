@@ -8,9 +8,12 @@ final class HomeViewModel: ObservableObject {
     private var router: HomeRouter
     private var healthKitManager: HealthKitManager!
     private var isHealthKitAuthorized: Bool = false
+    private var currentTraining: Training = Training.mock()
+    private var trainingUseCase: TrainingUseCase
 
-    init(router: HomeRouter, healthKitManager: HealthKitManager) {
+    init(router: HomeRouter, trainingUseCase: TrainingUseCase, healthKitManager: HealthKitManager) {
         self.router = router
+        self.trainingUseCase = trainingUseCase
         self.healthKitManager = healthKitManager
         self.weeks = self.getLastXWeeksDates(weeks: 4)
         self.loadTrainings()
@@ -21,12 +24,7 @@ final class HomeViewModel: ObservableObject {
     private func loadTrainings() {
         Task {
             await MainActor.run {
-                trainings = [
-                    Training(name: "Flexiones", image: "push-up-1",type: .strength, numberOfSets: 10, numberOfReps: 10, numberOfMinutesPerSet: 60),
-                    Training(name: "Dominadas", image: "pull-up-1", type: .strength, numberOfSets: 10, numberOfReps: 5, numberOfMinutesPerSet: 60),
-                    Training(name: "Sentadillas", image: "squat-1", type: .strength, numberOfSets: 10, numberOfReps: 20, numberOfMinutesPerSet: 60),
-                    Training(name: "Abdominales", image: "abs-1", type: .strength, numberOfSets: 10, numberOfReps: 20, numberOfMinutesPerSet: 60)
-                ]
+                trainings = trainingUseCase.getTrainings()
             }
         }
     }
@@ -74,8 +72,8 @@ final class HomeViewModel: ObservableObject {
         router.goToWorkoutList()
     }
 
-    func goToStart(this training: Training) {
-        router.goToStart(this: training)
+    func goToStart(this training: Training, and namespace: Namespace.ID) {
+        router.goToStart(this: training, and: namespace)
     }
 
     func getLastXWeeksDates(weeks: Int) -> [[HealthDay]] {
