@@ -16,6 +16,21 @@
 		C12315B12D68D36C00802707 /* DetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C12315B02D68D36C00802707 /* DetailView.swift */; };
 		C12315B32D6B6ECA00802707 /* CurrentTrainingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C12315B22D6B6ECA00802707 /* CurrentTrainingView.swift */; };
 		C12315B52D6B76F700802707 /* CountdownView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C12315B42D6B76F700802707 /* CountdownView.swift */; };
+		C1398FA62D6DF2E30092DB50 /* TrainingRepositoryProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1398FA52D6DF2D80092DB50 /* TrainingRepositoryProtocol.swift */; };
+		C1398FA72D6DF2E30092DB50 /* TrainingRepositoryProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1398FA52D6DF2D80092DB50 /* TrainingRepositoryProtocol.swift */; };
+		C1398FA92D6DF3250092DB50 /* TrainingRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1398FA82D6DF3210092DB50 /* TrainingRepository.swift */; };
+		C1398FAA2D6DF3250092DB50 /* TrainingRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1398FA82D6DF3210092DB50 /* TrainingRepository.swift */; };
+		C1398FAD2D6DF3AF0092DB50 /* TrainingLocalDataStoreProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1398FAC2D6DF3A50092DB50 /* TrainingLocalDataStoreProtocol.swift */; };
+		C1398FAE2D6DF3AF0092DB50 /* TrainingLocalDataStoreProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1398FAC2D6DF3A50092DB50 /* TrainingLocalDataStoreProtocol.swift */; };
+		C1398FB12D6DF3E90092DB50 /* TrainingLocalDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1398FB02D6DF3DC0092DB50 /* TrainingLocalDataSource.swift */; };
+		C1398FB22D6DF3E90092DB50 /* TrainingLocalDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1398FB02D6DF3DC0092DB50 /* TrainingLocalDataSource.swift */; };
+		C1398FB82D6DF40B0092DB50 /* TrainingDTO.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1398FB72D6DF4050092DB50 /* TrainingDTO.swift */; };
+		C1398FB92D6DF40B0092DB50 /* TrainingDTO.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1398FB72D6DF4050092DB50 /* TrainingDTO.swift */; };
+		C1398FBB2D6E03890092DB50 /* UserDefaultsManagerProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1398FBA2D6E03890092DB50 /* UserDefaultsManagerProtocol.swift */; };
+		C1398FBC2D6E06160092DB50 /* UserDefaultsManagerProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1398FBA2D6E03890092DB50 /* UserDefaultsManagerProtocol.swift */; };
+		C1398FBE2D6E08970092DB50 /* TrainingContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1398FBD2D6E08970092DB50 /* TrainingContainer.swift */; };
+		C1398FC12D6E095A0092DB50 /* TrainingUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1398FC02D6E09570092DB50 /* TrainingUseCase.swift */; };
+		C1398FC22D6E095A0092DB50 /* TrainingUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1398FC02D6E09570092DB50 /* TrainingUseCase.swift */; };
 		C13C47BE2A33AAE5005C90AB /* TimerBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = C13C47BD2A33AAE5005C90AB /* TimerBuilder.swift */; };
 		C13C47C02A33AAF0005C90AB /* TimerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C13C47BF2A33AAF0005C90AB /* TimerView.swift */; };
 		C13C47C22A33AB00005C90AB /* TimerProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = C13C47C12A33AB00005C90AB /* TimerProtocols.swift */; };
@@ -266,6 +281,14 @@
 		C12315B02D68D36C00802707 /* DetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailView.swift; sourceTree = "<group>"; };
 		C12315B22D6B6ECA00802707 /* CurrentTrainingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentTrainingView.swift; sourceTree = "<group>"; };
 		C12315B42D6B76F700802707 /* CountdownView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountdownView.swift; sourceTree = "<group>"; };
+		C1398FA52D6DF2D80092DB50 /* TrainingRepositoryProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingRepositoryProtocol.swift; sourceTree = "<group>"; };
+		C1398FA82D6DF3210092DB50 /* TrainingRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingRepository.swift; sourceTree = "<group>"; };
+		C1398FAC2D6DF3A50092DB50 /* TrainingLocalDataStoreProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingLocalDataStoreProtocol.swift; sourceTree = "<group>"; };
+		C1398FB02D6DF3DC0092DB50 /* TrainingLocalDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingLocalDataSource.swift; sourceTree = "<group>"; };
+		C1398FB72D6DF4050092DB50 /* TrainingDTO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingDTO.swift; sourceTree = "<group>"; };
+		C1398FBA2D6E03890092DB50 /* UserDefaultsManagerProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsManagerProtocol.swift; sourceTree = "<group>"; };
+		C1398FBD2D6E08970092DB50 /* TrainingContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingContainer.swift; sourceTree = "<group>"; };
+		C1398FC02D6E09570092DB50 /* TrainingUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingUseCase.swift; sourceTree = "<group>"; };
 		C13C47BD2A33AAE5005C90AB /* TimerBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerBuilder.swift; sourceTree = "<group>"; };
 		C13C47BF2A33AAF0005C90AB /* TimerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerView.swift; sourceTree = "<group>"; };
 		C13C47C12A33AB00005C90AB /* TimerProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerProtocols.swift; sourceTree = "<group>"; };
@@ -481,6 +504,7 @@
 		C11589312B0F741700254218 /* Manager */ = {
 			isa = PBXGroup;
 			children = (
+				C1398FBA2D6E03890092DB50 /* UserDefaultsManagerProtocol.swift */,
 			);
 			path = Manager;
 			sourceTree = "<group>";
@@ -510,6 +534,32 @@
 				C12315AA2D68CD3000802707 /* TrainingListV2ViewModel.swift */,
 			);
 			path = TrainingV2List;
+			sourceTree = "<group>";
+		};
+		C1398FAB2D6DF39C0092DB50 /* Training */ = {
+			isa = PBXGroup;
+			children = (
+				C1398FAF2D6DF3D30092DB50 /* Local */,
+			);
+			path = Training;
+			sourceTree = "<group>";
+		};
+		C1398FAF2D6DF3D30092DB50 /* Local */ = {
+			isa = PBXGroup;
+			children = (
+				C1398FB62D6DF4000092DB50 /* DTO */,
+				C1398FAC2D6DF3A50092DB50 /* TrainingLocalDataStoreProtocol.swift */,
+				C1398FB02D6DF3DC0092DB50 /* TrainingLocalDataSource.swift */,
+			);
+			path = Local;
+			sourceTree = "<group>";
+		};
+		C1398FB62D6DF4000092DB50 /* DTO */ = {
+			isa = PBXGroup;
+			children = (
+				C1398FB72D6DF4050092DB50 /* TrainingDTO.swift */,
+			);
+			path = DTO;
 			sourceTree = "<group>";
 		};
 		C13C47BC2A33AAD5005C90AB /* Timer */ = {
@@ -685,6 +735,7 @@
 		C16D03EC2B18ADD10014F906 /* Reposotories */ = {
 			isa = PBXGroup;
 			children = (
+				C1398FA52D6DF2D80092DB50 /* TrainingRepositoryProtocol.swift */,
 			);
 			path = Reposotories;
 			sourceTree = "<group>";
@@ -755,6 +806,7 @@
 		C1742E432A2F31A50020354D /* UseCases */ = {
 			isa = PBXGroup;
 			children = (
+				C1398FC02D6E09570092DB50 /* TrainingUseCase.swift */,
 				C162D66E2B0E17DB00CDCA26 /* Health */,
 				C1762ACD2B0A912D0035318F /* Workout */,
 			);
@@ -806,6 +858,7 @@
 		C1742E562A309FC50020354D /* Repositories */ = {
 			isa = PBXGroup;
 			children = (
+				C1398FA82D6DF3210092DB50 /* TrainingRepository.swift */,
 				C162D6692B0E175000CDCA26 /* Health */,
 				C15DC9472B0CBA9200F408B7 /* Workout */,
 			);
@@ -815,6 +868,7 @@
 		C1742E572A309FCA0020354D /* Datasources */ = {
 			isa = PBXGroup;
 			children = (
+				C1398FAB2D6DF39C0092DB50 /* Training */,
 				C162D6632B0DECDD00CDCA26 /* Health */,
 				C15DC9452B0CBA5700F408B7 /* Workout */,
 			);
@@ -833,6 +887,7 @@
 		C183FC012D550DF9009EE8B5 /* DI */ = {
 			isa = PBXGroup;
 			children = (
+				C1398FBD2D6E08970092DB50 /* TrainingContainer.swift */,
 				C11589312B0F741700254218 /* Manager */,
 				C1A953152A5D56E200A2A010 /* Helper */,
 			);
@@ -1534,6 +1589,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C1398FBE2D6E08970092DB50 /* TrainingContainer.swift in Sources */,
 				C162D6622B0D545800CDCA26 /* WorkoutSelectionViewModel.swift in Sources */,
 				C162D6722B0E17F900CDCA26 /* HealthUseCaseProtocol.swift in Sources */,
 				C13C47C72A33B00C005C90AB /* CountDownView.swift in Sources */,
@@ -1557,13 +1613,18 @@
 				C18F6F632A83EAE000914A0A /* Beat.swift in Sources */,
 				C11B9F3A2A5C37B300FC656F /* TabbarView.swift in Sources */,
 				C162D66D2B0E177200CDCA26 /* HealthRepository.swift in Sources */,
+				C1398FB12D6DF3E90092DB50 /* TrainingLocalDataSource.swift in Sources */,
 				C155910A2A31D3E400E30886 /* HomeTrainingBuilder.swift in Sources */,
+				C1398FBB2D6E03890092DB50 /* UserDefaultsManagerProtocol.swift in Sources */,
 				C15B7EEA2A57402F0067B28E /* ExerciseRow.swift in Sources */,
+				C1398FAA2D6DF3250092DB50 /* TrainingRepository.swift in Sources */,
 				C183FEAB2D57D8B2009EE8B5 /* Page.swift in Sources */,
+				C1398FA72D6DF2E30092DB50 /* TrainingRepositoryProtocol.swift in Sources */,
 				C183FEAC2D57D8B2009EE8B5 /* Navigator.swift in Sources */,
 				C183FEAD2D57D8B2009EE8B5 /* StackView.swift in Sources */,
 				C183FEAE2D57D8B2009EE8B5 /* ConfirmationDialogConfig.swift in Sources */,
 				C12315B12D68D36C00802707 /* DetailView.swift in Sources */,
+				C1398FC12D6E095A0092DB50 /* TrainingUseCase.swift in Sources */,
 				C183FEAF2D57D8B2009EE8B5 /* NavigatorProtocol.swift in Sources */,
 				C183FEB02D57D8B2009EE8B5 /* AlertConfig.swift in Sources */,
 				C1F34FA62A38FC6D00233D66 /* ChronoTimerView.swift in Sources */,
@@ -1613,6 +1674,7 @@
 				C1B670E02D5FD6C0005E9173 /* HomeView.swift in Sources */,
 				C15B7EE52A572C370067B28E /* DetailWorkoutProtocols.swift in Sources */,
 				C162D6602B0D544300CDCA26 /* WorkoutSelectionProtocols.swift in Sources */,
+				C1398FB82D6DF40B0092DB50 /* TrainingDTO.swift in Sources */,
 				C1B670ED2D627B12005E9173 /* HealthWeeks.swift in Sources */,
 				C1B670E82D626218005E9173 /* HealthKitManager.swift in Sources */,
 				C162D65E2B0D53CA00CDCA26 /* WorkoutSelectionView.swift in Sources */,
@@ -1635,6 +1697,7 @@
 				C15591012A31D0B700E30886 /* HomeTrainingViewModel.swift in Sources */,
 				C19D17FA2D5DE5EB000CCCEF /* TrainingDetailRouter.swift in Sources */,
 				C1B670EF2D6282A1005E9173 /* HealthDay.swift in Sources */,
+				C1398FAE2D6DF3AF0092DB50 /* TrainingLocalDataStoreProtocol.swift in Sources */,
 				C1742E4F2A2FC8D60020354D /* SplashView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1674,17 +1737,22 @@
 				C1F34F8E2A38FB9D00233D66 /* TimerBuilder.swift in Sources */,
 				C18FEDB32A76F9A5005519BE /* ListPlanViewModel.swift in Sources */,
 				C1A230412B0A95BC00E10FCF /* WorkoutUseCaseProtocol.swift in Sources */,
+				C1398FB22D6DF3E90092DB50 /* TrainingLocalDataSource.swift in Sources */,
+				C1398FB92D6DF40B0092DB50 /* TrainingDTO.swift in Sources */,
 				C1F34F902A38FB9D00233D66 /* CountDownView.swift in Sources */,
 				C1F34F942A38FBBF00233D66 /* Exercise.swift in Sources */,
+				C1398FBC2D6E06160092DB50 /* UserDefaultsManagerProtocol.swift in Sources */,
 				C18FEDB12A76F926005519BE /* ListPlanView.swift in Sources */,
 				C1F34FA32A38FC6D00233D66 /* ChronoView.swift in Sources */,
 				C1F34F952A38FBBF00233D66 /* Workout.swift in Sources */,
 				C1F34F972A38FC1100233D66 /* WorkoutRepositoryProtocol.swift in Sources */,
 				C1F34FA52A38FC6D00233D66 /* ChronoViewModel.swift in Sources */,
 				C1F34F932A38FBBF00233D66 /* WorkoutSet.swift in Sources */,
+				C1398FA92D6DF3250092DB50 /* TrainingRepository.swift in Sources */,
 				C1F34FA92A38FC6D00233D66 /* ChronoBuilder.swift in Sources */,
 				C183FE892D568AF1009EE8B5 /* SquatDataCollector.swift in Sources */,
 				C18F6F552A8160B700914A0A /* HeartBeatView.swift in Sources */,
+				C1398FC22D6E095A0092DB50 /* TrainingUseCase.swift in Sources */,
 				C1F34F642A38CD4300233D66 /* ContentView.swift in Sources */,
 				C1F34F622A38CD4300233D66 /* gymwatchApp.swift in Sources */,
 				C1F34F982A38FC1100233D66 /* WorkoutRepository.swift in Sources */,
@@ -1698,6 +1766,7 @@
 				C183FEB32D57D8B2009EE8B5 /* StackView.swift in Sources */,
 				C183FEB42D57D8B2009EE8B5 /* ConfirmationDialogConfig.swift in Sources */,
 				C183FEB52D57D8B2009EE8B5 /* NavigatorProtocol.swift in Sources */,
+				C1398FA62D6DF2E30092DB50 /* TrainingRepositoryProtocol.swift in Sources */,
 				C183FEB62D57D8B2009EE8B5 /* AlertConfig.swift in Sources */,
 				C183FE812D5689C1009EE8B5 /* SquatDetector.swift in Sources */,
 				C183FE852D568A3A009EE8B5 /* SquatDetectorView.swift in Sources */,
@@ -1714,6 +1783,7 @@
 				C183FE7E2D568866009EE8B5 /* MotionManager.swift in Sources */,
 				C1F34F8F2A38FB9D00233D66 /* TimerProtocols.swift in Sources */,
 				C18FEDB52A779DE1005519BE /* ListPlanBuilder.swift in Sources */,
+				C1398FAD2D6DF3AF0092DB50 /* TrainingLocalDataStoreProtocol.swift in Sources */,
 				C16D03F72B18B11E0014F906 /* WorkoutPlanModel.swift in Sources */,
 				C18FEDB92A77A644005519BE /* DetailWorkoutView.swift in Sources */,
 				C16D03FD2B18B1A20014F906 /* WorkoutSetDTO.swift in Sources */,
