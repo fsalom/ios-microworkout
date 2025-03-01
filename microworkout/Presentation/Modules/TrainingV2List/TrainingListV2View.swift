@@ -4,7 +4,7 @@ import SwiftUI
 struct TrainingListV2View: View {
     @ObservedObject var viewModel: TrainingListV2ViewModel
     @Namespace var animation
-    @State var selectedTraining = Training(name: "", image: "", type: .cardio, numberOfSets: 0, numberOfReps: 0, numberOfMinutesPerSet: 0)
+    @State var selectedTraining: Training?
     @State var showDetail: Bool = false
     @State private var scrollOffset: CGFloat = 0
     @State private var scrollPosition: UUID? = nil
@@ -36,7 +36,7 @@ struct TrainingListV2View: View {
                 .aspectRatio(contentMode: .fill)
                 .frame(height: 200)
                 .clipped()
-                .matchedGeometryEffect(id: training.image, in: animation, isSource: true)
+                .matchedGeometryEffect(id: training.image, in: animation, isSource: showDetail)
                 .mask(RoundedRectangle(cornerRadius: 12))
             VStack(alignment: .trailing) {
                 Text(training.name)
