@@ -5,7 +5,7 @@ enum TrainingType: String, Codable {
     case strength
 }
 
-struct Training: Identifiable {
+struct Training: Identifiable, Equatable {
     var id: UUID = UUID()
     var name: String
     var image: String
@@ -20,20 +20,8 @@ struct Training: Identifiable {
     }
 
     var numberOfSets: Int
-    var numberOfSetsForSlider: Double {
-        get { Double(numberOfSets) }
-        set { numberOfSets = Int(newValue) }
-    }
     var numberOfReps: Int
-    var numberOfRepsForSlider: Double {
-        get { Double(numberOfReps) }
-        set { numberOfReps = Int(newValue) }
-    }
     var numberOfMinutesPerSet: Int
-    var numberOfMinutesPerSetForSlider: Double {
-        get { Double(numberOfMinutesPerSet) }
-        set { numberOfMinutesPerSet = Int(newValue) }
-    }
 
     static func mock() -> Training {
         return Training(
