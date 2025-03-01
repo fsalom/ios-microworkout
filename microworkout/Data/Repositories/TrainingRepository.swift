@@ -19,6 +19,10 @@ class TrainingRepository: TrainingRepositoryProtocol {
         let dto = self.local.getCurrentTraining()
         return dto?.toDomain()
     }
+
+    func save(_ training: Training) {
+        self.local.saveCurrentTraining(training.toDTO())
+    }
 }
 
 
