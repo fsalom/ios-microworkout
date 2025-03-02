@@ -2,6 +2,9 @@ import SwiftUI
 
 struct DetailView: View {
     var animation: Namespace.ID
+    @State private var numberOfSetsForSlider: Double = 1
+    @State private var numberOfRepsForSlider: Double = 1
+    @State private var numberOfMinutesPerSetForSlider: Double = 10
     @Binding var showDetail: Bool
     @Binding var training: Training?
     @State var hasTrainingStarted: Bool = false
@@ -39,12 +42,14 @@ struct DetailView: View {
                                     .fill(Color.gray.opacity(0.2))
                             )
                         Spacer()
-                        SliderView(onFinish: {
-                            training?.startedAt = Date()
-                            withAnimation {
-                                hasTrainingStarted = true
-                            }
-                        }, isWaitingResponse: false)
+                        SliderView(
+                            onFinish: {
+                                training?.startedAt = Date()
+                                withAnimation {
+                                    hasTrainingStarted = true
+                                }
+                            },
+                            isWaitingResponse: false)
                         .matchedGeometryEffect(id: "background", in: animation)
                     }
                     .padding(16)
@@ -53,6 +58,19 @@ struct DetailView: View {
             }
             .navigationBarBackButtonHidden()
             .edgesIgnoringSafeArea(.all)
+            .onAppear {
+                updateSliderValues()
+            }
+        }
+    }
+
+    func updateSliderValues() {
+        if let training = training {
+            self.training = nil
+            numberOfSetsForSlider = Double(training.numberOfSets)
+            numberOfRepsForSlider = Double(training.numberOfReps)
+            numberOfMinutesPerSetForSlider = Double(training.numberOfMinutesPerSet)
+            self.training = training
         }
     }
 
@@ -72,28 +90,25 @@ struct DetailView: View {
             VStack {
                 Text("\(training.numberOfSets) series")
                     .fontWeight(.bold)
-                Slider(value: Binding(
-                    get: { training.numberOfSetsForSlider },
-                    set: { newValue in self.training?.numberOfSetsForSlider = newValue }
-                ), in: 1...20, step: 1)
+                Slider(value: $numberOfSetsForSlider, in: 1...20, step: 1, onEditingChanged: { _ in
+                    self.training?.numberOfSets = Int(numberOfSetsForSlider)
+                })
 
                 Divider()
 
                 Text("\(training.numberOfReps) repeticiones")
                     .fontWeight(.bold)
-                Slider(value: Binding(
-                    get: { training.numberOfRepsForSlider },
-                    set: { newValue in self.training?.numberOfRepsForSlider = newValue }
-                ), in: 1...20, step: 1)
+                Slider(value: $numberOfRepsForSlider, in: 1...20, step: 1, onEditingChanged: { _ in
+                    self.training?.numberOfReps = Int(numberOfRepsForSlider)
+                })
 
                 Divider()
 
                 Text("\(training.numberOfMinutesPerSet) minutos entre series")
                     .fontWeight(.bold)
-                Slider(value: Binding(
-                    get: { training.numberOfMinutesPerSetForSlider },
-                    set: { newValue in self.training?.numberOfMinutesPerSetForSlider = newValue }
-                ), in: 10...120, step: 10)
+                Slider(value: $numberOfMinutesPerSetForSlider, in: 10...120, step: 10, onEditingChanged: { _ in
+                    self.training?.numberOfMinutesPerSet = Int(numberOfMinutesPerSetForSlider)
+                })
             }
         } else {
             Text("No hay entrenamiento seleccionado")
