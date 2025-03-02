@@ -21,6 +21,10 @@ final class HomeViewModel: ObservableObject {
         self.getExerciseTime()
     }
 
+    func save(this training: Training) {
+        trainingUseCase.save(training)
+    }
+
     private func loadTrainings() {
         Task {
             await MainActor.run {
