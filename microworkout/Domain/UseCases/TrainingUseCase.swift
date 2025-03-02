@@ -13,4 +13,8 @@ class TrainingUseCase {
     func getCurrentTraining() -> Training? {
         self.repository.getCurrentTraining()
     }
+
+    func save(_ training: Training) {
+        self.repository.save(training)
+    }
 }
