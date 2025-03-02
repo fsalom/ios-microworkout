@@ -49,6 +49,11 @@ struct HomeView: View {
             .onAppear {
                 //viewModel.load()
             }
+            .onChange(of: selectedTraining, { oldValue, newValue in
+                selectedTraining = newValue
+                guard let selectedTraining else { return }
+                viewModel.save(this: selectedTraining)
+            })
             .edgesIgnoringSafeArea(.bottom)
         }
     }
