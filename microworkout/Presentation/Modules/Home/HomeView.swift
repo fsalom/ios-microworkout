@@ -8,7 +8,9 @@ struct HomeView: View {
 
     var body: some View {
         if showDetail {
-            DetailView(animation: animation, showDetail: $showDetail, training: $selectedTraining)
+            DetailView(animation: animation,
+                       showDetail: $showDetail,
+                       training: $selectedTraining)
         } else {
             ScrollView {
                 HStack(alignment: .top) {
