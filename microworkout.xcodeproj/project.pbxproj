@@ -732,12 +732,12 @@
 			path = Mock;
 			sourceTree = "<group>";
 		};
-		C16D03EC2B18ADD10014F906 /* Reposotories */ = {
+		C16D03EC2B18ADD10014F906 /* Repositories */ = {
 			isa = PBXGroup;
 			children = (
 				C1398FA52D6DF2D80092DB50 /* TrainingRepositoryProtocol.swift */,
 			);
-			path = Reposotories;
+			path = Repositories;
 			sourceTree = "<group>";
 		};
 		C16D03ED2B18AE040014F906 /* DTO */ = {
@@ -763,7 +763,7 @@
 		C1742E3E2A2F31420020354D /* Domain */ = {
 			isa = PBXGroup;
 			children = (
-				C16D03EC2B18ADD10014F906 /* Reposotories */,
+				C16D03EC2B18ADD10014F906 /* Repositories */,
 				C1742E432A2F31A50020354D /* UseCases */,
 				C1742E442A2F31B70020354D /* Entities */,
 			);
