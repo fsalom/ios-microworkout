@@ -1,10 +1,3 @@
-//
-//  HealthRepository.swift
-//  microworkout
-//
-//  Created by Fernando Salom Carratala on 22/11/23.
-//
-
 import Foundation
 
 class HealthRepository: HealthRepositoryProtocol {
@@ -12,5 +5,17 @@ class HealthRepository: HealthRepositoryProtocol {
 
     init(dataSource: HealthKitDataSourceProtocol){
         self.dataSource = dataSource
+    }
+
+    func requestAuthorization() async throws -> Bool {
+        try await dataSource.requestAuthorization()
+    }
+
+    func fetchExerciseTimeToday() async throws -> Double? {
+        try await dataSource.fetchExerciseTimeToday()
+    }
+
+    func fetchExerciseTime(startDate: Date, endDate: Date) async throws -> [Date : Double]? {
+        try await dataSource.fetchExerciseTime(startDate: startDate, endDate: endDate)
     }
 }
