@@ -1,10 +1,3 @@
-//
-//  HealthKitDataSource.swift
-//  microworkout
-//
-//  Created by Fernando Salom Carratala on 22/11/23.
-//
-
 import Foundation
 import HealthKit
 
@@ -14,73 +7,46 @@ enum HealthKitError: Error {
 
 class HealthKitDataSource: HealthKitDataSourceProtocol {
 
-    private let healthStore: HKHealthStore = HKHealthStore()
-    private let heartRateUnit: HKUnit = HKUnit(from: "count/min")
+    var healthKitManager: HealthKitManager
 
-    private func getTypesToRead() -> [HKObjectType] {
-        var hkObjects = [HKObjectType]()
-        for healthType in HealthKit.allCases {
-            hkObjects.append(healthType.hkObject)
-        }
-        return hkObjects
+    init(healthKitManager: HealthKitManager) {
+        self.healthKitManager = healthKitManager
     }
 
-    private func requestHealthkitPermissions(authorized: @escaping (Bool) -> Void) {
-        let typesToRead = Set(getTypesToRead())
-
-        healthStore.requestAuthorization(toShare: nil, read: typesToRead) { (success, error) in
-            authorized(success)
-            print("Request Authorization -- Success: ", success, " Error: ", error ?? "nil")
-        }
-    }
-
-    func isHealthDataAvailable() -> Bool {
-        guard HKHealthStore.isHealthDataAvailable() else {
-            return false
-        }
-        return true
-    }
-
-    private func readHeartRate() -> [Beat] {
-        var beats = [Beat]()
-        let quantityType  = HKObjectType.quantityType(forIdentifier: .heartRate)!
-        let sortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: false)
-        let sampleQuery = HKSampleQuery.init(sampleType: quantityType,
-                                             predicate: get24hPredicate(),
-                                             limit: HKObjectQueryNoLimit,
-                                             sortDescriptors: [sortDescriptor],
-                                             resultsHandler: { (query, results, error) in
-            guard let samples = results as? [HKQuantitySample] else {
-                print(error!)
-                return
+    func requestAuthorization() async throws -> Bool {
+        return try await withCheckedThrowingContinuation { continuation in
+            self.healthKitManager.requestAuthorization { success, error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume(returning: success)
+                }
             }
-            beats = samples.map({ Beat(value: $0.quantity.doubleValue(for: self.heartRateUnit), start: $0.startDate, end: $0.endDate)})
-        })
-        self.healthStore.execute(sampleQuery)
-        return beats
-    }
-
-    private func get24hPredicate() ->  NSPredicate{
-        let today = Date()
-        let startDate = Calendar.current.date(byAdding: .hour, value: -24, to: today)
-        let predicate = HKQuery.predicateForSamples(withStart: startDate,end: today,options: [])
-        return predicate
-    }
-
-    func log() {
-        /*
-        for sample in samples {
-            print("[\(sample)]")
-            print("Heart Rate: \(sample.quantity.doubleValue(for: self.heartRateUnit))")
-            print("quantityType: \(sample.quantityType)")
-            print("Start Date: \(sample.startDate)")
-            print("End Date: \(sample.endDate)")
-            print("Metadata: \(sample.metadata)")
-            print("UUID: \(sample.uuid)")
-            print("Source: \(sample.sourceRevision)")
-            print("Device: \(sample.device)")
-            print("---------------------------------\n")
         }
-         */
     }
+
+    func fetchExerciseTimeToday() async throws -> Double? {
+        return try await withCheckedThrowingContinuation { continuation in
+            self.healthKitManager.fetchExerciseTimeToday { steps, error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume(returning: steps)
+                }
+            }
+        }
+    }
+
+    func fetchExerciseTime(startDate: Date, endDate: Date) async throws -> [Date : Double]? {
+        return try await withCheckedThrowingContinuation { continuation in
+            self.healthKitManager.fetchExerciseTime(startDate: startDate, endDate: endDate) { result, error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume(returning: result)
+                }
+            }
+        }
+    }
+
 }
