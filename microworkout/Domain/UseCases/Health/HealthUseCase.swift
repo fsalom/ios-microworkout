@@ -16,28 +16,50 @@ class HealthUseCase: HealthUseCaseProtocol {
         try await self.repository.requestAuthorization()
     }
 
-    func fetchExerciseTimeToday() async throws -> Double? {
-        try await self.repository.fetchExerciseTimeToday()
-    }
-
-    func fetchExerciseTime(startDate: Date, endDate: Date) async throws -> [Date : Double] {
-        let data = try await self.repository.fetchExerciseTime(startDate: startDate,
-                                                               endDate: endDate)
-        guard let data = data else {
-            throw ErrorHealth.emptyData
-        }
-        return data
-    }
-
     func getDaysPerWeeksWithHealthInfo(for numberOfWeeks: Int) async throws -> [[HealthDay]] {
-        let calendar = Calendar.current
-        let startDate = calendar.startOfDay(for: Date().addingTimeInterval(-42 * 24 * 60 * 60))
-        let endOfDay = calendar.date(bySettingHour: 23, minute: 59, second: 59, of: Date())!
+        let success = try await requestAuthorization()
+        if success {
+            let calendar = Calendar.current
+            let startDate = calendar.startOfDay(for: Date().addingTimeInterval(-42 * 24 * 60 * 60))
+            let endOfDay = calendar.date(bySettingHour: 23, minute: 59, second: 59, of: Date())!
 
-        let data = try await fetchExerciseTime(startDate: startDate, endDate: endOfDay)
-        let weeks = self.getWeeksHealthDays(for: 4)
-        let healthWeeks = self.getUpdated(weeks: weeks, with: data)
-        return healthWeeks
+            let data = try await fetchExerciseTime(startDate: startDate, endDate: endOfDay)
+            let weeks = self.getWeeksHealthDays(for: 4)
+            let healthWeeks = self.getUpdated(weeks: weeks, with: data)
+            return healthWeeks
+        } else {
+            throw ErrorHealth.notAuthorized
+        }
+    }
+
+    func getHealthInfoForToday() async throws -> HealthDay {
+        let success = try await requestAuthorization()
+        if success {
+            let exercise = try? await self.repository.fetchExerciseTimeToday()
+            let hoursStandingCount = try? await self.repository.fetchHoursStandingCount()
+            let steps = try? await self.repository.fetchStepsCountToday()
+            let healthDay = HealthDay(date: Date(),
+                                      minutesOfExercise: Int(exercise ?? 0),
+                                      steps: Int(steps ?? 0),
+                                      minutesStanding: Int(hoursStandingCount ?? 0))
+            return healthDay
+        } else {
+            throw ErrorHealth.notAuthorized
+        }
+    }
+
+    private func fetchExerciseTime(startDate: Date, endDate: Date) async throws -> [Date : Double] {
+        let success = try await requestAuthorization()
+        if success {
+            let data = try await self.repository.fetchExerciseTime(startDate: startDate,
+                                                                   endDate: endDate)
+            guard let data = data else {
+                throw ErrorHealth.emptyData
+            }
+            return data
+        } else {
+            throw ErrorHealth.notAuthorized
+        }
     }
 
     private func getUpdated(weeks: [[HealthDay]], with exerciseData: [Date: Double]) -> [[HealthDay]]{
