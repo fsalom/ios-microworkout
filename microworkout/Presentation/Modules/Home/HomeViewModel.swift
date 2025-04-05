@@ -5,6 +5,7 @@ struct HomeUiState {
     var weeks: [[HealthDay]]
     var trainings: [Training] = []
     var error: String?
+    var healthInfoForToday: HealthDay = HealthDay(date: Date())
     var isHealthKitAuthorized: Bool = false
 }
 
@@ -37,11 +38,15 @@ final class HomeViewModel: ObservableObject {
         Task {
             do {
                 let weeks = try await healthUseCase.getDaysPerWeeksWithHealthInfo(for: 4)
+                let healthInfoForToday = try await healthUseCase.getHealthInfoForToday()
                 await MainActor.run {
                     self.uiState.weeks = weeks
+                    self.uiState.healthInfoForToday = healthInfoForToday
                 }
             } catch {
-
+                await MainActor.run {
+                    self.uiState.error = "Se ha producido un error obteniendo la información de salud"
+                }
             }
         }
     }
