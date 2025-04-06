@@ -19,18 +19,28 @@ struct Training: Identifiable, Equatable {
         }
     }
 
-    var numberOfSets: Int
-    var numberOfReps: Int
-    var numberOfMinutesPerSet: Int
+    var numberOfSets: Int {
+        return Int(numberOfSetsForSlider)
+    }
+    var numberOfReps: Int {
+        return Int(numberOfRepsForSlider)
+    }
+    var numberOfMinutesPerSet: Int {
+        return Int(numberOfMinutesPerSetForSlider)
+    }
+
+    var numberOfSetsForSlider: Double
+    var numberOfRepsForSlider: Double
+    var numberOfMinutesPerSetForSlider: Double
 
     static func mock() -> Training {
         return Training(
             name: "Mock Training",
             image: "mock",
             type: .cardio,
-            numberOfSets: 1,
-            numberOfReps: 1,
-            numberOfMinutesPerSet: 1
+            numberOfSetsForSlider: 1.0,
+            numberOfRepsForSlider: 1.0,
+            numberOfMinutesPerSetForSlider: 1.0
         )
     }
 }
