@@ -61,7 +61,9 @@ final class HomeViewModel: ObservableObject {
 
     private func askForPermissions() {
         healthKitManager.requestAuthorization { authorization, error in
-            self.uiState.isHealthKitAuthorized = authorization
+            DispatchQueue.main.async {
+                self.uiState.isHealthKitAuthorized = authorization
+            }
         }
     }
 
