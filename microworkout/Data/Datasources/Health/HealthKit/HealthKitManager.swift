@@ -8,6 +8,7 @@ class HealthKitManager {
     private let stepCountType = HKQuantityType.quantityType(forIdentifier: .stepCount)!
     private let heartRateType = HKQuantityType.quantityType(forIdentifier: .heartRate)!
     private let exerciseTimeType = HKQuantityType.quantityType(forIdentifier: .appleExerciseTime)!
+    private let hoursStandingCountType = HKQuantityType.quantityType(forIdentifier: .appleStandTime)!
 
     private init() {}
 
@@ -18,7 +19,7 @@ class HealthKitManager {
             return
         }
 
-        let readTypes: Set<HKObjectType> = [stepCountType, heartRateType, exerciseTimeType]
+        let readTypes: Set<HKObjectType> = [stepCountType, heartRateType, exerciseTimeType, hoursStandingCountType]
         let writeTypes: Set<HKSampleType> = [stepCountType]
 
         healthStore.requestAuthorization(toShare: writeTypes, read: readTypes) { success, error in
@@ -110,5 +111,30 @@ class HealthKitManager {
         }
 
         healthStore.execute(query)
+    }
+
+    /// Obtiene los minutos de ejercicio en un rango de fechas
+    func fetchHoursStandingCount(completion: @escaping (Double?, Error?) -> Void) {
+        requestAuthorization { success, error in
+            if success {
+                let now = Date()
+                let startOfDay = Calendar.current.startOfDay(for: now)
+                let predicate = HKQuery.predicateForSamples(withStart: startOfDay, end: now, options: .strictStartDate)
+
+                let query = HKStatisticsQuery(quantityType: self.hoursStandingCountType, quantitySamplePredicate: predicate, options: .cumulativeSum) { _, result, error in
+                    guard let result = result, let sum = result.sumQuantity() else {
+                        completion(nil, error)
+                        return
+                    }
+
+                    let seconds = sum.doubleValue(for: .second())
+                    let minutes = seconds / 60
+
+                    completion(minutes, nil)
+                }
+
+                self.healthStore.execute(query)
+            }
+        }
     }
 }
