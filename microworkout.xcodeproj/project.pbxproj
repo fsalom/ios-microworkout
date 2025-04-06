@@ -164,6 +164,7 @@
 		C1B670EF2D6282A1005E9173 /* HealthDay.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1B670EE2D62827F005E9173 /* HealthDay.swift */; };
 		C1B670F02D6282A1005E9173 /* HealthDay.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1B670EE2D62827F005E9173 /* HealthDay.swift */; };
 		C1CF26BB2A5DDAA800521884 /* CustomSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1CF26BA2A5DDAA800521884 /* CustomSlider.swift */; };
+		C1D052422D9F1AC100B0FF1D /* HealthContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D052412D9F1AB600B0FF1D /* HealthContainer.swift */; };
 		C1DE682B2A63F86F000DE4C8 /* NumberOfSeriesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1DE682A2A63F86F000DE4C8 /* NumberOfSeriesView.swift */; };
 		C1DE682D2A63FC83000DE4C8 /* RpeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1DE682C2A63FC83000DE4C8 /* RpeView.swift */; };
 		C1F34F622A38CD4300233D66 /* gymwatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1F34F612A38CD4300233D66 /* gymwatchApp.swift */; };
@@ -406,6 +407,7 @@
 		C1B670EC2D627B12005E9173 /* HealthWeeks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthWeeks.swift; sourceTree = "<group>"; };
 		C1B670EE2D62827F005E9173 /* HealthDay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthDay.swift; sourceTree = "<group>"; };
 		C1CF26BA2A5DDAA800521884 /* CustomSlider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomSlider.swift; sourceTree = "<group>"; };
+		C1D052412D9F1AB600B0FF1D /* HealthContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthContainer.swift; sourceTree = "<group>"; };
 		C1DE682A2A63F86F000DE4C8 /* NumberOfSeriesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NumberOfSeriesView.swift; sourceTree = "<group>"; };
 		C1DE682C2A63FC83000DE4C8 /* RpeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RpeView.swift; sourceTree = "<group>"; };
 		C1F34F5F2A38CD4300233D66 /* gymwatch Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "gymwatch Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -664,6 +666,7 @@
 		C162D6662B0DECFC00CDCA26 /* HealthKit */ = {
 			isa = PBXGroup;
 			children = (
+				C1B670E72D626218005E9173 /* HealthKitManager.swift */,
 				C162D6732B0E234100CDCA26 /* Model */,
 				C162D6672B0DEE3400CDCA26 /* HealthKitDataSource.swift */,
 			);
@@ -673,7 +676,6 @@
 		C162D6692B0E175000CDCA26 /* Health */ = {
 			isa = PBXGroup;
 			children = (
-				C162D66A2B0E176800CDCA26 /* HealthRepositoryProtocol.swift */,
 				C162D66C2B0E177200CDCA26 /* HealthRepository.swift */,
 			);
 			path = Health;
@@ -735,6 +737,7 @@
 		C16D03EC2B18ADD10014F906 /* Repositories */ = {
 			isa = PBXGroup;
 			children = (
+				C162D66A2B0E176800CDCA26 /* HealthRepositoryProtocol.swift */,
 				C1398FA52D6DF2D80092DB50 /* TrainingRepositoryProtocol.swift */,
 			);
 			path = Repositories;
@@ -887,6 +890,7 @@
 		C183FC012D550DF9009EE8B5 /* DI */ = {
 			isa = PBXGroup;
 			children = (
+				C1D052412D9F1AB600B0FF1D /* HealthContainer.swift */,
 				C1398FBD2D6E08970092DB50 /* TrainingContainer.swift */,
 				C11589312B0F741700254218 /* Manager */,
 				C1A953152A5D56E200A2A010 /* Helper */,
@@ -1022,7 +1026,6 @@
 		C183FEA32D57D89B009EE8B5 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
-				C1B670E62D62620E005E9173 /* HealthKit */,
 				C183FEBF2D5938EA009EE8B5 /* LiveActivity */,
 				C183FEAA2D57D8B2009EE8B5 /* Navigation */,
 			);
@@ -1253,14 +1256,6 @@
 				C1B670DD2D5FD6C0005E9173 /* HomeViewModel.swift */,
 			);
 			path = Home;
-			sourceTree = "<group>";
-		};
-		C1B670E62D62620E005E9173 /* HealthKit */ = {
-			isa = PBXGroup;
-			children = (
-				C1B670E72D626218005E9173 /* HealthKitManager.swift */,
-			);
-			path = HealthKit;
 			sourceTree = "<group>";
 		};
 		C1F34F602A38CD4300233D66 /* gymwatch Watch App */ = {
@@ -1598,6 +1593,7 @@
 				C15591082A31D1F100E30886 /* HomeWorkoutPlanView.swift in Sources */,
 				C162D6702B0E17EE00CDCA26 /* HealthUseCase.swift in Sources */,
 				C1742E4B2A2F32260020354D /* HomeTrainingView.swift in Sources */,
+				C1D052422D9F1AC100B0FF1D /* HealthContainer.swift in Sources */,
 				C12315B52D6B76F700802707 /* CountdownView.swift in Sources */,
 				C1742E532A309A0C0020354D /* WorkoutPlan.swift in Sources */,
 				C19D17FF2D5DF84C000CCCEF /* TrackingDayBuilder.swift in Sources */,
