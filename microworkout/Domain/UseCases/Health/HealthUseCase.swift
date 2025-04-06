@@ -33,8 +33,7 @@ class HealthUseCase: HealthUseCaseProtocol {
     }
 
     func getHealthInfoForToday() async throws -> HealthDay {
-        let success = try await requestAuthorization()
-        if success {
+        if try await requestAuthorization() {
             let exercise = try? await self.repository.fetchExerciseTimeToday()
             let hoursStandingCount = try? await self.repository.fetchHoursStandingCount()
             let steps = try? await self.repository.fetchStepsCountToday()
@@ -49,8 +48,7 @@ class HealthUseCase: HealthUseCaseProtocol {
     }
 
     private func fetchExerciseTime(startDate: Date, endDate: Date) async throws -> [Date : Double] {
-        let success = try await requestAuthorization()
-        if success {
+        if try await requestAuthorization() {
             let data = try await self.repository.fetchExerciseTime(startDate: startDate,
                                                                    endDate: endDate)
             guard let data = data else {
