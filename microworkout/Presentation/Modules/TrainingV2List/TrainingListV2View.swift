@@ -8,26 +8,22 @@ struct TrainingListV2View: View {
     @State var showDetail: Bool = false
     @State private var scrollOffset: CGFloat = 0
     @State private var scrollPosition: UUID? = nil
-
-
+    
+    
     var body: some View {
-        if showDetail {
-            DetailView(animation: animation, showDetail: $showDetail, training: $selectedTraining)
-        } else {
-            ScrollViewReader { scrollView in
-                ScrollView(.vertical) {
-                    VStack {
-                        ForEach(viewModel.trainings, id: \.id) { training in
-                            TrainingRow(with: training)
-                        }
+        ScrollViewReader { scrollView in
+            ScrollView(.vertical) {
+                VStack {
+                    ForEach(viewModel.trainings, id: \.id) { training in
+                        TrainingRow(with: training)
                     }
-                    .padding()
                 }
+                .padding()
             }
         }
     }
-
-
+    
+    
     @ViewBuilder
     func TrainingRow(with training: Training) -> some View {
         VStack {

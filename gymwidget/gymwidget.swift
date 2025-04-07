@@ -46,13 +46,29 @@ struct SimpleEntry: TimelineEntry {
 struct gymwidgetEntryView : View {
     var entry: Provider.Entry
 
-    var body: some View {
-        VStack {
-            Text("Time:")
-            Text(entry.date, style: .time)
+    var countdownDate: Date {
+           // Cuenta regresiva de 25 minutos
+           Calendar.current.date(byAdding: .minute, value: 25, to: entry.date) ?? entry.date
+       }
 
-            Text("Emoji:")
-            Text(entry.emoji)
+    var body: some View {
+        VStack(alignment: .center){
+            Text("Entrenamiento en marcha")
+                .font(.footnote)
+                .padding()
+                .foregroundStyle(.blue)
+                .background(
+                    RoundedRectangle(cornerRadius: 15)
+                        .fill(Color.white)
+                )
+            Text("Completa 10 flexiones en los próximos 25 minutos")
+                .font(.footnote)
+                .foregroundStyle(.white)
+            Text(countdownDate, style: .timer)
+                .frame(maxWidth: .infinity)
+                .font(.headline)
+                .foregroundStyle(.white)
+                .frame(alignment: .center)
         }
     }
 }
@@ -64,7 +80,7 @@ struct gymwidget: Widget {
         StaticConfiguration(kind: kind, provider: Provider()) { entry in
             if #available(iOS 17.0, *) {
                 gymwidgetEntryView(entry: entry)
-                    .containerBackground(.fill.tertiary, for: .widget)
+                    .containerBackground(.blue, for: .widget)
             } else {
                 gymwidgetEntryView(entry: entry)
                     .padding()
