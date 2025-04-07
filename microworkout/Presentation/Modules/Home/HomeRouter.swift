@@ -12,6 +12,6 @@ class HomeRouter {
     }
 
     func goToStart(this training: Training, and namespace: Namespace.ID) {
-        navigator.push(to: TrainingDetailBuilder().build(this: training, and: namespace))
+        navigator.push(to: TrainingDetailV2Builder().build(this: training, and: namespace))
     }
 }
