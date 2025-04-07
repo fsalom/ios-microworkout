@@ -10,103 +10,96 @@ struct HomeView: View {
 
 
     var body: some View {
-        if showDetail {
-            DetailView(animation: animation,
-                       showDetail: $showDetail,
-                       training: $selectedTraining)
-        } else {
-            ScrollView {
-
-                // HEADER
-                HStack(alignment: .top) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Welcome back")
-                            .font(.footnote)
-                            .lineLimit(2)
-                        Text("Fernando!")
-                            .font(.largeTitle)
-                            .fontWeight(.bold)
-                    }
-                    Spacer()
-                }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
-
-                // TODAY HEALTH INFO
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("Hoy")
-                        .font(.title2)
+        ScrollView {
+            // HEADER
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Welcome back")
+                        .font(.footnote)
+                        .lineLimit(2)
+                    Text("Fernando!")
+                        .font(.largeTitle)
                         .fontWeight(.bold)
-
-                    HStack(spacing: 12) {
-                        ForEach([
-                            ("\(viewModel.uiState.healthInfoForToday.steps)", "Pasos"),
-                            ("\(viewModel.uiState.healthInfoForToday.minutesOfExercise)", "Min. ejercicio"),
-                            ("\(viewModel.uiState.healthInfoForToday.minutesStanding)", "Min. de pie")
-                        ], id: \.1) { value, label in
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(value)
-                                    .font(.headline)
-                                    .fontWeight(.bold)
-                                    .frame(maxWidth: .infinity)
-                                Text(label)
-                                    .font(.footnote)
-                                    .frame(maxWidth: .infinity)
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color(.systemGray6))
-                            .cornerRadius(12)
-                        }
-                    }
                 }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
+                Spacer()
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
 
-                // HEALTH CALENDAR
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("Progresión ejercicio")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                    HealthWeeksView(weeks: self.$viewModel.uiState.weeks)
-                }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
-
-                Divider()
-                    .padding(.horizontal, 16)
-
-                // MICRO WORKOUT
-                Text("Micro entrenamientos")
+            // TODAY HEALTH INFO
+            VStack(alignment: .leading, spacing: 10) {
+                Text("Hoy")
                     .font(.title2)
                     .fontWeight(.bold)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
-                ListLastTrainings()
 
-                Divider()
-                    .padding(.horizontal, 16)
-
-            }
-            .onAppear {
-                if !hasAppeared {
-                    viewModel.loadWeeksWithHealthInfo()
-                    hasAppeared = true
+                HStack(spacing: 12) {
+                    ForEach([
+                        ("\(viewModel.uiState.healthInfoForToday.steps)", "Pasos"),
+                        ("\(viewModel.uiState.healthInfoForToday.minutesOfExercise)", "Min. ejercicio"),
+                        ("\(viewModel.uiState.healthInfoForToday.minutesStanding)", "Min. de pie")
+                    ], id: \.1) { value, label in
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(value)
+                                .font(.headline)
+                                .fontWeight(.bold)
+                                .frame(maxWidth: .infinity)
+                            Text(label)
+                                .font(.footnote)
+                                .frame(maxWidth: .infinity)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color(.systemGray6))
+                        .cornerRadius(12)
+                    }
                 }
             }
-            .onChange(of: scenePhase) { oldPhase, newPhase in
-                if newPhase == .active && hasAppeared {
-                    viewModel.loadWeeksWithHealthInfo()
-                }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
+
+            // HEALTH CALENDAR
+            VStack(alignment: .leading, spacing: 10) {
+                Text("Progresión ejercicio")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                HealthWeeksView(weeks: self.$viewModel.uiState.weeks)
             }
-            .onChange(of: selectedTraining, { oldValue, newValue in
-                selectedTraining = newValue
-                guard let selectedTraining else { return }
-                viewModel.save(this: selectedTraining)
-            })
-            .edgesIgnoringSafeArea(.bottom)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
+
+            Divider()
+                .padding(.horizontal, 16)
+
+            // MICRO WORKOUT
+            Text("Micro entrenamientos")
+                .font(.title2)
+                .fontWeight(.bold)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+            ListLastTrainings()
+
+            Divider()
+                .padding(.horizontal, 16)
+
         }
+        .onAppear {
+            if !hasAppeared {
+                viewModel.loadWeeksWithHealthInfo()
+                hasAppeared = true
+            }
+        }
+        .onChange(of: scenePhase) { oldPhase, newPhase in
+            if newPhase == .active && hasAppeared {
+                viewModel.loadWeeksWithHealthInfo()
+            }
+        }
+        .onChange(of: selectedTraining, { oldValue, newValue in
+            selectedTraining = newValue
+            guard let selectedTraining else { return }
+            viewModel.save(this: selectedTraining)
+        })
+        .edgesIgnoringSafeArea(.bottom)
     }
 
     @ViewBuilder
@@ -130,10 +123,7 @@ struct HomeView: View {
                         .matchedGeometryEffect(id: training.image, in: animation, isSource: !showDetail)
                         .mask(RoundedRectangle(cornerRadius: 20.0))
                         .onTapGesture {
-                            withAnimation(.spring()) {
-                                selectedTraining = training
-                                showDetail = true
-                            }
+                            viewModel.goToStart(this: training, and: animation)
                         }
                 }
             }
