@@ -6,7 +6,7 @@ enum HealthKitError: Error {
 }
 
 class HealthKitDataSource: HealthKitDataSourceProtocol {
-
+    
     var healthKitManager: HealthKitManager
 
     init(healthKitManager: HealthKitManager) {
@@ -25,18 +25,6 @@ class HealthKitDataSource: HealthKitDataSourceProtocol {
         }
     }
 
-    func fetchExerciseTimeToday() async throws -> Double? {
-        return try await withCheckedThrowingContinuation { continuation in
-            self.healthKitManager.fetchExerciseTimeToday { steps, error in
-                if let error = error {
-                    continuation.resume(throwing: error)
-                } else {
-                    continuation.resume(returning: steps)
-                }
-            }
-        }
-    }
-
     func fetchStepsCountToday() async throws -> Double? {
         return try await withCheckedThrowingContinuation { continuation in
             self.healthKitManager.fetchStepCount { steps, error in
@@ -49,13 +37,49 @@ class HealthKitDataSource: HealthKitDataSourceProtocol {
         }
     }
 
-    func fetchHoursStandingCount() async throws -> Double? {
+    func fetchStepsCount(startDate: Date, endDate: Date) async throws -> [Date : Double]? {
         return try await withCheckedThrowingContinuation { continuation in
-            self.healthKitManager.fetchHoursStandingCount { hours, error in
+            self.healthKitManager.fetchStepCount(startDate: startDate, endDate: endDate) { steps, error in
                 if let error = error {
                     continuation.resume(throwing: error)
                 } else {
-                    continuation.resume(returning: hours)
+                    continuation.resume(returning: steps)
+                }
+            }
+        }
+    }
+
+    func fetchStandingTime() async throws -> Double? {
+        return try await withCheckedThrowingContinuation { continuation in
+            self.healthKitManager.fetchStandingTime { minutes, error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume(returning: minutes)
+                }
+            }
+        }
+    }
+
+    func fetchStandingTime(startDate: Date, endDate: Date) async throws -> [Date : Double]? {
+        return try await withCheckedThrowingContinuation { continuation in
+            self.healthKitManager.fetchStandingTime(startDate: startDate, endDate: endDate) { result, error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume(returning: result)
+                }
+            }
+        }
+    }
+
+    func fetchExerciseTimeToday() async throws -> Double? {
+        return try await withCheckedThrowingContinuation { continuation in
+            self.healthKitManager.fetchExerciseTimeToday { steps, error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume(returning: steps)
                 }
             }
         }
