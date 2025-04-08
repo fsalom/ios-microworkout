@@ -8,7 +8,7 @@ class HealthKitManager {
     private let stepCountType = HKQuantityType.quantityType(forIdentifier: .stepCount)!
     private let heartRateType = HKQuantityType.quantityType(forIdentifier: .heartRate)!
     private let exerciseTimeType = HKQuantityType.quantityType(forIdentifier: .appleExerciseTime)!
-    private let hoursStandingCountType = HKQuantityType.quantityType(forIdentifier: .appleStandTime)!
+    private let standingTimeType = HKQuantityType.quantityType(forIdentifier: .appleStandTime)!
 
     private init() {}
 
@@ -19,7 +19,7 @@ class HealthKitManager {
             return
         }
 
-        let readTypes: Set<HKObjectType> = [stepCountType, heartRateType, exerciseTimeType, hoursStandingCountType]
+        let readTypes: Set<HKObjectType> = [stepCountType, heartRateType, exerciseTimeType, standingTimeType]
         let writeTypes: Set<HKSampleType> = [stepCountType]
 
         healthStore.requestAuthorization(toShare: writeTypes, read: readTypes) { success, error in
@@ -44,6 +44,41 @@ class HealthKitManager {
 
         healthStore.execute(query)
     }
+
+    func fetchStepCount(startDate: Date, endDate: Date, completion: @escaping ([Date: Double]?, Error?) -> Void) {
+        let predicate = HKQuery.predicateForSamples(withStart: startDate, end: endDate, options: .strictStartDate)
+
+        let interval = DateComponents(day: 1) // Agrupar por día
+
+        let query = HKStatisticsCollectionQuery(
+            quantityType: stepCountType,
+            quantitySamplePredicate: predicate,
+            options: .cumulativeSum,
+            anchorDate: startDate,
+            intervalComponents: interval
+        )
+
+        query.initialResultsHandler = { _, result, error in
+            guard let result = result else {
+                completion(nil, error)
+                return
+            }
+
+            var stepsData: [Date: Double] = [:]
+            result.enumerateStatistics(from: startDate, to: endDate) { statistics, _ in
+                if let sum = statistics.sumQuantity() {
+                    let steps = sum.doubleValue(for: .count())
+                    let date = statistics.startDate
+                    stepsData[date] = steps
+                }
+            }
+
+            completion(stepsData, nil)
+        }
+
+        healthStore.execute(query)
+    }
+
 
     /// Obtiene la última medición de frecuencia cardíaca
     func fetchLatestHeartRate(completion: @escaping (Double?, Error?) -> Void) {
@@ -114,14 +149,14 @@ class HealthKitManager {
     }
 
     /// Obtiene los minutos de ejercicio en un rango de fechas
-    func fetchHoursStandingCount(completion: @escaping (Double?, Error?) -> Void) {
+    func fetchStandingTime(completion: @escaping (Double?, Error?) -> Void) {
         requestAuthorization { success, error in
             if success {
                 let now = Date()
                 let startOfDay = Calendar.current.startOfDay(for: now)
                 let predicate = HKQuery.predicateForSamples(withStart: startOfDay, end: now, options: .strictStartDate)
 
-                let query = HKStatisticsQuery(quantityType: self.hoursStandingCountType, quantitySamplePredicate: predicate, options: .cumulativeSum) { _, result, error in
+                let query = HKStatisticsQuery(quantityType: self.standingTimeType, quantitySamplePredicate: predicate, options: .cumulativeSum) { _, result, error in
                     guard let result = result, let sum = result.sumQuantity() else {
                         completion(nil, error)
                         return
@@ -136,5 +171,41 @@ class HealthKitManager {
                 self.healthStore.execute(query)
             }
         }
+    }
+
+    func fetchStandingTime(startDate: Date, endDate: Date, completion: @escaping ([Date: Double]?, Error?) -> Void) {
+        let predicate = HKQuery.predicateForSamples(withStart: startDate, end: endDate, options: .strictStartDate)
+
+        let interval = DateComponents(day: 1) // Agrupar por día
+
+        let query = HKStatisticsCollectionQuery(
+            quantityType: standingTimeType,
+            quantitySamplePredicate: predicate,
+            options: .cumulativeSum,
+            anchorDate: startDate,
+            intervalComponents: interval
+        )
+
+        query.initialResultsHandler = { _, result, error in
+            guard let result = result else {
+                completion(nil, error)
+                return
+            }
+
+            var exerciseData: [Date: Double] = [:]
+            result.enumerateStatistics(from: startDate, to: endDate) { statistics, _ in
+                if let sum = statistics.sumQuantity() {
+                    let seconds = sum.doubleValue(for: .second())
+                    let minutes = seconds / 60
+                    //let minutes = sum.doubleValue(for: HKUnit.minute())
+                    let date = statistics.startDate
+                    exerciseData[date] = minutes
+                }
+            }
+
+            completion(exerciseData, nil)
+        }
+
+        healthStore.execute(query)
     }
 }
