@@ -8,10 +8,10 @@ class TrainingRepository: TrainingRepositoryProtocol {
 
     func getTrainings() -> [Training] {
         return [
-            Training(name: "Flexiones", image: "push-up-1",type: .strength, numberOfSets: 10, numberOfReps: 10, numberOfMinutesPerSet: 60),
-            Training(name: "Dominadas", image: "pull-up-1", type: .strength, numberOfSets: 10, numberOfReps: 5, numberOfMinutesPerSet: 60),
-            Training(name: "Sentadillas", image: "squat-1", type: .strength, numberOfSets: 10, numberOfReps: 20, numberOfMinutesPerSet: 60),
-            Training(name: "Abdominales", image: "abs-1", type: .strength, numberOfSets: 10, numberOfReps: 20, numberOfMinutesPerSet: 60)
+            Training(name: "Flexiones", image: "push-up-1",type: .strength, numberOfSetsForSlider: 10, numberOfRepsForSlider: 10, numberOfMinutesPerSetForSlider: 60),
+            Training(name: "Dominadas", image: "pull-up-1", type: .strength, numberOfSetsForSlider: 10, numberOfRepsForSlider: 5, numberOfMinutesPerSetForSlider: 60),
+            Training(name: "Sentadillas", image: "squat-1", type: .strength, numberOfSetsForSlider: 10, numberOfRepsForSlider: 20, numberOfMinutesPerSetForSlider: 60),
+            Training(name: "Abdominales", image: "abs-1", type: .strength, numberOfSetsForSlider: 10, numberOfRepsForSlider: 20, numberOfMinutesPerSetForSlider: 60)
         ]
     }
 
@@ -28,7 +28,7 @@ class TrainingRepository: TrainingRepositoryProtocol {
 
 fileprivate extension TrainingDTO {
     func toDomain() -> Training {
-        return Training(name: self.name, image: self.image, type: .strength, numberOfSets: 10, numberOfReps: 10, numberOfMinutesPerSet: 60)
+        return Training(name: self.name, image: self.image, type: .strength, numberOfSetsForSlider: 10, numberOfRepsForSlider: 10, numberOfMinutesPerSetForSlider: 60)
     }
 }
 
@@ -38,8 +38,8 @@ fileprivate extension Training {
                            image: self.image,
                            type: self.type,
                            numberOfSetsCompleted: self.numberOfSetsCompleted,
-                           numberOfSets: self.numberOfSets,
-                           numberOfReps: self.numberOfReps,
-                           numberOfMinutesPerSet: self.numberOfMinutesPerSet)
+                           numberOfSets: self.numberOfSetsForSlider,
+                           numberOfReps: self.numberOfRepsForSlider,
+                           numberOfMinutesPerSet: self.numberOfMinutesPerSetForSlider)
     }
 }
