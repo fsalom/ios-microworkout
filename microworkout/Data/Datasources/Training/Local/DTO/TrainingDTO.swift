@@ -9,7 +9,7 @@ struct TrainingDTO: Codable {
     var completedAt: Date?
     var sets: [Date] = []
     var numberOfSetsCompleted: Int = 0
-    var numberOfSets: Int
-    var numberOfReps: Int
-    var numberOfMinutesPerSet: Int
+    var numberOfSets: Double
+    var numberOfReps: Double
+    var numberOfMinutesPerSet: Double
 }
