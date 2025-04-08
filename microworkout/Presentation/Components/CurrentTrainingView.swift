@@ -9,7 +9,7 @@ import SwiftUI
 
 struct CurrentTrainingView: View {
     @Binding var isPresented: Bool
-    @Binding var training: Training?
+    @Binding var training: Training
     @State var hasToResetTimer = false
     @State private var isPressed = false
     var animation: Namespace.ID
@@ -35,7 +35,7 @@ struct CurrentTrainingView: View {
                     .padding(.bottom, 50)
                 HStack(spacing: 10) {
                     VStack {
-                        Text("\(training!.numberOfSetsCompleted)")
+                        Text("\(training.numberOfSetsCompleted)")
                             .font(.title)
                             .foregroundStyle(.white)
                             .fontWeight(.bold)
@@ -45,7 +45,7 @@ struct CurrentTrainingView: View {
                     }
                     .frame(maxWidth: .infinity)
                     VStack {
-                        Text("\(training!.numberOfSetsCompleted*training!.numberOfReps)")
+                        Text("\(training.numberOfSetsCompleted*training.numberOfReps)")
                             .font(.title)
                             .foregroundStyle(.white)
                             .fontWeight(.bold)
@@ -55,7 +55,7 @@ struct CurrentTrainingView: View {
                     }
                     .frame(maxWidth: .infinity)
                     VStack {
-                        Text(training!.startedAt!, style: .timer)
+                        Text(training.startedAt!, style: .timer)
                             .font(.title)
                             .foregroundStyle(.white)
                             .fontWeight(.bold)
@@ -67,7 +67,7 @@ struct CurrentTrainingView: View {
                 }
                 .padding(.bottom, 100)
                 Button {
-                    training?.numberOfSetsCompleted += 1
+                    training.numberOfSetsCompleted += 1
                     hasToResetTimer = true
                     withAnimation(.easeOut(duration: 0.2)) {
                         isPressed = true
@@ -78,7 +78,7 @@ struct CurrentTrainingView: View {
                         }
                     }
                 } label: {
-                    CountdownView(startDate:training?.sets.last ?? Date(), totalMinutes: training!.numberOfMinutesPerSet, hasToResetTimer: $hasToResetTimer)
+                    CountdownView(startDate:training.sets.last ?? Date(), totalMinutes: training.numberOfMinutesPerSet, hasToResetTimer: $hasToResetTimer)
                         .padding(5)
                         .background(isPressed ? Color.blue : Color.clear)
                         .overlay(
@@ -117,9 +117,9 @@ struct CurrentTrainingView: View {
     @ViewBuilder
     func getTextTotal() -> Text {
         Text("Tu entreno actual consiste en un total de ") +
-        Text("\(training!.numberOfReps*training!.numberOfSets)").fontWeight(.bold) +
+        Text("\(training.numberOfReps*training.numberOfSets)").fontWeight(.bold) +
         Text(" repeticiones a lo largo de ") +
-        Text("\(Int(training!.numberOfMinutesPerSet*training!.numberOfSets)/60)").fontWeight(.bold) +
+        Text("\(Int(training.numberOfMinutesPerSet*training.numberOfSets)/60)").fontWeight(.bold) +
         Text(" horas")
     }
 
