@@ -28,7 +28,7 @@ struct HomeView: View {
 
             // TODAY HEALTH INFO
             VStack(alignment: .leading, spacing: 10) {
-                Text("Hoy")
+                Text("\(viewModel.uiState.healthInfoForToday.dateWithFormat)")
                     .font(.title2)
                     .fontWeight(.bold)
 
@@ -62,7 +62,9 @@ struct HomeView: View {
                 Text("Progresión ejercicio")
                     .font(.title2)
                     .fontWeight(.bold)
-                HealthWeeksView(weeks: self.$viewModel.uiState.weeks)
+                HealthWeeksView(weeks: self.$viewModel.uiState.weeks) { day in
+                    self.viewModel.showHealthInfo(for: day)
+                }
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 8)
