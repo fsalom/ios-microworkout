@@ -34,6 +34,12 @@ final class HomeViewModel: ObservableObject {
         trainingUseCase.save(training)
     }
 
+    func showHealthInfo(for day: HealthDay) {
+        DispatchQueue.main.async {
+            self.uiState.healthInfoForToday = day
+        }
+    }
+
     func loadWeeksWithHealthInfo() {
         Task {
             do {
