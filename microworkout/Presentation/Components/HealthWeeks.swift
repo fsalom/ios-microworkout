@@ -1,16 +1,10 @@
-//
-//  Weeks.swift
-//  microworkout
-//
-//  Created by Fernando Salom Carratala on 16/2/25.
-//
-
 import SwiftUI
 
 struct HealthWeeksView: View {
-
     @Binding var weeks: [[HealthDay]]
     let daysOfWeek = ["L", "M", "X", "J", "V", "S", "D"]
+    var onDayTap: ((HealthDay) -> Void)? = nil
+
     var maxMinutes: Int {
         weeks.flatMap { $0.map { $0.minutesOfExercise } }.max() ?? 1
     }
@@ -23,7 +17,6 @@ struct HealthWeeksView: View {
 
     var body: some View {
         VStack(spacing: 10) {
-            // Encabezado de días
             LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 7), spacing: 5) {
                 ForEach(daysOfWeek, id: \.self) { day in
                     Text("\(day)")
@@ -51,6 +44,9 @@ struct HealthWeeksView: View {
                                 RoundedRectangle(cornerRadius: 5)
                                     .stroke(Color.green, lineWidth: Calendar.current.isDate(healthDay.date, inSameDayAs: Date()) ? 1 : 0)
                             )
+                            .onTapGesture {
+                                onDayTap?(healthDay)
+                            }
                     }
                 }
             }
