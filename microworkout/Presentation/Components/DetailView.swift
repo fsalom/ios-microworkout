@@ -6,7 +6,7 @@ struct DetailView: View {
     @State private var numberOfRepsForSlider: Double = 1
     @State private var numberOfMinutesPerSetForSlider: Double = 10
     @Binding var showDetail: Bool
-    @Binding var training: Training?
+    @Binding var training: Training
     @State var hasTrainingStarted: Bool = false
 
     var body: some View {
@@ -18,15 +18,15 @@ struct DetailView: View {
             VStack{
                 ZStack(alignment: .top) {
                     GeometryReader { geometry in
-                        Image(training!.image)
+                        Image(training.image)
                             .resizable()
                             .aspectRatio(contentMode: .fill)
                             .frame(width: geometry.size.width, height: 300)
-                            .matchedGeometryEffect(id: training!.image, in: animation, isSource: showDetail)
+                            .matchedGeometryEffect(id: training.image, in: animation, isSource: showDetail)
                             .clipShape(RoundedRectangle(cornerRadius: 20.0)) // Aplica el redondeo correctamente
                     }
                     .frame(height: 300)
-                    Text(training!.name)
+                    Text(training.name)
                         .font(.system(size: 40))
                         .fontWeight(.bold)
                         .padding(.top, 150)
@@ -46,7 +46,7 @@ struct DetailView: View {
                         Spacer()
                         SliderView(
                             onFinish: {
-                                training?.startedAt = Date()
+                                training.startedAt = Date()
                                 withAnimation {
                                     hasTrainingStarted = true
                                 }
@@ -67,33 +67,31 @@ struct DetailView: View {
     }
 
     func updateSliderValues() {
-        if let training = training {
-            self.training = nil
+
             numberOfSetsForSlider = Double(training.numberOfSets)
             numberOfRepsForSlider = Double(training.numberOfReps)
             numberOfMinutesPerSetForSlider = Double(training.numberOfMinutesPerSet)
-            self.training = training
-        }
+
     }
 
     @ViewBuilder
     func getTextTotal() -> Text {
         Text("Así harás un total de ") +
-        Text("\(training!.numberOfReps*training!.numberOfSets)").fontWeight(.bold) +
+        Text("\(training.numberOfReps*training.numberOfSets)").fontWeight(.bold) +
         Text(" repeticiones a lo largo de ") +
-        Text("\(Int(training!.numberOfMinutesPerSet*training!.numberOfSets)/60)").fontWeight(.bold) +
+        Text("\(Int(training.numberOfMinutesPerSet*training.numberOfSets)/60)").fontWeight(.bold) +
         Text(" horas (aproximadamente)")
 
     }
 
     @ViewBuilder
     func getSlidersView() -> some View {
-        if let training = training { // Solo muestra los sliders si hay un training válido
             VStack {
+                /*
                 Text("\(training.numberOfSets) series")
                     .fontWeight(.bold)
                 Slider(value: $numberOfSetsForSlider, in: 1...20, step: 1, onEditingChanged: { _ in
-                    self.training?.numberOfSets = Int(numberOfSetsForSlider)
+                    self.training.numberOfSets = Int(numberOfSetsForSlider)
                 })
 
                 Divider()
@@ -101,7 +99,7 @@ struct DetailView: View {
                 Text("\(training.numberOfReps) repeticiones")
                     .fontWeight(.bold)
                 Slider(value: $numberOfRepsForSlider, in: 1...20, step: 1, onEditingChanged: { _ in
-                    self.training?.numberOfReps = Int(numberOfRepsForSlider)
+                    self.training.numberOfReps = Int(numberOfRepsForSlider)
                 })
 
                 Divider()
@@ -109,12 +107,9 @@ struct DetailView: View {
                 Text("\(training.numberOfMinutesPerSet) minutos entre series")
                     .fontWeight(.bold)
                 Slider(value: $numberOfMinutesPerSetForSlider, in: 10...120, step: 10, onEditingChanged: { _ in
-                    self.training?.numberOfMinutesPerSet = Int(numberOfMinutesPerSetForSlider)
-                })
+                    self.training.numberOfMinutesPerSet = Int(numberOfMinutesPerSetForSlider)
+                })*/
             }
-        } else {
-            Text("No hay entrenamiento seleccionado")
-        }
     }
 
     var dismissButton: some View {
