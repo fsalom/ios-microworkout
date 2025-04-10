@@ -23,7 +23,15 @@ class HealthRepository: HealthRepositoryProtocol {
         try await dataSource.fetchStepsCountToday()
     }
 
-    func fetchHoursStandingCount() async throws -> Double? {
-        try await dataSource.fetchHoursStandingCount()
+    func fetchStepsCount(startDate: Date, endDate: Date) async throws -> [Date : Double]? {
+        try await dataSource.fetchStepsCount(startDate: startDate, endDate: endDate)
+    }
+
+    func fetchStandingTime() async throws -> Double? {
+        try await dataSource.fetchStandingTime()
+    }
+
+    func fetchStandingTime(startDate: Date, endDate: Date) async throws -> [Date : Double]? {
+        try await dataSource.fetchStandingTime(startDate: startDate, endDate: endDate)
     }
 }
