@@ -23,9 +23,15 @@ class HealthUseCase: HealthUseCaseProtocol {
             let startDate = calendar.startOfDay(for: Date().addingTimeInterval(-42 * 24 * 60 * 60))
             let endOfDay = calendar.date(bySettingHour: 23, minute: 59, second: 59, of: Date())!
 
-            let data = try await fetchExerciseTime(startDate: startDate, endDate: endOfDay)
+            let exerciseData = try await fetchExerciseTime(startDate: startDate, endDate: endOfDay)
+            let standingData = try await fetchStandingTime(startDate: startDate, endDate: endOfDay)
+            let stepsData = try await fetchStepsCount(startDate: startDate, endDate: endOfDay)
+
             let weeks = self.getWeeksHealthDays(for: 4)
-            let healthWeeks = self.getUpdated(weeks: weeks, with: data)
+            let healthWeeks = self.getUpdated(weeks: weeks,
+                                              exerciseData: exerciseData,
+                                              standingData: standingData,
+                                              stepsData: stepsData)
             return healthWeeks
         } else {
             throw ErrorHealth.notAuthorized
@@ -35,7 +41,7 @@ class HealthUseCase: HealthUseCaseProtocol {
     func getHealthInfoForToday() async throws -> HealthDay {
         if try await requestAuthorization() {
             let exercise = try? await self.repository.fetchExerciseTimeToday()
-            let hoursStandingCount = try? await self.repository.fetchHoursStandingCount()
+            let hoursStandingCount = try? await self.repository.fetchStandingTime()
             let steps = try? await self.repository.fetchStepsCountToday()
             let healthDay = HealthDay(date: Date(),
                                       minutesOfExercise: Int(exercise ?? 0),
@@ -60,7 +66,34 @@ class HealthUseCase: HealthUseCaseProtocol {
         }
     }
 
-    private func getUpdated(weeks: [[HealthDay]], with exerciseData: [Date: Double]) -> [[HealthDay]]{
+    private func fetchStepsCount(startDate: Date, endDate: Date) async throws -> [Date : Double] {
+        if try await requestAuthorization() {
+            let data = try await self.repository.fetchStepsCount(startDate: startDate, endDate: endDate)
+            guard let data = data else {
+                throw ErrorHealth.emptyData
+            }
+            return data
+        } else {
+            throw ErrorHealth.notAuthorized
+        }
+    }
+
+    private func fetchStandingTime(startDate: Date, endDate: Date) async throws -> [Date : Double] {
+        if try await requestAuthorization() {
+            let data = try await self.repository.fetchStandingTime(startDate: startDate, endDate: endDate)
+            guard let data = data else {
+                throw ErrorHealth.emptyData
+            }
+            return data
+        } else {
+            throw ErrorHealth.notAuthorized
+        }
+    }
+
+    private func getUpdated(weeks: [[HealthDay]],
+                            exerciseData: [Date: Double],
+                            standingData: [Date: Double],
+                            stepsData: [Date: Double]) -> [[HealthDay]]{
         let calendar = Calendar.current
         var weeksBackup = weeks
         for weekIndex in weeksBackup.indices {
@@ -68,6 +101,12 @@ class HealthUseCase: HealthUseCaseProtocol {
                 let healthDay = weeksBackup[weekIndex][dayIndex]
                 if let minutes = exerciseData[calendar.startOfDay(for: healthDay.date)] {
                     weeksBackup[weekIndex][dayIndex].minutesOfExercise = Int(minutes) // Actualizar minutos
+                }
+                if let steps = stepsData[calendar.startOfDay(for: healthDay.date)] {
+                    weeksBackup[weekIndex][dayIndex].steps = Int(steps) // Actualizar minutos
+                }
+                if let standing = standingData[calendar.startOfDay(for: healthDay.date)] {
+                    weeksBackup[weekIndex][dayIndex].minutesStanding = Int(standing) // Actualizar minutos
                 }
             }
         }
