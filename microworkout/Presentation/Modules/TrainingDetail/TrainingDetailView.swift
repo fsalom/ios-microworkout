@@ -22,13 +22,13 @@ struct TrainingDetailView: View {
                     .frame(maxWidth: .infinity)
                     .background(.gray).opacity(0.5)
                     .clipShape(RoundedRectangle(cornerRadius: 6))
-                Slider(value: $viewModel.training.numberOfSetsForSlider, in: 1...20, step: 1)
+                //Slider(value: $viewModel.training.numberOfSetsForSlider, in: 1...20, step: 1)
                 Text("\(viewModel.training.numberOfReps) Repeticiones")
                     .padding()
                     .frame(maxWidth: .infinity)
                     .background(.gray).opacity(0.5)
                     .clipShape(RoundedRectangle(cornerRadius: 6))
-                Slider(value: $viewModel.training.numberOfRepsForSlider, in: 1...20, step: 1)
+                //Slider(value: $viewModel.training.numberOfRepsForSlider, in: 1...20, step: 1)
                 Spacer()
                 SliderView(onFinish: {
 
@@ -45,9 +45,9 @@ struct TrainingDetailView_Previews: PreviewProvider {
         TrainingDetailBuilder().build(this: Training(name: "example",
                                                      image: "abs-1",
                                                      type: .strength,
-                                                     numberOfSets: 10,
-                                                     numberOfReps: 10,
-                                                     numberOfMinutesPerSet: 60),
+                                                     numberOfSetsForSlider: 10,
+                                                     numberOfRepsForSlider: 10,
+                                                     numberOfMinutesPerSetForSlider: 60),
                                       and: namespace)
     }
 }
