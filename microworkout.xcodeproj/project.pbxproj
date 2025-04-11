@@ -80,6 +80,12 @@
 		C17040A52DA2E5F4000E97C0 /* TrainingDetailV2Builder.swift in Sources */ = {isa = PBXBuildFile; fileRef = C17040A42DA2E5ED000E97C0 /* TrainingDetailV2Builder.swift */; };
 		C17040A72DA2E5FD000E97C0 /* TrainingDetailV2View.swift in Sources */ = {isa = PBXBuildFile; fileRef = C17040A62DA2E5F8000E97C0 /* TrainingDetailV2View.swift */; };
 		C17040A92DA2E60C000E97C0 /* TrainingDetailV2ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C17040A82DA2E605000E97C0 /* TrainingDetailV2ViewModel.swift */; };
+		C17040AA2DA93C98000E97C0 /* TrainingLocalDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1398FB02D6DF3DC0092DB50 /* TrainingLocalDataSource.swift */; };
+		C17040AB2DA93C98000E97C0 /* TrainingDTO.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1398FB72D6DF4050092DB50 /* TrainingDTO.swift */; };
+		C17040AC2DA93C98000E97C0 /* TrainingLocalDataStoreProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1398FAC2D6DF3A50092DB50 /* TrainingLocalDataStoreProtocol.swift */; };
+		C17040AD2DA93CA0000E97C0 /* TrainingRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1398FA82D6DF3210092DB50 /* TrainingRepository.swift */; };
+		C17040AE2DA93CAA000E97C0 /* TrainingRepositoryProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1398FA52D6DF2D80092DB50 /* TrainingRepositoryProtocol.swift */; };
+		C17040AF2DA93CB2000E97C0 /* TrainingUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1398FC02D6E09570092DB50 /* TrainingUseCase.swift */; };
 		C1742E462A2F31DA0020354D /* Workout.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1742E452A2F31DA0020354D /* Workout.swift */; };
 		C1742E482A2F31F00020354D /* WorkoutUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1742E472A2F31F00020354D /* WorkoutUseCase.swift */; };
 		C1742E4B2A2F32260020354D /* HomeTrainingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1742E4A2A2F32260020354D /* HomeTrainingView.swift */; };
@@ -1596,7 +1602,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C17040AA2DA93C98000E97C0 /* TrainingLocalDataSource.swift in Sources */,
+				C17040AB2DA93C98000E97C0 /* TrainingDTO.swift in Sources */,
+				C17040AC2DA93C98000E97C0 /* TrainingLocalDataStoreProtocol.swift in Sources */,
 				C183FEC32D59392C009EE8B5 /* LiveActivityManager.swift in Sources */,
+				C17040AD2DA93CA0000E97C0 /* TrainingRepository.swift in Sources */,
+				C17040AE2DA93CAA000E97C0 /* TrainingRepositoryProtocol.swift in Sources */,
+				C17040AF2DA93CB2000E97C0 /* TrainingUseCase.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
