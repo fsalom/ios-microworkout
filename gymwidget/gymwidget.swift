@@ -9,6 +9,14 @@ import WidgetKit
 import SwiftUI
 
 struct Provider: TimelineProvider {
+    var usecase: TrainingUseCase
+
+    init() {
+        let datasource: TrainingLocalDataSourceProtocol = TrainingLocalDataSource()
+        let repository: TrainingRepositoryProtocol = TrainingRepository(local: datasource)
+        self.usecase = TrainingUseCase(repository: repository)
+    }
+
     func placeholder(in context: Context) -> SimpleEntry {
         SimpleEntry(date: Date(), emoji: "😀")
     }
