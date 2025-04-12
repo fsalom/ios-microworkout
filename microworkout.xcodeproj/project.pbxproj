@@ -86,6 +86,8 @@
 		C17040AD2DA93CA0000E97C0 /* TrainingRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1398FA82D6DF3210092DB50 /* TrainingRepository.swift */; };
 		C17040AE2DA93CAA000E97C0 /* TrainingRepositoryProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1398FA52D6DF2D80092DB50 /* TrainingRepositoryProtocol.swift */; };
 		C17040AF2DA93CB2000E97C0 /* TrainingUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1398FC02D6E09570092DB50 /* TrainingUseCase.swift */; };
+		C17040B02DAA66EE000E97C0 /* Training.swift in Sources */ = {isa = PBXBuildFile; fileRef = C183FE792D5687A9009EE8B5 /* Training.swift */; };
+		C17040B12DAA6AC1000E97C0 /* UserDefaultsManagerProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1398FBA2D6E03890092DB50 /* UserDefaultsManagerProtocol.swift */; };
 		C1742E462A2F31DA0020354D /* Workout.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1742E452A2F31DA0020354D /* Workout.swift */; };
 		C1742E482A2F31F00020354D /* WorkoutUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1742E472A2F31F00020354D /* WorkoutUseCase.swift */; };
 		C1742E4B2A2F32260020354D /* HomeTrainingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1742E4A2A2F32260020354D /* HomeTrainingView.swift */; };
@@ -1602,6 +1604,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C17040B12DAA6AC1000E97C0 /* UserDefaultsManagerProtocol.swift in Sources */,
+				C17040B02DAA66EE000E97C0 /* Training.swift in Sources */,
 				C17040AA2DA93C98000E97C0 /* TrainingLocalDataSource.swift in Sources */,
 				C17040AB2DA93C98000E97C0 /* TrainingDTO.swift in Sources */,
 				C17040AC2DA93C98000E97C0 /* TrainingLocalDataStoreProtocol.swift in Sources */,
