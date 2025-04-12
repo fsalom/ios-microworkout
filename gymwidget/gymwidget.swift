@@ -12,31 +12,28 @@ struct Provider: TimelineProvider {
     var usecase: TrainingUseCase
 
     init() {
-        let datasource: TrainingLocalDataSourceProtocol = TrainingLocalDataSource()
+        let datasource: TrainingLocalDataSourceProtocol = TrainingLocalDataSource(localStorage: UserDefaultsManager())
         let repository: TrainingRepositoryProtocol = TrainingRepository(local: datasource)
         self.usecase = TrainingUseCase(repository: repository)
     }
 
-    func placeholder(in context: Context) -> SimpleEntry {
-        SimpleEntry(date: Date(), emoji: "😀")
+    func placeholder(in context: Context) -> TrainingEntry {
+        guard let training = usecase.getCurrentTraining() else {
+            return TrainingEntry.mock()
+        }
+        return TrainingEntry.from(entity: training)
     }
 
-    func getSnapshot(in context: Context, completion: @escaping (SimpleEntry) -> ()) {
-        let entry = SimpleEntry(date: Date(), emoji: "😀")
-        completion(entry)
+    func getSnapshot(in context: Context, completion: @escaping (TrainingEntry) -> ()) {
+        guard let training = usecase.getCurrentTraining() else {
+            completion(TrainingEntry.mock())
+            return
+        }
+        completion(TrainingEntry.from(entity: training))
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<Entry>) -> ()) {
-        var entries: [SimpleEntry] = []
-
-        // Generate a timeline consisting of five entries an hour apart, starting from the current date.
-        let currentDate = Date()
-        for hourOffset in 0 ..< 5 {
-            let entryDate = Calendar.current.date(byAdding: .hour, value: hourOffset, to: currentDate)!
-            let entry = SimpleEntry(date: entryDate, emoji: "😀")
-            entries.append(entry)
-        }
-
+        var entries: [TrainingEntry] = []
         let timeline = Timeline(entries: entries, policy: .atEnd)
         completion(timeline)
     }
@@ -46,9 +43,39 @@ struct Provider: TimelineProvider {
 //    }
 }
 
-struct SimpleEntry: TimelineEntry {
-    let date: Date
-    let emoji: String
+struct TrainingEntry: TimelineEntry {
+    var date: Date
+    var id: UUID = UUID()
+    var name: String
+    var image: String
+    var type: TrainingType
+    var startedAt: Date?
+    var completedAt: Date?
+    var sets: [Date] = []
+    var numberOfSetsCompleted: Int = 0
+    var numberOfSets: Int
+    var numberOfReps: Int
+    var numberOfMinutesPerSet: Int
+
+    static func from(entity: Training) -> TrainingEntry {
+        TrainingEntry(date: entity.sets.last ?? Date(),
+                      name: entity.name,
+                      image: entity.image,
+                      type: entity.type,
+                      numberOfSets: entity.numberOfSets,
+                      numberOfReps: entity.numberOfReps,
+                      numberOfMinutesPerSet: entity.numberOfMinutesPerSet)
+    }
+
+    static func mock() -> TrainingEntry {
+        TrainingEntry(date: .now,
+                             name: "",
+                             image: "",
+                             type: .cardio,
+                             numberOfSets: 0,
+                             numberOfReps: 0,
+                             numberOfMinutesPerSet: 0)
+    }
 }
 
 struct gymwidgetEntryView : View {
@@ -103,6 +130,11 @@ struct gymwidget: Widget {
 #Preview(as: .systemSmall) {
     gymwidget()
 } timeline: {
-    SimpleEntry(date: .now, emoji: "😀")
-    SimpleEntry(date: .now, emoji: "🤩")
+    TrainingEntry(date: Date(),
+                  name: "dto.name",
+                  image: "dto.image",
+                  type: .cardio,
+                  numberOfSets: 0,
+                  numberOfReps: 0,
+                  numberOfMinutesPerSet: 0)
 }
