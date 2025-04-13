@@ -38,9 +38,9 @@ struct Provider: TimelineProvider {
         completion(timeline)
     }
 
-//    func relevances() async -> WidgetRelevances<Void> {
-//        // Generate a list containing the contexts this widget is relevant in.
-//    }
+    //    func relevances() async -> WidgetRelevances<Void> {
+    //        // Generate a list containing the contexts this widget is relevant in.
+    //    }
 }
 
 struct TrainingEntry: TimelineEntry {
@@ -69,12 +69,12 @@ struct TrainingEntry: TimelineEntry {
 
     static func mock() -> TrainingEntry {
         TrainingEntry(date: .now,
-                             name: "",
-                             image: "",
-                             type: .cardio,
-                             numberOfSets: 0,
-                             numberOfReps: 0,
-                             numberOfMinutesPerSet: 0)
+                      name: "",
+                      image: "",
+                      type: .cardio,
+                      numberOfSets: 0,
+                      numberOfReps: 0,
+                      numberOfMinutesPerSet: 0)
     }
 }
 
@@ -82,28 +82,39 @@ struct gymwidgetEntryView : View {
     var entry: Provider.Entry
 
     var countdownDate: Date {
-           // Cuenta regresiva de 25 minutos
-           Calendar.current.date(byAdding: .minute, value: 25, to: entry.date) ?? entry.date
-       }
+        // Cuenta regresiva de 25 minutos
+        Calendar.current.date(byAdding: .minute, value: 25, to: entry.date) ?? entry.date
+    }
 
     var body: some View {
         VStack(alignment: .center){
-            Text("Entrenamiento en marcha")
-                .font(.footnote)
-                .padding()
-                .foregroundStyle(.blue)
-                .background(
-                    RoundedRectangle(cornerRadius: 15)
-                        .fill(Color.white)
-                )
-            Text("Completa 10 flexiones en los próximos 25 minutos")
-                .font(.footnote)
-                .foregroundStyle(.white)
-            Text(countdownDate, style: .timer)
-                .frame(maxWidth: .infinity)
-                .font(.headline)
-                .foregroundStyle(.white)
-                .frame(alignment: .center)
+            if entry.sets.isEmpty {
+                Text("Ningún entrenamiento en marcha")
+                    .font(.footnote)
+                    .padding()
+                    .foregroundStyle(.blue)
+                    .background(
+                        RoundedRectangle(cornerRadius: 15)
+                            .fill(Color.white)
+                    )
+            } else {
+                Text("Entrenamiento en marcha")
+                    .font(.footnote)
+                    .padding()
+                    .foregroundStyle(.blue)
+                    .background(
+                        RoundedRectangle(cornerRadius: 15)
+                            .fill(Color.white)
+                    )
+                Text("Completa 10 flexiones en los próximos 25 minutos")
+                    .font(.footnote)
+                    .foregroundStyle(.white)
+                Text(countdownDate, style: .timer)
+                    .frame(maxWidth: .infinity)
+                    .font(.headline)
+                    .foregroundStyle(.white)
+                    .frame(alignment: .center)
+            }
         }
     }
 }
