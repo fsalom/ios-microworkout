@@ -5,14 +5,15 @@ struct TrainingDetailV2View: View {
     @State private var numberOfSetsForSlider: Double = 1
     @State private var numberOfRepsForSlider: Double = 1
     @State private var numberOfMinutesPerSetForSlider: Double = 10
-    @State var hasTrainingStarted: Bool = false
     @ObservedObject var viewModel: TrainingDetailV2ViewModel
 
     var body: some View {
-        if hasTrainingStarted {
-            CurrentTrainingView(isPresented: $hasTrainingStarted,
-                                training: $viewModel.training,
-                                animation: animation)
+        if let currentTraining = self.viewModel.uiState.currentTraining {
+            CurrentTrainingView(
+                isPresented: $viewModel.uiState.hasTrainingStarted,
+                viewModel: .init(useCase: TrainingContainer().makeUseCase()),
+                animation: animation
+            )
         } else {
             VStack{
                 ZStack(alignment: .top) {
@@ -30,7 +31,6 @@ struct TrainingDetailV2View: View {
                         .padding(.top, 150)
                         .foregroundStyle(.white)
                         .shadow(radius: 10)
-                    dismissButton
                 }
                 VStack {
                     VStack(alignment: .leading, spacing: 8) {
@@ -44,9 +44,8 @@ struct TrainingDetailV2View: View {
                         Spacer()
                         SliderView(
                             onFinish: {
-                                viewModel.training.startedAt = Date()
                                 withAnimation {
-                                    hasTrainingStarted = true
+                                    viewModel.startTraining()
                                 }
                             },
                             isWaitingResponse: false)
@@ -56,7 +55,6 @@ struct TrainingDetailV2View: View {
                 }
                 .padding(.bottom, 60)
             }
-            .navigationBarBackButtonHidden()
             .edgesIgnoringSafeArea(.all)
             .onAppear {
                 updateSliderValues()
@@ -98,22 +96,6 @@ struct TrainingDetailV2View: View {
             Text("\(viewModel.training.numberOfMinutesPerSet) minutos entre series")
                 .fontWeight(.bold)
             Slider(value: $viewModel.training.numberOfMinutesPerSetForSlider, in: 10...120, step: 10)
-        }
-    }
-
-    var dismissButton: some View {
-        HStack {
-            Spacer()
-            Button {
-            } label: {
-                Image(systemName: "xmark")
-                    .frame(width: 30, height: 30)
-                    .foregroundColor(Color(uiColor: .black))
-                    .background(Color(uiColor: .white))
-                    .clipShape(Circle())
-                    .padding(.top, 60)
-                    .padding(.trailing, 40)
-            }
         }
     }
 }
