@@ -3,7 +3,6 @@ import SwiftUI
 struct HomeView: View {
     @ObservedObject var viewModel: HomeViewModel
     @Namespace var animation
-    @State private var selectedTraining: Training? = nil
     @State private var showDetail = false
     @State private var hasAppeared = false
     @Environment(\.scenePhase) private var scenePhase
@@ -96,11 +95,6 @@ struct HomeView: View {
                 viewModel.loadWeeksWithHealthInfo()
             }
         }
-        .onChange(of: selectedTraining, { oldValue, newValue in
-            selectedTraining = newValue
-            guard let selectedTraining else { return }
-            viewModel.save(this: selectedTraining)
-        })
         .edgesIgnoringSafeArea(.bottom)
     }
 

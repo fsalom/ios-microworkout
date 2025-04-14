@@ -4,6 +4,7 @@ import SwiftUICore
 struct HomeUiState {
     var weeks: [[HealthDay]]
     var trainings: [Training] = []
+    var currentTraining: Training?
     var error: String?
     var healthInfoForToday: HealthDay = HealthDay(date: Date())
     var isHealthKitAuthorized: Bool = false
@@ -61,6 +62,7 @@ final class HomeViewModel: ObservableObject {
         Task {
             await MainActor.run {
                 self.uiState.trainings = trainingUseCase.getTrainings()
+                self.uiState.currentTraining = trainingUseCase.getCurrentTraining()
             }
         }
     }
