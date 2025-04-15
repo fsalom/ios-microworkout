@@ -1,8 +1,12 @@
 import Foundation
 
+struct CurrentTrainingUIState {
+    var training: Training
+    var hasToResetTimer: Bool = false
+}
+
 class CurrentTrainingViewModel: ObservableObject {
-    @Published var training: Training
-    @Published var hasToResetTimer = false
+    @Published var uiState: CurrentTrainingUIState = .init(training: Training.mock())
     private var useCase: TrainingUseCase
 
     init(useCase: TrainingUseCase) {
@@ -10,20 +14,47 @@ class CurrentTrainingViewModel: ObservableObject {
         guard let training = self.useCase.getCurrentTraining() else {
             fatalError()
         }
-        self.training = training
+        self.uiState.training = training
     }
 
     func incrementSet() {
-        training.numberOfSetsCompleted += 1
-        training.sets.append(Date())  // o la lógica real que uses
-        hasToResetTimer = true
+        self.uiState.training.sets.append(Date())
+        self.uiState.hasToResetTimer = true
     }
 
-    func totalReps() -> Int {
-        training.numberOfReps * training.numberOfSets
+    func getTotalReps() -> Int {
+        self.uiState.training.numberOfReps * self.uiState.training.numberOfSets
     }
 
-    func totalDurationInHours() -> Int {
-        (training.numberOfMinutesPerSet * training.numberOfSets) / 60
+    func getTotalDurationInHours() -> Int {
+        let numberOfminutesPerSet = self.uiState.training.numberOfMinutesPerSet
+        let numberOfSets = self.uiState.training.numberOfSets
+        return (numberOfminutesPerSet * numberOfSets) / 60
     }
+
+    func getCurrentSets() -> Int {
+        return self.uiState.training.sets.count
+    }
+
+    func getCurrentTotalReps() -> Int {
+        self.uiState.training.numberOfReps * self.getCurrentSets()
+    }
+
+    func currentDurationInMinutes() -> Int {
+        let dates = self.uiState.training.sets
+        guard dates.count > 1 else { return 0 }
+
+        let sortedDates = dates.sorted()
+        var totalMinutes = 0
+
+        for i in 1..<sortedDates.count {
+            let previous = sortedDates[i - 1]
+            let current = sortedDates[i]
+            let interval = current.timeIntervalSince(previous)
+            totalMinutes += Int(interval / 60)
+        }
+
+        return totalMinutes
+    }
+    
 }
