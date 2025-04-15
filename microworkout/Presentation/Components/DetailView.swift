@@ -12,7 +12,7 @@ struct DetailView: View {
     var body: some View {
         if hasTrainingStarted {
             CurrentTrainingView(isPresented: $hasTrainingStarted,
-                                training: $training,
+                                viewModel: .init(useCase: TrainingContainer().makeUseCase()),
                                 animation: animation)
         } else {
             VStack{
