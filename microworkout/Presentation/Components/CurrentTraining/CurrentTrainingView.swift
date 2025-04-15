@@ -2,7 +2,7 @@ import SwiftUI
 
 struct CurrentTrainingView: View {
     @Binding var isPresented: Bool
-    @StateObject var viewModel: CurrentTrainingViewModel
+    @ObservedObject var viewModel: CurrentTrainingViewModel
     var animation: Namespace.ID
 
     @State private var isPressed = false
@@ -12,32 +12,21 @@ struct CurrentTrainingView: View {
             Color.blue
                 .matchedGeometryEffect(id: "background", in: animation)
                 .ignoresSafeArea()
-                .onTapGesture {
-                    withAnimation(.spring()) {
-                        isPresented = false
-                    }
-                }
 
             VStack {
-                getTextTotal()
-                    .padding()
-                    .foregroundStyle(.blue)
-                    .background(
-                        RoundedRectangle(cornerRadius: 15)
-                            .fill(Color.white)
-                    )
-                    .padding(.bottom, 50)
-
-                // Resto del cuerpo igual pero usando viewModel.training en vez de training...
-
+                styledInfoText(getTextTotal())
+                getTextCurrentTotal()
+                    .foregroundStyle(.white)
+                    .padding(.bottom, 100)
+                Spacer()
                 Button {
                     viewModel.incrementSet()
                     animatePress()
                 } label: {
                     CountdownView(
-                        startDate: viewModel.training.sets.last ?? Date(),
-                        totalMinutes: viewModel.training.numberOfMinutesPerSet,
-                        hasToResetTimer: $viewModel.hasToResetTimer
+                        startDate: viewModel.uiState.training.sets.last ?? Date(),
+                        totalMinutes: viewModel.uiState.training.numberOfMinutesPerSet,
+                        hasToResetTimer: $viewModel.uiState.hasToResetTimer
                     )
                     .padding(5)
                     .background(isPressed ? Color.blue : Color.clear)
@@ -48,27 +37,68 @@ struct CurrentTrainingView: View {
                 .buttonStyle(.plain)
                 .padding(.bottom, 100)
 
-                // ...
             }
         }
+        .navigationBarBackButtonHidden()
     }
 
     func getTextTotal() -> Text {
         Text("Tu entreno actual consiste en un total de ") +
-        Text("\(viewModel.totalReps())").fontWeight(.bold) +
+        Text("\(viewModel.getTotalReps())").fontWeight(.bold) +
         Text(" repeticiones a lo largo de ") +
-        Text("\(viewModel.totalDurationInHours())").fontWeight(.bold) +
+        Text("\(viewModel.getTotalDurationInHours())").fontWeight(.bold) +
         Text(" horas")
     }
 
+    @ViewBuilder
+    func getTextCurrentTotal() -> some View {
+        HStack(spacing: 50){
+            VStack(spacing: 10){
+                Text("\(viewModel.getCurrentSets())")
+                    .font(.system(size: 60))
+                    .fontWeight(.bold)
+                Text("Ronda")
+                    .font(.footnote)
+            }
+            VStack(spacing: 10){
+                Text("\(viewModel.getCurrentTotalReps())")
+                    .font(.system(size: 60))
+                    .fontWeight(.bold)
+                Text("Repeticiones")
+                    .font(.footnote)
+            }
+            VStack(spacing: 10){
+                Text("\(viewModel.currentDurationInMinutes())")
+                    .font(.system(size: 60))
+                    .fontWeight(.bold)
+                Text("Minutos")
+                    .font(.footnote)
+            }
+
+        }
+    }
+
     func animatePress() {
-        withAnimation(.easeOut(duration: 0.2)) {
+        withAnimation(.easeOut(duration: 0.1)) {
             isPressed = true
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-            withAnimation {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            withAnimation(.easeIn(duration: 0.2)) {
                 isPressed = false
             }
         }
+    }
+
+    @ViewBuilder
+    func styledInfoText(_ text: Text) -> some View {
+        text
+            .padding()
+            .foregroundStyle(.blue)
+            .background(
+                RoundedRectangle(cornerRadius: 15)
+                    .fill(Color.white)
+            )
+            .padding(.bottom, 50)
+            .padding(.top, 50)
     }
 }
