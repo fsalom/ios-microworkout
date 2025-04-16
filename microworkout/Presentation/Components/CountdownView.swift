@@ -1,35 +1,68 @@
 import SwiftUI
 import Combine
 
-struct CountdownView: View {
-    @State private var remainingTime: Int = 0
+struct CountdownButtonView: View {
     @Binding var hasToResetTimer: Bool
     let startDate: Date
     let totalMinutes: Int
+    let limitOfSets: Int
+    @Binding var sets: [Date]
+    let action: () -> Void
+
+    @State private var remainingTime: Int = 0
+    @State private var timerSubscription: Cancellable?
+    @State private var isPressed: Bool = false
 
     private var endDate: Date {
-        startDate.addingTimeInterval(TimeInterval(totalMinutes * 60))
-    }
-
-    @State private var timerSubscription: Cancellable?
-
-    init(startDate: Date, totalMinutes: Int, hasToResetTimer: Binding<Bool>) {
-        self.startDate = startDate
-        self.totalMinutes = totalMinutes
-        self._hasToResetTimer = hasToResetTimer
+        startDate.addingTimeInterval(TimeInterval(totalMinutes))
     }
 
     var body: some View {
-        VStack {
-            Text(timeFormatted(remainingTime))
-                .font(.largeTitle)
-                .fontWeight(.bold)
-                .foregroundColor(.blue)
-                .background(Circle().fill(Color.white).frame(width: 200, height: 200))
+        Button {
+            action()
+            animatePress()
+        } label: {
+            ZStack{
+                Circle()
+                    .fill(isPressed ? Color.blue.opacity(0.5) : Color.white.opacity(0.3))
+                    .frame(width: 200, height: 200)
+                if remainingTime > 0 {
+                    VStack{
+                        Text(timeFormatted(remainingTime))
+                            .font(.largeTitle)
+                            .fontWeight(.bold)
+                        if limitOfSets - 1 == sets.count {
+                            Text("ÚLTIMA RONDA")
+                                .font(.footnote)
+                                .fontWeight(.black)
+                        }
+                    }
+                    .foregroundColor((limitOfSets - 1 == sets.count) ? .blue : .white)
+                    .frame(width: 180, height: 180)
+                    .background(Circle().fill((limitOfSets - 1 == sets.count) ? .white : .blue.opacity(0.3)))
+                } else {
+                    Text("TIEMPO AGOTADO")
+                        .font(.title)
+                        .fontWeight(.bold)
+                        .foregroundColor(.white)
+                        .multilineTextAlignment(.center)
+                        .frame(width: 180, height: 180)
+                        .background(
+                            Circle()
+                                .fill(
+                                    LinearGradient(
+                                        gradient: Gradient(colors: [Color.blue.opacity(0.7), Color.blue.opacity(0.3)]),
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                                .shadow(color: Color.white.opacity(0.6), radius: 4, x: -4, y: -4) // luz superior izquierda
+                                .shadow(color: Color.black.opacity(0.2), radius: 4, x: 4, y: 4)   // sombra inferior derecha
+                        )
+                }
+            }
         }
-        .background(
-            Circle().fill(Color.white.opacity(0.3)).frame(width: 220, height: 220)
-        )
+        .buttonStyle(.plain)
         .onAppear {
             startTimer()
         }
@@ -40,6 +73,17 @@ struct CountdownView: View {
             if newValue {
                 resetTimer()
                 hasToResetTimer = false
+            }
+        }
+    }
+
+    private func animatePress() {
+        withAnimation(.easeInOut(duration: 0.1)) {
+            isPressed = true
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            withAnimation(.easeInOut(duration: 0.1)) {
+                isPressed = false
             }
         }
     }
