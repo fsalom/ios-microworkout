@@ -19,24 +19,16 @@ struct CurrentTrainingView: View {
                     .foregroundStyle(.white)
                     .padding(.bottom, 100)
                 Spacer()
-                Button {
+                CountdownButtonView(
+                    hasToResetTimer: $viewModel.uiState.hasToResetTimer,
+                    startDate: viewModel.uiState.training.sets.last ?? Date(),
+                    totalMinutes: viewModel.uiState.training.numberOfMinutesPerSet,
+                    limitOfSets: viewModel.uiState.training.numberOfSets,
+                    sets: $viewModel.uiState.training.sets
+                ) {
                     viewModel.incrementSet()
-                    animatePress()
-                } label: {
-                    CountdownView(
-                        startDate: viewModel.uiState.training.sets.last ?? Date(),
-                        totalMinutes: viewModel.uiState.training.numberOfMinutesPerSet,
-                        hasToResetTimer: $viewModel.uiState.hasToResetTimer
-                    )
-                    .padding(5)
-                    .background(isPressed ? Color.blue : Color.clear)
-                    .overlay(
-                        Circle().fill(Color.clear).frame(width: 200, height: 200)
-                    )
                 }
-                .buttonStyle(.plain)
                 .padding(.bottom, 100)
-
             }
         }
         .navigationBarBackButtonHidden()
