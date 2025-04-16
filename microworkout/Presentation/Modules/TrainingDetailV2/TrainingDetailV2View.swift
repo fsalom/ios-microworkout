@@ -8,7 +8,7 @@ struct TrainingDetailV2View: View {
     @ObservedObject var viewModel: TrainingDetailV2ViewModel
 
     var body: some View {
-        if let currentTraining = self.viewModel.uiState.currentTraining {
+        if let _ = self.viewModel.uiState.currentTraining {
             CurrentTrainingView(
                 isPresented: $viewModel.uiState.hasTrainingStarted,
                 viewModel: .init(useCase: TrainingContainer().makeUseCase()),
@@ -53,7 +53,7 @@ struct TrainingDetailV2View: View {
                     }
                     .padding(16)
                 }
-                .padding(.bottom, 60)
+                .padding(.bottom, 100)
             }
             .edgesIgnoringSafeArea(.all)
             .onAppear {
