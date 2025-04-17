@@ -176,6 +176,8 @@
 		C1B670ED2D627B12005E9173 /* HealthWeeks.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1B670EC2D627B12005E9173 /* HealthWeeks.swift */; };
 		C1B670EF2D6282A1005E9173 /* HealthDay.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1B670EE2D62827F005E9173 /* HealthDay.swift */; };
 		C1B670F02D6282A1005E9173 /* HealthDay.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1B670EE2D62827F005E9173 /* HealthDay.swift */; };
+		C1BE53982DB02E3A00B57345 /* SwitcherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1BE53972DB02E3A00B57345 /* SwitcherView.swift */; };
+		C1BE55EB2DB02EB900B57345 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1BE55EA2DB02EB600B57345 /* AppState.swift */; };
 		C1CF26BB2A5DDAA800521884 /* CustomSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1CF26BA2A5DDAA800521884 /* CustomSlider.swift */; };
 		C1D052422D9F1AC100B0FF1D /* HealthContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D052412D9F1AB600B0FF1D /* HealthContainer.swift */; };
 		C1DE682B2A63F86F000DE4C8 /* NumberOfSeriesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1DE682A2A63F86F000DE4C8 /* NumberOfSeriesView.swift */; };
@@ -424,6 +426,8 @@
 		C1B670E72D626218005E9173 /* HealthKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitManager.swift; sourceTree = "<group>"; };
 		C1B670EC2D627B12005E9173 /* HealthWeeks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthWeeks.swift; sourceTree = "<group>"; };
 		C1B670EE2D62827F005E9173 /* HealthDay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthDay.swift; sourceTree = "<group>"; };
+		C1BE53972DB02E3A00B57345 /* SwitcherView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwitcherView.swift; sourceTree = "<group>"; };
+		C1BE55EA2DB02EB600B57345 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 		C1CF26BA2A5DDAA800521884 /* CustomSlider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomSlider.swift; sourceTree = "<group>"; };
 		C1D052412D9F1AB600B0FF1D /* HealthContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthContainer.swift; sourceTree = "<group>"; };
 		C1DE682A2A63F86F000DE4C8 /* NumberOfSeriesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NumberOfSeriesView.swift; sourceTree = "<group>"; };
@@ -833,6 +837,7 @@
 		C1742E412A2F317C0020354D /* Modules */ = {
 			isa = PBXGroup;
 			children = (
+				C1BE53962DB02DFB00B57345 /* Switcher */,
 				C12315AB2D68CD3000802707 /* TrainingV2List */,
 				C1B670DA2D5FD69E005E9173 /* Home */,
 				C19D17FB2D5DF82F000CCCEF /* TrackingDay */,
@@ -1297,6 +1302,15 @@
 			path = Home;
 			sourceTree = "<group>";
 		};
+		C1BE53962DB02DFB00B57345 /* Switcher */ = {
+			isa = PBXGroup;
+			children = (
+				C1BE55EA2DB02EB600B57345 /* AppState.swift */,
+				C1BE53972DB02E3A00B57345 /* SwitcherView.swift */,
+			);
+			path = Switcher;
+			sourceTree = "<group>";
+		};
 		C1F34F602A38CD4300233D66 /* gymwatch Watch App */ = {
 			isa = PBXGroup;
 			children = (
@@ -1653,6 +1667,7 @@
 				C19D17EA2D5BE508000CCCEF /* RootView.swift in Sources */,
 				C183FE7A2D5687AD009EE8B5 /* Training.swift in Sources */,
 				C183FEC22D5938EE009EE8B5 /* LiveActivityManager.swift in Sources */,
+				C1BE55EB2DB02EB900B57345 /* AppState.swift in Sources */,
 				C18F6F632A83EAE000914A0A /* Beat.swift in Sources */,
 				C11B9F3A2A5C37B300FC656F /* TabbarView.swift in Sources */,
 				C17040A72DA2E5FD000E97C0 /* TrainingDetailV2View.swift in Sources */,
@@ -1715,6 +1730,7 @@
 				C1742E5B2A30A0400020354D /* WorkoutMockDataSource.swift in Sources */,
 				C16D03E22B18A13B0014F906 /* WorkoutModel.swift in Sources */,
 				C15590FF2A31CB2A00E30886 /* WorkoutRepository.swift in Sources */,
+				C1BE53982DB02E3A00B57345 /* SwitcherView.swift in Sources */,
 				C13C47BE2A33AAE5005C90AB /* TimerBuilder.swift in Sources */,
 				C1B670DE2D5FD6C0005E9173 /* HomeViewModel.swift in Sources */,
 				C1B670DF2D5FD6C0005E9173 /* HomeBuilder.swift in Sources */,
