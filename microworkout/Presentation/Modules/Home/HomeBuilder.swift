@@ -1,11 +1,12 @@
 
 class HomeBuilder {
-    func build() -> HomeView {
+    func build(appState: AppState) -> HomeView {
         let viewModel = HomeViewModel(
             router: HomeRouter(navigator: Navigator.shared),
             trainingUseCase: TrainingContainer().makeUseCase(),
             healthUseCase: HealthContainer().makeUseCase(),
-            healthKitManager: HealthKitManager.shared)
+            healthKitManager: HealthKitManager.shared,
+            appState: appState)
         return HomeView(viewModel: viewModel)
     }
 }

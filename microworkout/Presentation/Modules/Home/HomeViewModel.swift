@@ -12,21 +12,23 @@ struct HomeUiState {
 
 final class HomeViewModel: ObservableObject {
     @Published var uiState: HomeUiState = .init(weeks: [[]], error: nil)
-
     private var router: HomeRouter
     private var healthKitManager: HealthKitManager!
     private var currentTraining: Training = Training.mock()
     private var trainingUseCase: TrainingUseCase
     private var healthUseCase: HealthUseCase
+    private var appState: AppState
 
     init(router: HomeRouter,
          trainingUseCase: TrainingUseCase,
          healthUseCase: HealthUseCase,
-         healthKitManager: HealthKitManager) {
+         healthKitManager: HealthKitManager,
+         appState: AppState) {
         self.router = router
         self.trainingUseCase = trainingUseCase
         self.healthUseCase = healthUseCase
         self.healthKitManager = healthKitManager
+        self.appState = appState
         self.loadTrainings()
         self.askForPermissions()
     }
@@ -80,7 +82,8 @@ final class HomeViewModel: ObservableObject {
     }
 
     func goToStart(this training: Training, and namespace: Namespace.ID) {
-        router.goToStart(this: training, and: namespace)
+        appState.changeScreen(to: .workout(training: training))
+        //router.goToStart(this: training, and: namespace)
     }
 
 
