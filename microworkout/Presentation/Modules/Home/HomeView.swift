@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct HomeView: View {
+    @EnvironmentObject var appState: AppState
     @ObservedObject var viewModel: HomeViewModel
     @Namespace var animation
     @State private var showDetail = false
@@ -130,6 +131,6 @@ struct HomeView: View {
 
 struct HomeView_Previews: PreviewProvider {
     static var previews: some View {
-        HomeBuilder().build()
+        HomeBuilder().build(appState: AppState())
     }
 }
