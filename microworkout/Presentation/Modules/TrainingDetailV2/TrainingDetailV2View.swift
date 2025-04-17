@@ -10,9 +10,6 @@ struct TrainingDetailV2View: View {
     var body: some View {
         if let _ = self.viewModel.uiState.currentTraining {
             CurrentTrainingView(
-                isPresented: $viewModel.uiState.hasTrainingStarted,
-                viewModel: .init(useCase: TrainingContainer().makeUseCase()),
-                animation: animation
             )
         } else {
             VStack{

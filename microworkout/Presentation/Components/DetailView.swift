@@ -11,9 +11,7 @@ struct DetailView: View {
 
     var body: some View {
         if hasTrainingStarted {
-            CurrentTrainingView(isPresented: $hasTrainingStarted,
-                                viewModel: .init(useCase: TrainingContainer().makeUseCase()),
-                                animation: animation)
+            CurrentTrainingView()
         } else {
             VStack{
                 ZStack(alignment: .top) {
