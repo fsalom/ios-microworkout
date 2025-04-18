@@ -178,6 +178,7 @@
 		C1B670F02D6282A1005E9173 /* HealthDay.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1B670EE2D62827F005E9173 /* HealthDay.swift */; };
 		C1BE53982DB02E3A00B57345 /* SwitcherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1BE53972DB02E3A00B57345 /* SwitcherView.swift */; };
 		C1BE55EB2DB02EB900B57345 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1BE55EA2DB02EB600B57345 /* AppState.swift */; };
+		C1BE55ED2DB184B100B57345 /* CurrentTrainingBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1BE55EC2DB184AA00B57345 /* CurrentTrainingBuilder.swift */; };
 		C1CF26BB2A5DDAA800521884 /* CustomSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1CF26BA2A5DDAA800521884 /* CustomSlider.swift */; };
 		C1D052422D9F1AC100B0FF1D /* HealthContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D052412D9F1AB600B0FF1D /* HealthContainer.swift */; };
 		C1DE682B2A63F86F000DE4C8 /* NumberOfSeriesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1DE682A2A63F86F000DE4C8 /* NumberOfSeriesView.swift */; };
@@ -428,6 +429,7 @@
 		C1B670EE2D62827F005E9173 /* HealthDay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthDay.swift; sourceTree = "<group>"; };
 		C1BE53972DB02E3A00B57345 /* SwitcherView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwitcherView.swift; sourceTree = "<group>"; };
 		C1BE55EA2DB02EB600B57345 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
+		C1BE55EC2DB184AA00B57345 /* CurrentTrainingBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentTrainingBuilder.swift; sourceTree = "<group>"; };
 		C1CF26BA2A5DDAA800521884 /* CustomSlider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomSlider.swift; sourceTree = "<group>"; };
 		C1D052412D9F1AB600B0FF1D /* HealthContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthContainer.swift; sourceTree = "<group>"; };
 		C1DE682A2A63F86F000DE4C8 /* NumberOfSeriesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NumberOfSeriesView.swift; sourceTree = "<group>"; };
@@ -790,6 +792,7 @@
 		C17040B22DAC4494000E97C0 /* CurrentTraining */ = {
 			isa = PBXGroup;
 			children = (
+				C1BE55EC2DB184AA00B57345 /* CurrentTrainingBuilder.swift */,
 				C12315B22D6B6ECA00802707 /* CurrentTrainingView.swift */,
 				C17040B32DAC449D000E97C0 /* CurrentTrainingViewModel.swift */,
 			);
@@ -1705,6 +1708,7 @@
 				C19D17F62D5DE527000CCCEF /* TrainingDetailView.swift in Sources */,
 				C19D17F72D5DE527000CCCEF /* TrainingDetailBuilder.swift in Sources */,
 				C19D17F82D5DE527000CCCEF /* TrainingDetailViewModel.swift in Sources */,
+				C1BE55ED2DB184B100B57345 /* CurrentTrainingBuilder.swift in Sources */,
 				C19788C62A7EDE4B0031648B /* HealthKitView.swift in Sources */,
 				C154B26D2D63BE5800B2A89F /* SliderView.swift in Sources */,
 				C16D03EA2B18ADB00014F906 /* WorkoutRemoteDataSourceProtocol.swift in Sources */,
