@@ -8,7 +8,7 @@ struct SwitcherView: View {
         case .home:
             HomeBuilder().build(appState: appState)
         case .workout:
-            CurrentTrainingView()
+            CurrentTrainingBuilder().build(appState: appState)
         case .loading:
             ProgressView()
         }
