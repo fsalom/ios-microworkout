@@ -8,7 +8,7 @@ struct TrainingDetailUIState {
 
 final class TrainingDetailV2ViewModel: ObservableObject {
 
-    var namespace: Namespace.ID
+    var appState: AppState
     private var router: TrainingDetailV2Router
     private var trainingUseCase: TrainingUseCase
     @Published var training: Training
@@ -17,18 +17,17 @@ final class TrainingDetailV2ViewModel: ObservableObject {
     init(trainingUseCase: TrainingUseCase,
          router: TrainingDetailV2Router,
          training: Training,
-         namespace: Namespace.ID) {
+         appState: AppState) {
         self.trainingUseCase = trainingUseCase
         self.router = router
-        self.namespace = namespace
+        self.appState = appState
         self.training = training
     }
 
     func startTraining() {
         DispatchQueue.main.async {
             self.trainingUseCase.save(self.training)
-            self.uiState.hasTrainingStarted = true
-            self.uiState.currentTraining = self.training
+            self.appState.changeScreen(to: .workout(training: self.training))
         }
     }
 }
