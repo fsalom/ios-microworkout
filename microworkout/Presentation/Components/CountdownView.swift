@@ -17,7 +17,7 @@ struct CountdownButtonView: View {
     @State private var isPressed: Bool = false
 
     private var endDate: Date {
-        startDate.addingTimeInterval(TimeInterval(totalMinutes))
+        startDate.addingTimeInterval(TimeInterval(totalMinutes*60))
     }
 
     var body: some View {
