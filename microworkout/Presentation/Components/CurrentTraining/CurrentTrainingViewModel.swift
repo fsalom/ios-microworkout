@@ -18,6 +18,10 @@ class CurrentTrainingViewModel: ObservableObject {
         self.uiState.training = training
     }
 
+    func close() {
+        self.appState.changeScreen(to: .home)
+    }
+
     func incrementSet() {
         self.uiState.training.sets.append(Date())
         self.uiState.hasToResetTimer = true
