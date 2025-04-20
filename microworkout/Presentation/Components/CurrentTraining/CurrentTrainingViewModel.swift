@@ -16,6 +16,7 @@ class CurrentTrainingViewModel: ObservableObject {
             fatalError()
         }
         self.uiState.training = training
+        self.uiState.training.startedAt = Date()
     }
 
     func close() {
@@ -25,6 +26,7 @@ class CurrentTrainingViewModel: ObservableObject {
     func incrementSet() {
         self.uiState.training.sets.append(Date())
         self.uiState.hasToResetTimer = true
+        self.uiState.training.calculateNumberOfSeconds()
     }
 
     func getTotalReps() -> Int {
@@ -45,21 +47,6 @@ class CurrentTrainingViewModel: ObservableObject {
         self.uiState.training.numberOfReps * self.getCurrentSets()
     }
 
-    func currentDurationInMinutes() -> Int {
-        let dates = self.uiState.training.sets
-        guard dates.count > 1 else { return 0 }
-
-        let sortedDates = dates.sorted()
-        var totalMinutes = 0
-
-        for i in 1..<sortedDates.count {
-            let previous = sortedDates[i - 1]
-            let current = sortedDates[i]
-            let interval = current.timeIntervalSince(previous)
-            totalMinutes += Int(interval / 60)
-        }
-
-        return totalMinutes
-    }
+    
     
 }

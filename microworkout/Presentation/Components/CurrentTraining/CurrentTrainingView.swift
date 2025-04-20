@@ -1,19 +1,25 @@
 import SwiftUI
 
 struct CurrentTrainingView: View {
-    @Binding var isPresented: Bool
     @ObservedObject var viewModel: CurrentTrainingViewModel
-    var animation: Namespace.ID
-
     @State private var isPressed = false
 
     var body: some View {
         ZStack(alignment: .top) {
+            
             Color.blue
-                .matchedGeometryEffect(id: "background", in: animation)
                 .ignoresSafeArea()
 
             VStack {
+                HStack {
+                    Spacer()
+                    closeButton()
+                }.padding(.horizontal, 16)
+                Text(viewModel.uiState.training.name.uppercased())
+                    .font(.title)
+                    .fontWeight(.black)
+                    .foregroundStyle(.white)
+                    .padding(.vertical, 20)
                 styledInfoText(getTextTotal())
                 getTextCurrentTotal()
                     .foregroundStyle(.white)
@@ -21,11 +27,13 @@ struct CurrentTrainingView: View {
                 Spacer()
                 CountdownButtonView(
                     hasToResetTimer: $viewModel.uiState.hasToResetTimer,
+                    sets: $viewModel.uiState.training.sets,
                     startDate: viewModel.uiState.training.sets.last ?? Date(),
-                    totalMinutes: viewModel.uiState.training.numberOfMinutesPerSet,
-                    limitOfSets: viewModel.uiState.training.numberOfSets,
-                    sets: $viewModel.uiState.training.sets
+                    totalMinutes: (viewModel.uiState.training.numberOfMinutesPerSet),
+                    limitOfSets: viewModel.uiState.training.numberOfSets
                 ) {
+                    viewModel.incrementSet()
+                } end: {
                     viewModel.incrementSet()
                 }
                 .padding(.bottom, 100)
@@ -46,7 +54,7 @@ struct CurrentTrainingView: View {
     func getTextCurrentTotal() -> some View {
         HStack(spacing: 50){
             VStack(spacing: 10){
-                Text("\(viewModel.getCurrentSets())")
+                Text("\(viewModel.getCurrentSets())/\(viewModel.uiState.training.numberOfSets)")
                     .font(.system(size: 60))
                     .fontWeight(.bold)
                 Text("Ronda")
@@ -60,13 +68,12 @@ struct CurrentTrainingView: View {
                     .font(.footnote)
             }
             VStack(spacing: 10){
-                Text("\(viewModel.currentDurationInMinutes())")
+                Text("\(viewModel.uiState.training.numberOfMinutes)")
                     .font(.system(size: 60))
                     .fontWeight(.bold)
                 Text("Minutos")
                     .font(.footnote)
             }
-
         }
     }
 
@@ -90,7 +97,22 @@ struct CurrentTrainingView: View {
                 RoundedRectangle(cornerRadius: 15)
                     .fill(Color.white)
             )
-            .padding(.bottom, 50)
-            .padding(.top, 50)
+            .padding(.bottom, 20)
+            .padding(.top, 20)
+    }
+
+    @ViewBuilder
+    func closeButton() -> some View {
+        Button(action: {
+            self.viewModel.close()
+        }) {
+            ZStack{
+                Circle()
+                    .fill(Color.white.opacity(0.3))
+                    .frame(width: 40, height: 40)
+                Image(systemName: "xmark")
+                    .foregroundColor(.blue)
+            }
+        }
     }
 }
