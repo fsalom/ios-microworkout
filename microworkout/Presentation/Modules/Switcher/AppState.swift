@@ -29,3 +29,16 @@ final class AppState: ObservableObject {
         }
     }
 }
+
+extension AppState {
+    var isWorkoutScreen: Bool {
+        if case .workout = screen { return true }
+        return false
+    }
+
+    var currentTraining: Training? {
+        if case let .workout(training) = screen { return training }
+        return nil
+    }
+}
+
