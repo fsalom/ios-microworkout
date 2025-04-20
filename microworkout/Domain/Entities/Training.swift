@@ -32,6 +32,27 @@ struct Training: Identifiable, Equatable {
     var numberOfSetsForSlider: Double
     var numberOfRepsForSlider: Double
     var numberOfMinutesPerSetForSlider: Double
+    var numberOfSeconds: Double = 0.0
+    var numberOfMinutes: Int {
+        return Int(numberOfSeconds/60)
+    }
+
+    mutating func calculateNumberOfSeconds() {
+        var dates = self.sets
+        if let startDate = self.startedAt, dates.count < 1 {
+            dates.append(startDate)
+            dates.append(Date())
+        }
+
+        let sortedDates = dates.sorted()
+
+        for i in 1..<sortedDates.count {
+            let previous = sortedDates[i - 1]
+            let current = sortedDates[i]
+            let interval = current.timeIntervalSince(previous)
+            self.numberOfSeconds += interval
+        }
+    }
 
     static func mock() -> Training {
         return Training(
