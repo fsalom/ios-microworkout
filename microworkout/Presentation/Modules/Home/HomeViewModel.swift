@@ -81,9 +81,9 @@ final class HomeViewModel: ObservableObject {
         router.goToWorkoutList()
     }
 
-    func goToStart(this training: Training, and namespace: Namespace.ID) {
-        appState.changeScreen(to: .workout(training: training))
-        //router.goToStart(this: training, and: namespace)
+    func goToStart(this training: Training) {
+        //appState.changeScreen(to: .workout(training: training))
+        router.goToStart(this: training, and: appState)
     }
 
 

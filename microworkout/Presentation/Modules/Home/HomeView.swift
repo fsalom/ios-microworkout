@@ -120,7 +120,7 @@ struct HomeView: View {
                         .matchedGeometryEffect(id: training.image, in: animation, isSource: !showDetail)
                         .mask(RoundedRectangle(cornerRadius: 20.0))
                         .onTapGesture {
-                            viewModel.goToStart(this: training, and: animation)
+                            viewModel.goToStart(this: training)
                         }
                 }
             }
