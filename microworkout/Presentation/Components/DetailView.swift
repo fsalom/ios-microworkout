@@ -11,7 +11,7 @@ struct DetailView: View {
 
     var body: some View {
         if hasTrainingStarted {
-            CurrentTrainingView()
+            CurrentTrainingBuilder().build(appState: AppState())
         } else {
             VStack{
                 ZStack(alignment: .top) {
