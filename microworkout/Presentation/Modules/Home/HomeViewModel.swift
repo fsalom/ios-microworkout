@@ -31,6 +31,9 @@ final class HomeViewModel: ObservableObject {
         self.appState = appState
         self.loadTrainings()
         self.askForPermissions()
+        if let training = self.trainingUseCase.getCurrentTraining() {
+            appState.changeScreen(to: .workout(training: training))
+        }
     }
 
     func save(this training: Training) {
