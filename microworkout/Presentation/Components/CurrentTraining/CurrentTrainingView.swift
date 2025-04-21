@@ -28,7 +28,7 @@ struct CurrentTrainingView: View {
                 ) {
                     viewModel.incrementSet()
                 } end: {
-                    viewModel.incrementSet()
+                    
                 }
                 .padding(.bottom, 64)
                 SliderView(
