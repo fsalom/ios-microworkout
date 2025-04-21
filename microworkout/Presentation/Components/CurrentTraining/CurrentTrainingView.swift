@@ -6,24 +6,18 @@ struct CurrentTrainingView: View {
 
     var body: some View {
         ZStack(alignment: .top) {
-            
             Color.blue
                 .ignoresSafeArea()
-
             VStack {
-                HStack {
-                    Spacer()
-                    closeButton()
-                }.padding(.horizontal, 16)
                 Text(viewModel.uiState.training.name.uppercased())
                     .font(.title)
                     .fontWeight(.black)
                     .foregroundStyle(.white)
-                    .padding(.vertical, 20)
+                    .padding(.vertical, 16)
                 styledInfoText(getTextTotal())
                 getTextCurrentTotal()
                     .foregroundStyle(.white)
-                    .padding(.bottom, 100)
+                    .padding(.bottom, 32)
                 Spacer()
                 CountdownButtonView(
                     hasToResetTimer: $viewModel.uiState.hasToResetTimer,
@@ -36,7 +30,20 @@ struct CurrentTrainingView: View {
                 } end: {
                     viewModel.incrementSet()
                 }
-                .padding(.bottom, 100)
+                .padding(.bottom, 64)
+                SliderView(
+                    message: "Desliza para finalizar",
+                    backgroundColor: .white,
+                    frontColor: .blue,
+                    successColor: .white,
+                    onFinish: {
+                        withAnimation {
+                            self.viewModel.close()
+                        }
+                    },
+                    isWaitingResponse: false)
+                .padding(.horizontal, 16)
+                .padding(.bottom, 16)
             }
         }
         .navigationBarBackButtonHidden()
@@ -52,29 +59,32 @@ struct CurrentTrainingView: View {
 
     @ViewBuilder
     func getTextCurrentTotal() -> some View {
-        HStack(spacing: 50){
+        HStack{
             VStack(spacing: 10){
                 Text("\(viewModel.getCurrentSets())/\(viewModel.uiState.training.numberOfSets)")
-                    .font(.system(size: 60))
+                    .font(.system(size: 48))
                     .fontWeight(.bold)
                 Text("Ronda")
                     .font(.footnote)
             }
+            Spacer()
             VStack(spacing: 10){
                 Text("\(viewModel.getCurrentTotalReps())")
-                    .font(.system(size: 60))
+                    .font(.system(size: 48))
                     .fontWeight(.bold)
                 Text("Repeticiones")
                     .font(.footnote)
             }
+            Spacer()
             VStack(spacing: 10){
                 Text("\(viewModel.uiState.training.numberOfMinutes)")
-                    .font(.system(size: 60))
+                    .font(.system(size: 48))
                     .fontWeight(.bold)
                 Text("Minutos")
                     .font(.footnote)
             }
         }
+        .padding(.horizontal, 32)
     }
 
     func animatePress() {
