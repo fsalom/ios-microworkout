@@ -1,5 +1,6 @@
 import SwiftUI
 import Combine
+import AudioToolbox
 
 struct CountdownButtonView: View {
     @Binding var hasToResetTimer: Bool
@@ -28,6 +29,7 @@ struct CountdownButtonView: View {
                 action()
             }
             animatePress()
+            vibrate()
         } label: {
             ZStack{
                 Circle()
@@ -35,7 +37,7 @@ struct CountdownButtonView: View {
                           ? Color.white.opacity(0.8) : Color.white.opacity(0.3)
                     )
                     .frame(width: 200, height: 200)
-                if (limitOfSets == sets.count) ||
+                if (limitOfSets <= sets.count) ||
                     (sets.count == (limitOfSets - 1) && remainingTime == 0) {
                     Text("FIN")
                         .font(.title)
@@ -127,6 +129,10 @@ struct CountdownButtonView: View {
         if remainingTime == 0 {
             stopTimer()
         }
+    }
+
+    private func vibrate() {
+        AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
     }
 
     private func timeFormatted(_ totalSeconds: Int) -> String {
