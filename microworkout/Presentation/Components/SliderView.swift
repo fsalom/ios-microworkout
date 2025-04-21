@@ -6,6 +6,7 @@ struct SliderView: View {
     var message: String = "Desliza para iniciar"
     var backgroundColor: Color = .gray
     var frontColor: Color = .black
+    var successColor: Color = .green
     let sliderHeight: CGFloat = 60
     @State private var offsetAnimation: CGFloat = 200
 
@@ -21,7 +22,7 @@ struct SliderView: View {
 
                 // Background track
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(isComplete ? .green  : backgroundColor.opacity(0.3))
+                    .fill(isComplete ? successColor : backgroundColor.opacity(0.3))
                     .frame(height: sliderHeight)
 
                 // Label
@@ -77,7 +78,7 @@ struct SliderView: View {
     func button() -> some View {
         ZStack {
             RoundedRectangle(cornerRadius: 8)
-                .fill(isComplete ? .green : backgroundColor)
+                .fill(isComplete ? successColor : backgroundColor)
                 .frame(width: sliderHeight, height: sliderHeight - 10)
             if isWaitingResponse {
                 ProgressView()
@@ -86,7 +87,7 @@ struct SliderView: View {
                 Image("ic_slide_arrow")
                     .renderingMode(.template)
                     .resizable()
-                    //.opacity(0.5)
+                //.opacity(0.5)
                     .frame(width: 25, height: 25, alignment: .center)
                     .tint(frontColor)
                     .foregroundColor(frontColor)
