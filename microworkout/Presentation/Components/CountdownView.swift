@@ -27,9 +27,9 @@ struct CountdownButtonView: View {
                 end()
             } else {
                 action()
+                vibrate()
             }
             animatePress()
-            vibrate()
         } label: {
             ZStack{
                 Circle()
