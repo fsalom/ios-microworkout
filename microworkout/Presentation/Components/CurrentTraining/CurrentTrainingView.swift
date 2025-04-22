@@ -28,7 +28,7 @@ struct CurrentTrainingView: View {
                 ) {
                     viewModel.incrementSet()
                 } end: {
-                    
+                    viewModel.saveAndClose()
                 }
                 .padding(.bottom, 64)
                 SliderView(
@@ -38,7 +38,7 @@ struct CurrentTrainingView: View {
                     successColor: .white,
                     onFinish: {
                         withAnimation {
-                            self.viewModel.close()
+                            self.viewModel.saveAndClose()
                         }
                     },
                     isWaitingResponse: false)
@@ -114,7 +114,7 @@ struct CurrentTrainingView: View {
     @ViewBuilder
     func closeButton() -> some View {
         Button(action: {
-            self.viewModel.close()
+            self.viewModel.saveAndClose()
         }) {
             ZStack{
                 Circle()
