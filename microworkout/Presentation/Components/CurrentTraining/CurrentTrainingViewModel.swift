@@ -12,21 +12,18 @@ class CurrentTrainingViewModel: ObservableObject {
 
     init(appState: AppState) {
         self.appState = appState
-        guard let training = self.useCase.getCurrentTraining() else {
+        guard let training = self.useCase.getCurrent() else {
             fatalError()
         }
         self.uiState.training = training
         self.uiState.training.startedAt = Date()
     }
 
-    func close() {
-        self.appState.changeScreen(to: .home)
-    }
-
     func incrementSet() {
         self.uiState.training.sets.append(Date())
         self.uiState.hasToResetTimer = true
         self.uiState.training.calculateNumberOfSeconds()
+        self.useCase.saveCurrent(self.uiState.training)
     }
 
     func getTotalReps() -> Int {
@@ -47,6 +44,10 @@ class CurrentTrainingViewModel: ObservableObject {
         self.uiState.training.numberOfReps * self.getCurrentSets()
     }
 
-    
-    
+    func saveAndClose() {
+        DispatchQueue.main.async {
+            self.useCase.finish(self.uiState.training)
+            self.appState.changeScreen(to: .home)
+        }
+    }
 }
