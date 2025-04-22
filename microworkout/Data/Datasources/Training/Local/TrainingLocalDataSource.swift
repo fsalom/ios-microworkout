@@ -2,18 +2,26 @@ class TrainingLocalDataSource: TrainingLocalDataSourceProtocol {
     private var localStorage: UserDefaultsManagerProtocol
 
     enum TrainingKey: String {
-        case currentTraining
+        case current
+        case finish
     }
 
     init(localStorage: UserDefaultsManagerProtocol) {
         self.localStorage = localStorage
     }
 
-    func getCurrentTraining() -> TrainingDTO? {
-        return self.localStorage.get(forKey: TrainingKey.currentTraining.rawValue)
+    func getCurrent() -> TrainingDTO? {
+        return self.localStorage.get(forKey: TrainingKey.current.rawValue)
     }
 
-    func saveCurrentTraining(_ training: TrainingDTO) {
-        self.localStorage.save(training, forKey: TrainingKey.currentTraining.rawValue)
+    func saveCurrent(_ training: TrainingDTO) {
+        self.localStorage.save(training, forKey: TrainingKey.current.rawValue)
+    }
+
+    func finish(_ training: TrainingDTO) {
+        var finishedTrainings: [TrainingDTO] = self.localStorage.get(forKey: TrainingKey.finish.rawValue) ?? []
+        finishedTrainings.append(training)
+        self.localStorage.save(finishedTrainings, forKey: TrainingKey.finish.rawValue)
+        self.localStorage.remove(forKey: TrainingKey.current.rawValue)
     }
 }

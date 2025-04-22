@@ -1,5 +1,4 @@
 class TrainingRepository: TrainingRepositoryProtocol {
-
     private var local: TrainingLocalDataSourceProtocol
 
     init(local: TrainingLocalDataSourceProtocol) {
@@ -8,38 +7,53 @@ class TrainingRepository: TrainingRepositoryProtocol {
 
     func getTrainings() -> [Training] {
         return [
-            Training(name: "Flexiones", image: "push-up-1",type: .strength, numberOfSetsForSlider: 10, numberOfRepsForSlider: 10, numberOfMinutesPerSetForSlider: 60),
+            Training(name: "Flexiones", image: "push-up-1",type: .strength, numberOfSetsForSlider: 10, numberOfRepsForSlider: 10, numberOfMinutesPerSetForSlider: 1),
             Training(name: "Dominadas", image: "pull-up-1", type: .strength, numberOfSetsForSlider: 10, numberOfRepsForSlider: 5, numberOfMinutesPerSetForSlider: 60),
             Training(name: "Sentadillas", image: "squat-1", type: .strength, numberOfSetsForSlider: 10, numberOfRepsForSlider: 20, numberOfMinutesPerSetForSlider: 60),
             Training(name: "Abdominales", image: "abs-1", type: .strength, numberOfSetsForSlider: 10, numberOfRepsForSlider: 20, numberOfMinutesPerSetForSlider: 60)
         ]
     }
 
-    func getCurrentTraining() -> Training? {
-        let dto = self.local.getCurrentTraining()
+    func getCurrent() -> Training? {
+        let dto = self.local.getCurrent()
         return dto?.toDomain()
     }
 
-    func save(_ training: Training) {
-        self.local.saveCurrentTraining(training.toDTO())
+    func saveCurrent(_ training: Training) {
+        self.local.saveCurrent(training.toDTO())
     }
-}
 
+    func finish(_ training: Training) {
+        self.local.finish(training.toDTO())
+    }
+
+}
 
 fileprivate extension TrainingDTO {
     func toDomain() -> Training {
-        return Training(name: self.name, image: self.image, type: .strength, numberOfSetsForSlider: 10, numberOfRepsForSlider: 10, numberOfMinutesPerSetForSlider: 60)
+        return Training(name: self.name,
+                        image: self.image,
+                        type: .strength,
+                        numberOfSetsForSlider: self.numberOfSets,
+                        numberOfRepsForSlider: self.numberOfReps,
+                        numberOfMinutesPerSetForSlider: self.numberOfMinutesPerSet)
     }
 }
 
 fileprivate extension Training {
     func toDTO() -> TrainingDTO {
-        return TrainingDTO(name: self.name,
-                           image: self.image,
-                           type: self.type,
-                           numberOfSetsCompleted: self.numberOfSetsCompleted,
-                           numberOfSets: self.numberOfSetsForSlider,
-                           numberOfReps: self.numberOfRepsForSlider,
-                           numberOfMinutesPerSet: self.numberOfMinutesPerSetForSlider)
+        return TrainingDTO(
+            id: self.id,
+            name: self.name,
+            image: self.image,
+            type: self.type,
+            startedAt: self.startedAt,
+            completedAt: self.completedAt,
+            sets: self.sets,
+            numberOfSetsCompleted: self.numberOfSetsCompleted,
+            numberOfSets: self.numberOfSetsForSlider,
+            numberOfReps: self.numberOfRepsForSlider,
+            numberOfMinutesPerSet: self.numberOfMinutesPerSetForSlider
+        )
     }
 }

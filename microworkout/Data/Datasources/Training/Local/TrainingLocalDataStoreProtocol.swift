@@ -1,4 +1,5 @@
 protocol TrainingLocalDataSourceProtocol {
-    func getCurrentTraining() -> TrainingDTO?
-    func saveCurrentTraining(_ training: TrainingDTO)
+    func getCurrent() -> TrainingDTO?
+    func saveCurrent(_ training: TrainingDTO)
+    func finish(_ training: TrainingDTO)
 }

@@ -1,5 +1,6 @@
 protocol TrainingRepositoryProtocol {
     func getTrainings() -> [Training]
-    func getCurrentTraining() -> Training?
-    func save(_ training: Training)
+    func getCurrent() -> Training?
+    func saveCurrent(_ training: Training)
+    func finish(_ training: Training)
 }
