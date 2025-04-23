@@ -7,9 +7,7 @@ struct SwitcherView: View {
         switch appState.screen {
         case .home:
             HomeBuilder().build(appState: appState)
-        case .workout:
-            CurrentTrainingBuilder().build(appState: appState)
-        case .loading:
+        case .workout, .loading:
             ProgressView()
         }
     }
