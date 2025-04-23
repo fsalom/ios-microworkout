@@ -14,14 +14,18 @@ class UserDefaultsManager: UserDefaultsManagerProtocol {
     }
 
     func save<T: Codable>(_ object: T, forKey key: String) {
-        if let data = try? JSONEncoder().encode(object) {
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        if let data = try? encoder.encode(object) {
             defaults.set(data, forKey: key)
         }
     }
 
     func get<T: Codable>(forKey key: String) -> T? {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
         guard let data = defaults.data(forKey: key) else { return nil }
-        return try? JSONDecoder().decode(T.self, from: data)
+        return try? decoder.decode(T.self, from: data)
     }
 
     func remove(forKey key: String) {
