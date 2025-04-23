@@ -18,14 +18,14 @@ struct Provider: TimelineProvider {
     }
 
     func placeholder(in context: Context) -> TrainingEntry {
-        guard let training = usecase.getCurrentTraining() else {
+        guard let training = usecase.getCurrent() else {
             return TrainingEntry.mock()
         }
         return TrainingEntry.from(entity: training)
     }
 
     func getSnapshot(in context: Context, completion: @escaping (TrainingEntry) -> ()) {
-        guard let training = usecase.getCurrentTraining() else {
+        guard let training = usecase.getCurrent() else {
             completion(TrainingEntry.mock())
             return
         }
