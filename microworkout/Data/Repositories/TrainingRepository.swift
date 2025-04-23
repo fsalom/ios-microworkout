@@ -33,7 +33,10 @@ fileprivate extension TrainingDTO {
     func toDomain() -> Training {
         return Training(name: self.name,
                         image: self.image,
-                        type: .strength,
+                        type: self.type,
+                        startedAt: self.startedAt,
+                        completedAt: self.completedAt,
+                        sets: self.sets,
                         numberOfSetsForSlider: self.numberOfSets,
                         numberOfRepsForSlider: self.numberOfReps,
                         numberOfMinutesPerSetForSlider: self.numberOfMinutesPerSet)
