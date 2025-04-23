@@ -10,11 +10,15 @@ class TrainingUseCase {
         self.repository.getTrainings()
     }
 
-    func getCurrentTraining() -> Training? {
-        self.repository.getCurrentTraining()
+    func getCurrent() -> Training? {
+        self.repository.getCurrent()
     }
 
-    func save(_ training: Training) {
-        self.repository.save(training)
+    func saveCurrent(_ training: Training) {
+        self.repository.saveCurrent(training)
+    }
+
+    func finish(_ training: Training) {
+        self.repository.finish(training)
     }
 }
