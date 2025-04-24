@@ -8,54 +8,49 @@ struct TrainingDetailV2View: View {
     @ObservedObject var viewModel: TrainingDetailV2ViewModel
 
     var body: some View {
-        if let _ = self.viewModel.uiState.currentTraining {
-            CurrentTrainingView(
-            )
-        } else {
-            VStack{
-                ZStack(alignment: .top) {
-                    GeometryReader { geometry in
-                        Image(viewModel.training.image)
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                            .frame(width: geometry.size.width, height: 300)
-                            .clipShape(RoundedRectangle(cornerRadius: 20.0)) // Aplica el redondeo correctamente
-                    }
-                    .frame(height: 300)
-                    Text(viewModel.training.name)
-                        .font(.system(size: 40))
-                        .fontWeight(.bold)
-                        .padding(.top, 150)
-                        .foregroundStyle(.white)
-                        .shadow(radius: 10)
+        VStack{
+            ZStack(alignment: .top) {
+                GeometryReader { geometry in
+                    Image(viewModel.training.image)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: geometry.size.width, height: 300)
+                        .clipShape(RoundedRectangle(cornerRadius: 20.0)) 
                 }
-                VStack {
-                    VStack(alignment: .leading, spacing: 8) {
-                        getSlidersView()
-                        getTextTotal()
-                            .padding()
-                            .background(
-                                RoundedRectangle(cornerRadius: 15)
-                                    .fill(Color.gray.opacity(0.2))
-                            )
-                        Spacer()
-                        SliderView(
-                            onFinish: {
-                                withAnimation {
-                                    viewModel.startTraining()
-                                }
-                            },
-                            isWaitingResponse: false)
-                        .matchedGeometryEffect(id: "background", in: animation)
-                    }
-                    .padding(16)
+                .frame(height: 300)
+                Text(viewModel.training.name)
+                    .font(.system(size: 40))
+                    .fontWeight(.bold)
+                    .padding(.top, 150)
+                    .foregroundStyle(.white)
+                    .shadow(radius: 10)
+            }
+            VStack {
+                VStack(alignment: .leading, spacing: 8) {
+                    getSlidersView()
+                    getTextTotal()
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: 15)
+                                .fill(Color.gray.opacity(0.2))
+                        )
+                    Spacer()
+                    SliderView(
+                        onFinish: {
+                            withAnimation {
+                                viewModel.startTraining()
+                            }
+                        },
+                        isWaitingResponse: false)
+                    .matchedGeometryEffect(id: "background", in: animation)
                 }
-                .padding(.bottom, 100)
+                .padding(16)
             }
-            .edgesIgnoringSafeArea(.all)
-            .onAppear {
-                updateSliderValues()
-            }
+            .padding(.bottom, 100)
+        }
+        .edgesIgnoringSafeArea(.all)
+        .onAppear {
+            updateSliderValues()
         }
     }
 
@@ -83,7 +78,7 @@ struct TrainingDetailV2View: View {
             Slider(value: $viewModel.training.numberOfSetsForSlider, in: 1...20, step: 1)
 
             Divider()
-
+            
             Text("\(viewModel.training.numberOfReps) repeticiones")
                 .fontWeight(.bold)
             Slider(value: $viewModel.training.numberOfRepsForSlider, in: 1...20, step: 1)
