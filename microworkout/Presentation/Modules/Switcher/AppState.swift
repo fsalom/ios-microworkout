@@ -19,7 +19,7 @@ final class AppState: ObservableObject {
 
     @Published public var screen: Screen = .home {
         didSet {
-            print("🏷️ \(screen.icon) App state: launched \(screen)")
+            print("🏷️ \(screen.icon) App state")
         }
     }
 
