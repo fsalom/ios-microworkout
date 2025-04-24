@@ -10,4 +10,8 @@ class TrainingDetailV2Router {
     func goToWorkoutList() {
         navigator.push(to: EmptyView())
     }
+
+    func goBack() {
+        navigator.dismiss()
+    }
 }
