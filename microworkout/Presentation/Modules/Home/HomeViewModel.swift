@@ -31,13 +31,13 @@ final class HomeViewModel: ObservableObject {
         self.appState = appState
         self.loadTrainings()
         self.askForPermissions()
-        if let training = self.trainingUseCase.getCurrentTraining() {
+        if let training = self.trainingUseCase.getCurrent() {
             appState.changeScreen(to: .workout(training: training))
         }
     }
 
     func save(this training: Training) {
-        trainingUseCase.save(training)
+        trainingUseCase.saveCurrent(training)
     }
 
     func showHealthInfo(for day: HealthDay) {
@@ -67,7 +67,7 @@ final class HomeViewModel: ObservableObject {
         Task {
             await MainActor.run {
                 self.uiState.trainings = trainingUseCase.getTrainings()
-                self.uiState.currentTraining = trainingUseCase.getCurrentTraining()
+                self.uiState.currentTraining = trainingUseCase.getCurrent()
             }
         }
     }
