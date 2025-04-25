@@ -7,7 +7,6 @@ struct TrainingDetailUIState {
 }
 
 final class TrainingDetailV2ViewModel: ObservableObject {
-
     var appState: AppState
     private var router: TrainingDetailV2Router
     private var trainingUseCase: TrainingUseCase
@@ -26,7 +25,10 @@ final class TrainingDetailV2ViewModel: ObservableObject {
 
     func startTraining() {
         DispatchQueue.main.async {
-            self.trainingUseCase.save(self.training)
+            self.training.startedAt = Date()
+            self.training.sets.append(Date())
+            self.trainingUseCase.saveCurrent(self.training)
+            self.router.goBack()
             self.appState.changeScreen(to: .workout(training: self.training))
         }
     }
