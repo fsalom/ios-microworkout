@@ -23,7 +23,7 @@ struct CountdownButtonView: View {
 
     var body: some View {
         Button {
-            if limitOfSets == sets.count {
+            if limitOfSets <= sets.count {
                 end()
             } else {
                 action()
