@@ -16,6 +16,7 @@ struct Training: Identifiable, Equatable {
     var numberOfSetsCompleted: Int = 0 {
         didSet {
             sets.append(Date())
+            calculateNumberOfSeconds()
         }
     }
 
@@ -36,22 +37,27 @@ struct Training: Identifiable, Equatable {
     var numberOfMinutes: Int {
         return Int(numberOfSeconds/60)
     }
+    var timeSpent: String {
+        return String(format: "%02d:%02d", numberOfMinutes, Int(numberOfSeconds)%60)
+    }
 
     mutating func calculateNumberOfSeconds() {
         var dates = self.sets
-        if let startDate = self.startedAt, dates.count < 1 {
+        if let startDate = self.startedAt, dates.isEmpty {
             dates.append(startDate)
             dates.append(Date())
         }
 
         let sortedDates = dates.sorted()
 
+        var totalSeconds: Double = 0.0
         for i in 1..<sortedDates.count {
             let previous = sortedDates[i - 1]
             let current = sortedDates[i]
-            let interval = current.timeIntervalSince(previous)
-            self.numberOfSeconds += interval
+            totalSeconds += current.timeIntervalSince(previous)
         }
+
+        self.numberOfSeconds = totalSeconds
     }
 
     static func mock() -> Training {
