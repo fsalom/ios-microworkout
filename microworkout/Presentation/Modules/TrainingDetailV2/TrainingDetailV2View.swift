@@ -15,7 +15,6 @@ struct TrainingDetailV2View: View {
                         .resizable()
                         .aspectRatio(contentMode: .fill)
                         .frame(width: geometry.size.width, height: 300)
-                        .clipShape(RoundedRectangle(cornerRadius: 20.0)) 
                 }
                 .frame(height: 300)
                 Text(viewModel.training.name)
@@ -46,12 +45,12 @@ struct TrainingDetailV2View: View {
                 }
                 .padding(16)
             }
-            .padding(.bottom, 100)
         }
-        .edgesIgnoringSafeArea(.all)
         .onAppear {
             updateSliderValues()
         }
+        .toolbarBackground(Color.white, for: .navigationBar)
+        .toolbarColorScheme(.light, for: .navigationBar)
     }
 
     func updateSliderValues() {
