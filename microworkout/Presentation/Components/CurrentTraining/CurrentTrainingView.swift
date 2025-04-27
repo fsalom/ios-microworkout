@@ -31,19 +31,21 @@ struct CurrentTrainingView: View {
                     viewModel.saveAndClose()
                 }
                 .padding(.bottom, 64)
-                SliderView(
-                    message: "Desliza para finalizar",
-                    backgroundColor: .white,
-                    frontColor: .blue,
-                    successColor: .white,
-                    onFinish: {
-                        withAnimation {
-                            self.viewModel.saveAndClose()
-                        }
-                    },
-                    isWaitingResponse: false)
-                .padding(.horizontal, 16)
-                .padding(.bottom, 16)
+                if viewModel.uiState.training.numberOfSets >     viewModel.uiState.training.sets.count {
+                    SliderView(
+                        message: "Desliza para finalizar",
+                        backgroundColor: .white,
+                        frontColor: .blue,
+                        successColor: .white,
+                        onFinish: {
+                            withAnimation {
+                                self.viewModel.saveAndClose()
+                            }
+                        },
+                        isWaitingResponse: false)
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 16)
+                }
             }
         }
         .navigationBarBackButtonHidden()
@@ -62,7 +64,7 @@ struct CurrentTrainingView: View {
         HStack{
             VStack(spacing: 10){
                 Text("\(viewModel.getCurrentSets())/\(viewModel.uiState.training.numberOfSets)")
-                    .font(.system(size: 48))
+                    .font(.system(size: 30))
                     .fontWeight(.bold)
                 Text("Ronda")
                     .font(.footnote)
@@ -77,8 +79,8 @@ struct CurrentTrainingView: View {
             }
             Spacer()
             VStack(spacing: 10){
-                Text("\(viewModel.uiState.training.numberOfMinutes)")
-                    .font(.system(size: 48))
+                Text("\(viewModel.uiState.training.timeSpent)")
+                    .font(.system(size: 30))
                     .fontWeight(.bold)
                 Text("Minutos")
                     .font(.footnote)
