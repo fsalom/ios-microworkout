@@ -27,6 +27,9 @@ class TrainingRepository: TrainingRepositoryProtocol {
         self.local.finish(training.toDTO())
     }
 
+    func getFinished() -> [Training] {
+        return self.local.getFinished().map { $0.toDomain() }
+    }
 }
 
 fileprivate extension TrainingDTO {
