@@ -4,6 +4,7 @@ import SwiftUICore
 struct HomeUiState {
     var weeks: [[HealthDay]]
     var trainings: [Training] = []
+    var lastTrainings: [Training] = []
     var currentTraining: Training?
     var error: String?
     var healthInfoForToday: HealthDay = HealthDay(date: Date())
@@ -30,6 +31,7 @@ final class HomeViewModel: ObservableObject {
         self.healthKitManager = healthKitManager
         self.appState = appState
         self.loadTrainings()
+        self.loadLastTrainings()
         self.askForPermissions()
         if let training = self.trainingUseCase.getCurrent() {
             appState.changeScreen(to: .workout(training: training))
@@ -68,6 +70,14 @@ final class HomeViewModel: ObservableObject {
             await MainActor.run {
                 self.uiState.trainings = trainingUseCase.getTrainings()
                 self.uiState.currentTraining = trainingUseCase.getCurrent()
+            }
+        }
+    }
+
+    private func loadLastTrainings() {
+        Task {
+            await MainActor.run {
+                self.uiState.lastTrainings = trainingUseCase.getFinished()
             }
         }
     }

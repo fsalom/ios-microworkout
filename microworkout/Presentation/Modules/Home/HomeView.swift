@@ -83,6 +83,13 @@ struct HomeView: View {
 
             Divider()
                 .padding(.horizontal, 16)
+            Text("Últimos entrenamientos")
+                .font(.title2)
+                .fontWeight(.bold)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+            ListFinishedTrainings()
 
         }
         .onAppear {
@@ -99,6 +106,26 @@ struct HomeView: View {
         .edgesIgnoringSafeArea(.bottom)
     }
 
+    @ViewBuilder
+    func ListFinishedTrainings() -> some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            LazyHStack(spacing: 16) {
+                ForEach(viewModel.uiState.lastTrainings, id: \.id) { training in
+                    Image(training.image)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 100, height: 100)
+                        .clipped()
+                        .mask(RoundedRectangle(cornerRadius: 20.0))
+                        .onTapGesture {
+                            viewModel.goToStart(this: training)
+                        }
+                }
+            }
+            .padding()
+        }
+    }
+    
     @ViewBuilder
     func ListLastTrainings() -> some View {
         ScrollView(.horizontal, showsIndicators: false) {
