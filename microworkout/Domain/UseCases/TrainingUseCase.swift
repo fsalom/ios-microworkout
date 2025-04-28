@@ -21,4 +21,8 @@ class TrainingUseCase {
     func finish(_ training: Training) {
         self.repository.finish(training)
     }
+
+    func getFinished() -> [Training] {
+        self.repository.getFinished()
+    }
 }
