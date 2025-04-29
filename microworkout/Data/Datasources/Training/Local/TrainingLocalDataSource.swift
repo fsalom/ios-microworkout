@@ -25,4 +25,8 @@ class TrainingLocalDataSource: TrainingLocalDataSourceProtocol {
         self.localStorage.save(finishedTrainings, forKey: TrainingKey.finish.rawValue)
         self.localStorage.remove(forKey: TrainingKey.current.rawValue)
     }
+
+    func getFinished() -> [TrainingDTO] {
+        return self.localStorage.get(forKey: TrainingKey.finish.rawValue) ?? []
+    }
 }
