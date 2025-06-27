@@ -181,6 +181,7 @@
 		C1BE55ED2DB184B100B57345 /* CurrentTrainingBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1BE55EC2DB184AA00B57345 /* CurrentTrainingBuilder.swift */; };
 		C1CF26BB2A5DDAA800521884 /* CustomSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1CF26BA2A5DDAA800521884 /* CustomSlider.swift */; };
 		C1D052422D9F1AC100B0FF1D /* HealthContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D052412D9F1AB600B0FF1D /* HealthContainer.swift */; };
+		C1D61A252E0D8F7300206F4E /* CurrentSessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D61A242E0D8F7300206F4E /* CurrentSessionView.swift */; };
 		C1DE682B2A63F86F000DE4C8 /* NumberOfSeriesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1DE682A2A63F86F000DE4C8 /* NumberOfSeriesView.swift */; };
 		C1DE682D2A63FC83000DE4C8 /* RpeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1DE682C2A63FC83000DE4C8 /* RpeView.swift */; };
 		C1F34F622A38CD4300233D66 /* gymwatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1F34F612A38CD4300233D66 /* gymwatchApp.swift */; };
@@ -432,6 +433,7 @@
 		C1BE55EC2DB184AA00B57345 /* CurrentTrainingBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentTrainingBuilder.swift; sourceTree = "<group>"; };
 		C1CF26BA2A5DDAA800521884 /* CustomSlider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomSlider.swift; sourceTree = "<group>"; };
 		C1D052412D9F1AB600B0FF1D /* HealthContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthContainer.swift; sourceTree = "<group>"; };
+		C1D61A242E0D8F7300206F4E /* CurrentSessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentSessionView.swift; sourceTree = "<group>"; };
 		C1DE682A2A63F86F000DE4C8 /* NumberOfSeriesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NumberOfSeriesView.swift; sourceTree = "<group>"; };
 		C1DE682C2A63FC83000DE4C8 /* RpeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RpeView.swift; sourceTree = "<group>"; };
 		C1F34F5F2A38CD4300233D66 /* gymwatch Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "gymwatch Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -840,6 +842,7 @@
 		C1742E412A2F317C0020354D /* Modules */ = {
 			isa = PBXGroup;
 			children = (
+				C1D61A232E0D8F5300206F4E /* CurrrentSession */,
 				C1BE53962DB02DFB00B57345 /* Switcher */,
 				C12315AB2D68CD3000802707 /* TrainingV2List */,
 				C1B670DA2D5FD69E005E9173 /* Home */,
@@ -1314,6 +1317,14 @@
 			path = Switcher;
 			sourceTree = "<group>";
 		};
+		C1D61A232E0D8F5300206F4E /* CurrrentSession */ = {
+			isa = PBXGroup;
+			children = (
+				C1D61A242E0D8F7300206F4E /* CurrentSessionView.swift */,
+			);
+			path = CurrrentSession;
+			sourceTree = "<group>";
+		};
 		C1F34F602A38CD4300233D66 /* gymwatch Watch App */ = {
 			isa = PBXGroup;
 			children = (
@@ -1725,6 +1736,7 @@
 				C16D03E52B18A2540014F906 /* WorkoutPlanModel.swift in Sources */,
 				C183FEBC2D57DB2B009EE8B5 /* ToastView.swift in Sources */,
 				C162D6752B0E236600CDCA26 /* HealthKit.swift in Sources */,
+				C1D61A252E0D8F7300206F4E /* CurrentSessionView.swift in Sources */,
 				C1762ACF2B0A913F0035318F /* WorkoutUseCaseProtocol.swift in Sources */,
 				C19D17EE2D5BF440000CCCEF /* TrainingListRouter.swift in Sources */,
 				C17040A52DA2E5F4000E97C0 /* TrainingDetailV2Builder.swift in Sources */,
