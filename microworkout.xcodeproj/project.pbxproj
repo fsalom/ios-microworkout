@@ -43,6 +43,7 @@
 		C15591032A31D0E000E30886 /* HomeTrainingProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15591022A31D0E000E30886 /* HomeTrainingProtocols.swift */; };
 		C15591082A31D1F100E30886 /* HomeWorkoutPlanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15591072A31D1F100E30886 /* HomeWorkoutPlanView.swift */; };
 		C155910A2A31D3E400E30886 /* HomeTrainingBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15591092A31D3E400E30886 /* HomeTrainingBuilder.swift */; };
+		C1574BED2E11B9CE002A7156 /* CronoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1574BEC2E11B9CE002A7156 /* CronoView.swift */; };
 		C15B7EE12A572BB70067B28E /* DetailWorkoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15B7EE02A572BB70067B28E /* DetailWorkoutView.swift */; };
 		C15B7EE32A572BC70067B28E /* DetailWorkoutBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15B7EE22A572BC70067B28E /* DetailWorkoutBuilder.swift */; };
 		C15B7EE52A572C370067B28E /* DetailWorkoutProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15B7EE42A572C370067B28E /* DetailWorkoutProtocols.swift */; };
@@ -319,6 +320,7 @@
 		C15591022A31D0E000E30886 /* HomeTrainingProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeTrainingProtocols.swift; sourceTree = "<group>"; };
 		C15591072A31D1F100E30886 /* HomeWorkoutPlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeWorkoutPlanView.swift; sourceTree = "<group>"; };
 		C15591092A31D3E400E30886 /* HomeTrainingBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeTrainingBuilder.swift; sourceTree = "<group>"; };
+		C1574BEC2E11B9CE002A7156 /* CronoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CronoView.swift; sourceTree = "<group>"; };
 		C15B7EE02A572BB70067B28E /* DetailWorkoutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailWorkoutView.swift; sourceTree = "<group>"; };
 		C15B7EE22A572BC70067B28E /* DetailWorkoutBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailWorkoutBuilder.swift; sourceTree = "<group>"; };
 		C15B7EE42A572C370067B28E /* DetailWorkoutProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailWorkoutProtocols.swift; sourceTree = "<group>"; };
@@ -1261,6 +1263,7 @@
 		C19D18022D5DFB28000CCCEF /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				C1574BEC2E11B9CE002A7156 /* CronoView.swift */,
 				C17040B22DAC4494000E97C0 /* CurrentTraining */,
 				C12315B42D6B76F700802707 /* CountdownView.swift */,
 				C12315B02D68D36C00802707 /* DetailView.swift */,
@@ -1741,6 +1744,7 @@
 				C19D17EE2D5BF440000CCCEF /* TrainingListRouter.swift in Sources */,
 				C17040A52DA2E5F4000E97C0 /* TrainingDetailV2Builder.swift in Sources */,
 				C1DE682D2A63FC83000DE4C8 /* RpeView.swift in Sources */,
+				C1574BED2E11B9CE002A7156 /* CronoView.swift in Sources */,
 				C16D03F32B18AEEF0014F906 /* ExerciseDTO.swift in Sources */,
 				C1A953142A5D4B3900A2A010 /* AddWorkoutView.swift in Sources */,
 				C1742E5B2A30A0400020354D /* WorkoutMockDataSource.swift in Sources */,
