@@ -28,7 +28,7 @@ struct RootView: View {
             }
         }
         .fullScreenCover(isPresented: .constant(appState.isWorkoutScreen)) {
-            if let training = appState.currentTraining {
+            if let _ = appState.currentTraining {
                 CurrentTrainingBuilder().build(appState: appState)
             }
         }
