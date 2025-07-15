@@ -5,15 +5,16 @@ struct Exercise_: Identifiable, Hashable {
     let name: String
 }
 
-struct LoggedExercise: Identifiable {
-    let id = UUID()
+struct LoggedExercise: Identifiable, Equatable {
+    let id: UUID
     let exercise: Exercise_
-    let reps: Int
-    let weight: Double
+    var reps: Int
+    var weight: Double
 }
 
 struct ExerciseInput: View {
     let exercise: Exercise_
+    var existing: LoggedExercise? = nil
     var onSave: (LoggedExercise) -> Void
 
     @State private var reps: String = ""
@@ -21,14 +22,11 @@ struct ExerciseInput: View {
     @State private var errorMessage: String?
 
     @FocusState private var focusedField: Field?
-
-    enum Field {
-        case reps, weight
-    }
+    enum Field { case reps, weight }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Ejercicio seleccionado:")
+            Text(existing == nil ? "Nueva serie" : "Editar serie")
                 .font(.headline)
             Text(exercise.name)
                 .font(.title2)
@@ -36,57 +34,81 @@ struct ExerciseInput: View {
 
             TextField("Repeticiones", text: $reps)
                 .keyboardType(.numberPad)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .textFieldStyle(.roundedBorder)
                 .focused($focusedField, equals: .reps)
                 .submitLabel(.next)
-                .onSubmit {
-                    focusedField = .weight
-                }
+                .onSubmit { focusedField = .weight }
 
             TextField("Peso (kg)", text: $weight)
                 .keyboardType(.decimalPad)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .textFieldStyle(.roundedBorder)
                 .focused($focusedField, equals: .weight)
                 .submitLabel(.done)
-                .onSubmit {
-                    submitExercise()
-                }
+                .onSubmit { save() }
 
             if let error = errorMessage {
                 Text(error)
                     .foregroundColor(.red)
             }
 
-            Divider()
+            Button("Guardar") {
+                save()
+            }
         }
         .padding()
         .background(Color(.secondarySystemBackground))
         .cornerRadius(10)
         .shadow(radius: 2)
         .onAppear {
-            // Enfocar al cargar
+            reps = existing.map { "\($0.reps)" } ?? ""
+            weight = existing.map { "\($0.weight)" } ?? ""
             focusedField = .reps
         }
     }
 
-    private func submitExercise() {
-        if let repsInt = Int(reps), let weightDouble = Double(weight) {
-            onSave(LoggedExercise(exercise: exercise, reps: repsInt, weight: weightDouble))
-            self.reps = ""
-            self.weight = ""
-            self.errorMessage = nil
-            focusedField = .reps // volver a reps
-        } else {
-            errorMessage = "Introduce números válidos en repeticiones y peso"
+    private func save() {
+        guard let r = Int(reps), let w = Double(weight) else {
+            errorMessage = "Valores no válidos"
+            return
         }
+
+        onSave(LoggedExercise(
+            id: existing?.id ?? UUID(),
+            exercise: exercise,
+            reps: r,
+            weight: w
+        ))
     }
 }
 
+extension Array where Element: Hashable {
+    func uniqued() -> [Element] {
+        var seen = Set<Element>()
+        return filter { seen.insert($0).inserted }
+    }
+}
+
+
+import SwiftUI
+
 struct CurrentSessionView: View {
     @State private var searchText: String = ""
-    @State private var selectedExercise: Exercise_? = nil
+    @State private var activeForm: ActiveExerciseForm? = nil
     @State private var loggedExercises: [LoggedExercise] = []
+
     @FocusState private var isSearchFocused: Bool
+
+    enum ActiveExerciseForm: Identifiable {
+        case new(Exercise_)
+        case edit(LoggedExercise)
+
+        var id: UUID {
+            switch self {
+            case .new(let exercise): return exercise.id
+            case .edit(let logged): return logged.id
+            }
+        }
+    }
 
     let exercises: [Exercise_] = [
         Exercise_(name: "Press de banca"),
@@ -110,24 +132,47 @@ struct CurrentSessionView: View {
         NavigationView {
             ZStack {
                 VStack {
-                    if let exercise = selectedExercise {
-                        ExerciseInput(exercise: exercise) { logged in
-                            loggedExercises.append(logged)
-                            selectedExercise = nil
-                        }
-                        .padding(.horizontal)
-                    }
+
+                    // Agrupación por ejercicio
+                    let groupedByExercise = Dictionary(grouping: loggedExercises, by: { $0.exercise })
+                    let orderedExercises = loggedExercises.map { $0.exercise }.uniqued()
 
                     if !loggedExercises.isEmpty {
                         List {
-                            Section(header: Text("Ejercicios añadidos")) {
-                                ForEach(loggedExercises) { e in
-                                    VStack(alignment: .leading) {
-                                        Text(e.exercise.name)
-                                            .fontWeight(.semibold)
-                                        Text("\(e.reps) repeticiones · \(e.weight, specifier: "%.1f") kg")
-                                            .font(.subheadline)
-                                            .foregroundColor(.gray)
+                            ForEach(orderedExercises, id: \.self) { exercise in
+                                Section(header:
+                                    HStack {
+                                        Text(exercise.name)
+                                            .font(.headline)
+                                        Spacer()
+                                        Button(action: {
+                                            activeForm = .new(exercise)
+                                        }) {
+                                            Image(systemName: "plus.circle")
+                                                .imageScale(.large)
+                                        }
+                                        .buttonStyle(.plain)
+                                    }
+                                ) {
+                                    ForEach(groupedByExercise[exercise] ?? []) { e in
+                                        HStack {
+                                            VStack(alignment: .leading) {
+                                                Text("\(e.reps) repeticiones · \(e.weight, specifier: "%.1f") kg")
+                                                    .font(.subheadline)
+                                                    .foregroundColor(.gray)
+                                            }
+                                            Spacer()
+                                        }
+                                        .contentShape(Rectangle())
+                                        .onTapGesture {
+                                            activeForm = .edit(e)
+                                        }
+                                    }
+                                    .onDelete { indexSet in
+                                        if let group = groupedByExercise[exercise] {
+                                            let idsToRemove = indexSet.map { group[$0].id }
+                                            loggedExercises.removeAll { idsToRemove.contains($0.id) }
+                                        }
                                     }
                                 }
                             }
@@ -139,14 +184,14 @@ struct CurrentSessionView: View {
                 .searchable(text: $searchText)
                 .focused($isSearchFocused)
 
-                // Capa superior que ocupa toda la pantalla con los resultados
-                if !filteredExercises.isEmpty && selectedExercise == nil {
+                // Lista de búsqueda en overlay
+                if !filteredExercises.isEmpty && activeForm == nil {
                     Color(.systemBackground)
                         .ignoresSafeArea()
 
                     List(filteredExercises) { exercise in
                         Button {
-                            selectedExercise = exercise
+                            activeForm = .new(exercise)
                             searchText = ""
                             isSearchFocused = false
                         } label: {
@@ -155,6 +200,27 @@ struct CurrentSessionView: View {
                     }
                     .listStyle(.plain)
                 }
+            }
+        }
+        .sheet(item: $activeForm) { form in
+            switch form {
+            case .new(let exercise):
+                ExerciseInput(exercise: exercise) { new in
+                    loggedExercises.append(new)
+                    activeForm = nil
+                }
+                .padding()
+                .presentationDetents([.medium])
+
+            case .edit(let existing):
+                ExerciseInput(exercise: existing.exercise, existing: existing) { updated in
+                    if let index = loggedExercises.firstIndex(where: { $0.id == updated.id }) {
+                        loggedExercises[index] = updated
+                    }
+                    activeForm = nil
+                }
+                .padding()
+                .presentationDetents([.medium])
             }
         }
     }
