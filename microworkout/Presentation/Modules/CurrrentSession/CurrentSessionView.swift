@@ -56,9 +56,6 @@ struct ExerciseInput: View {
             }
         }
         .padding()
-        .background(Color(.secondarySystemBackground))
-        .cornerRadius(10)
-        .shadow(radius: 2)
         .onAppear {
             reps = existing.map { "\($0.reps)" } ?? ""
             weight = existing.map { "\($0.weight)" } ?? ""
@@ -146,7 +143,12 @@ struct CurrentSessionView: View {
                                             .font(.headline)
                                         Spacer()
                                         Button(action: {
-                                            activeForm = .new(exercise)
+                                            if let last = groupedByExercise[exercise]?.last {
+                                                let new = LoggedExercise(id: UUID(), exercise: last.exercise, reps: last.reps, weight: last.weight)
+                                                activeForm = .new(new.exercise)
+                                            } else {
+                                                activeForm = .new(exercise)
+                                            }
                                         }) {
                                             Image(systemName: "plus.circle")
                                                 .imageScale(.large)
@@ -180,6 +182,13 @@ struct CurrentSessionView: View {
                     }
 
                     Spacer()
+                    SliderView(
+                        onFinish: {
+                            withAnimation {
+
+                            }
+                        },
+                        isWaitingResponse: false)
                 }
                 .searchable(text: $searchText)
                 .focused($isSearchFocused)
@@ -210,7 +219,8 @@ struct CurrentSessionView: View {
                     activeForm = nil
                 }
                 .padding()
-                .presentationDetents([.medium])
+                .presentationDetents([.height(240)])
+                .presentationDragIndicator(.visible)
 
             case .edit(let existing):
                 ExerciseInput(exercise: existing.exercise, existing: existing) { updated in
@@ -220,7 +230,8 @@ struct CurrentSessionView: View {
                     activeForm = nil
                 }
                 .padding()
-                .presentationDetents([.medium])
+                .presentationDetents([.height(240)])
+                .presentationDragIndicator(.visible)
             }
         }
     }
