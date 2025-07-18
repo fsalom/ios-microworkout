@@ -139,6 +139,7 @@ struct CurrentSessionView: View {
     @State private var activeForm: ActiveExerciseForm? = nil
     @State private var loggedExercises: [LoggedExercise] = []
 
+    @State private var isRunning: Bool = false
     @State private var startTime: Date? = nil
     @State private var now = Date()
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
@@ -178,7 +179,8 @@ struct CurrentSessionView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                Color(.systemGroupedBackground).ignoresSafeArea()
+                (startTime != nil ? Color.blue : Color(.systemGroupedBackground))
+                    .ignoresSafeArea()
 
                 VStack {
 
@@ -189,7 +191,8 @@ struct CurrentSessionView: View {
                         let seconds = totalSeconds % 60
                         Text(String(format: "%02d:%02d:%02d", hours, minutes, seconds))
                             .font(.largeTitle)
-                            .foregroundColor(.secondary)
+                            .fontWeight(.black)
+                            .foregroundColor(startTime != nil ? .white : .secondary)
                             .padding(.top, 8)
                     }
 
@@ -204,6 +207,7 @@ struct CurrentSessionView: View {
                                     HStack {
                                         Text(exercise.name)
                                             .font(.headline)
+                                            .foregroundColor(startTime != nil ? .white : .primary)
                                         Spacer()
                                     Button(action: {
                                         if let last = groupedByExercise[exercise]?.last {
@@ -228,6 +232,7 @@ struct CurrentSessionView: View {
                                     }) {
                                         Image(systemName: "plus.circle")
                                             .imageScale(.large)
+                                            .foregroundColor(startTime != nil ? .white : .blue)
                                     }
                                     .buttonStyle(.plain)
                                     }
@@ -241,7 +246,6 @@ struct CurrentSessionView: View {
                                             }
                                             Spacer()
                                         }
-                                        .contentShape(Rectangle())
                                         .onTapGesture {
                                             activeForm = .edit(e)
                                         }
@@ -255,17 +259,36 @@ struct CurrentSessionView: View {
                                 }
                             }
                         }
+                        //.listStyle(.plain)
+                        .scrollContentBackground(.hidden)
                     }
 
                     Spacer()
-                    SliderView(
-                        onFinish: {
-                            withAnimation {
-                                startTime = Date()
-                            }
-                        },
-                        isWaitingResponse: false)
+                    if self.isRunning {
+                        SliderView(
+                            message: "Desliza para finalizar",
+                            backgroundColor: .white,
+                            frontColor: .blue,
+                            successColor: .white,
+                            onFinish: {
+                                withAnimation {
+                                    startTime = nil
+                                    self.isRunning = false
+                                }
+                            },
+                            isWaitingResponse: false)
+                    } else {
+                        SliderView(
+                            onFinish: {
+                                withAnimation {
+                                    startTime = Date()
+                                    self.isRunning = true
+                                }
+                            },
+                            isWaitingResponse: false)
+                    }
                 }
+                .padding(6)
                 .searchable(text: $searchText)
                 .focused($isSearchFocused)
                 .onReceive(timer) { input in
