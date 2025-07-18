@@ -12,59 +12,105 @@ struct LoggedExercise: Identifiable, Equatable {
     var weight: Double
 }
 
+struct StepperInputView: View {
+    var label: String
+    @Binding var value: Double?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Button(action: {
+                    if let currentValue = value {
+                        value = max(0, currentValue - 1)
+                    } else {
+                        value = 0
+                    }
+                }) {
+                    Image(systemName: "minus")
+                        .frame(width: 44, height: 44)
+                }
+
+                TextField(label, value: $value, format: .number)
+                    .keyboardType(.decimalPad)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity)
+
+                Button(action: {
+                    if let currentValue = value {
+                        value = currentValue + 1
+                    } else {
+                        value = 1
+                    }
+                }) {
+                    Image(systemName: "plus")
+                        .frame(width: 44, height: 44)
+                }
+            }
+            .padding(4)
+            .overlay(
+                RoundedRectangle(cornerRadius: 6)
+                    .stroke(Color.gray.opacity(0.4), lineWidth: 1)
+            )
+        }
+        .padding(4)
+    }
+}
+
 struct ExerciseInput: View {
     let exercise: Exercise_
     var existing: LoggedExercise? = nil
     var onSave: (LoggedExercise) -> Void
 
-    @State private var reps: String = ""
-    @State private var weight: String = ""
+    @State private var repsValue: Double? = nil
+    @State private var weight: Double? = nil
     @State private var errorMessage: String?
+
+    var isFormValid: Bool {
+        repsValue != nil && weight != nil
+    }
 
     @FocusState private var focusedField: Field?
     enum Field { case reps, weight }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 4) {
             Text(existing == nil ? "Nueva serie" : "Editar serie")
                 .font(.headline)
             Text(exercise.name)
                 .font(.title2)
                 .bold()
 
-            TextField("Repeticiones", text: $reps)
-                .keyboardType(.numberPad)
-                .textFieldStyle(.roundedBorder)
-                .focused($focusedField, equals: .reps)
-                .submitLabel(.next)
-                .onSubmit { focusedField = .weight }
+            StepperInputView(label: "Peso", value: $weight)
 
-            TextField("Peso (kg)", text: $weight)
-                .keyboardType(.decimalPad)
-                .textFieldStyle(.roundedBorder)
-                .focused($focusedField, equals: .weight)
-                .submitLabel(.done)
-                .onSubmit { save() }
+            StepperInputView(label: "Repeticiones", value: $repsValue)
 
             if let error = errorMessage {
                 Text(error)
                     .foregroundColor(.red)
             }
 
-            Button("Guardar") {
+            Button(action: {
                 save()
+            }) {
+                Text("Guardar")
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(isFormValid ? Color.black : Color.gray)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
             }
+            .disabled(!isFormValid)
+
         }
-        .padding()
         .onAppear {
-            reps = existing.map { "\($0.reps)" } ?? ""
-            weight = existing.map { "\($0.weight)" } ?? ""
+            repsValue = existing.map { Double($0.reps) }
+            weight = existing?.weight
             focusedField = .reps
         }
     }
 
     private func save() {
-        guard let r = Int(reps), let w = Double(weight) else {
+        guard let r = repsValue.flatMap(Int.init), let w = weight else {
             errorMessage = "Valores no válidos"
             return
         }
@@ -92,6 +138,10 @@ struct CurrentSessionView: View {
     @State private var searchText: String = ""
     @State private var activeForm: ActiveExerciseForm? = nil
     @State private var loggedExercises: [LoggedExercise] = []
+
+    @State private var startTime: Date? = nil
+    @State private var now = Date()
+    let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     @FocusState private var isSearchFocused: Bool
 
@@ -128,7 +178,20 @@ struct CurrentSessionView: View {
     var body: some View {
         NavigationView {
             ZStack {
+                Color(.systemGroupedBackground).ignoresSafeArea()
+
                 VStack {
+
+                    if let startTime = startTime {
+                        let totalSeconds = Int(now.timeIntervalSince(startTime))
+                        let hours = totalSeconds / 3600
+                        let minutes = (totalSeconds % 3600) / 60
+                        let seconds = totalSeconds % 60
+                        Text(String(format: "%02d:%02d:%02d", hours, minutes, seconds))
+                            .font(.largeTitle)
+                            .foregroundColor(.secondary)
+                            .padding(.top, 8)
+                    }
 
                     // Agrupación por ejercicio
                     let groupedByExercise = Dictionary(grouping: loggedExercises, by: { $0.exercise })
@@ -142,18 +205,31 @@ struct CurrentSessionView: View {
                                         Text(exercise.name)
                                             .font(.headline)
                                         Spacer()
-                                        Button(action: {
-                                            if let last = groupedByExercise[exercise]?.last {
-                                                let new = LoggedExercise(id: UUID(), exercise: last.exercise, reps: last.reps, weight: last.weight)
-                                                activeForm = .new(new.exercise)
-                                            } else {
-                                                activeForm = .new(exercise)
-                                            }
-                                        }) {
-                                            Image(systemName: "plus.circle")
-                                                .imageScale(.large)
+                                    Button(action: {
+                                        if let last = groupedByExercise[exercise]?.last {
+                                            // Creamos una nueva serie con los datos del último LoggedExercise
+                                            let new = LoggedExercise(
+                                                id: UUID(),
+                                                exercise: last.exercise,
+                                                reps: last.reps,
+                                                weight: last.weight
+                                            )
+                                            activeForm = .new(new.exercise)
+                                        } else {
+                                            // Si no hay ninguna serie anterior, se crea una nueva vacía
+                                            let new = LoggedExercise(
+                                                id: UUID(),
+                                                exercise: exercise,
+                                                reps: 0,
+                                                weight: 0
+                                            )
+                                            activeForm = .edit(new)
                                         }
-                                        .buttonStyle(.plain)
+                                    }) {
+                                        Image(systemName: "plus.circle")
+                                            .imageScale(.large)
+                                    }
+                                    .buttonStyle(.plain)
                                     }
                                 ) {
                                     ForEach(groupedByExercise[exercise] ?? []) { e in
@@ -185,13 +261,16 @@ struct CurrentSessionView: View {
                     SliderView(
                         onFinish: {
                             withAnimation {
-
+                                startTime = Date()
                             }
                         },
                         isWaitingResponse: false)
                 }
                 .searchable(text: $searchText)
                 .focused($isSearchFocused)
+                .onReceive(timer) { input in
+                    now = input
+                }
 
                 // Lista de búsqueda en overlay
                 if !filteredExercises.isEmpty && activeForm == nil {
@@ -214,12 +293,16 @@ struct CurrentSessionView: View {
         .sheet(item: $activeForm) { form in
             switch form {
             case .new(let exercise):
-                ExerciseInput(exercise: exercise) { new in
+                let last = loggedExercises.last(where: { $0.exercise == exercise })
+                ExerciseInput(
+                    exercise: exercise,
+                    existing: last.map { LoggedExercise(id: UUID(), exercise: $0.exercise, reps: $0.reps, weight: $0.weight) }
+                ) { new in
                     loggedExercises.append(new)
                     activeForm = nil
                 }
                 .padding()
-                .presentationDetents([.height(240)])
+                .presentationDetents([.height(260)])
                 .presentationDragIndicator(.visible)
 
             case .edit(let existing):
@@ -230,7 +313,7 @@ struct CurrentSessionView: View {
                     activeForm = nil
                 }
                 .padding()
-                .presentationDetents([.height(240)])
+                .presentationDetents([.height(260)])
                 .presentationDragIndicator(.visible)
             }
         }
