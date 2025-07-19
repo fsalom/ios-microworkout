@@ -10,7 +10,7 @@ struct LoggedExercise: Identifiable, Equatable {
     let exercise: Exercise_
     var reps: Int
     var weight: Double
-    var isCompleted: Bool = false  // 🔧 Añadido
+    var isCompleted: Bool = false
 }
 
 struct StepperInputView: View {
@@ -212,7 +212,6 @@ struct CurrentSessionView: View {
                                         Spacer()
                                     Button(action: {
                                         if let last = groupedByExercise[exercise]?.last {
-                                            // Creamos una nueva serie con los datos del último LoggedExercise
                                             let new = LoggedExercise(
                                                 id: UUID(),
                                                 exercise: last.exercise,
@@ -221,7 +220,6 @@ struct CurrentSessionView: View {
                                             )
                                             activeForm = .new(new.exercise)
                                         } else {
-                                            // Si no hay ninguna serie anterior, se crea una nueva vacía
                                             let new = LoggedExercise(
                                                 id: UUID(),
                                                 exercise: exercise,
@@ -231,12 +229,18 @@ struct CurrentSessionView: View {
                                             activeForm = .edit(new)
                                         }
                                     }) {
-                                        Image(systemName: "plus.circle")
-                                            .imageScale(.large)
-                                            .foregroundColor(startTime != nil ? .white : .blue)
+                                        Image(systemName: "plus.circle.fill")
+                                            .resizable()
+                                            .frame(width: 24, height: 24)
+                                            .foregroundColor(startTime != nil ? .blue : .blue)
+                                            .padding(5)
+                                            .background(Circle().fill(startTime != nil ? Color(.systemGray5) : .white ))
                                     }
                                     .buttonStyle(.plain)
+
                                     }
+                                    .padding(8)
+                                    .listRowInsets(EdgeInsets())
                                 ) {
                                     ForEach(groupedByExercise[exercise] ?? []) { e in
                                         HStack {
