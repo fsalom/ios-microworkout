@@ -10,6 +10,7 @@ struct LoggedExercise: Identifiable, Equatable {
     let exercise: Exercise_
     var reps: Int
     var weight: Double
+    var isCompleted: Bool = false  // 🔧 Añadido
 }
 
 struct StepperInputView: View {
@@ -245,6 +246,16 @@ struct CurrentSessionView: View {
                                                     .foregroundColor(.gray)
                                             }
                                             Spacer()
+                                            Button(action: {
+                                                if let index = loggedExercises.firstIndex(where: { $0.id == e.id }) {
+                                                    loggedExercises[index].isCompleted.toggle()
+                                                }
+                                            }) {
+                                                Image(systemName: e.isCompleted ? "checkmark.circle.fill" : "circle")
+                                                    .foregroundColor(e.isCompleted ? .green : .gray)
+                                                    .imageScale(.large)
+                                            }
+                                            .buttonStyle(.plain)
                                         }
                                         .onTapGesture {
                                             activeForm = .edit(e)
@@ -288,7 +299,7 @@ struct CurrentSessionView: View {
                             isWaitingResponse: false)
                     }
                 }
-                .padding(6)
+                .padding(16)
                 .searchable(text: $searchText)
                 .focused($isSearchFocused)
                 .onReceive(timer) { input in
