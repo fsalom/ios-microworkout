@@ -17,7 +17,8 @@ enum ExerciseType: CaseIterable, Identifiable {
     var id: Self { self }
 }
 
-struct Exercise {
+struct Exercise: Identifiable, Hashable {
+    let id = UUID()
     let name: String
-    var type: ExerciseType
+    var type: ExerciseType = .weight
 }
