@@ -1,130 +1,5 @@
 import SwiftUI
 
-struct Exercise_: Identifiable, Hashable {
-    let id = UUID()
-    let name: String
-}
-
-struct LoggedExercise: Identifiable, Equatable {
-    let id: UUID
-    let exercise: Exercise_
-    var reps: Int
-    var weight: Double
-    var isCompleted: Bool = false
-}
-
-struct StepperInputView: View {
-    var label: String
-    @Binding var value: Double?
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack {
-                Button(action: {
-                    if let currentValue = value {
-                        value = max(0, currentValue - 1)
-                    } else {
-                        value = 0
-                    }
-                }) {
-                    Image(systemName: "minus")
-                        .frame(width: 44, height: 44)
-                }
-
-                TextField(label, value: $value, format: .number)
-                    .keyboardType(.decimalPad)
-                    .multilineTextAlignment(.center)
-                    .frame(maxWidth: .infinity)
-
-                Button(action: {
-                    if let currentValue = value {
-                        value = currentValue + 1
-                    } else {
-                        value = 1
-                    }
-                }) {
-                    Image(systemName: "plus")
-                        .frame(width: 44, height: 44)
-                }
-            }
-            .padding(4)
-            .overlay(
-                RoundedRectangle(cornerRadius: 6)
-                    .stroke(Color.gray.opacity(0.4), lineWidth: 1)
-            )
-        }
-        .padding(4)
-    }
-}
-
-struct ExerciseInput: View {
-    let exercise: Exercise_
-    var existing: LoggedExercise? = nil
-    var onSave: (LoggedExercise) -> Void
-
-    @State private var repsValue: Double? = nil
-    @State private var weight: Double? = nil
-    @State private var errorMessage: String?
-
-    var isFormValid: Bool {
-        repsValue != nil && weight != nil
-    }
-
-    @FocusState private var focusedField: Field?
-    enum Field { case reps, weight }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(existing == nil ? "Nueva serie" : "Editar serie")
-                .font(.headline)
-            Text(exercise.name)
-                .font(.title2)
-                .bold()
-
-            StepperInputView(label: "Peso", value: $weight)
-
-            StepperInputView(label: "Repeticiones", value: $repsValue)
-
-            if let error = errorMessage {
-                Text(error)
-                    .foregroundColor(.red)
-            }
-
-            Button(action: {
-                save()
-            }) {
-                Text("Guardar")
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(isFormValid ? Color.black : Color.gray)
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
-            }
-            .disabled(!isFormValid)
-
-        }
-        .onAppear {
-            repsValue = existing.map { Double($0.reps) }
-            weight = existing?.weight
-            focusedField = .reps
-        }
-    }
-
-    private func save() {
-        guard let r = repsValue.flatMap(Int.init), let w = weight else {
-            errorMessage = "Valores no válidos"
-            return
-        }
-
-        onSave(LoggedExercise(
-            id: existing?.id ?? UUID(),
-            exercise: exercise,
-            reps: r,
-            weight: w
-        ))
-    }
-}
-
 extension Array where Element: Hashable {
     func uniqued() -> [Element] {
         var seen = Set<Element>()
@@ -132,117 +7,75 @@ extension Array where Element: Hashable {
     }
 }
 
-
-import SwiftUI
-
 struct CurrentSessionView: View {
-    @State private var searchText: String = ""
-    @State private var activeForm: ActiveExerciseForm? = nil
-    @State private var loggedExercises: [LoggedExercise] = []
-
-    @State private var isRunning: Bool = false
-    @State private var startTime: Date? = nil
-    @State private var now = Date()
-    let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
-
+    @StateObject private var viewModel = CurrentSessionViewModel()
     @FocusState private var isSearchFocused: Bool
 
-    enum ActiveExerciseForm: Identifiable {
-        case new(Exercise_)
-        case edit(LoggedExercise)
-
-        var id: UUID {
-            switch self {
-            case .new(let exercise): return exercise.id
-            case .edit(let logged): return logged.id
-            }
-        }
-    }
-
-    let exercises: [Exercise_] = [
-        Exercise_(name: "Press de banca"),
-        Exercise_(name: "Sentadilla"),
-        Exercise_(name: "Peso muerto"),
-        Exercise_(name: "Dominadas"),
-        Exercise_(name: "Press militar"),
-        Exercise_(name: "Curl de bíceps"),
-        Exercise_(name: "Remo con barra")
-    ]
-
-    var filteredExercises: [Exercise_] {
-        if searchText.isEmpty {
-            return []
-        } else {
-            return exercises.filter { $0.name.lowercased().contains(searchText.lowercased()) }
-        }
-    }
+    let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     var body: some View {
         NavigationView {
             ZStack {
-                (startTime != nil ? Color.blue : Color(.systemGroupedBackground))
+                (viewModel.startTime != nil ? Color.blue : Color(.systemGroupedBackground))
                     .ignoresSafeArea()
 
                 VStack {
-
-                    if let startTime = startTime {
-                        let totalSeconds = Int(now.timeIntervalSince(startTime))
+                    if let start = viewModel.startTime {
+                        let totalSeconds = Int(viewModel.now.timeIntervalSince(start))
                         let hours = totalSeconds / 3600
                         let minutes = (totalSeconds % 3600) / 60
                         let seconds = totalSeconds % 60
                         Text(String(format: "%02d:%02d:%02d", hours, minutes, seconds))
                             .font(.largeTitle)
                             .fontWeight(.black)
-                            .foregroundColor(startTime != nil ? .white : .secondary)
+                            .foregroundColor(.white)
                             .padding(.top, 8)
                     }
 
-                    // Agrupación por ejercicio
-                    let groupedByExercise = Dictionary(grouping: loggedExercises, by: { $0.exercise })
-                    let orderedExercises = loggedExercises.map { $0.exercise }.uniqued()
+                    let grouped = viewModel.groupedByExercise()
+                    let ordered = viewModel.orderedExercises()
 
-                    if !loggedExercises.isEmpty {
+                    if !viewModel.loggedExercises.isEmpty {
                         List {
-                            ForEach(orderedExercises, id: \.self) { exercise in
+                            ForEach(ordered, id: \.self) { exercise in
                                 Section(header:
                                     HStack {
                                         Text(exercise.name)
                                             .font(.headline)
-                                            .foregroundColor(startTime != nil ? .white : .primary)
+                                            .foregroundColor(viewModel.startTime != nil ? .white : .primary)
                                         Spacer()
-                                    Button(action: {
-                                        if let last = groupedByExercise[exercise]?.last {
-                                            let new = LoggedExercise(
-                                                id: UUID(),
-                                                exercise: last.exercise,
-                                                reps: last.reps,
-                                                weight: last.weight
-                                            )
-                                            activeForm = .new(new.exercise)
-                                        } else {
-                                            let new = LoggedExercise(
-                                                id: UUID(),
-                                                exercise: exercise,
-                                                reps: 0,
-                                                weight: 0
-                                            )
-                                            activeForm = .edit(new)
+                                        Button(action: {
+                                            if let last = grouped[exercise]?.last {
+                                                let new = LoggedExercise(
+                                                    id: UUID(),
+                                                    exercise: last.exercise,
+                                                    reps: last.reps,
+                                                    weight: last.weight
+                                                )
+                                                viewModel.activeForm = .new(new.exercise)
+                                            } else {
+                                                let new = LoggedExercise(
+                                                    id: UUID(),
+                                                    exercise: exercise,
+                                                    reps: 0,
+                                                    weight: 0
+                                                )
+                                                viewModel.activeForm = .edit(new)
+                                            }
+                                        }) {
+                                            Image(systemName: "plus.circle.fill")
+                                                .resizable()
+                                                .frame(width: 24, height: 24)
+                                                .foregroundColor(viewModel.startTime != nil ? .blue : Color(.gray))
+                                                .padding(5)
+                                                .background(Circle().fill(viewModel.startTime != nil ? Color(.systemGray5) : .white))
                                         }
-                                    }) {
-                                        Image(systemName: "plus.circle.fill")
-                                            .resizable()
-                                            .frame(width: 24, height: 24)
-                                            .foregroundColor(startTime != nil ? .blue : .blue)
-                                            .padding(5)
-                                            .background(Circle().fill(startTime != nil ? Color(.systemGray5) : .white ))
-                                    }
-                                    .buttonStyle(.plain)
-
+                                        .buttonStyle(.plain)
                                     }
                                     .padding(8)
                                     .listRowInsets(EdgeInsets())
                                 ) {
-                                    ForEach(groupedByExercise[exercise] ?? []) { e in
+                                    ForEach(grouped[exercise] ?? []) { e in
                                         HStack {
                                             VStack(alignment: .leading) {
                                                 Text("\(e.reps) repeticiones · \(e.weight, specifier: "%.1f") kg")
@@ -251,9 +84,7 @@ struct CurrentSessionView: View {
                                             }
                                             Spacer()
                                             Button(action: {
-                                                if let index = loggedExercises.firstIndex(where: { $0.id == e.id }) {
-                                                    loggedExercises[index].isCompleted.toggle()
-                                                }
+                                                viewModel.toggleCompletion(for: e.id)
                                             }) {
                                                 Image(systemName: e.isCompleted ? "checkmark.circle.fill" : "circle")
                                                     .foregroundColor(e.isCompleted ? .green : .gray)
@@ -262,63 +93,54 @@ struct CurrentSessionView: View {
                                             .buttonStyle(.plain)
                                         }
                                         .onTapGesture {
-                                            activeForm = .edit(e)
+                                            viewModel.activeForm = .edit(e)
                                         }
                                     }
                                     .onDelete { indexSet in
-                                        if let group = groupedByExercise[exercise] {
+                                        if let group = grouped[exercise] {
                                             let idsToRemove = indexSet.map { group[$0].id }
-                                            loggedExercises.removeAll { idsToRemove.contains($0.id) }
+                                            viewModel.deleteExercises(with: idsToRemove)
                                         }
                                     }
                                 }
                             }
                         }
-                        //.listStyle(.plain)
                         .scrollContentBackground(.hidden)
                     }
 
                     Spacer()
-                    if self.isRunning {
+
+                    if viewModel.isRunning {
                         SliderView(
                             message: "Desliza para finalizar",
                             backgroundColor: .white,
                             frontColor: .blue,
                             successColor: .white,
                             onFinish: {
-                                withAnimation {
-                                    startTime = nil
-                                    self.isRunning = false
-                                }
+                                withAnimation { viewModel.stopSession() }
                             },
                             isWaitingResponse: false)
                     } else {
                         SliderView(
                             onFinish: {
-                                withAnimation {
-                                    startTime = Date()
-                                    self.isRunning = true
-                                }
+                                withAnimation { viewModel.startSession() }
                             },
                             isWaitingResponse: false)
                     }
                 }
                 .padding(16)
-                .searchable(text: $searchText)
+                .searchable(text: $viewModel.searchText) // , isPresented: $isSearchFocused
                 .focused($isSearchFocused)
-                .onReceive(timer) { input in
-                    now = input
+                .onReceive(timer) { date in
+                    viewModel.updateNow(to: date)
                 }
 
-                // Lista de búsqueda en overlay
-                if !filteredExercises.isEmpty && activeForm == nil {
-                    Color(.systemBackground)
-                        .ignoresSafeArea()
-
-                    List(filteredExercises) { exercise in
+                if !viewModel.filteredExercises.isEmpty && viewModel.activeForm == nil {
+                    Color(.systemBackground).ignoresSafeArea()
+                    List(viewModel.filteredExercises) { exercise in
                         Button {
-                            activeForm = .new(exercise)
-                            searchText = ""
+                            viewModel.activeForm = .new(exercise)
+                            viewModel.searchText = ""
                             isSearchFocused = false
                         } label: {
                             Text(exercise.name)
@@ -328,16 +150,16 @@ struct CurrentSessionView: View {
                 }
             }
         }
-        .sheet(item: $activeForm) { form in
+        .sheet(item: $viewModel.activeForm) { form in
             switch form {
             case .new(let exercise):
-                let last = loggedExercises.last(where: { $0.exercise == exercise })
+                let last = viewModel.loggedExercises.last(where: { $0.exercise == exercise })
                 ExerciseInput(
                     exercise: exercise,
                     existing: last.map { LoggedExercise(id: UUID(), exercise: $0.exercise, reps: $0.reps, weight: $0.weight) }
                 ) { new in
-                    loggedExercises.append(new)
-                    activeForm = nil
+                    viewModel.addLoggedExercise(new)
+                    viewModel.activeForm = nil
                 }
                 .padding()
                 .presentationDetents([.height(260)])
@@ -345,10 +167,8 @@ struct CurrentSessionView: View {
 
             case .edit(let existing):
                 ExerciseInput(exercise: existing.exercise, existing: existing) { updated in
-                    if let index = loggedExercises.firstIndex(where: { $0.id == updated.id }) {
-                        loggedExercises[index] = updated
-                    }
-                    activeForm = nil
+                    viewModel.updateLoggedExercise(updated)
+                    viewModel.activeForm = nil
                 }
                 .padding()
                 .presentationDetents([.height(260)])
