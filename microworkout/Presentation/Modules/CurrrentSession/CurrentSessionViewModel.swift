@@ -16,6 +16,11 @@ class CurrentSessionViewModel: ObservableObject {
     @Published var startTime: Date? = nil
     @Published var now: Date = Date()
     @Published var activeForm: ActiveExerciseForm?
+    private var exerciseUseCase: ExerciseUseCase
+
+    init(exerciseUseCase: ExerciseUseCase) {
+        self.exerciseUseCase = exerciseUseCase
+    }
 
     enum ActiveExerciseForm: Identifiable {
         case new(Exercise)
@@ -28,8 +33,6 @@ class CurrentSessionViewModel: ObservableObject {
             }
         }
     }
-
-    private var cancellables = Set<AnyCancellable>()
 
     let exercises: [Exercise] = [
         Exercise(name: "Press de banca"),
