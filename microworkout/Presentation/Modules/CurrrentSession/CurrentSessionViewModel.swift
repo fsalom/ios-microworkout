@@ -16,10 +16,12 @@ class CurrentSessionViewModel: ObservableObject {
     @Published var startTime: Date? = nil
     @Published var now: Date = Date()
     @Published var activeForm: ActiveExerciseForm?
-    private var exerciseUseCase: ExerciseUseCase
+    private var exerciseUseCase: ExerciseUseCaseProtocol
+    private var loggedExerciseUseCase: LoggedExerciseUseCaseProtocol
 
-    init(exerciseUseCase: ExerciseUseCase) {
+    init(exerciseUseCase: ExerciseUseCase, loggedExerciseUseCase: LoggedExerciseUseCaseProtocol) {
         self.exerciseUseCase = exerciseUseCase
+        self.loggedExerciseUseCase = loggedExerciseUseCase
     }
 
     enum ActiveExerciseForm: Identifiable {
