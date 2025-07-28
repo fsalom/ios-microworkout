@@ -18,7 +18,7 @@ struct SwitcherView: View {
                     .tabItem {
                         Image(systemName: "figure.strengthtraining.traditional.circle.fill")
                     }
-                CurrentSessionView()
+                CurrentSessionBuilder().build()
                     .navigationTitle("Sesión")
                     .tabItem {
                         Image(systemName: "person.crop.circle.fill")
