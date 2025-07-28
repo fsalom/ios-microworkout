@@ -8,7 +8,7 @@ extension Array where Element: Hashable {
 }
 
 struct CurrentSessionView: View {
-    @StateObject private var viewModel = CurrentSessionViewModel()
+    @StateObject var viewModel: CurrentSessionViewModel
     @FocusState private var isSearchFocused: Bool
 
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
@@ -135,7 +135,7 @@ struct CurrentSessionView: View {
                     viewModel.updateNow(to: date)
                 }
 
-                if !viewModel.filteredExercises.isEmpty && viewModel.activeForm == nil {
+                if !viewModel.exercises.isEmpty && viewModel.activeForm == nil {
                     Color(.systemBackground).ignoresSafeArea()
                     List(viewModel.filteredExercises) { exercise in
                         Button {
@@ -179,5 +179,5 @@ struct CurrentSessionView: View {
 }
 
 #Preview {
-    CurrentSessionView()
+    CurrentSessionBuilder().build()
 }
