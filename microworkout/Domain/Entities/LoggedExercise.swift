@@ -1,7 +1,7 @@
 import Foundation
 
 struct LoggedExercise: Identifiable, Equatable {
-    let id: UUID
+    let id: String
     let exercise: Exercise
     var reps: Int
     var weight: Double
