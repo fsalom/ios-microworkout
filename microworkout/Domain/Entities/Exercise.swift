@@ -18,7 +18,7 @@ enum ExerciseType: CaseIterable, Identifiable {
 }
 
 struct Exercise: Identifiable, Hashable {
-    let id = UUID()
+    let id: String = UUID().uuidString
     let name: String
     var type: ExerciseType = .weight
 }
