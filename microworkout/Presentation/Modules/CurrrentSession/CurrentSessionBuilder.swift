@@ -2,7 +2,7 @@
 
 class CurrentSessionBuilder {
     func build() -> CurrentSessionView {
-        let loggedExerciseDataSource: LoggedExerciseDataSourceProtocol = LoggedExerciseLocalDataSource(localStorage: UserDefaultsManager())
+        let loggedExerciseDataSource: LoggedExerciseDataSourceProtocol = LoggedExerciseMemoryDataSource()
         let loggedExerciseRepository: LoggedExerciseRepositoryProtocol = LoggedExerciseRepository(dataSource: loggedExerciseDataSource)
         let loggedExerciseUseCase: LoggedExerciseUseCaseProtocol = LoggedExerciseUseCase(repository: loggedExerciseRepository)
         let mockExerciseDataSource: ExerciseDataSourceProtocol = ExerciseMockDataSource()
