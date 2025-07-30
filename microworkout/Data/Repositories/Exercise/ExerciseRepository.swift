@@ -23,12 +23,12 @@ class ExerciseRepository: ExerciseRepositoryProtocol {
 
 fileprivate extension ExerciseDTO {
     func toDomain() -> Exercise {
-        return Exercise(name: self.name)
+        return Exercise(id: self.id, name: self.name)
     }
 }
 
 fileprivate extension Exercise {
     func toDTO(type: String = "") -> ExerciseDTO {
-        return ExerciseDTO(name: self.name, type: type)
+        return ExerciseDTO(id: self.id, name: self.name, type: type)
     }
 }
