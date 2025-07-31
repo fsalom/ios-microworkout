@@ -44,7 +44,7 @@ class CurrentSessionViewModel: ObservableObject {
 
     func search(with text: String) {
         Task { @MainActor in
-            self.exercises = try! await self.exerciseUseCase.getExercises(contains: self.searchText)
+            self.exercises = try! await self.exerciseUseCase.getAll(contains: self.searchText)
         }
     }
 
@@ -62,18 +62,34 @@ class CurrentSessionViewModel: ObservableObject {
         now = date
     }
 
+    func addExercise(with name: String) {
+        Task { @MainActor in
+            let exercise = try await self.exerciseUseCase.create(with: name)
+            searchText = ""
+            activeForm = .new(exercise)
+        }
+    }
+
     func addLoggedExercise(_ new: LoggedExercise) {
-        loggedExercises.append(new)
+        Task { @MainActor in
+            loggedExercises = try await self.loggedExerciseUseCase.add(new: new)
+            activeForm = nil
+        }
     }
 
     func updateLoggedExercise(_ updated: LoggedExercise) {
-        if let index = loggedExercises.firstIndex(where: { $0.id == updated.id }) {
-            loggedExercises[index] = updated
+        Task { @MainActor in
+            loggedExercises = try await self.loggedExerciseUseCase.update(this: updated)
+            activeForm = nil
         }
     }
 
     func deleteExercises(with ids: [String]) {
-        loggedExercises.removeAll { ids.contains($0.id) }
+        Task { @MainActor in
+            for id in ids {
+                loggedExercises = try await self.loggedExerciseUseCase.delete(this: id)
+            }
+        }
     }
 
     func toggleCompletion(for exerciseId: String) {
@@ -88,5 +104,25 @@ class CurrentSessionViewModel: ObservableObject {
 
     func orderedExercises() -> [Exercise] {
         self.loggedExerciseUseCase.order(these: self.loggedExercises)
+    }
+
+    func action(for grouped: [Exercise: [LoggedExercise]], and exercise: Exercise){
+        if let last = grouped[exercise]?.last {
+            let new = LoggedExercise(
+                id: UUID().uuidString,
+                exercise: last.exercise,
+                reps: last.reps,
+                weight: last.weight
+            )
+            activeForm = .new(new.exercise)
+        } else {
+            let new = LoggedExercise(
+                id: UUID().uuidString,
+                exercise: exercise,
+                reps: 0,
+                weight: 0
+            )
+            activeForm = .edit(new)
+        }
     }
 }
