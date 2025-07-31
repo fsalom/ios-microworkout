@@ -27,7 +27,7 @@ class MemoryDataSource<T> {
         if let instance = InstanceStore.instances[key] as? Self {
             return instance
         } else {
-            let newInstance = Self(cacheTTL: 300)
+            let newInstance = Self(cacheTTL: 31536000)
             InstanceStore.instances[key] = newInstance
             return newInstance
         }
@@ -39,7 +39,7 @@ class MemoryDataSource<T> {
         InstanceStore.instances[key] = newInstance
     }
 
-    required init(cacheTTL: TimeInterval = 300) {
+    required init(cacheTTL: TimeInterval = 31536000) {
         self.cacheTTL = cacheTTL
     }
 
