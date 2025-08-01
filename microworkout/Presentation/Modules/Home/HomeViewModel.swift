@@ -5,6 +5,7 @@ struct HomeUiState {
     var weeks: [[HealthDay]]
     var trainings: [Training] = []
     var lastTrainings: [Training] = []
+    var lastLoggedExercises: [LoggedExerciseByDay] = []
     var currentTraining: Training?
     var error: String?
     var healthInfoForToday: HealthDay = HealthDay(date: Date())
@@ -18,20 +19,24 @@ final class HomeViewModel: ObservableObject {
     private var currentTraining: Training = Training.mock()
     private var trainingUseCase: TrainingUseCase
     private var healthUseCase: HealthUseCase
+    private var loggedExerciseUseCase: LoggedExerciseUseCase
     private var appState: AppState
 
     init(router: HomeRouter,
          trainingUseCase: TrainingUseCase,
          healthUseCase: HealthUseCase,
+         loggedExerciseUseCase: LoggedExerciseUseCase,
          healthKitManager: HealthKitManager,
          appState: AppState) {
         self.router = router
         self.trainingUseCase = trainingUseCase
         self.healthUseCase = healthUseCase
+        self.loggedExerciseUseCase = loggedExerciseUseCase
         self.healthKitManager = healthKitManager
         self.appState = appState
         self.loadTrainings()
         self.loadLastTrainings()
+        self.loadLoggedExercises()
         self.askForPermissions()
         if let training = self.trainingUseCase.getCurrent() {
             appState.changeScreen(to: .workout(training: training))
@@ -79,6 +84,13 @@ final class HomeViewModel: ObservableObject {
             await MainActor.run {
                 self.uiState.lastTrainings = trainingUseCase.getFinished()
             }
+        }
+    }
+
+    private func loadLoggedExercises() {
+        Task { @MainActor in
+            let lastLoggedExercises = try await loggedExerciseUseCase.getAll()
+            self.uiState.lastLoggedExercises = lastLoggedExercises
         }
     }
 

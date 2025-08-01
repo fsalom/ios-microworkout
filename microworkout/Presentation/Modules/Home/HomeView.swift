@@ -89,7 +89,8 @@ struct HomeView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 8)
-            ListFinishedTrainings()
+            ListLastLoggedExercises()
+            //ListFinishedTrainings()
 
         }
         .onAppear {
@@ -125,7 +126,20 @@ struct HomeView: View {
             .padding()
         }
     }
-    
+
+    @ViewBuilder
+    func ListLastLoggedExercises() -> some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            LazyHStack(spacing: 16) {
+                ForEach(viewModel.uiState.lastLoggedExercises, id: \.id) { loggedExercise in
+                    Text("[\(loggedExercise.exercises.count)]")
+                }
+            }
+            .padding()
+        }
+    }
+
+
     @ViewBuilder
     func ListLastTrainings() -> some View {
         ScrollView(.horizontal, showsIndicators: false) {
