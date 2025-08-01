@@ -16,7 +16,7 @@ struct Workout: Identifiable {
     var isCollapsed: Bool = true
 
     init(name: String) {
-        exercise = .init(name: name, type: .weight)
+        exercise = .init(id: UUID().uuidString, name: name, type: .weight)
         numberOfSeries = 4
         results = [WorkoutSet(reps: 10, weight: 81.25, rpe: 8.0, rir: 9.0),
                    WorkoutSet(reps: 10, weight: 85.0, rpe: 8.0, rir: 9.0),
@@ -25,7 +25,7 @@ struct Workout: Identifiable {
     }
 
     init() {
-        self.exercise = .init(name: "Correr", type: .none)
+        self.exercise = .init(id: UUID().uuidString, name: "Correr", type: .none)
         numberOfSeries = 4
         results = []
         set =  WorkoutSet()
