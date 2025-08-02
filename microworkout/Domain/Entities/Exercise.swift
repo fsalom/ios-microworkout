@@ -18,7 +18,17 @@ enum ExerciseType: CaseIterable, Identifiable {
 }
 
 struct Exercise: Identifiable, Hashable {
-    let id: String = UUID().uuidString
+    let id: String
     let name: String
     var type: ExerciseType = .weight
+}
+
+extension Exercise {
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+
+    static func == (lhs: Exercise, rhs: Exercise) -> Bool {
+        return lhs.id == rhs.id
+    }
 }
