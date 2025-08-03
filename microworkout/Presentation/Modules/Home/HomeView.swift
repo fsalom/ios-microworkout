@@ -90,6 +90,7 @@ struct HomeView: View {
                 .padding(.horizontal, 16)
                 .padding(.vertical, 8)
             ListLastLoggedExercises()
+                .padding(.bottom, 64)
             //ListFinishedTrainings()
 
         }
@@ -130,9 +131,20 @@ struct HomeView: View {
     @ViewBuilder
     func ListLastLoggedExercises() -> some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            LazyHStack(spacing: 16) {
+            LazyVStack(spacing: 16) {
                 ForEach(viewModel.uiState.lastLoggedExercises, id: \.id) { loggedExercise in
-                    Text("[\(loggedExercise.exercises.count)]")
+                    HStack(spacing: 10) {
+                        if let day = loggedExercise.dateParts?.day, let monthName = loggedExercise.dateParts?.monthName {
+                            DateBadge(day: day, monthName: monthName)
+                        }
+                        VStack(alignment: .leading){
+                            Text(loggedExercise.exercisesFormatted)
+                                .fontWeight(.bold)
+                            Text(loggedExercise.durationFormatted)
+                        }
+                    }
+                    .padding(10)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
             .padding()
