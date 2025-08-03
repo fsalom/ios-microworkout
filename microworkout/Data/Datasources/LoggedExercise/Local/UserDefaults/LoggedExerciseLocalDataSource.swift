@@ -60,7 +60,7 @@ class LoggedExerciseLocalDataSource: LoggedExerciseDataSourceProtocol {
     }
 
     func getAll() async throws -> [LoggedExerciseByDayDTO] {
-        var allDaysWithExercises: [LoggedExerciseByDayDTO] = self.localStorage.get(forKey: ExerciseKey.all.rawValue) ?? []
+        let allDaysWithExercises: [LoggedExerciseByDayDTO] = self.localStorage.get(forKey: ExerciseKey.all.rawValue) ?? []
         return allDaysWithExercises
     }
 }
