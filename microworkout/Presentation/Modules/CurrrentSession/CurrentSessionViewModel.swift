@@ -53,9 +53,20 @@ class CurrentSessionViewModel: ObservableObject {
         isRunning = true
     }
 
+    func secondsBetween(_ start: Date, _ end: Date) -> Int {
+        return Int(end.timeIntervalSince(start))
+    }
+
     func stopSession() {
-        startTime = nil
-        isRunning = false
+        Task { @MainActor in
+            do {
+                try await self.loggedExerciseUseCase.save(these: loggedExercises, with: secondsBetween(startTime!, Date()))
+                startTime = nil
+                isRunning = false
+            } catch {
+                isRunning = true
+            }
+        }
     }
 
     func updateNow(to date: Date) {
