@@ -1,12 +1,5 @@
 import SwiftUI
 
-extension Array where Element: Hashable {
-    func uniqued() -> [Element] {
-        var seen = Set<Element>()
-        return filter { seen.insert($0).inserted }
-    }
-}
-
 struct CurrentSessionView: View {
     @StateObject var viewModel: CurrentSessionViewModel
     @FocusState private var isSearchFocused: Bool
@@ -45,23 +38,7 @@ struct CurrentSessionView: View {
                                             .foregroundColor(viewModel.startTime != nil ? .white : .primary)
                                         Spacer()
                                         Button(action: {
-                                            if let last = grouped[exercise]?.last {
-                                                let new = LoggedExercise(
-                                                    id: UUID(),
-                                                    exercise: last.exercise,
-                                                    reps: last.reps,
-                                                    weight: last.weight
-                                                )
-                                                viewModel.activeForm = .new(new.exercise)
-                                            } else {
-                                                let new = LoggedExercise(
-                                                    id: UUID(),
-                                                    exercise: exercise,
-                                                    reps: 0,
-                                                    weight: 0
-                                                )
-                                                viewModel.activeForm = .edit(new)
-                                            }
+                                            viewModel.action(for: grouped, and: exercise)
                                         }) {
                                             Image(systemName: "plus.circle.fill")
                                                 .resizable()
@@ -78,7 +55,7 @@ struct CurrentSessionView: View {
                                     ForEach(grouped[exercise] ?? []) { e in
                                         HStack {
                                             VStack(alignment: .leading) {
-                                                Text("\(e.reps) repeticiones · \(e.weight, specifier: "%.1f") kg")
+                                                Text("\(e.reps) repeticiones · \(e.weight, specifier: "%.2f") kg")
                                                     .font(.subheadline)
                                                     .foregroundColor(.gray)
                                             }
@@ -135,19 +112,34 @@ struct CurrentSessionView: View {
                     viewModel.updateNow(to: date)
                 }
 
-                if !viewModel.exercises.isEmpty && viewModel.activeForm == nil {
+                if !viewModel.searchText.isEmpty && viewModel.activeForm == nil {
                     Color(.systemBackground).ignoresSafeArea()
-                    List(viewModel.filteredExercises) { exercise in
-                        Button {
-                            viewModel.activeForm = .new(exercise)
-                            viewModel.searchText = ""
-                            isSearchFocused = false
-                        } label: {
-                            Text(exercise.name)
+                    if viewModel.exercises.count == 0 {
+                        List {
+                            Button {
+                                viewModel.addExercise(with: viewModel.searchText)
+                            } label: {
+                                HStack {
+                                    Image(systemName: "plus.circle.fill")
+                                    Text("Añadir \"\(viewModel.searchText)\" como nuevo ejercicio")
+                                        .fontWeight(.medium)
+                                }
+                            }
                         }
+                    } else {
+                        List(viewModel.exercises) { exercise in
+                            Button {
+                                viewModel.activeForm = .new(exercise)
+                                viewModel.searchText = ""
+                                isSearchFocused = false
+                            } label: {
+                                Text(exercise.name)
+                            }
+                        }
+                        .listStyle(.plain)
                     }
-                    .listStyle(.plain)
                 }
+
             }
         }
         .sheet(item: $viewModel.activeForm) { form in
@@ -156,10 +148,9 @@ struct CurrentSessionView: View {
                 let last = viewModel.loggedExercises.last(where: { $0.exercise == exercise })
                 ExerciseInput(
                     exercise: exercise,
-                    existing: last.map { LoggedExercise(id: UUID(), exercise: $0.exercise, reps: $0.reps, weight: $0.weight) }
+                    existing: last.map { LoggedExercise(id: UUID().uuidString, exercise: $0.exercise, reps: $0.reps, weight: $0.weight) }
                 ) { new in
                     viewModel.addLoggedExercise(new)
-                    viewModel.activeForm = nil
                 }
                 .padding()
                 .presentationDetents([.height(260)])
@@ -168,7 +159,6 @@ struct CurrentSessionView: View {
             case .edit(let existing):
                 ExerciseInput(exercise: existing.exercise, existing: existing) { updated in
                     viewModel.updateLoggedExercise(updated)
-                    viewModel.activeForm = nil
                 }
                 .padding()
                 .presentationDetents([.height(260)])
