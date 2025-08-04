@@ -67,7 +67,7 @@ struct ExerciseInput: View {
         }
 
         onSave(LoggedExercise(
-            id: existing?.id ?? UUID(),
+            id: existing?.id ?? UUID().uuidString,
             exercise: exercise,
             reps: r,
             weight: w
