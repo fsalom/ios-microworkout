@@ -99,6 +99,7 @@ struct HomeView: View {
                 viewModel.loadWeeksWithHealthInfo()
                 hasAppeared = true
             }
+            viewModel.load()
         }
         .onChange(of: scenePhase) { oldPhase, newPhase in
             if newPhase == .active && hasAppeared {
@@ -134,21 +135,30 @@ struct HomeView: View {
             LazyVStack(spacing: 16) {
                 ForEach(viewModel.uiState.lastLoggedExercises, id: \.id) { loggedExercise in
                     HStack(spacing: 10) {
-                        if let day = loggedExercise.dateParts?.day, let monthName = loggedExercise.dateParts?.monthName {
-                            DateBadge(day: day, monthName: monthName)
+                        if let parts = loggedExercise.dateParts {
+                            DateBadge(day: parts.day, monthName: parts.monthName)
                         }
-                        VStack(alignment: .leading){
-                            Text(loggedExercise.exercisesFormatted)
-                                .fontWeight(.bold)
+                        VStack(alignment: .leading) {
+                            Text(loggedExercise.exercisesFormatted).fontWeight(.bold)
+                            Text(loggedExercise.totalSeriesFormatted).fontWeight(.bold)
                             Text(loggedExercise.durationFormatted)
                         }
+                        Spacer(minLength: 0)
                     }
-                    .padding(10)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(12)
+                    .background(Color(.systemGray6))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .containerRelativeFrame(.horizontal, count: 1, spacing: 16)
+                    .onTapGesture {
+                        self.viewModel.goTo(this: loggedExercise)
+                    }
                 }
             }
-            .padding()
+            .scrollTargetLayout()
         }
+        .scrollTargetBehavior(.paging)
+        .scrollBounceBehavior(.basedOnSize, axes: .horizontal)
+        .padding(.horizontal, 16)
     }
 
 
