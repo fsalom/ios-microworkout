@@ -1,0 +1,20 @@
+{
+    "shared": [
+        "Gula/Shared/Error",
+        "Gula/Shared/Components/CustomTextField",
+        "Gula/Shared/Components/CustomButton",
+        "Gula/Shared/Components/Toast",
+        "Gula/Shared/Domain/Entities/User",
+        "Gula/Shared/Domain/UseCase/Validation",
+        "Gula/Shared/Resources/DeeplinkManager",
+        "Gula/Shared/Configuration"
+    ],
+
+    "libraries": [
+        {
+            "name": "TripleA",
+            "url": "https://github.com/fsalom/TripleA",
+            "version": "2.3.0"
+        }
+    ]
+}
