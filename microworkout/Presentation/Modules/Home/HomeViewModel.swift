@@ -34,13 +34,17 @@ final class HomeViewModel: ObservableObject {
         self.loggedExerciseUseCase = loggedExerciseUseCase
         self.healthKitManager = healthKitManager
         self.appState = appState
-        self.loadTrainings()
-        self.loadLastTrainings()
-        self.loadLoggedExercises()
+        self.load()
         self.askForPermissions()
         if let training = self.trainingUseCase.getCurrent() {
             appState.changeScreen(to: .workout(training: training))
         }
+    }
+
+    func load() {
+        self.loadTrainings()
+        self.loadLastTrainings()
+        self.loadLoggedExercises()
     }
 
     func save(this training: Training) {
@@ -104,6 +108,10 @@ final class HomeViewModel: ObservableObject {
 
     func goToTrainings() {
         router.goToWorkoutList()
+    }
+
+    func goTo(this loggedExercise: LoggedExerciseByDay) {
+        router.goTo(this: loggedExercise)
     }
 
     func goToStart(this training: Training) {
