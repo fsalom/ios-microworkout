@@ -12,14 +12,13 @@ struct SwitcherView: View {
                     .tabItem {
                         Image(systemName: "house.circle.fill")
                     }
-
-                HomeTrainingBuilder().build()
-                    .navigationTitle("Sesión")
+                CurrentSessionBuilder().build()
+                    .navigationTitle("Entrenamiento")
                     .tabItem {
                         Image(systemName: "figure.strengthtraining.traditional.circle.fill")
                     }
-                CurrentSessionBuilder().build()
-                    .navigationTitle("Sesión")
+                ProfileBuilder().build()
+                    .navigationTitle("Perfil")
                     .tabItem {
                         Image(systemName: "person.crop.circle.fill")
                     }
