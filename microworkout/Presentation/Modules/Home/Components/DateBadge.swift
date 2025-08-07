@@ -15,7 +15,7 @@ struct DateBadge: View {
         }
         .padding(6)
         .frame(width: 60, height: 60)
-        .background(Color(.systemGray6))                       // fondo
+        .background(Color(.white))                       // fondo
         .clipShape(RoundedRectangle(cornerRadius: 8))          // recorte
         .overlay(                                              // borde opcional
             RoundedRectangle(cornerRadius: 8)
