@@ -106,6 +106,7 @@ struct HomeView: View {
                 viewModel.loadWeeksWithHealthInfo()
             }
         }
+        .padding(.bottom, 32)
         .edgesIgnoringSafeArea(.bottom)
     }
 
