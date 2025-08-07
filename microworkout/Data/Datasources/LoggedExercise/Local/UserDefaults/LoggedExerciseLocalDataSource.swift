@@ -13,6 +13,8 @@ enum LocalError: Error {
 }
 
 class LoggedExerciseLocalDataSource: LoggedExerciseDataSourceProtocol {
+
+    
     private var localStorage: UserDefaultsManagerProtocol
 
     enum ExerciseKey: String {
@@ -46,6 +48,12 @@ class LoggedExerciseLocalDataSource: LoggedExerciseDataSourceProtocol {
         exercises.removeAll(where: {$0.id == id})
         self.localStorage.save(exercises, forKey: ExerciseKey.current.rawValue)
         return exercises
+    }
+
+    func delete(this loggedExercisesByDay: LoggedExerciseByDay) async throws {
+        var allDaysWithExercises = try await self.getAll()
+        allDaysWithExercises.removeAll(where: {$0.date == loggedExercisesByDay.date})
+        self.localStorage.save(allDaysWithExercises, forKey: ExerciseKey.all.rawValue)
     }
 
     func save(these exercises: [LoggedExerciseDTO], with duration: Int) async throws {        

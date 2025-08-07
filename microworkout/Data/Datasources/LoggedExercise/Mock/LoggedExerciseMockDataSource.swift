@@ -30,4 +30,8 @@ class LoggedExerciseMockDataSource: LoggedExerciseDataSourceProtocol {
     func delete(with id: String) async throws -> [LoggedExerciseDTO] {
         []
     }
+
+    func delete(this loggedExercisesByDay: LoggedExerciseByDay) async throws {
+
+    }
 }
