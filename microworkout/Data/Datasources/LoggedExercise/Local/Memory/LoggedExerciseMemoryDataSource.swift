@@ -38,6 +38,10 @@ class LoggedExerciseMemoryDataSource: LoggedExerciseDataSourceProtocol {
         return exercises
     }
 
+    func delete(this loggedExercisesByDay: LoggedExerciseByDay) async throws {
+        fatalError("THIS IS NOT IMPLEMENTED")
+    }
+
     func update(this exercise: LoggedExerciseDTO) async throws -> [LoggedExerciseDTO] {
         var exercises: [LoggedExerciseDTO] = try memory.get()
         guard let index = exercises.firstIndex(of: exercises.first(where: {$0.id == exercise.id})!) else {
