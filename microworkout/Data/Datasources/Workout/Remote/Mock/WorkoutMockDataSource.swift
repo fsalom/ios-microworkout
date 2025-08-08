@@ -11,7 +11,8 @@ class WorkoutMockDataSource: WorkoutRemoteDataSourceProtocol {
     func getWorkoutPlan() -> WorkoutPlanDTO {
         let workouts = [
             WorkoutDTO(id: "1",
-                       exercise: ExerciseDTO(name: "Sentadillas",
+                       exercise: ExerciseDTO(id: "sentadillas,",
+                                             name: "Sentadillas",
                                              type: "rpes"),
                        numberOfSeries: 10,
                        results: [],
