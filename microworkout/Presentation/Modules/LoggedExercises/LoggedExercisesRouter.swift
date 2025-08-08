@@ -7,7 +7,7 @@ class LoggedExercisesRouter {
         self.navigator = navigator
     }
 
-    func goToWorkoutList() {
-        navigator.push(to: TrainingListV2Builder().build())
+    func comeBack() {
+        navigator.dismiss()
     }
 }
