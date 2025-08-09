@@ -25,14 +25,38 @@ struct CurrentSessionView: View {
                             .padding(.top, 8)
                     }
 
-                    let grouped = viewModel.groupedByExercise()
-                    let ordered = viewModel.orderedExercises()
+                    if viewModel.isSaved {
+                        Spacer()
+                        CenteredSquareOverlay(size: 180) {
+                            VStack {
+                                Image(systemName: "tray.fill")
+                                    .font(.largeTitle)
+                                    .foregroundStyle(.white)
+                                Text("Entrenamiento guardado")
+                                    .font(.caption)
+                                    .foregroundStyle(.white)
+                            }
+                            .padding()
+                        }
+                        .transition(.scale)
+                        .onAppear {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                                withAnimation(.easeInOut) {
+                                    self.viewModel.isSaved = false
+                                }
+                            }
+                        }
+                        Spacer()
+                    } else {
 
-                    if !viewModel.loggedExercises.isEmpty {
-                        List {
-                            ForEach(ordered, id: \.self) { exercise in
-                                Section(header:
-                                    HStack {
+                        let grouped = viewModel.groupedByExercise()
+                        let ordered = viewModel.orderedExercises()
+
+                        if !viewModel.loggedExercises.isEmpty {
+                            List {
+                                ForEach(ordered, id: \.self) { exercise in
+                                    Section(header:
+                                                HStack {
                                         Text(exercise.name)
                                             .font(.headline)
                                             .foregroundColor(viewModel.startTime != nil ? .white : .primary)
@@ -49,40 +73,49 @@ struct CurrentSessionView: View {
                                         }
                                         .buttonStyle(.plain)
                                     }
-                                    .padding(8)
-                                    .listRowInsets(EdgeInsets())
-                                ) {
-                                    ForEach(grouped[exercise] ?? []) { e in
-                                        HStack {
-                                            VStack(alignment: .leading) {
-                                                Text("\(e.reps) repeticiones · \(e.weight, specifier: "%.2f") kg")
-                                                    .font(.subheadline)
-                                                    .foregroundColor(.gray)
+                                        .padding(8)
+                                        .listRowInsets(EdgeInsets())
+                                    ) {
+                                        ForEach(grouped[exercise] ?? []) { e in
+                                            HStack {
+                                                VStack(alignment: .leading) {
+                                                    Text("\(e.reps) repeticiones · \(e.weight, specifier: "%.2f") kg")
+                                                        .font(.subheadline)
+                                                        .foregroundColor(.gray)
+                                                }
+                                                Spacer()
+                                                Button(action: {
+                                                    viewModel.toggleCompletion(for: e.id)
+                                                }) {
+                                                    Image(systemName: e.isCompleted ? "checkmark.circle.fill" : "circle")
+                                                        .foregroundColor(e.isCompleted ? .green : .gray)
+                                                        .imageScale(.large)
+                                                }
+                                                .buttonStyle(.plain)
                                             }
-                                            Spacer()
-                                            Button(action: {
-                                                viewModel.toggleCompletion(for: e.id)
-                                            }) {
-                                                Image(systemName: e.isCompleted ? "checkmark.circle.fill" : "circle")
-                                                    .foregroundColor(e.isCompleted ? .green : .gray)
-                                                    .imageScale(.large)
+                                            .onTapGesture {
+                                                viewModel.activeForm = .edit(e)
                                             }
-                                            .buttonStyle(.plain)
                                         }
-                                        .onTapGesture {
-                                            viewModel.activeForm = .edit(e)
-                                        }
-                                    }
-                                    .onDelete { indexSet in
-                                        if let group = grouped[exercise] {
-                                            let idsToRemove = indexSet.map { group[$0].id }
-                                            viewModel.deleteExercises(with: idsToRemove)
+                                        .onDelete { indexSet in
+                                            if let group = grouped[exercise] {
+                                                let idsToRemove = indexSet.map { group[$0].id }
+                                                viewModel.deleteExercises(with: idsToRemove)
+                                            }
                                         }
                                     }
                                 }
                             }
+                            .scrollContentBackground(.hidden)
+                        } else {
+                            VStack {
+                                Image(systemName: "arrow.up")
+                                    .font(.largeTitle)
+                                Text("Busca ejecicios para tu rutina...")
+                                    .font(.caption)
+                            }
+                            .padding(16)
                         }
-                        .scrollContentBackground(.hidden)
                     }
 
                     Spacer()
@@ -148,7 +181,7 @@ struct CurrentSessionView: View {
                 let last = viewModel.loggedExercises.last(where: { $0.exercise == exercise })
                 ExerciseInput(
                     exercise: exercise,
-                    existing: last.map { LoggedExercise(id: UUID().uuidString, exercise: $0.exercise, reps: $0.reps, weight: $0.weight) }
+                    existing: last.map { viewModel.createLoggedExercise(from: $0) }
                 ) { new in
                     viewModel.addLoggedExercise(new)
                 }
