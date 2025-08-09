@@ -10,62 +10,66 @@ struct LoggedExercisesView: View {
 
         ZStack {
             Color(.systemGroupedBackground)
-            List {
-                ForEach(ordered, id: \.self) { exercise in
-                    Section(header:
+            VStack {
+                HStack(spacing: 20) {
+                    StatView(title: "Ejercicios",
+                             value: self.viewModel.uiState.loggedExercises.exercisesFormatted,
+                             systemImage: "figure.strengthtraining.traditional")
+
+                    StatView(title: "Series",
+                             value: self.viewModel.uiState.loggedExercises.totalSeriesFormatted,
+                             systemImage: "repeat")
+
+                    StatView(title: "Peso total",
+                             value: self.viewModel.uiState.loggedExercises.totalWeightFormatted,
+                             systemImage: "scalemass")
+                }
+                .padding()
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color(.systemGray6))
+                )
+
+                List {
+                    ForEach(ordered, id: \.self) { exercise in
+                        Section(header:
+                                    HStack {
+                            Text(exercise.name)
+                                .font(.headline)
+                                .foregroundColor(.primary)
+                            Spacer()
+                        }
+                            .padding(8)
+                            .listRowInsets(EdgeInsets())
+                        ) {
+                            ForEach(grouped[exercise] ?? []) { e in
                                 HStack {
-                        Text(exercise.name)
-                            .font(.headline)
-                            .foregroundColor(.primary)
-                        Spacer()
-                        Button(action: {
-
-                        }) {
-                            Image(systemName: "plus.circle.fill")
-                                .resizable()
-                                .frame(width: 24, height: 24)
-                                .foregroundColor( Color(.gray))
-                                .padding(5)
-                                .background(Circle().fill(.white))
-                        }
-                        .buttonStyle(.plain)
-                    }
-                        .padding(8)
-                        .listRowInsets(EdgeInsets())
-                    ) {
-                        ForEach(grouped[exercise] ?? []) { e in
-                            HStack {
-                                VStack(alignment: .leading) {
-                                    Text("\(e.reps) repeticiones · \(e.weight, specifier: "%.2f") kg")
-                                        .font(.subheadline)
-                                        .foregroundColor(.gray)
+                                    VStack(alignment: .leading) {
+                                        Text("\(e.reps) repeticiones · \(e.weight, specifier: "%.2f") kg")
+                                            .font(.subheadline)
+                                            .foregroundColor(.gray)
+                                    }
+                                    Spacer()
                                 }
-                                Spacer()
-                                Button(action: {
-
-                                }) {
-                                    Image(systemName: e.isCompleted ? "checkmark.circle.fill" : "circle")
-                                        .foregroundColor(e.isCompleted ? .green : .gray)
-                                        .imageScale(.large)
-                                }
-                                .buttonStyle(.plain)
-                            }
-                            .onTapGesture {
-
-                            }
-                        }
-                        .onDelete { indexSet in
-                            if let group = grouped[exercise] {
-                                let idsToRemove = indexSet.map { group[$0].id }
-
                             }
                         }
                     }
                 }
+                .scrollContentBackground(.hidden)
             }
-            .scrollContentBackground(.hidden)
         }
-
+        .edgesIgnoringSafeArea(.bottom)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Menu {
+                    Button("Eliminar") {
+                        viewModel.delete()
+                    }
+                } label: {
+                    Label("Más", systemImage: "ellipsis.circle")
+                }
+            }
+        }
     }
 }
 
