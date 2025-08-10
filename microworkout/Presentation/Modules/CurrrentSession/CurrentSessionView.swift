@@ -111,8 +111,10 @@ struct CurrentSessionView: View {
                             VStack {
                                 Image(systemName: "arrow.up")
                                     .font(.largeTitle)
+                                    .foregroundColor(viewModel.startTime != nil ? .white : .primary)
                                 Text("Busca ejecicios para tu rutina...")
                                     .font(.caption)
+                                    .foregroundColor(viewModel.startTime != nil ? .white : .primary)
                             }
                             .padding(16)
                         }
