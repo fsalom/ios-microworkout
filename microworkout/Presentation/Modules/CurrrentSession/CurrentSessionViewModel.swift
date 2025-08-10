@@ -18,6 +18,7 @@ class CurrentSessionViewModel: ObservableObject {
     @Published var loggedExercises: [LoggedExercise] = []
     @Published var exercises: [Exercise] = []
     @Published var isRunning: Bool = false
+    @Published var isSaved: Bool = false
     @Published var startTime: Date? = nil
     @Published var now: Date = Date()
     @Published var activeForm: ActiveExerciseForm?
@@ -62,6 +63,8 @@ class CurrentSessionViewModel: ObservableObject {
             do {
                 try await self.loggedExerciseUseCase.save(these: loggedExercises, with: secondsBetween(startTime!, Date()))
                 startTime = nil
+                loggedExercises.removeAll()
+                isSaved = true
                 isRunning = false
             } catch {
                 isRunning = true
@@ -83,14 +86,16 @@ class CurrentSessionViewModel: ObservableObject {
 
     func addLoggedExercise(_ new: LoggedExercise) {
         Task { @MainActor in
-            loggedExercises = try await self.loggedExerciseUseCase.add(new: new)
+            let loggedExercises = try await self.loggedExerciseUseCase.add(new: new)
+            self.loggedExercises = reorder(loggedExercises)
             activeForm = nil
         }
     }
 
     func updateLoggedExercise(_ updated: LoggedExercise) {
         Task { @MainActor in
-            loggedExercises = try await self.loggedExerciseUseCase.update(this: updated)
+            let loggedExercises = try await self.loggedExerciseUseCase.update(this: updated)
+            self.loggedExercises = reorder(loggedExercises)
             activeForm = nil
         }
     }
@@ -98,9 +103,14 @@ class CurrentSessionViewModel: ObservableObject {
     func deleteExercises(with ids: [String]) {
         Task { @MainActor in
             for id in ids {
-                loggedExercises = try await self.loggedExerciseUseCase.delete(this: id)
+                let loggedExercises = try await self.loggedExerciseUseCase.delete(this: id)
+                self.loggedExercises = reorder(loggedExercises)
             }
         }
+    }
+
+    func createLoggedExercise(from last: LoggedExercise) -> LoggedExercise {
+        LoggedExercise(id: UUID().uuidString, exercise: last.exercise, reps: last.reps, weight: last.weight)
     }
 
     func toggleCompletion(for exerciseId: String) {
@@ -119,12 +129,7 @@ class CurrentSessionViewModel: ObservableObject {
 
     func action(for grouped: [Exercise: [LoggedExercise]], and exercise: Exercise){
         if let last = grouped[exercise]?.last {
-            let new = LoggedExercise(
-                id: UUID().uuidString,
-                exercise: last.exercise,
-                reps: last.reps,
-                weight: last.weight
-            )
+            let new = createLoggedExercise(from: last)
             activeForm = .new(new.exercise)
         } else {
             let new = LoggedExercise(
@@ -134,6 +139,14 @@ class CurrentSessionViewModel: ObservableObject {
                 weight: 0
             )
             activeForm = .edit(new)
+        }
+    }
+
+    func reorder(_ loggedExercises: [LoggedExercise]) -> [LoggedExercise] {
+        loggedExercises.sorted {
+            let d0 = $0.date
+            let d1 = $1.date
+            return d0 > d1
         }
     }
 }
