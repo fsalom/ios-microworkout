@@ -8,10 +8,10 @@ struct LoggedExercisesUiState {
 
 final class LoggedExercisesViewModel: ObservableObject {
     @Published var uiState: LoggedExercisesUiState
-    private var router: HomeRouter
+    private var router: LoggedExercisesRouter
     private var loggedExerciseUseCase: LoggedExerciseUseCase
 
-    init(router: HomeRouter,
+    init(router: LoggedExercisesRouter,
          loggedExerciseUseCase: LoggedExerciseUseCase,
          loggedExercises: LoggedExerciseByDay) {
         self.uiState = .init(loggedExercises: loggedExercises, error: nil)
@@ -27,7 +27,10 @@ final class LoggedExercisesViewModel: ObservableObject {
         self.loggedExerciseUseCase.order(these: self.uiState.loggedExercises.exercises)
     }
 
-    func goToTrainings() {
-        router.goToWorkoutList()
+    func delete() {
+        Task {
+            try await self.loggedExerciseUseCase.delete(this: uiState.loggedExercises)
+            self.router.comeBack()
+        }
     }
 }
