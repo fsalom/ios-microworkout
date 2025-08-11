@@ -19,11 +19,6 @@ struct TabbarView: View {
                 .tabItem {
                     Label("Salud", systemImage: "heart.fill")
                 }
-
-            ProfileView()
-                .tabItem {
-                    Label("Perfil", systemImage: "person.fill")
-                }
         }
     }
 }
