@@ -32,11 +32,19 @@ class LoggedExerciseUseCase: LoggedExerciseUseCaseProtocol {
     }
 
     func groupByExercise(these exercises: [LoggedExercise]) -> [Exercise: [LoggedExercise]] {
-        Dictionary(grouping: exercises, by: { $0.exercise })
+        Dictionary(
+                grouping: exercises,
+                by: { $0.exercise }
+            )
+            .mapValues { group in
+                group.sorted { $0.date > $1.date }
+            }
     }
 
     func order(these exercises: [LoggedExercise]) -> [Exercise] {
-        exercises.map { $0.exercise }.uniqued()
+        exercises
+            .sorted { $0.date > $1.date }
+            .map { $0.exercise }.uniqued()
     }
 
     func getAll() async throws -> [LoggedExerciseByDay] {
