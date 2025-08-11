@@ -113,6 +113,11 @@ class CurrentSessionViewModel: ObservableObject {
         LoggedExercise(id: UUID().uuidString, exercise: last.exercise, reps: last.reps, weight: last.weight)
     }
 
+    func getLast(for exercise: Exercise) -> LoggedExercise {
+        let last = loggedExercises.last(where: { $0.exercise == exercise })
+        return createLoggedExercise(from: last!)
+    }
+
     func toggleCompletion(for exerciseId: String) {
         if let index = loggedExercises.firstIndex(where: { $0.id == exerciseId }) {
             loggedExercises[index].isCompleted.toggle()
@@ -126,6 +131,7 @@ class CurrentSessionViewModel: ObservableObject {
     func orderedExercises() -> [Exercise] {
         self.loggedExerciseUseCase.order(these: self.loggedExercises)
     }
+
 
     func action(for grouped: [Exercise: [LoggedExercise]], and exercise: Exercise){
         if let last = grouped[exercise]?.last {
