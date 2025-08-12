@@ -1,9 +1,4 @@
-//
-//  ExerciseRepository.swift
-//  microworkout
-//
-//  Created by Fernando Salom Carratala on 20/7/25.
-//
+import Foundation
 
 class ExerciseRepository: ExerciseRepositoryProtocol {
     private var dataSource: ExerciseDataSourceProtocol
@@ -23,12 +18,15 @@ class ExerciseRepository: ExerciseRepositoryProtocol {
 
 fileprivate extension ExerciseDTO {
     func toDomain() -> Exercise {
-        return Exercise(id: self.id, name: self.name)
+        // Convert stored String ID to UUID, defaulting to new UUID on failure
+        let uuid = UUID(uuidString: self.id) ?? UUID()
+        let type = ExerciseType(rawValue: self.type) ?? .none
+        return Exercise(id: uuid, name: self.name, type: type)
     }
 }
 
 fileprivate extension Exercise {
     func toDTO(type: String = "") -> ExerciseDTO {
-        return ExerciseDTO(id: self.id, name: self.name, type: type)
+        return ExerciseDTO(id: self.id.uuidString, name: self.name, type: type)
     }
 }
