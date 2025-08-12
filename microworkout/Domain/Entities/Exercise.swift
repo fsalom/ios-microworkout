@@ -7,28 +7,39 @@
 
 import Foundation
 
-enum ExerciseType: CaseIterable, Identifiable {
+public enum ExerciseType: String, CaseIterable, Identifiable, Codable {
     case distance
     case weight
     case kcal
     case reps
     case none
 
-    var id: Self { self }
+    public var id: Self { self }
 }
 
-struct Exercise: Identifiable, Hashable {
-    let id: String
-    let name: String
-    var type: ExerciseType = .weight
+/// Modelo principal de un ejercicio en el dominio.
+public struct Exercise: Identifiable, Hashable, Codable {
+    public let id: UUID
+    public var name: String
+    public var type: ExerciseType
+
+    public init(
+        id: UUID = UUID(),
+        name: String,
+        type: ExerciseType = .weight
+    ) {
+        self.id = id
+        self.name = name
+        self.type = type
+    }
 }
 
 extension Exercise {
-    func hash(into hasher: inout Hasher) {
+    public func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }
 
-    static func == (lhs: Exercise, rhs: Exercise) -> Bool {
-        return lhs.id == rhs.id
+    public static func == (lhs: Exercise, rhs: Exercise) -> Bool {
+        lhs.id == rhs.id
     }
 }
