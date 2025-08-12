@@ -1,9 +1,9 @@
-
-
 class CurrentSessionBuilder {
     func build() -> CurrentSessionView {
-        let viewModel = CurrentSessionViewModel(exerciseUseCase: ExerciseContainer().makeUseCase(),
-                                                loggedExerciseUseCase: LoggedExerciseContainer().makeUseCase())
+        let viewModel = CurrentSessionViewModel(
+            exerciseUseCase: ExerciseContainer().makeUseCase(),
+            workoutEntryUseCase: WorkoutEntryContainer().makeUseCase()
+        )
         return CurrentSessionView(viewModel: viewModel)
     }
 }

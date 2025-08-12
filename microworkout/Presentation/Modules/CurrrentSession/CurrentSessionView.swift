@@ -52,7 +52,7 @@ struct CurrentSessionView: View {
                         let grouped = viewModel.groupedByExercise()
                         let ordered = viewModel.orderedExercises()
 
-                        if !viewModel.loggedExercises.isEmpty {
+                        if !viewModel.workoutEntries.isEmpty {
                             List {
                                 ForEach(ordered, id: \.self) { exercise in
                                     Section(header:
@@ -79,7 +79,7 @@ struct CurrentSessionView: View {
                                         ForEach(grouped[exercise] ?? []) { e in
                                             HStack {
                                                 VStack(alignment: .leading) {
-                                                    Text("\(e.reps) repeticiones · \(e.weight, specifier: "%.2f") kg")
+                                                    Text("\(e.reps ?? 0) repeticiones · \(e.weight ?? 0.0, specifier: "%.2f") kg")
                                                         .font(.subheadline)
                                                         .foregroundColor(.gray)
                                                 }
@@ -98,10 +98,8 @@ struct CurrentSessionView: View {
                                             }
                                         }
                                         .onDelete { indexSet in
-                                            if let group = grouped[exercise] {
-                                                let idsToRemove = indexSet.map { group[$0].id }
-                                                viewModel.deleteExercises(with: idsToRemove)
-                                            }
+                                            let idsToRemove = indexSet.map { grouped[exercise]?[$0].id }.compactMap { $0 }
+                                            viewModel.deleteEntries(with: idsToRemove)
                                         }
                                     }
                                 }
@@ -174,34 +172,37 @@ struct CurrentSessionView: View {
                         .listStyle(.plain)
                     }
                 }
-
             }
-        }
-        .sheet(item: $viewModel.activeForm) { form in
-            switch form {
-            case .new(let exercise):
-                let last = viewModel.loggedExercises.last(where: { $0.exercise == exercise })
-                ExerciseInput(
-                    exercise: exercise,
-                    existing: last.map { viewModel.createLoggedExercise(from: $0) }
-                ) { new in
-                    viewModel.addLoggedExercise(new)
-                }
-                .padding()
-                .presentationDetents([.height(260)])
-                .presentationDragIndicator(.visible)
+            .sheet(item: $viewModel.activeForm) { form in
+                switch form {
+                case .new(let exercise):
+                    let defaultEntry = viewModel.getWorkoutEntry(for: exercise)
+                    ExerciseInput(
+                        exercise: exercise,
+                        existing: defaultEntry
+                    ) { entry in
+                        viewModel.addWorkoutEntry(entry)
+                    }
+                    .padding()
+                    .presentationDetents([.height(260)])
+                    .presentationDragIndicator(.visible)
 
-            case .edit(let existing):
-                ExerciseInput(exercise: existing.exercise, existing: existing) { updated in
-                    viewModel.updateLoggedExercise(updated)
+                case .edit(let existing):
+                    ExerciseInput(
+                        exercise: existing.exercise,
+                        existing: existing
+                    ) { entry in
+                        viewModel.updateWorkoutEntry(entry)
+                    }
+                    .padding()
+                    .presentationDetents([.height(260)])
+                    .presentationDragIndicator(.visible)
                 }
-                .padding()
-                .presentationDetents([.height(260)])
-                .presentationDragIndicator(.visible)
             }
         }
     }
 }
+
 
 #Preview {
     CurrentSessionBuilder().build()
