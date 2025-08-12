@@ -145,15 +145,15 @@ struct HomeView: View {
     @ViewBuilder
     func ListLastLoggedExercises() -> some View {
         LazyVStack(spacing: 16) {
-            ForEach(viewModel.uiState.lastLoggedExercises, id: \.id) { loggedExercise in
+            ForEach(viewModel.uiState.lastEntriesByDay) { entryDay in
                 HStack(spacing: 10) {
-                    if let parts = loggedExercise.dateParts {
+                    if let parts = entryDay.dateParts {
                         DateBadge(day: parts.day, monthName: parts.monthName)
                     }
                     VStack(alignment: .leading) {
-                        Text(loggedExercise.exercisesFormatted).fontWeight(.bold)
-                        Text(loggedExercise.totalSeriesFormatted).fontWeight(.bold)
-                        Text(loggedExercise.durationFormatted)
+                        Text(entryDay.exercisesFormatted).fontWeight(.bold)
+                        Text(entryDay.totalSeriesFormatted).fontWeight(.bold)
+                        Text(entryDay.durationFormatted)
                     }
                     Spacer(minLength: 0)
                 }
@@ -161,7 +161,7 @@ struct HomeView: View {
                 .background(Color(.systemGray6))
                 .clipShape(RoundedRectangle(cornerRadius: 12))
                 .onTapGesture {
-                    self.viewModel.goTo(this: loggedExercise)
+                    viewModel.goTo(this: entryDay)
                 }
             }
         }

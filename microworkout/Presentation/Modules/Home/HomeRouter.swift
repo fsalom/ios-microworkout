@@ -11,8 +11,8 @@ class HomeRouter {
         navigator.push(to: TrainingListV2Builder().build())
     }
 
-    func goTo(this loggedExercise: LoggedExerciseByDay) {
-        navigator.push(to: LoggedExercisesBuilder().build(this: loggedExercise))
+    func goTo(this entryDay: WorkoutEntryByDay) {
+        navigator.push(to: LoggedExercisesBuilder().build(for: entryDay))
     }
 
     func goToStart(this training: Training, and appState: AppState) {
