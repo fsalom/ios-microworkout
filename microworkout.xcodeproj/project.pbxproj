@@ -39,6 +39,17 @@
 		BBCE82D1C9788F1D913A5880 /* DeeplinkManagerRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9543E6DA3768F2689E931C5F /* DeeplinkManagerRepository.swift */; };
 		BD501C3148039F50CACA2B7E /* ValidationUseCaseProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F5E819E30AD9EE4A2DCDE66 /* ValidationUseCaseProtocol.swift */; };
 		BE9A519141736E6CE3026CDC /* CustomTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF384417700A12694577E31 /* CustomTextField.swift */; };
+		C11985582E4B398E0072ED64 /* WorkoutEntryByDay.swift in Sources */ = {isa = PBXBuildFile; fileRef = C11985572E4B398E0072ED64 /* WorkoutEntryByDay.swift */; };
+		C11985592E4B398E0072ED64 /* WorkoutEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = C11985562E4B398E0072ED64 /* WorkoutEntry.swift */; };
+		C119855D2E4B39990072ED64 /* WorkoutEntryUseCaseProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = C119855B2E4B39990072ED64 /* WorkoutEntryUseCaseProtocol.swift */; };
+		C119855E2E4B39990072ED64 /* WorkoutEntryUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C119855A2E4B39990072ED64 /* WorkoutEntryUseCase.swift */; };
+		C11985602E4B39A70072ED64 /* WorkoutEntryRepositoryProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = C119855F2E4B39A70072ED64 /* WorkoutEntryRepositoryProtocol.swift */; };
+		C119856C2E4B39B20072ED64 /* WorkoutEntryLocalDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = C11985652E4B39B20072ED64 /* WorkoutEntryLocalDataSource.swift */; };
+		C119856D2E4B39B20072ED64 /* WorkoutEntryDataSourceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = C119856A2E4B39B20072ED64 /* WorkoutEntryDataSourceProtocol.swift */; };
+		C119856E2E4B39B20072ED64 /* WorkoutEntryDTO.swift in Sources */ = {isa = PBXBuildFile; fileRef = C11985612E4B39B20072ED64 /* WorkoutEntryDTO.swift */; };
+		C119856F2E4B39B20072ED64 /* WorkoutEntryMockDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = C11985682E4B39B20072ED64 /* WorkoutEntryMockDataSource.swift */; };
+		C11985702E4B39B20072ED64 /* WorkoutEntryMemoryDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = C11985632E4B39B20072ED64 /* WorkoutEntryMemoryDataSource.swift */; };
+		C11985722E4B423E0072ED64 /* WorkoutEntryContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C11985712E4B423E0072ED64 /* WorkoutEntryContainer.swift */; };
 		C11B9F3A2A5C37B300FC656F /* TabbarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C11B9F392A5C37B300FC656F /* TabbarView.swift */; };
 		C11D9FDE2E427F47005890C3 /* StatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C11D9FDD2E427F47005890C3 /* StatView.swift */; };
 		C11D9FE12E4280B6005890C3 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C11D9FE02E4280B1005890C3 /* ProfileView.swift */; };
@@ -86,8 +97,6 @@
 		C15B7EE52A572C370067B28E /* DetailWorkoutProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15B7EE42A572C370067B28E /* DetailWorkoutProtocols.swift */; };
 		C15B7EE72A572CAE0067B28E /* DetailWorkoutViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15B7EE62A572CAE0067B28E /* DetailWorkoutViewModel.swift */; };
 		C15B7EEA2A57402F0067B28E /* ExerciseRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15B7EE92A57402F0067B28E /* ExerciseRow.swift */; };
-		C16051D32E2BF440003CB9B8 /* LoggedExercise.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16051D22E2BF440003CB9B8 /* LoggedExercise.swift */; };
-		C16051D42E2BF440003CB9B8 /* LoggedExercise.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16051D22E2BF440003CB9B8 /* LoggedExercise.swift */; };
 		C16051D72E2BF46E003CB9B8 /* StepperInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16051D62E2BF46E003CB9B8 /* StepperInputView.swift */; };
 		C16051D92E2BF486003CB9B8 /* ExerciseInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16051D82E2BF486003CB9B8 /* ExerciseInput.swift */; };
 		C16051DB2E2BF671003CB9B8 /* CurrentSessionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16051DA2E2BF671003CB9B8 /* CurrentSessionViewModel.swift */; };
@@ -105,27 +114,9 @@
 		C16051F12E2D6D89003CB9B8 /* ExerciseDataSourceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16051EF2E2D6D89003CB9B8 /* ExerciseDataSourceProtocol.swift */; };
 		C16051F52E2D6EAB003CB9B8 /* ExerciseMockDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16051F42E2D6EAB003CB9B8 /* ExerciseMockDataSource.swift */; };
 		C16051F62E2D6EAB003CB9B8 /* ExerciseMockDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16051F42E2D6EAB003CB9B8 /* ExerciseMockDataSource.swift */; };
-		C16051FE2E316449003CB9B8 /* LoggedExerciseUseCaseProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16051FD2E316449003CB9B8 /* LoggedExerciseUseCaseProtocol.swift */; };
-		C16051FF2E316449003CB9B8 /* LoggedExerciseUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16051FC2E316449003CB9B8 /* LoggedExerciseUseCase.swift */; };
-		C16052002E316449003CB9B8 /* LoggedExerciseUseCaseProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16051FD2E316449003CB9B8 /* LoggedExerciseUseCaseProtocol.swift */; };
-		C16052012E316449003CB9B8 /* LoggedExerciseUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16051FC2E316449003CB9B8 /* LoggedExerciseUseCase.swift */; };
-		C16052032E3164D8003CB9B8 /* LoggedExerciseRepositoryProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16052022E3164D8003CB9B8 /* LoggedExerciseRepositoryProtocol.swift */; };
-		C16052042E3164D8003CB9B8 /* LoggedExerciseRepositoryProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16052022E3164D8003CB9B8 /* LoggedExerciseRepositoryProtocol.swift */; };
 		C16052062E369B02003CB9B8 /* CurrentSessionBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16052052E369B02003CB9B8 /* CurrentSessionBuilder.swift */; };
-		C16052092E369BEC003CB9B8 /* LoggedExerciseRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16052072E369BEC003CB9B8 /* LoggedExerciseRepository.swift */; };
-		C160520A2E369BEC003CB9B8 /* LoggedExerciseRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16052072E369BEC003CB9B8 /* LoggedExerciseRepository.swift */; };
-		C16052112E369C12003CB9B8 /* LoggedExerciseDataSourceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = C160520F2E369C12003CB9B8 /* LoggedExerciseDataSourceProtocol.swift */; };
-		C16052122E369C12003CB9B8 /* LoggedExerciseLocalDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = C160520D2E369C12003CB9B8 /* LoggedExerciseLocalDataSource.swift */; };
-		C16052132E369C12003CB9B8 /* LoggedExerciseMockDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = C160520B2E369C12003CB9B8 /* LoggedExerciseMockDataSource.swift */; };
-		C16052142E369C12003CB9B8 /* LoggedExerciseDataSourceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = C160520F2E369C12003CB9B8 /* LoggedExerciseDataSourceProtocol.swift */; };
-		C16052152E369C12003CB9B8 /* LoggedExerciseLocalDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = C160520D2E369C12003CB9B8 /* LoggedExerciseLocalDataSource.swift */; };
-		C16052162E369C12003CB9B8 /* LoggedExerciseMockDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = C160520B2E369C12003CB9B8 /* LoggedExerciseMockDataSource.swift */; };
-		C16052192E369CC8003CB9B8 /* LoggedExerciseDTO.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16052182E369CC8003CB9B8 /* LoggedExerciseDTO.swift */; };
-		C160521A2E369CC8003CB9B8 /* LoggedExerciseDTO.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16052182E369CC8003CB9B8 /* LoggedExerciseDTO.swift */; };
 		C160538E2E3932D0003CB9B8 /* MemoryDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = C160538D2E3932D0003CB9B8 /* MemoryDataSource.swift */; };
 		C160538F2E3932D0003CB9B8 /* MemoryDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = C160538D2E3932D0003CB9B8 /* MemoryDataSource.swift */; };
-		C16053932E39332B003CB9B8 /* LoggedExerciseMemoryDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16053922E39332B003CB9B8 /* LoggedExerciseMemoryDataSource.swift */; };
-		C16053942E39332B003CB9B8 /* LoggedExerciseMemoryDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16053922E39332B003CB9B8 /* LoggedExerciseMemoryDataSource.swift */; };
 		C162D65C2B0D53B400CDCA26 /* WorkoutSelectionBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = C162D65B2B0D53B400CDCA26 /* WorkoutSelectionBuilder.swift */; };
 		C162D65E2B0D53CA00CDCA26 /* WorkoutSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C162D65D2B0D53CA00CDCA26 /* WorkoutSelectionView.swift */; };
 		C162D6602B0D544300CDCA26 /* WorkoutSelectionProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = C162D65F2B0D544300CDCA26 /* WorkoutSelectionProtocols.swift */; };
@@ -137,6 +128,14 @@
 		C162D6702B0E17EE00CDCA26 /* HealthUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C162D66F2B0E17EE00CDCA26 /* HealthUseCase.swift */; };
 		C162D6722B0E17F900CDCA26 /* HealthUseCaseProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = C162D6712B0E17F900CDCA26 /* HealthUseCaseProtocol.swift */; };
 		C162D6752B0E236600CDCA26 /* HealthKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = C162D6742B0E236600CDCA26 /* HealthKit.swift */; };
+		C1671C192E4B552D00583C1F /* WorkoutEntryRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1671C172E4B552D00583C1F /* WorkoutEntryRepository.swift */; };
+		C1671C1A2E4C733D00583C1F /* Training.swift in Sources */ = {isa = PBXBuildFile; fileRef = C183FE792D5687A9009EE8B5 /* Training.swift */; };
+		C1671C1B2E4C733D00583C1F /* Training.swift in Sources */ = {isa = PBXBuildFile; fileRef = C183FE792D5687A9009EE8B5 /* Training.swift */; };
+		C1671C1C2E4C735300583C1F /* Exercise.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1742E502A3099550020354D /* Exercise.swift */; };
+		C1671C1D2E4C735F00583C1F /* WorkoutEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = C11985562E4B398E0072ED64 /* WorkoutEntry.swift */; };
+		C1671C1E2E4C735F00583C1F /* WorkoutEntryByDay.swift in Sources */ = {isa = PBXBuildFile; fileRef = C11985572E4B398E0072ED64 /* WorkoutEntryByDay.swift */; };
+		C1671C1F2E4C735F00583C1F /* WorkoutEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = C11985562E4B398E0072ED64 /* WorkoutEntry.swift */; };
+		C1671C202E4C735F00583C1F /* WorkoutEntryByDay.swift in Sources */ = {isa = PBXBuildFile; fileRef = C11985572E4B398E0072ED64 /* WorkoutEntryByDay.swift */; };
 		C16D03E02B18A10D0014F906 /* WorkoutSwiftDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16D03DF2B18A10D0014F906 /* WorkoutSwiftDataSource.swift */; };
 		C16D03E22B18A13B0014F906 /* WorkoutModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16D03E12B18A13B0014F906 /* WorkoutModel.swift */; };
 		C16D03E52B18A2540014F906 /* WorkoutPlanModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16D03E42B18A2540014F906 /* WorkoutPlanModel.swift */; };
@@ -164,7 +163,6 @@
 		C17040AD2DA93CA0000E97C0 /* TrainingRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1398FA82D6DF3210092DB50 /* TrainingRepository.swift */; };
 		C17040AE2DA93CAA000E97C0 /* TrainingRepositoryProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1398FA52D6DF2D80092DB50 /* TrainingRepositoryProtocol.swift */; };
 		C17040AF2DA93CB2000E97C0 /* TrainingUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1398FC02D6E09570092DB50 /* TrainingUseCase.swift */; };
-		C17040B02DAA66EE000E97C0 /* Training.swift in Sources */ = {isa = PBXBuildFile; fileRef = C183FE792D5687A9009EE8B5 /* Training.swift */; };
 		C17040B12DAA6AC1000E97C0 /* UserDefaultsManagerProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1398FBA2D6E03890092DB50 /* UserDefaultsManagerProtocol.swift */; };
 		C17040B42DAC449D000E97C0 /* CurrentTrainingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C17040B32DAC449D000E97C0 /* CurrentTrainingViewModel.swift */; };
 		C1742E462A2F31DA0020354D /* Workout.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1742E452A2F31DA0020354D /* Workout.swift */; };
@@ -184,10 +182,7 @@
 		C183FE762D56856A009EE8B5 /* TrainingListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C183FE722D56856A009EE8B5 /* TrainingListView.swift */; };
 		C183FE772D56856A009EE8B5 /* TrainingListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C183FE732D56856A009EE8B5 /* TrainingListViewModel.swift */; };
 		C183FE7A2D5687AD009EE8B5 /* Training.swift in Sources */ = {isa = PBXBuildFile; fileRef = C183FE792D5687A9009EE8B5 /* Training.swift */; };
-		C183FE7B2D5687AD009EE8B5 /* Training.swift in Sources */ = {isa = PBXBuildFile; fileRef = C183FE792D5687A9009EE8B5 /* Training.swift */; };
 		C183FE7E2D568866009EE8B5 /* MotionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C183FE7D2D568866009EE8B5 /* MotionManager.swift */; };
-		C183FE812D5689C1009EE8B5 /* SquatDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = C183FE802D5689C1009EE8B5 /* SquatDetector.swift */; };
-		C183FE852D568A3A009EE8B5 /* SquatDetectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C183FE842D568A3A009EE8B5 /* SquatDetectorView.swift */; };
 		C183FE892D568AF1009EE8B5 /* SquatDataCollector.swift in Sources */ = {isa = PBXBuildFile; fileRef = C183FE882D568AF1009EE8B5 /* SquatDataCollector.swift */; };
 		C183FE8B2D568B4C009EE8B5 /* SquatDataCollectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C183FE8A2D568B44009EE8B5 /* SquatDataCollectorView.swift */; };
 		C183FE912D57D475009EE8B5 /* MenuBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = C183FE8D2D57D475009EE8B5 /* MenuBuilder.swift */; };
@@ -259,7 +254,6 @@
 		C1CF26BB2A5DDAA800521884 /* CustomSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1CF26BA2A5DDAA800521884 /* CustomSlider.swift */; };
 		C1D052422D9F1AC100B0FF1D /* HealthContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D052412D9F1AB600B0FF1D /* HealthContainer.swift */; };
 		C1D61A252E0D8F7300206F4E /* CurrentSessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D61A242E0D8F7300206F4E /* CurrentSessionView.swift */; };
-		C1DAF5EB2E3D5E6F005A830C /* LoggedExerciseContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1DAF5EA2E3D5E67005A830C /* LoggedExerciseContainer.swift */; };
 		C1DAF5ED2E3D5E7A005A830C /* ExerciseContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1DAF5EC2E3D5E77005A830C /* ExerciseContainer.swift */; };
 		C1DAF5F02E3FDE78005A830C /* DateBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1DAF5EF2E3FDE78005A830C /* DateBadge.swift */; };
 		C1DAF5F82E411D60005A830C /* LoggedExercisesRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1DAF5F32E411D60005A830C /* LoggedExercisesRouter.swift */; };
@@ -423,6 +417,17 @@
 		B86B345EE695949677562913 /* VerifyPasswordView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VerifyPasswordView.swift; sourceTree = "<group>"; };
 		BAB73D510261EB9EC22B9352 /* UserDTO.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UserDTO.swift; sourceTree = "<group>"; };
 		BE0DA4B8C3BC0D66F8C03BC8 /* VerifyPasswordBuilder.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VerifyPasswordBuilder.swift; sourceTree = "<group>"; };
+		C11985562E4B398E0072ED64 /* WorkoutEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutEntry.swift; sourceTree = "<group>"; };
+		C11985572E4B398E0072ED64 /* WorkoutEntryByDay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutEntryByDay.swift; sourceTree = "<group>"; };
+		C119855A2E4B39990072ED64 /* WorkoutEntryUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutEntryUseCase.swift; sourceTree = "<group>"; };
+		C119855B2E4B39990072ED64 /* WorkoutEntryUseCaseProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutEntryUseCaseProtocol.swift; sourceTree = "<group>"; };
+		C119855F2E4B39A70072ED64 /* WorkoutEntryRepositoryProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutEntryRepositoryProtocol.swift; sourceTree = "<group>"; };
+		C11985612E4B39B20072ED64 /* WorkoutEntryDTO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutEntryDTO.swift; sourceTree = "<group>"; };
+		C11985632E4B39B20072ED64 /* WorkoutEntryMemoryDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutEntryMemoryDataSource.swift; sourceTree = "<group>"; };
+		C11985652E4B39B20072ED64 /* WorkoutEntryLocalDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutEntryLocalDataSource.swift; sourceTree = "<group>"; };
+		C11985682E4B39B20072ED64 /* WorkoutEntryMockDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutEntryMockDataSource.swift; sourceTree = "<group>"; };
+		C119856A2E4B39B20072ED64 /* WorkoutEntryDataSourceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutEntryDataSourceProtocol.swift; sourceTree = "<group>"; };
+		C11985712E4B423E0072ED64 /* WorkoutEntryContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutEntryContainer.swift; sourceTree = "<group>"; };
 		C11B9F342A5845BE00FC656F /* microworkout.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = microworkout.entitlements; sourceTree = "<group>"; };
 		C11B9F392A5C37B300FC656F /* TabbarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabbarView.swift; sourceTree = "<group>"; };
 		C11D9FDD2E427F47005890C3 /* StatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatView.swift; sourceTree = "<group>"; };
@@ -462,7 +467,6 @@
 		C15B7EE42A572C370067B28E /* DetailWorkoutProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailWorkoutProtocols.swift; sourceTree = "<group>"; };
 		C15B7EE62A572CAE0067B28E /* DetailWorkoutViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailWorkoutViewModel.swift; sourceTree = "<group>"; };
 		C15B7EE92A57402F0067B28E /* ExerciseRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseRow.swift; sourceTree = "<group>"; };
-		C16051D22E2BF440003CB9B8 /* LoggedExercise.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggedExercise.swift; sourceTree = "<group>"; };
 		C16051D62E2BF46E003CB9B8 /* StepperInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StepperInputView.swift; sourceTree = "<group>"; };
 		C16051D82E2BF486003CB9B8 /* ExerciseInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseInput.swift; sourceTree = "<group>"; };
 		C16051DA2E2BF671003CB9B8 /* CurrentSessionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentSessionViewModel.swift; sourceTree = "<group>"; };
@@ -473,17 +477,8 @@
 		C16051EC2E2D6D2B003CB9B8 /* ExerciseLocalDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseLocalDataSource.swift; sourceTree = "<group>"; };
 		C16051EF2E2D6D89003CB9B8 /* ExerciseDataSourceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseDataSourceProtocol.swift; sourceTree = "<group>"; };
 		C16051F42E2D6EAB003CB9B8 /* ExerciseMockDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseMockDataSource.swift; sourceTree = "<group>"; };
-		C16051FC2E316449003CB9B8 /* LoggedExerciseUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggedExerciseUseCase.swift; sourceTree = "<group>"; };
-		C16051FD2E316449003CB9B8 /* LoggedExerciseUseCaseProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggedExerciseUseCaseProtocol.swift; sourceTree = "<group>"; };
-		C16052022E3164D8003CB9B8 /* LoggedExerciseRepositoryProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggedExerciseRepositoryProtocol.swift; sourceTree = "<group>"; };
 		C16052052E369B02003CB9B8 /* CurrentSessionBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentSessionBuilder.swift; sourceTree = "<group>"; };
-		C16052072E369BEC003CB9B8 /* LoggedExerciseRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggedExerciseRepository.swift; sourceTree = "<group>"; };
-		C160520B2E369C12003CB9B8 /* LoggedExerciseMockDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggedExerciseMockDataSource.swift; sourceTree = "<group>"; };
-		C160520D2E369C12003CB9B8 /* LoggedExerciseLocalDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggedExerciseLocalDataSource.swift; sourceTree = "<group>"; };
-		C160520F2E369C12003CB9B8 /* LoggedExerciseDataSourceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggedExerciseDataSourceProtocol.swift; sourceTree = "<group>"; };
-		C16052182E369CC8003CB9B8 /* LoggedExerciseDTO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggedExerciseDTO.swift; sourceTree = "<group>"; };
 		C160538D2E3932D0003CB9B8 /* MemoryDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryDataSource.swift; sourceTree = "<group>"; };
-		C16053922E39332B003CB9B8 /* LoggedExerciseMemoryDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggedExerciseMemoryDataSource.swift; sourceTree = "<group>"; };
 		C162D65B2B0D53B400CDCA26 /* WorkoutSelectionBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutSelectionBuilder.swift; sourceTree = "<group>"; };
 		C162D65D2B0D53CA00CDCA26 /* WorkoutSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutSelectionView.swift; sourceTree = "<group>"; };
 		C162D65F2B0D544300CDCA26 /* WorkoutSelectionProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutSelectionProtocols.swift; sourceTree = "<group>"; };
@@ -495,6 +490,7 @@
 		C162D66F2B0E17EE00CDCA26 /* HealthUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthUseCase.swift; sourceTree = "<group>"; };
 		C162D6712B0E17F900CDCA26 /* HealthUseCaseProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthUseCaseProtocol.swift; sourceTree = "<group>"; };
 		C162D6742B0E236600CDCA26 /* HealthKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKit.swift; sourceTree = "<group>"; };
+		C1671C172E4B552D00583C1F /* WorkoutEntryRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutEntryRepository.swift; sourceTree = "<group>"; };
 		C16D03DF2B18A10D0014F906 /* WorkoutSwiftDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutSwiftDataSource.swift; sourceTree = "<group>"; };
 		C16D03E12B18A13B0014F906 /* WorkoutModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutModel.swift; sourceTree = "<group>"; };
 		C16D03E42B18A2540014F906 /* WorkoutPlanModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutPlanModel.swift; sourceTree = "<group>"; };
@@ -594,7 +590,6 @@
 		C1CF26BA2A5DDAA800521884 /* CustomSlider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomSlider.swift; sourceTree = "<group>"; };
 		C1D052412D9F1AB600B0FF1D /* HealthContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthContainer.swift; sourceTree = "<group>"; };
 		C1D61A242E0D8F7300206F4E /* CurrentSessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentSessionView.swift; sourceTree = "<group>"; };
-		C1DAF5EA2E3D5E67005A830C /* LoggedExerciseContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggedExerciseContainer.swift; sourceTree = "<group>"; };
 		C1DAF5EC2E3D5E77005A830C /* ExerciseContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseContainer.swift; sourceTree = "<group>"; };
 		C1DAF5EF2E3FDE78005A830C /* DateBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateBadge.swift; sourceTree = "<group>"; };
 		C1DAF5F32E411D60005A830C /* LoggedExercisesRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggedExercisesRouter.swift; sourceTree = "<group>"; };
@@ -989,6 +984,67 @@
 			path = Manager;
 			sourceTree = "<group>";
 		};
+		C119855C2E4B39990072ED64 /* WorkoutEntry */ = {
+			isa = PBXGroup;
+			children = (
+				C119855A2E4B39990072ED64 /* WorkoutEntryUseCase.swift */,
+				C119855B2E4B39990072ED64 /* WorkoutEntryUseCaseProtocol.swift */,
+			);
+			path = WorkoutEntry;
+			sourceTree = "<group>";
+		};
+		C11985622E4B39B20072ED64 /* DTO */ = {
+			isa = PBXGroup;
+			children = (
+				C11985612E4B39B20072ED64 /* WorkoutEntryDTO.swift */,
+			);
+			path = DTO;
+			sourceTree = "<group>";
+		};
+		C11985642E4B39B20072ED64 /* Memory */ = {
+			isa = PBXGroup;
+			children = (
+				C11985632E4B39B20072ED64 /* WorkoutEntryMemoryDataSource.swift */,
+			);
+			path = Memory;
+			sourceTree = "<group>";
+		};
+		C11985662E4B39B20072ED64 /* UserDefaults */ = {
+			isa = PBXGroup;
+			children = (
+				C11985652E4B39B20072ED64 /* WorkoutEntryLocalDataSource.swift */,
+			);
+			path = UserDefaults;
+			sourceTree = "<group>";
+		};
+		C11985672E4B39B20072ED64 /* Local */ = {
+			isa = PBXGroup;
+			children = (
+				C11985622E4B39B20072ED64 /* DTO */,
+				C11985642E4B39B20072ED64 /* Memory */,
+				C11985662E4B39B20072ED64 /* UserDefaults */,
+			);
+			path = Local;
+			sourceTree = "<group>";
+		};
+		C11985692E4B39B20072ED64 /* Mock */ = {
+			isa = PBXGroup;
+			children = (
+				C11985682E4B39B20072ED64 /* WorkoutEntryMockDataSource.swift */,
+			);
+			path = Mock;
+			sourceTree = "<group>";
+		};
+		C119856B2E4B39B20072ED64 /* WorkoutEntry */ = {
+			isa = PBXGroup;
+			children = (
+				C11985672E4B39B20072ED64 /* Local */,
+				C11985692E4B39B20072ED64 /* Mock */,
+				C119856A2E4B39B20072ED64 /* WorkoutEntryDataSourceProtocol.swift */,
+			);
+			path = WorkoutEntry;
+			sourceTree = "<group>";
+		};
 		C11B9F382A5C37A400FC656F /* Tabbar */ = {
 			isa = PBXGroup;
 			children = (
@@ -1184,81 +1240,12 @@
 			path = Mock;
 			sourceTree = "<group>";
 		};
-		C16051FB2E31643E003CB9B8 /* LoggedExercise */ = {
-			isa = PBXGroup;
-			children = (
-				C16051FC2E316449003CB9B8 /* LoggedExerciseUseCase.swift */,
-				C16051FD2E316449003CB9B8 /* LoggedExerciseUseCaseProtocol.swift */,
-			);
-			path = LoggedExercise;
-			sourceTree = "<group>";
-		};
-		C16052082E369BEC003CB9B8 /* LoggedExercise */ = {
-			isa = PBXGroup;
-			children = (
-				C16052072E369BEC003CB9B8 /* LoggedExerciseRepository.swift */,
-			);
-			path = LoggedExercise;
-			sourceTree = "<group>";
-		};
-		C160520C2E369C12003CB9B8 /* Mock */ = {
-			isa = PBXGroup;
-			children = (
-				C160520B2E369C12003CB9B8 /* LoggedExerciseMockDataSource.swift */,
-			);
-			path = Mock;
-			sourceTree = "<group>";
-		};
-		C160520E2E369C12003CB9B8 /* Local */ = {
-			isa = PBXGroup;
-			children = (
-				C16053912E393314003CB9B8 /* Memory */,
-				C16053902E393303003CB9B8 /* UserDefaults */,
-				C16052172E369CA8003CB9B8 /* DTO */,
-			);
-			path = Local;
-			sourceTree = "<group>";
-		};
-		C16052102E369C12003CB9B8 /* LoggedExercise */ = {
-			isa = PBXGroup;
-			children = (
-				C160520C2E369C12003CB9B8 /* Mock */,
-				C160520E2E369C12003CB9B8 /* Local */,
-				C160520F2E369C12003CB9B8 /* LoggedExerciseDataSourceProtocol.swift */,
-			);
-			path = LoggedExercise;
-			sourceTree = "<group>";
-		};
-		C16052172E369CA8003CB9B8 /* DTO */ = {
-			isa = PBXGroup;
-			children = (
-				C16052182E369CC8003CB9B8 /* LoggedExerciseDTO.swift */,
-			);
-			path = DTO;
-			sourceTree = "<group>";
-		};
 		C160538C2E3932BF003CB9B8 /* Cache */ = {
 			isa = PBXGroup;
 			children = (
 				C160538D2E3932D0003CB9B8 /* MemoryDataSource.swift */,
 			);
 			path = Cache;
-			sourceTree = "<group>";
-		};
-		C16053902E393303003CB9B8 /* UserDefaults */ = {
-			isa = PBXGroup;
-			children = (
-				C160520D2E369C12003CB9B8 /* LoggedExerciseLocalDataSource.swift */,
-			);
-			path = UserDefaults;
-			sourceTree = "<group>";
-		};
-		C16053912E393314003CB9B8 /* Memory */ = {
-			isa = PBXGroup;
-			children = (
-				C16053922E39332B003CB9B8 /* LoggedExerciseMemoryDataSource.swift */,
-			);
-			path = Memory;
 			sourceTree = "<group>";
 		};
 		C162D65A2B0D539900CDCA26 /* WorkoutSelection */ = {
@@ -1316,6 +1303,14 @@
 			path = Model;
 			sourceTree = "<group>";
 		};
+		C1671C182E4B552D00583C1F /* WorkoutEntry */ = {
+			isa = PBXGroup;
+			children = (
+				C1671C172E4B552D00583C1F /* WorkoutEntryRepository.swift */,
+			);
+			path = WorkoutEntry;
+			sourceTree = "<group>";
+		};
 		C16D03DE2B18A0EE0014F906 /* SwiftData */ = {
 			isa = PBXGroup;
 			children = (
@@ -1355,8 +1350,8 @@
 		C16D03EC2B18ADD10014F906 /* Repositories */ = {
 			isa = PBXGroup;
 			children = (
+				C119855F2E4B39A70072ED64 /* WorkoutEntryRepositoryProtocol.swift */,
 				C16051E32E2D6C53003CB9B8 /* ExerciseRepositoryProtocol.swift */,
-				C16052022E3164D8003CB9B8 /* LoggedExerciseRepositoryProtocol.swift */,
 				C162D66A2B0E176800CDCA26 /* HealthRepositoryProtocol.swift */,
 				C1398FA52D6DF2D80092DB50 /* TrainingRepositoryProtocol.swift */,
 			);
@@ -1455,7 +1450,7 @@
 		C1742E432A2F31A50020354D /* UseCases */ = {
 			isa = PBXGroup;
 			children = (
-				C16051FB2E31643E003CB9B8 /* LoggedExercise */,
+				C119855C2E4B39990072ED64 /* WorkoutEntry */,
 				C16051DC2E2D6B77003CB9B8 /* Exercise */,
 				C1398FC02D6E09570092DB50 /* TrainingUseCase.swift */,
 				C162D66E2B0E17DB00CDCA26 /* Health */,
@@ -1467,7 +1462,8 @@
 		C1742E442A2F31B70020354D /* Entities */ = {
 			isa = PBXGroup;
 			children = (
-				C16051D22E2BF440003CB9B8 /* LoggedExercise.swift */,
+				C11985562E4B398E0072ED64 /* WorkoutEntry.swift */,
+				C11985572E4B398E0072ED64 /* WorkoutEntryByDay.swift */,
 				C1B670EE2D62827F005E9173 /* HealthDay.swift */,
 				C183FE792D5687A9009EE8B5 /* Training.swift */,
 				C1742E522A309A0C0020354D /* WorkoutPlan.swift */,
@@ -1510,8 +1506,8 @@
 		C1742E562A309FC50020354D /* Repositories */ = {
 			isa = PBXGroup;
 			children = (
+				C1671C182E4B552D00583C1F /* WorkoutEntry */,
 				C16051E72E2D6CA0003CB9B8 /* Exercise */,
-				C16052082E369BEC003CB9B8 /* LoggedExercise */,
 				C1398FA82D6DF3210092DB50 /* TrainingRepository.swift */,
 				C162D6692B0E175000CDCA26 /* Health */,
 				C15DC9472B0CBA9200F408B7 /* Workout */,
@@ -1522,8 +1518,8 @@
 		C1742E572A309FCA0020354D /* Datasources */ = {
 			isa = PBXGroup;
 			children = (
+				C119856B2E4B39B20072ED64 /* WorkoutEntry */,
 				C16051EB2E2D6D1D003CB9B8 /* Exercise */,
-				C16052102E369C12003CB9B8 /* LoggedExercise */,
 				C1398FAB2D6DF39C0092DB50 /* Training */,
 				C162D6632B0DECDD00CDCA26 /* Health */,
 				C15DC9452B0CBA5700F408B7 /* Workout */,
@@ -1543,8 +1539,8 @@
 		C183FC012D550DF9009EE8B5 /* DI */ = {
 			isa = PBXGroup;
 			children = (
+				C11985712E4B423E0072ED64 /* WorkoutEntryContainer.swift */,
 				C1DAF5EC2E3D5E77005A830C /* ExerciseContainer.swift */,
-				C1DAF5EA2E3D5E67005A830C /* LoggedExerciseContainer.swift */,
 				C1D052412D9F1AB600B0FF1D /* HealthContainer.swift */,
 				C1398FBD2D6E08970092DB50 /* TrainingContainer.swift */,
 				C11589312B0F741700254218 /* Manager */,
@@ -2382,11 +2378,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				C17040B12DAA6AC1000E97C0 /* UserDefaultsManagerProtocol.swift in Sources */,
-				C17040B02DAA66EE000E97C0 /* Training.swift in Sources */,
+				C1671C1B2E4C733D00583C1F /* Training.swift in Sources */,
 				C17040AA2DA93C98000E97C0 /* TrainingLocalDataSource.swift in Sources */,
 				C17040AB2DA93C98000E97C0 /* TrainingDTO.swift in Sources */,
 				C17040AC2DA93C98000E97C0 /* TrainingLocalDataStoreProtocol.swift in Sources */,
 				C183FEC32D59392C009EE8B5 /* LiveActivityManager.swift in Sources */,
+				C1671C1C2E4C735300583C1F /* Exercise.swift in Sources */,
+				C1671C1F2E4C735F00583C1F /* WorkoutEntry.swift in Sources */,
+				C1671C202E4C735F00583C1F /* WorkoutEntryByDay.swift in Sources */,
 				C17040AD2DA93CA0000E97C0 /* TrainingRepository.swift in Sources */,
 				C17040AE2DA93CAA000E97C0 /* TrainingRepositoryProtocol.swift in Sources */,
 				C17040AF2DA93CB2000E97C0 /* TrainingUseCase.swift in Sources */,
@@ -2404,7 +2403,6 @@
 				C1742E512A3099550020354D /* Exercise.swift in Sources */,
 				C1B670E22D5FDDD8005E9173 /* HomeRouter.swift in Sources */,
 				C15591082A31D1F100E30886 /* HomeWorkoutPlanView.swift in Sources */,
-				C16051D32E2BF440003CB9B8 /* LoggedExercise.swift in Sources */,
 				C162D6702B0E17EE00CDCA26 /* HealthUseCase.swift in Sources */,
 				C16051E92E2D6CAB003CB9B8 /* ExerciseRepository.swift in Sources */,
 				C1742E4B2A2F32260020354D /* HomeTrainingView.swift in Sources */,
@@ -2414,14 +2412,12 @@
 				C19D17FF2D5DF84C000CCCEF /* TrackingDayBuilder.swift in Sources */,
 				C19D18002D5DF84C000CCCEF /* TrackingDayView.swift in Sources */,
 				C19D18012D5DF84C000CCCEF /* TrackingDayViewModel.swift in Sources */,
-				C16052092E369BEC003CB9B8 /* LoggedExerciseRepository.swift in Sources */,
 				C16D03E02B18A10D0014F906 /* WorkoutSwiftDataSource.swift in Sources */,
 				C1DE682B2A63F86F000DE4C8 /* NumberOfSeriesView.swift in Sources */,
 				C1DAF5F02E3FDE78005A830C /* DateBadge.swift in Sources */,
 				C1F34FA22A38FC6D00233D66 /* ChronoView.swift in Sources */,
 				C1742E552A309EDE0020354D /* WorkoutSet.swift in Sources */,
 				C19D17EA2D5BE508000CCCEF /* RootView.swift in Sources */,
-				C160521A2E369CC8003CB9B8 /* LoggedExerciseDTO.swift in Sources */,
 				C183FE7A2D5687AD009EE8B5 /* Training.swift in Sources */,
 				C183FEC22D5938EE009EE8B5 /* LiveActivityManager.swift in Sources */,
 				C1BE55EB2DB02EB900B57345 /* AppState.swift in Sources */,
@@ -2434,7 +2430,6 @@
 				C155910A2A31D3E400E30886 /* HomeTrainingBuilder.swift in Sources */,
 				C1398FBB2D6E03890092DB50 /* UserDefaultsManagerProtocol.swift in Sources */,
 				C1DAF5FC2E411D60005A830C /* LoggedExercisesView.swift in Sources */,
-				C16053932E39332B003CB9B8 /* LoggedExerciseMemoryDataSource.swift in Sources */,
 				C16052062E369B02003CB9B8 /* CurrentSessionBuilder.swift in Sources */,
 				C15B7EEA2A57402F0067B28E /* ExerciseRow.swift in Sources */,
 				C1398FAA2D6DF3250092DB50 /* TrainingRepository.swift in Sources */,
@@ -2449,25 +2444,27 @@
 				C1398FC12D6E095A0092DB50 /* TrainingUseCase.swift in Sources */,
 				C183FEAF2D57D8B2009EE8B5 /* NavigatorProtocol.swift in Sources */,
 				C183FEB02D57D8B2009EE8B5 /* AlertConfig.swift in Sources */,
+				C119856C2E4B39B20072ED64 /* WorkoutEntryLocalDataSource.swift in Sources */,
+				C119856D2E4B39B20072ED64 /* WorkoutEntryDataSourceProtocol.swift in Sources */,
+				C119856E2E4B39B20072ED64 /* WorkoutEntryDTO.swift in Sources */,
+				C119856F2E4B39B20072ED64 /* WorkoutEntryMockDataSource.swift in Sources */,
+				C11985702E4B39B20072ED64 /* WorkoutEntryMemoryDataSource.swift in Sources */,
 				C11D9FE52E4280ED005890C3 /* ProfileViewModel.swift in Sources */,
-				C16052032E3164D8003CB9B8 /* LoggedExerciseRepositoryProtocol.swift in Sources */,
 				C1F34FA62A38FC6D00233D66 /* ChronoTimerView.swift in Sources */,
 				C19788C82A7EDF160031648B /* HealthKitViewModel.swift in Sources */,
 				C162D65C2B0D53B400CDCA26 /* WorkoutSelectionBuilder.swift in Sources */,
 				C16D03E72B18A29D0014F906 /* ExerciseModel.swift in Sources */,
 				C13C47C42A33AB0B005C90AB /* TimerViewModel.swift in Sources */,
-				C16051FE2E316449003CB9B8 /* LoggedExerciseUseCaseProtocol.swift in Sources */,
-				C16051FF2E316449003CB9B8 /* LoggedExerciseUseCase.swift in Sources */,
 				C19D18042D5DFB2E000CCCEF /* DynamicGridView.swift in Sources */,
 				C15B7EE12A572BB70067B28E /* DetailWorkoutView.swift in Sources */,
 				C1742E462A2F31DA0020354D /* Workout.swift in Sources */,
 				C19788CA2A7EDF390031648B /* HealthKitBuilder.swift in Sources */,
 				C12315B32D6B6ECA00802707 /* CurrentTrainingView.swift in Sources */,
 				C15590FD2A31CB1C00E30886 /* WorkoutRepositoryProtocol.swift in Sources */,
-				C1DAF5EB2E3D5E6F005A830C /* LoggedExerciseContainer.swift in Sources */,
 				C11D9FE82E428165005890C3 /* ProfileBuilder.swift in Sources */,
 				C13C47C02A33AAF0005C90AB /* TimerView.swift in Sources */,
 				C17040A32DA2E5E9000E97C0 /* TrainingDetailV2Router.swift in Sources */,
+				C1671C192E4B552D00583C1F /* WorkoutEntryRepository.swift in Sources */,
 				C16D03EF2B18AE110014F906 /* WorkoutPlanDTO.swift in Sources */,
 				C16D03F52B18AF390014F906 /* WorkoutSetDTO.swift in Sources */,
 				C19D17F62D5DE527000CCCEF /* TrainingDetailView.swift in Sources */,
@@ -2475,18 +2472,17 @@
 				C19D17F82D5DE527000CCCEF /* TrainingDetailViewModel.swift in Sources */,
 				C1BE55ED2DB184B100B57345 /* CurrentTrainingBuilder.swift in Sources */,
 				C19788C62A7EDE4B0031648B /* HealthKitView.swift in Sources */,
-				C16052122E369C12003CB9B8 /* LoggedExerciseLocalDataSource.swift in Sources */,
 				C154B26D2D63BE5800B2A89F /* SliderView.swift in Sources */,
 				C16D03EA2B18ADB00014F906 /* WorkoutRemoteDataSourceProtocol.swift in Sources */,
 				C1742E592A309FDC0020354D /* WorkoutLocalDataSourceProtocol.swift in Sources */,
+				C119855D2E4B39990072ED64 /* WorkoutEntryUseCaseProtocol.swift in Sources */,
+				C119855E2E4B39990072ED64 /* WorkoutEntryUseCase.swift in Sources */,
 				C15B7EE72A572CAE0067B28E /* DetailWorkoutViewModel.swift in Sources */,
 				C1F34FA82A38FC6D00233D66 /* ChronoBuilder.swift in Sources */,
 				C1CF26BB2A5DDAA800521884 /* CustomSlider.swift in Sources */,
 				C162D66B2B0E176800CDCA26 /* HealthRepositoryProtocol.swift in Sources */,
 				C16051DF2E2D6B8C003CB9B8 /* ExerciseUseCaseProtocol.swift in Sources */,
-				C16052132E369C12003CB9B8 /* LoggedExerciseMockDataSource.swift in Sources */,
 				C192BF1C2A2A976A00982F33 /* MicroWorkoutApp.swift in Sources */,
-				C16052112E369C12003CB9B8 /* LoggedExerciseDataSourceProtocol.swift in Sources */,
 				C12315AC2D68CD3000802707 /* TrainingListV2View.swift in Sources */,
 				C12315AD2D68CD3000802707 /* TrainingListV2Builder.swift in Sources */,
 				C12315AE2D68CD3000802707 /* TrainingListV2Router.swift in Sources */,
@@ -2495,6 +2491,7 @@
 				C16D03E52B18A2540014F906 /* WorkoutPlanModel.swift in Sources */,
 				C162D6752B0E236600CDCA26 /* HealthKit.swift in Sources */,
 				C1D61A252E0D8F7300206F4E /* CurrentSessionView.swift in Sources */,
+				C11985722E4B423E0072ED64 /* WorkoutEntryContainer.swift in Sources */,
 				C1762ACF2B0A913F0035318F /* WorkoutUseCaseProtocol.swift in Sources */,
 				C16051E22E2D6B95003CB9B8 /* ExerciseUseCase.swift in Sources */,
 				C19D17EE2D5BF440000CCCEF /* TrainingListRouter.swift in Sources */,
@@ -2520,9 +2517,12 @@
 				C1DAF5F82E411D60005A830C /* LoggedExercisesRouter.swift in Sources */,
 				C162D6602B0D544300CDCA26 /* WorkoutSelectionProtocols.swift in Sources */,
 				C1398FB82D6DF40B0092DB50 /* TrainingDTO.swift in Sources */,
+				C11985582E4B398E0072ED64 /* WorkoutEntryByDay.swift in Sources */,
+				C11985592E4B398E0072ED64 /* WorkoutEntry.swift in Sources */,
 				C1B670ED2D627B12005E9173 /* HealthWeeks.swift in Sources */,
 				C17040B42DAC449D000E97C0 /* CurrentTrainingViewModel.swift in Sources */,
 				C1B670E82D626218005E9173 /* HealthKitManager.swift in Sources */,
+				C11985602E4B39A70072ED64 /* WorkoutEntryRepositoryProtocol.swift in Sources */,
 				C162D65E2B0D53CA00CDCA26 /* WorkoutSelectionView.swift in Sources */,
 				C15591032A31D0E000E30886 /* HomeTrainingProtocols.swift in Sources */,
 				C183FE752D56856A009EE8B5 /* TrainingListBuilder.swift in Sources */,
@@ -2626,7 +2626,6 @@
 				C1F34F8D2A38FB9D00233D66 /* TimerView.swift in Sources */,
 				C183FE912D57D475009EE8B5 /* MenuBuilder.swift in Sources */,
 				C183FE932D57D475009EE8B5 /* MenuView.swift in Sources */,
-				C16052192E369CC8003CB9B8 /* LoggedExerciseDTO.swift in Sources */,
 				C183FE942D57D475009EE8B5 /* MenuViewModel.swift in Sources */,
 				C16D03FB2B18B19D0014F906 /* WorkoutDTO.swift in Sources */,
 				C16051F12E2D6D89003CB9B8 /* ExerciseDataSourceProtocol.swift in Sources */,
@@ -2638,11 +2637,9 @@
 				C1398FB22D6DF3E90092DB50 /* TrainingLocalDataSource.swift in Sources */,
 				C1398FB92D6DF40B0092DB50 /* TrainingDTO.swift in Sources */,
 				C1F34F902A38FB9D00233D66 /* CountDownView.swift in Sources */,
-				C16052042E3164D8003CB9B8 /* LoggedExerciseRepositoryProtocol.swift in Sources */,
 				C1F34F942A38FBBF00233D66 /* Exercise.swift in Sources */,
 				C1398FBC2D6E06160092DB50 /* UserDefaultsManagerProtocol.swift in Sources */,
 				C18FEDB12A76F926005519BE /* ListPlanView.swift in Sources */,
-				C16053942E39332B003CB9B8 /* LoggedExerciseMemoryDataSource.swift in Sources */,
 				C1F34FA32A38FC6D00233D66 /* ChronoView.swift in Sources */,
 				C1F34F952A38FBBF00233D66 /* Workout.swift in Sources */,
 				C1F34F972A38FC1100233D66 /* WorkoutRepositoryProtocol.swift in Sources */,
@@ -2656,16 +2653,12 @@
 				C1F34F642A38CD4300233D66 /* ContentView.swift in Sources */,
 				C1F34F622A38CD4300233D66 /* gymwatchApp.swift in Sources */,
 				C1F34F982A38FC1100233D66 /* WorkoutRepository.swift in Sources */,
-				C160520A2E369BEC003CB9B8 /* LoggedExerciseRepository.swift in Sources */,
 				C16051EA2E2D6CAB003CB9B8 /* ExerciseRepository.swift in Sources */,
 				C16D03FC2B18B19F0014F906 /* ExerciseDTO.swift in Sources */,
 				C183FEA22D57D634009EE8B5 /* MenuItem.swift in Sources */,
 				C160538F2E3932D0003CB9B8 /* MemoryDataSource.swift in Sources */,
-				C16052002E316449003CB9B8 /* LoggedExerciseUseCaseProtocol.swift in Sources */,
-				C16052012E316449003CB9B8 /* LoggedExerciseUseCase.swift in Sources */,
 				C18FEDBB2A77A658005519BE /* DetailWorkoutViewModel.swift in Sources */,
 				C18F6F572A8160CE00914A0A /* HeartBeatViewModel.swift in Sources */,
-				C16052142E369C12003CB9B8 /* LoggedExerciseDataSourceProtocol.swift in Sources */,
 				C183FEB12D57D8B2009EE8B5 /* Page.swift in Sources */,
 				C183FEB22D57D8B2009EE8B5 /* Navigator.swift in Sources */,
 				C183FEB32D57D8B2009EE8B5 /* StackView.swift in Sources */,
@@ -2673,10 +2666,7 @@
 				C183FEB52D57D8B2009EE8B5 /* NavigatorProtocol.swift in Sources */,
 				C1398FA62D6DF2E30092DB50 /* TrainingRepositoryProtocol.swift in Sources */,
 				C183FEB62D57D8B2009EE8B5 /* AlertConfig.swift in Sources */,
-				C183FE812D5689C1009EE8B5 /* SquatDetector.swift in Sources */,
 				C16051E12E2D6B95003CB9B8 /* ExerciseUseCase.swift in Sources */,
-				C183FE852D568A3A009EE8B5 /* SquatDetectorView.swift in Sources */,
-				C16052162E369C12003CB9B8 /* LoggedExerciseMockDataSource.swift in Sources */,
 				C16051E52E2D6C58003CB9B8 /* ExerciseRepositoryProtocol.swift in Sources */,
 				C16051ED2E2D6D2B003CB9B8 /* ExerciseLocalDataSource.swift in Sources */,
 				C16D03FA2B18B19B0014F906 /* WorkoutPlanDTO.swift in Sources */,
@@ -2685,16 +2675,16 @@
 				C16D03F92B18B1780014F906 /* WorkoutRemoteDataSourceProtocol.swift in Sources */,
 				C11DA0212E428689005890C3 /* ToastView.swift in Sources */,
 				C1F34F992A38FC1400233D66 /* WorkoutMockDataSource.swift in Sources */,
-				C183FE7B2D5687AD009EE8B5 /* Training.swift in Sources */,
 				C1B670E92D626218005E9173 /* HealthKitManager.swift in Sources */,
 				C16D03F82B18B1200014F906 /* ExerciseModel.swift in Sources */,
 				C16D03F62B18B11B0014F906 /* WorkoutModel.swift in Sources */,
 				C18F6F592A8160DC00914A0A /* HeartBeatBuilder.swift in Sources */,
 				C1F34FAB2A38FC6D00233D66 /* ChronoProtocols.swift in Sources */,
-				C16051D42E2BF440003CB9B8 /* LoggedExercise.swift in Sources */,
+				C1671C1A2E4C733D00583C1F /* Training.swift in Sources */,
 				C183FE7E2D568866009EE8B5 /* MotionManager.swift in Sources */,
-				C16052152E369C12003CB9B8 /* LoggedExerciseLocalDataSource.swift in Sources */,
 				C1F34F8F2A38FB9D00233D66 /* TimerProtocols.swift in Sources */,
+				C1671C1D2E4C735F00583C1F /* WorkoutEntry.swift in Sources */,
+				C1671C1E2E4C735F00583C1F /* WorkoutEntryByDay.swift in Sources */,
 				C18FEDB52A779DE1005519BE /* ListPlanBuilder.swift in Sources */,
 				C1398FAD2D6DF3AF0092DB50 /* TrainingLocalDataStoreProtocol.swift in Sources */,
 				C16D03F72B18B11E0014F906 /* WorkoutPlanModel.swift in Sources */,
