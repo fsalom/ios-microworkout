@@ -1,11 +1,3 @@
-//
-//  CurrentSessionViewModel.swift
-//  microworkout
-//
-//  Created by Fernando Salom Carratala on 19/7/25.
-//
-
-
 import SwiftUI
 import Combine
 
@@ -15,7 +7,7 @@ class CurrentSessionViewModel: ObservableObject {
             search(with: self.searchText)
         }
     }
-    @Published var loggedExercises: [LoggedExercise] = []
+    @Published var workoutEntries: [WorkoutEntry] = []
     @Published var exercises: [Exercise] = []
     @Published var isRunning: Bool = false
     @Published var isSaved: Bool = false
@@ -24,18 +16,19 @@ class CurrentSessionViewModel: ObservableObject {
     @Published var activeForm: ActiveExerciseForm?
 
     private var exerciseUseCase: ExerciseUseCaseProtocol
-    private var loggedExerciseUseCase: LoggedExerciseUseCaseProtocol
+    private var workoutEntryUseCase: WorkoutEntryUseCaseProtocol
 
-    init(exerciseUseCase: ExerciseUseCaseProtocol, loggedExerciseUseCase: LoggedExerciseUseCaseProtocol) {
+    init(exerciseUseCase: ExerciseUseCaseProtocol,
+         workoutEntryUseCase: WorkoutEntryUseCaseProtocol) {
         self.exerciseUseCase = exerciseUseCase
-        self.loggedExerciseUseCase = loggedExerciseUseCase
+        self.workoutEntryUseCase = workoutEntryUseCase
     }
 
     enum ActiveExerciseForm: Identifiable {
         case new(Exercise)
-        case edit(LoggedExercise)
+        case edit(WorkoutEntry)
 
-        var id: String {
+        var id: UUID {
             switch self {
             case .new(let exercise): return exercise.id
             case .edit(let logged): return logged.id
@@ -60,15 +53,10 @@ class CurrentSessionViewModel: ObservableObject {
 
     func stopSession() {
         Task { @MainActor in
-            do {
-                try await self.loggedExerciseUseCase.save(these: loggedExercises, with: secondsBetween(startTime!, Date()))
-                startTime = nil
-                loggedExercises.removeAll()
-                isSaved = true
-                isRunning = false
-            } catch {
-                isRunning = true
-            }
+            startTime = nil
+            workoutEntries.removeAll()
+            isSaved = true
+            isRunning = false
         }
     }
 
@@ -84,75 +72,71 @@ class CurrentSessionViewModel: ObservableObject {
         }
     }
 
-    func addLoggedExercise(_ new: LoggedExercise) {
+    func addWorkoutEntry(_ new: WorkoutEntry) {
         Task { @MainActor in
-            let loggedExercises = try await self.loggedExerciseUseCase.add(new: new)
-            self.loggedExercises = reorder(loggedExercises)
+            try await workoutEntryUseCase.add(new)
+            workoutEntries = reorder(workoutEntries + [new])
             activeForm = nil
         }
     }
 
-    func updateLoggedExercise(_ updated: LoggedExercise) {
+    func updateWorkoutEntry(_ updated: WorkoutEntry) {
         Task { @MainActor in
-            let loggedExercises = try await self.loggedExerciseUseCase.update(this: updated)
-            self.loggedExercises = reorder(loggedExercises)
+            try await workoutEntryUseCase.update(updated)
+            if let idx = workoutEntries.firstIndex(where: { $0.id == updated.id }) {
+                workoutEntries[idx] = updated
+            }
+            workoutEntries = reorder(workoutEntries)
             activeForm = nil
         }
     }
 
-    func deleteExercises(with ids: [String]) {
+    func deleteEntries(with ids: [UUID]) {
         Task { @MainActor in
             for id in ids {
-                let loggedExercises = try await self.loggedExerciseUseCase.delete(this: id)
-                self.loggedExercises = reorder(loggedExercises)
+                try await workoutEntryUseCase.delete(entryID: id)
+                workoutEntries.removeAll { $0.id == id }
             }
         }
     }
 
-    func createLoggedExercise(from last: LoggedExercise) -> LoggedExercise {
-        LoggedExercise(id: UUID().uuidString, exercise: last.exercise, reps: last.reps, weight: last.weight)
+    func createWorkoutEntry(from last: WorkoutEntry) -> WorkoutEntry {
+        WorkoutEntry(exercise: last.exercise, reps: last.reps, weight: last.weight)
     }
 
-    func getLast(for exercise: Exercise) -> LoggedExercise {
-        let last = loggedExercises.last(where: { $0.exercise == exercise })
-        return createLoggedExercise(from: last!)
+    func getWorkoutEntry(for exercise: Exercise) -> WorkoutEntry {
+        guard let last = workoutEntries.last(where: { $0.exercise == exercise }) else {
+            return createWorkoutEntry(from: .init(exercise: exercise, reps: nil, weight: nil))
+        }
+        return createWorkoutEntry(from: last)
     }
 
-    func toggleCompletion(for exerciseId: String) {
-        if let index = loggedExercises.firstIndex(where: { $0.id == exerciseId }) {
-            loggedExercises[index].isCompleted.toggle()
+    func toggleCompletion(for entryId: UUID) {
+        if let index = workoutEntries.firstIndex(where: { $0.id == entryId }) {
+            workoutEntries[index].isCompleted.toggle()
         }
     }
 
-    func groupedByExercise() -> [Exercise: [LoggedExercise]] {
-        self.loggedExerciseUseCase.groupByExercise(these: self.loggedExercises)
+    func groupedByExercise() -> [Exercise: [WorkoutEntry]] {
+        workoutEntryUseCase.groupByExercise(these: workoutEntries)
     }
 
     func orderedExercises() -> [Exercise] {
-        self.loggedExerciseUseCase.order(these: self.loggedExercises)
+        workoutEntryUseCase.order(these: workoutEntries)
     }
 
 
-    func action(for grouped: [Exercise: [LoggedExercise]], and exercise: Exercise){
+    func action(for grouped: [Exercise: [WorkoutEntry]], and exercise: Exercise) {
         if let last = grouped[exercise]?.last {
-            let new = createLoggedExercise(from: last)
+            let new = createWorkoutEntry(from: last)
             activeForm = .new(new.exercise)
         } else {
-            let new = LoggedExercise(
-                id: UUID().uuidString,
-                exercise: exercise,
-                reps: 0,
-                weight: 0
-            )
+            let new = WorkoutEntry(exercise: exercise, reps: 0, weight: 0)
             activeForm = .edit(new)
         }
     }
 
-    func reorder(_ loggedExercises: [LoggedExercise]) -> [LoggedExercise] {
-        loggedExercises.sorted {
-            let d0 = $0.date
-            let d1 = $1.date
-            return d0 > d1
-        }
+    func reorder(_ entries: [WorkoutEntry]) -> [WorkoutEntry] {
+        entries.sorted { $0.date > $1.date }
     }
 }

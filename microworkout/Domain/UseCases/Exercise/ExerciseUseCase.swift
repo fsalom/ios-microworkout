@@ -1,10 +1,3 @@
-//
-//  ExerciseUseCase.swift
-//  microworkout
-//
-//  Created by Fernando Salom Carratala on 20/7/25.
-//
-
 import Foundation
 
 class ExerciseUseCase: ExerciseUseCaseProtocol {
@@ -20,6 +13,6 @@ class ExerciseUseCase: ExerciseUseCaseProtocol {
     }
 
     func create(with name: String) async throws -> Exercise {
-        return Exercise(id: UUID().uuidString, name: name)
+        return Exercise(name: name)
     }
 }

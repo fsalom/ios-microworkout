@@ -2,35 +2,38 @@ import Foundation
 import SwiftUICore
 
 struct LoggedExercisesUiState {
-    var loggedExercises: LoggedExerciseByDay
+    var entryDay: WorkoutEntryByDay
     var error: String?
 }
 
 final class LoggedExercisesViewModel: ObservableObject {
     @Published var uiState: LoggedExercisesUiState
     private var router: LoggedExercisesRouter
-    private var loggedExerciseUseCase: LoggedExerciseUseCase
+    private var exerciseUseCase: ExerciseUseCaseProtocol
+    private var workoutEntryUseCase: WorkoutEntryUseCaseProtocol
 
     init(router: LoggedExercisesRouter,
-         loggedExerciseUseCase: LoggedExerciseUseCase,
-         loggedExercises: LoggedExerciseByDay) {
-        self.uiState = .init(loggedExercises: loggedExercises, error: nil)
+         exerciseUseCase: ExerciseUseCaseProtocol,
+         workoutEntryUseCase: WorkoutEntryUseCaseProtocol,
+         entryDay: WorkoutEntryByDay) {
+        self.uiState = .init(entryDay: entryDay, error: nil)
         self.router = router
-        self.loggedExerciseUseCase = loggedExerciseUseCase
+        self.exerciseUseCase = exerciseUseCase
+        self.workoutEntryUseCase = workoutEntryUseCase
     }
 
-    func groupedByExercise() -> [Exercise: [LoggedExercise]] {
-        self.loggedExerciseUseCase.groupByExercise(these: self.uiState.loggedExercises.exercises)
+    func groupedByExercise() -> [Exercise: [WorkoutEntry]] {
+        workoutEntryUseCase.groupByExercise(these: self.uiState.entryDay.entries)
     }
 
     func orderedExercises() -> [Exercise] {
-        self.loggedExerciseUseCase.order(these: self.uiState.loggedExercises.exercises)
+        workoutEntryUseCase.order(these: self.uiState.entryDay.entries)
     }
 
     func delete() {
         Task {
-            try await self.loggedExerciseUseCase.delete(this: uiState.loggedExercises)
-            self.router.comeBack()
+            try await workoutEntryUseCase.deleteEntries(for: uiState.entryDay)
+            router.comeBack()
         }
     }
 }

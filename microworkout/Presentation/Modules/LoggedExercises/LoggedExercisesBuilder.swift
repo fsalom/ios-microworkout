@@ -1,10 +1,13 @@
+import SwiftUI
 
 class LoggedExercisesBuilder {
-    func build(this loggedExercises: LoggedExerciseByDay) -> LoggedExercisesView {
+    func build(for entryDay: WorkoutEntryByDay) -> LoggedExercisesView {
         let viewModel = LoggedExercisesViewModel(
             router: LoggedExercisesRouter(navigator: Navigator.shared),
-            loggedExerciseUseCase: LoggedExerciseContainer().makeUseCase(),
-            loggedExercises: loggedExercises)
+            exerciseUseCase: ExerciseContainer().makeUseCase(),
+            workoutEntryUseCase: WorkoutEntryContainer().makeUseCase(),
+            entryDay: entryDay
+        )
         return LoggedExercisesView(viewModel: viewModel)
     }
 }

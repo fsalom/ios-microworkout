@@ -1,16 +1,9 @@
-//
-//  ExerciseInput.swift
-//  microworkout
-//
-//  Created by Fernando Salom Carratala on 19/7/25.
-//
-
 import SwiftUI
 
 struct ExerciseInput: View {
     let exercise: Exercise
-    var existing: LoggedExercise? = nil
-    var onSave: (LoggedExercise) -> Void
+    var existing: WorkoutEntry? = nil
+    var onSave: (WorkoutEntry) -> Void
 
     @State private var repsValue: Double? = nil
     @State private var weight: Double? = nil
@@ -54,7 +47,7 @@ struct ExerciseInput: View {
 
         }
         .onAppear {
-            repsValue = existing.map { Double($0.reps) }
+            repsValue = existing.map { Double($0.reps ?? 0) }
             weight = existing?.weight
             focusedField = .reps
         }
@@ -66,11 +59,15 @@ struct ExerciseInput: View {
             return
         }
 
-        onSave(LoggedExercise(
-            id: existing?.id ?? UUID().uuidString,
+        onSave(WorkoutEntry(
+            id: existing?.id ?? UUID(),
             exercise: exercise,
+            date: existing?.date ?? Date(),
             reps: r,
-            weight: w
+            weight: w,
+            distanceMeters: nil,
+            calories: nil,
+            isCompleted: existing?.isCompleted ?? false
         ))
     }
 }

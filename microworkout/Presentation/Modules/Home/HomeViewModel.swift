@@ -5,7 +5,7 @@ struct HomeUiState {
     var weeks: [[HealthDay]]
     var trainings: [Training] = []
     var lastTrainings: [Training] = []
-    var lastLoggedExercises: [LoggedExerciseByDay] = []
+    var lastEntriesByDay: [WorkoutEntryByDay] = []
     var currentTraining: Training?
     var error: String?
     var healthInfoForToday: HealthDay = HealthDay(date: Date())
@@ -19,19 +19,19 @@ final class HomeViewModel: ObservableObject {
     private var currentTraining: Training = Training.mock()
     private var trainingUseCase: TrainingUseCase
     private var healthUseCase: HealthUseCase
-    private var loggedExerciseUseCase: LoggedExerciseUseCase
+    private var workoutEntryUseCase: WorkoutEntryUseCaseProtocol
     private var appState: AppState
 
     init(router: HomeRouter,
          trainingUseCase: TrainingUseCase,
          healthUseCase: HealthUseCase,
-         loggedExerciseUseCase: LoggedExerciseUseCase,
+         workoutEntryUseCase: WorkoutEntryUseCaseProtocol,
          healthKitManager: HealthKitManager,
          appState: AppState) {
         self.router = router
         self.trainingUseCase = trainingUseCase
         self.healthUseCase = healthUseCase
-        self.loggedExerciseUseCase = loggedExerciseUseCase
+        self.workoutEntryUseCase = workoutEntryUseCase
         self.healthKitManager = healthKitManager
         self.appState = appState
         self.load()
@@ -93,8 +93,8 @@ final class HomeViewModel: ObservableObject {
 
     private func loadLoggedExercises() {
         Task { @MainActor in
-            let lastLoggedExercises = try await loggedExerciseUseCase.getAll()
-            self.uiState.lastLoggedExercises = lastLoggedExercises
+            let entries = try await workoutEntryUseCase.getAllByDay()
+            self.uiState.lastEntriesByDay = entries
         }
     }
 
@@ -110,8 +110,8 @@ final class HomeViewModel: ObservableObject {
         router.goToWorkoutList()
     }
 
-    func goTo(this loggedExercise: LoggedExerciseByDay) {
-        router.goTo(this: loggedExercise)
+    func goTo(this entryDay: WorkoutEntryByDay) {
+        router.goTo(this: entryDay)
     }
 
     func goToStart(this training: Training) {
