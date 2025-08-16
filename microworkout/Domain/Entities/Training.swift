@@ -71,3 +71,32 @@ struct Training: Identifiable, Equatable {
         )
     }
 }
+
+// MARK: - Mapping to Exercise & WorkoutEntry
+extension Training {
+    /// Crea un Exercise a partir de este Training.
+    func toExercise() -> Exercise {
+        Exercise(id: self.id, name: self.name, type: .none)
+    }
+
+    /// Genera un arreglo de WorkoutEntry para cada serie del training,
+    /// espaciadas por `numberOfMinutesPerSetForSlider` minutos, empezando en `start`.
+    func toWorkoutEntries(startingAt start: Date = Date()) -> [WorkoutEntry] {
+        let exercise = toExercise()
+        return (0..<Int(numberOfSetsForSlider)).map { index in
+            let entryDate = Calendar(identifier: .gregorian)
+                .date(byAdding: .minute,
+                        value: Int(numberOfMinutesPerSetForSlider) * index,
+                        to: start) ?? start
+            return WorkoutEntry(
+                exercise: exercise,
+                date: entryDate,
+                reps: Int(numberOfRepsForSlider),
+                weight: nil,
+                distanceMeters: nil,
+                calories: nil,
+                isCompleted: false
+            )
+        }
+    }
+}
