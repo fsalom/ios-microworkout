@@ -1,5 +1,5 @@
 import Foundation
-import SwiftUICore
+import SwiftUI
 
 final class TrainingListV2ViewModel: ObservableObject {
     enum TypeOfList {

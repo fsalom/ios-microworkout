@@ -1,5 +1,5 @@
 import Foundation
-import SwiftUICore
+import SwiftUI
 
 struct LoggedExercisesUiState {
     var entryDay: WorkoutEntryByDay

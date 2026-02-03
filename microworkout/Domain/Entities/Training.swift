@@ -79,7 +79,7 @@ extension Training {
         Exercise(id: self.id, name: self.name, type: .none)
     }
 
-    /// Genera un arreglo de WorkoutEntry para cada serie del training,
+
     /// espaciadas por `numberOfMinutesPerSetForSlider` minutos, empezando en `start`.
     func toWorkoutEntries(startingAt start: Date = Date()) -> [WorkoutEntry] {
         let exercise = toExercise()

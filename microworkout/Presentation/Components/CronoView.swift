@@ -5,7 +5,7 @@
 //  Created by Fernando Salom Carratala on 29/6/25.
 //
 
-import SwiftUICore
+import SwiftUI
 
 
 struct CronoView: View {

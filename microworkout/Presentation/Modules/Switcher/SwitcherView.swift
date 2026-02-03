@@ -17,6 +17,11 @@ struct SwitcherView: View {
                     .tabItem {
                         Image(systemName: "figure.strengthtraining.traditional.circle.fill")
                     }
+                MealsBuilder().build()
+                    .navigationTitle("Comidas")
+                    .tabItem {
+                        Image(systemName: "fork.knife.circle.fill")
+                    }
                 ProfileBuilder().build()
                     .navigationTitle("Perfil")
                     .tabItem {
