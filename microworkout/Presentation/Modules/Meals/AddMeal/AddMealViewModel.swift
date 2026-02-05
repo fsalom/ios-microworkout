@@ -5,6 +5,7 @@
 
 import Foundation
 import SwiftUI
+import Combine
 
 struct AddMealUiState {
     var selectedType: MealType = .breakfast
@@ -12,9 +13,14 @@ struct AddMealUiState {
     var items: [FoodItem] = []
     var isLoading: Bool = false
     var error: String?
-    var showManualEntry: Bool = false
 
-    // Manual entry fields
+    // Search state
+    var searchQuery: String = ""
+    var searchResults: [FoodItem] = []
+    var isSearching: Bool = false
+
+    // Manual entry
+    var showManualEntry: Bool = false
     var manualName: String = ""
     var manualCalories: String = ""
     var manualCarbs: String = ""
@@ -39,6 +45,7 @@ final class AddMealViewModel: ObservableObject {
     @Published var uiState: AddMealUiState = .init()
     private var router: AddMealRouter
     private var mealUseCase: MealUseCaseProtocol
+    private var searchTask: Task<Void, Never>?
 
     init(router: AddMealRouter, mealUseCase: MealUseCaseProtocol) {
         self.router = router
@@ -48,6 +55,55 @@ final class AddMealViewModel: ObservableObject {
     func selectMealType(_ type: MealType) {
         uiState.selectedType = type
     }
+
+    // MARK: - Search
+
+    func searchFoods() {
+        let query = uiState.searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard query.count >= 2 else {
+            uiState.searchResults = []
+            return
+        }
+
+        // Cancel previous search
+        searchTask?.cancel()
+
+        uiState.isSearching = true
+
+        searchTask = Task {
+            // Debounce
+            try? await Task.sleep(nanoseconds: 300_000_000) // 300ms
+
+            guard !Task.isCancelled else { return }
+
+            do {
+                let results = try await mealUseCase.searchFoods(query: query)
+                await MainActor.run {
+                    guard !Task.isCancelled else { return }
+                    self.uiState.searchResults = results
+                    self.uiState.isSearching = false
+                }
+            } catch {
+                await MainActor.run {
+                    self.uiState.searchResults = []
+                    self.uiState.isSearching = false
+                }
+            }
+        }
+    }
+
+    func clearSearch() {
+        uiState.searchQuery = ""
+        uiState.searchResults = []
+        searchTask?.cancel()
+    }
+
+    func selectSearchResult(_ item: FoodItem) {
+        addFoodItem(item)
+        clearSearch()
+    }
+
+    // MARK: - Food Items
 
     func addFoodItem(_ item: FoodItem) {
         uiState.items.append(item)
@@ -62,6 +118,8 @@ final class AddMealViewModel: ObservableObject {
         guard index < uiState.items.count else { return }
         uiState.items.remove(at: index)
     }
+
+    // MARK: - Manual Entry
 
     func toggleManualEntry() {
         uiState.showManualEntry.toggle()
@@ -102,11 +160,15 @@ final class AddMealViewModel: ObservableObject {
         uiState.manualQuantity = "100"
     }
 
+    // MARK: - Barcode
+
     func scanBarcode() {
         router.goToBarcodeScannerView { [weak self] foodItem in
             self?.addFoodItem(foodItem)
         }
     }
+
+    // MARK: - Save
 
     func saveMeal() {
         guard uiState.canSave else { return }
