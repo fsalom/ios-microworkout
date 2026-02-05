@@ -12,4 +12,5 @@ protocol MealRepositoryProtocol {
     func getMeals(from startDate: Date, to endDate: Date) async throws -> [Meal]
     func deleteMeal(_ mealId: UUID) async throws
     func fetchFoodInfo(barcode: String) async throws -> FoodItem?
+    func searchFoods(query: String) async throws -> [FoodItem]
 }

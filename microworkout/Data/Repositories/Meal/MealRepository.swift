@@ -37,4 +37,9 @@ class MealRepository: MealRepositoryProtocol {
         }
         return productDTO.toDomain(barcode: barcode)
     }
+
+    func searchFoods(query: String) async throws -> [FoodItem] {
+        let products = try await remoteApi.searchProducts(query: query, page: 1, pageSize: 25)
+        return products.map { $0.toDomain() }
+    }
 }

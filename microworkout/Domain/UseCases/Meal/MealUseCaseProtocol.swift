@@ -22,6 +22,9 @@ protocol MealUseCaseProtocol {
     /// Busca información de un alimento por código de barras.
     func fetchFoodByBarcode(_ barcode: String) async throws -> FoodItem?
 
+    /// Busca alimentos por texto.
+    func searchFoods(query: String) async throws -> [FoodItem]
+
     /// Calcula los totales nutricionales del día actual.
     func getTodayTotals() async throws -> NutritionInfo
 }

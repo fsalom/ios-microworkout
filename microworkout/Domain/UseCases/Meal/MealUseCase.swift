@@ -34,6 +34,10 @@ class MealUseCase: MealUseCaseProtocol {
         try await repository.fetchFoodInfo(barcode: barcode)
     }
 
+    func searchFoods(query: String) async throws -> [FoodItem] {
+        try await repository.searchFoods(query: query)
+    }
+
     func getTodayTotals() async throws -> NutritionInfo {
         let meals = try await getMealsForToday()
         return meals.reduce(NutritionInfo.zero) { $0 + $1.totalNutrition }

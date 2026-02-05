@@ -9,4 +9,7 @@ import Foundation
 protocol OpenFoodFactsApiProtocol {
     /// Busca un producto por código de barras.
     func fetchProduct(barcode: String) async throws -> OpenFoodFactsProductDTO?
+
+    /// Busca productos por texto.
+    func searchProducts(query: String, page: Int, pageSize: Int) async throws -> [OpenFoodFactsProductDTO]
 }
