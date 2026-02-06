@@ -25,6 +25,11 @@ struct AddMealView: View {
                     // Time Picker
                     TimePicker(selectedTime: $viewModel.uiState.selectedTime)
 
+                    // Recent Foods
+                    if !viewModel.uiState.recentFoods.isEmpty {
+                        RecentFoodsSection(viewModel: viewModel)
+                    }
+
                     // Search Section
                     FoodSearchSection(viewModel: viewModel, isSearchFocused: $isSearchFocused)
 
@@ -125,6 +130,42 @@ struct TimePicker: View {
         .background(Color(.systemBackground))
         .cornerRadius(12)
         .padding(.horizontal)
+    }
+}
+
+// MARK: - Recent Foods Section
+
+struct RecentFoodsSection: View {
+    @ObservedObject var viewModel: AddMealViewModel
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Recientes")
+                .font(.headline)
+                .padding(.horizontal)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(viewModel.uiState.recentFoods) { food in
+                        Button(action: { viewModel.addRecentFood(food) }) {
+                            HStack(spacing: 4) {
+                                Image(systemName: "clock.arrow.circlepath")
+                                    .font(.caption2)
+                                Text(food.name)
+                                    .lineLimit(1)
+                            }
+                            .font(.subheadline)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                            .background(Color(.systemGray5))
+                            .foregroundColor(.primary)
+                            .cornerRadius(16)
+                        }
+                    }
+                }
+                .padding(.horizontal)
+            }
+        }
     }
 }
 

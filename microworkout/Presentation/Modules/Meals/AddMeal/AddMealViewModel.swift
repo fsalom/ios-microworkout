@@ -8,9 +8,10 @@ import SwiftUI
 import Combine
 
 struct AddMealUiState {
-    var selectedType: MealType = .breakfast
+    var selectedType: MealType = .forCurrentTime()
     var selectedTime: Date = Date()
     var items: [FoodItem] = []
+    var recentFoods: [FoodItem] = []
     var isLoading: Bool = false
     var error: String?
 
@@ -50,6 +51,7 @@ final class AddMealViewModel: ObservableObject {
     init(router: AddMealRouter, mealUseCase: MealUseCaseProtocol) {
         self.router = router
         self.mealUseCase = mealUseCase
+        loadRecentFoods()
     }
 
     func selectMealType(_ type: MealType) {
@@ -101,6 +103,33 @@ final class AddMealViewModel: ObservableObject {
     func selectSearchResult(_ item: FoodItem) {
         addFoodItem(item)
         clearSearch()
+    }
+
+    // MARK: - Recent Foods
+
+    func loadRecentFoods() {
+        Task {
+            do {
+                let foods = try await mealUseCase.getRecentFoods(limit: 10)
+                await MainActor.run {
+                    self.uiState.recentFoods = foods
+                }
+            } catch {
+                // Silently fail — recent foods are not critical
+            }
+        }
+    }
+
+    func addRecentFood(_ food: FoodItem) {
+        let newItem = FoodItem(
+            name: food.name,
+            barcode: food.barcode,
+            nutritionPer100g: food.nutritionPer100g,
+            quantity: food.quantity,
+            servingSize: food.servingSize,
+            imageUrl: food.imageUrl
+        )
+        addFoodItem(newItem)
     }
 
     // MARK: - Food Items
