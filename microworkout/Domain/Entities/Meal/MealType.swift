@@ -21,4 +21,14 @@ public enum MealType: String, CaseIterable, Identifiable, Codable {
         case .snack: return "leaf.fill"
         }
     }
+
+    public static func forCurrentTime() -> MealType {
+        let hour = Calendar.current.component(.hour, from: Date())
+        switch hour {
+        case 6..<10: return .breakfast
+        case 10..<15: return .lunch
+        case 15..<21: return .dinner
+        default: return .snack
+        }
+    }
 }
