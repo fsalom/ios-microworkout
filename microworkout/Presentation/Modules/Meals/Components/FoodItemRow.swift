@@ -71,19 +71,47 @@ struct EditableFoodItemRow: View {
                 }
             }
 
-            // Quantity slider
-            HStack {
-                Text("Cantidad:")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+            // Quantity input
+            VStack(spacing: 8) {
+                HStack {
+                    Text("Cantidad:")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
 
-                Slider(value: $item.quantity, in: 10...500, step: 10)
-                    .tint(.blue)
+                    Spacer()
 
-                Text("\(Int(item.quantity))g")
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                    .frame(minWidth: 50, alignment: .trailing)
+                    HStack(spacing: 4) {
+                        TextField("100", value: $item.quantity, format: .number)
+                            .keyboardType(.numberPad)
+                            .multilineTextAlignment(.trailing)
+                            .frame(width: 70)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 6)
+                            .background(Color(.systemGray6))
+                            .cornerRadius(8)
+
+                        Text("g")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
+                }
+
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        ForEach([50, 100, 150, 200, 300], id: \.self) { preset in
+                            Button(action: { item.quantity = Double(preset) }) {
+                                Text("\(preset)g")
+                                    .font(.caption)
+                                    .fontWeight(.medium)
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 6)
+                                    .background(Int(item.quantity) == preset ? Color.blue : Color(.systemGray5))
+                                    .foregroundColor(Int(item.quantity) == preset ? .white : .primary)
+                                    .cornerRadius(16)
+                            }
+                        }
+                    }
+                }
             }
         }
         .padding()
