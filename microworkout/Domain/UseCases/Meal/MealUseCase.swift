@@ -42,4 +42,30 @@ class MealUseCase: MealUseCaseProtocol {
         let meals = try await getMealsForToday()
         return meals.reduce(NutritionInfo.zero) { $0 + $1.totalNutrition }
     }
+
+    func getRecentFoods(limit: Int) async throws -> [FoodItem] {
+        let now = Date()
+        let sixtyDaysAgo = Calendar.current.date(byAdding: .day, value: -60, to: now)!
+        let meals = try await repository.getMeals(from: sixtyDaysAgo, to: now)
+
+        // Extract all food items sorted by meal timestamp (most recent first)
+        let sortedMeals = meals.sorted { $0.timestamp > $1.timestamp }
+        var seen = Set<String>()
+        var recentFoods: [FoodItem] = []
+
+        for meal in sortedMeals {
+            for item in meal.items {
+                let key = item.name.lowercased()
+                if !seen.contains(key) {
+                    seen.insert(key)
+                    recentFoods.append(item)
+                    if recentFoods.count >= limit {
+                        return recentFoods
+                    }
+                }
+            }
+        }
+
+        return recentFoods
+    }
 }

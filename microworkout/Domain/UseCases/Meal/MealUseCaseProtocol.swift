@@ -27,4 +27,7 @@ protocol MealUseCaseProtocol {
 
     /// Calcula los totales nutricionales del día actual.
     func getTodayTotals() async throws -> NutritionInfo
+
+    /// Devuelve los alimentos usados recientemente, deduplicados por nombre.
+    func getRecentFoods(limit: Int) async throws -> [FoodItem]
 }
