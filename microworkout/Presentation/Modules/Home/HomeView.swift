@@ -12,6 +12,10 @@ struct HomeView: View {
     var body: some View {
         ZStack(alignment: .top) {
             List {
+                CalorieProgressCard()
+                    .padding(.horizontal, 8)
+                    .listRowSeparator(.hidden)
+
                 HealthGrid()
                     .padding(.horizontal, 8)
                     .listRowSeparator(.hidden)
@@ -70,7 +74,7 @@ struct HomeView: View {
                         .clipShape(Circle())
                     VStack(alignment: .leading) {
                         Text("Bienvenido")
-                        Text("Fernando")
+                        Text(viewModel.uiState.userName ?? "Fernando")
                             .fontWeight(.bold)
                     }
                     Spacer()
@@ -81,6 +85,60 @@ struct HomeView: View {
             }
             .frame(maxWidth: .infinity, alignment: .top)
             .background(Color.white)
+        }
+    }
+
+    @ViewBuilder
+    func CalorieProgressCard() -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Calorias de hoy")
+                .font(.headline)
+                .fontWeight(.bold)
+
+            if let target = viewModel.uiState.dailyCalorieTarget {
+                let consumed = viewModel.uiState.todayCalories
+                let progress = min(consumed / target, 1.5)
+                let ratio = consumed / target
+
+                GeometryReader { geometry in
+                    ZStack(alignment: .leading) {
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color(.systemGray5))
+                            .frame(height: 24)
+
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(calorieBarColor(ratio: ratio))
+                            .frame(width: geometry.size.width * CGFloat(min(progress, 1.0)), height: 24)
+                    }
+                }
+                .frame(height: 24)
+
+                Text("\(Int(consumed)) / \(Int(target)) kcal")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            } else {
+                let consumed = viewModel.uiState.todayCalories
+                Text("\(Int(consumed)) kcal consumidas")
+                    .font(.title2)
+                    .fontWeight(.semibold)
+
+                Text("Configura tu perfil para ver tu objetivo diario")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .padding()
+        .background(Color(.systemGray6))
+        .cornerRadius(12)
+    }
+
+    private func calorieBarColor(ratio: Double) -> Color {
+        if ratio > 1.0 {
+            return .red
+        } else if ratio > 0.8 {
+            return .orange
+        } else {
+            return .green
         }
     }
 

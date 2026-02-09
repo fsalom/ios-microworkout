@@ -10,6 +10,9 @@ struct HomeUiState {
     var error: String?
     var healthInfoForToday: HealthDay = HealthDay(date: Date())
     var isHealthKitAuthorized: Bool = false
+    var todayCalories: Double = 0
+    var dailyCalorieTarget: Double? = nil
+    var userName: String? = nil
 }
 
 final class HomeViewModel: ObservableObject {
@@ -20,18 +23,24 @@ final class HomeViewModel: ObservableObject {
     private var trainingUseCase: TrainingUseCase
     private var healthUseCase: HealthUseCase
     private var workoutEntryUseCase: WorkoutEntryUseCaseProtocol
+    private var mealUseCase: MealUseCaseProtocol
+    private var userProfileUseCase: UserProfileUseCaseProtocol
     private var appState: AppState
 
     init(router: HomeRouter,
          trainingUseCase: TrainingUseCase,
          healthUseCase: HealthUseCase,
          workoutEntryUseCase: WorkoutEntryUseCaseProtocol,
+         mealUseCase: MealUseCaseProtocol,
+         userProfileUseCase: UserProfileUseCaseProtocol,
          healthKitManager: HealthKitManager,
          appState: AppState) {
         self.router = router
         self.trainingUseCase = trainingUseCase
         self.healthUseCase = healthUseCase
         self.workoutEntryUseCase = workoutEntryUseCase
+        self.mealUseCase = mealUseCase
+        self.userProfileUseCase = userProfileUseCase
         self.healthKitManager = healthKitManager
         self.appState = appState
         self.load()
@@ -45,6 +54,7 @@ final class HomeViewModel: ObservableObject {
         self.loadTrainings()
         self.loadLastTrainings()
         self.loadLoggedExercises()
+        self.loadCalorieData()
     }
 
     func save(this training: Training) {
@@ -95,6 +105,17 @@ final class HomeViewModel: ObservableObject {
         Task { @MainActor in
             let entries = try await workoutEntryUseCase.getAllByDay()
             self.uiState.lastEntriesByDay = entries
+        }
+    }
+
+    private func loadCalorieData() {
+        Task { @MainActor in
+            let profile = userProfileUseCase.getProfile()
+            self.uiState.dailyCalorieTarget = profile?.dailyCalorieTarget
+            self.uiState.userName = profile?.name
+            if let totals = try? await mealUseCase.getTodayTotals() {
+                self.uiState.todayCalories = totals.calories
+            }
         }
     }
 
