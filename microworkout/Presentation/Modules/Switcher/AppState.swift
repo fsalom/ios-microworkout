@@ -19,10 +19,14 @@ final class AppState: ObservableObject {
         }
     }
 
-    @Published public var screen: Screen = .home {
+    @Published public var screen: Screen {
         didSet {
             print("🏷️ \(screen.icon) App state")
         }
+    }
+
+    init(initialScreen: Screen = .home) {
+        self.screen = initialScreen
     }
 
     func changeScreen(to screen: Screen) {
