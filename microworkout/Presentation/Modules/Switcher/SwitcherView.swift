@@ -28,6 +28,8 @@ struct SwitcherView: View {
                         Image(systemName: "person.crop.circle.fill")
                     }
             }
+        case .onboarding:
+            OnboardingBuilder().build(appState: appState)
         case .workout, .loading:
             ProgressView()
         }

@@ -7,12 +7,14 @@ final class AppState: ObservableObject {
         case workout(training: Training)
         case home
         case loading
+        case onboarding
 
         var icon: String {
             switch self {
             case .workout: "🏋️‍♂️"
             case .home: "🏠"
             case .loading: "⏳"
+            case .onboarding: "👋"
             }
         }
     }
