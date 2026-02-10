@@ -8,8 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		047816D96A3C70BF9B138CA6 /* ToastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402E0ED53C463443B6371953 /* ToastView.swift */; };
+		06954E92D46A3D37104F0DD7 /* UserProfileUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1F49521E15A540E81A53E92 /* UserProfileUseCase.swift */; };
 		0B7E199B779C7627D1791682 /* UserContactView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B84BCB7D891625F62851B35 /* UserContactView.swift */; };
 		0F37CDF58D6D879E39B9F95A /* UserRemoteDatasource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2AB94B00D62DED9FF47B8F /* UserRemoteDatasource.swift */; };
+		0F7A8C69CC63F8DDD5D2426B /* OnboardingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F43AEA95C5E9F8FA3E2CE0FF /* OnboardingViewModel.swift */; };
 		1C93BE4AA98295FAD1127961 /* ErrorDTO.swift in Sources */ = {isa = PBXBuildFile; fileRef = B41BC41811F5896CA201F3B0 /* ErrorDTO.swift */; };
 		2A9E69194EB3F79145C69182 /* DeeplinkResendView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5739FB660BB5FB76257F520F /* DeeplinkResendView.swift */; };
 		32BCEDBC5D985FB0599F7DD3 /* ChangePasswordViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFD8E098B791BA52701B89FE /* ChangePasswordViewModel.swift */; };
@@ -20,12 +22,17 @@
 		4D4240FEF4193EDD102C9A4C /* DeeplinkResendConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B72E80B71897C77CC5891D7 /* DeeplinkResendConfig.swift */; };
 		51CA4DAA2C19E3E17E982759 /* ErrorHandlerProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = F21D3A6744AE92C0E6668177 /* ErrorHandlerProtocol.swift */; };
 		57FBB9672DD70BBF430B419C /* UserRemoteDatasourceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 230A637BB2F7B028F8E07F42 /* UserRemoteDatasourceProtocol.swift */; };
+		5A79A85FC1B89AE535A6B74D /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B2405D4C8AD71FB63FD123B /* OnboardingView.swift */; };
 		687E705124519BFADFC65AF2 /* ValidationUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B741760D7BB512986960993 /* ValidationUseCase.swift */; };
+		742B006DE706E9B67E0D1A44 /* UserProfileRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83EB78C9B598157B9F2F2FA8 /* UserProfileRepository.swift */; };
+		794041734A1464CCADB08B4C /* UserProfileContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD1703D6174A762AD782D4EB /* UserProfileContainer.swift */; };
 		7ECAC948DBDA2FAA2C6AF579 /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0196370B893F91ECEA90B258 /* Config.swift */; };
+		80F485AE3E238236C964BDCD /* UserProfileUseCaseProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4F9231E3DB271227E10B3B0 /* UserProfileUseCaseProtocol.swift */; };
 		827DEDA923D46D77B48BFA75 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C13511C4D56B46529E835CA /* User.swift */; };
 		891AECCF8164D07A873B01FD /* AccountViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8E34F54D6829A10A5772D34 /* AccountViewModel.swift */; };
 		8BDED977EFF286193CEBB782 /* CustomButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 800DC512C22A3A139B4C82DD /* CustomButton.swift */; };
 		934887694D069FDE437B6AB6 /* DeeplinkResendBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A2C5AC132F16BE9D4B9CBB4 /* DeeplinkResendBuilder.swift */; };
+		93CD144DF3BB76C2A997E774 /* UserProfileRepositoryProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A3D802CFA51B3365D0F0CBD /* UserProfileRepositoryProtocol.swift */; };
 		947603BED2DE1C93CF23421F /* DeeplinkManagerRepositoryProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11328A2AA2C2EC6C2DDDB935 /* DeeplinkManagerRepositoryProtocol.swift */; };
 		94DCF2CAA5FF4C6246C5ADAD /* DeeplinkManagerUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DEB2BADD8700103F0A51A29 /* DeeplinkManagerUseCase.swift */; };
 		95EEFCA27553BADEF3CB7036 /* AccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE66B3EBE8F6925DA4AB1498 /* AccountView.swift */; };
@@ -333,13 +340,16 @@
 		D81664034146289679B803C5 /* DeeplinkManagerDatasourceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = A38959BF91D5B79B84AFE689 /* DeeplinkManagerDatasourceProtocol.swift */; };
 		D8B5A4C4EA75619921A594D0 /* DeeplinkResendViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA06416D8B1D0CD3561318D9 /* DeeplinkResendViewModel.swift */; };
 		D96424D64468B2A74EE9BC05 /* VerifyPasswordViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DD0D25D00BF63A3E0F72807 /* VerifyPasswordViewModel.swift */; };
+		DA2998EFC9E3CE6B4E540310 /* UserLocalDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53175420FFE5BDA398CA2043 /* UserLocalDataSource.swift */; };
 		DCB9F22002286E963AA9ED21 /* AccountBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32277F501026CDCD9203D42F /* AccountBuilder.swift */; };
 		E20445D3CBDA41963CF5B702 /* ChangeEmailBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C15E20007B7F24EC5FF3168 /* ChangeEmailBuilder.swift */; };
+		E5D9FD9B4AB63F8EA0B0FE69 /* UserProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEBF521051C4F9BDB94D0722 /* UserProfile.swift */; };
 		E8F84D90B833E771BACB9678 /* UserRepositoryProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6887C8F01673394522703832 /* UserRepositoryProtocol.swift */; };
 		EB12CBF377694C6DF6749CCC /* UserRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B006261E436D32136E1A201 /* UserRepository.swift */; };
 		F4C9DBBED5692706AE2AA895 /* VerifyPasswordBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE0DA4B8C3BC0D66F8C03BC8 /* VerifyPasswordBuilder.swift */; };
 		F7FF9214EFCA3F9FEE87128D /* UserContactBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E24FBAAC510E4839DD73BDB /* UserContactBuilder.swift */; };
 		FB3F04985C20635230155B40 /* UserUseCaseProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F1334B40B3120056C3FDFAF /* UserUseCaseProtocol.swift */; };
+		FBF45EB923FEA9A3EE9ADFF2 /* OnboardingBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB8D8FB300B4B7E3D9447052 /* OnboardingBuilder.swift */; };
 		FCD1096EA4728492DF418790 /* AppError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E0E7A0BC387147668FFA3A3 /* AppError.swift */; };
 /* End PBXBuildFile section */
 
@@ -426,11 +436,13 @@
 		29911A875D33178720D86403 /* ChangeEmailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ChangeEmailView.swift; sourceTree = "<group>"; };
 		2F5E819E30AD9EE4A2DCDE66 /* ValidationUseCaseProtocol.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ValidationUseCaseProtocol.swift; sourceTree = "<group>"; };
 		32277F501026CDCD9203D42F /* AccountBuilder.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AccountBuilder.swift; sourceTree = "<group>"; };
+		3A3D802CFA51B3365D0F0CBD /* UserProfileRepositoryProtocol.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UserProfileRepositoryProtocol.swift; sourceTree = "<group>"; };
 		402E0ED53C463443B6371953 /* ToastView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ToastView.swift; sourceTree = "<group>"; };
 		4B006261E436D32136E1A201 /* UserRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UserRepository.swift; sourceTree = "<group>"; };
 		4B72E80B71897C77CC5891D7 /* DeeplinkResendConfig.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeeplinkResendConfig.swift; sourceTree = "<group>"; };
 		4B84BCB7D891625F62851B35 /* UserContactView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UserContactView.swift; sourceTree = "<group>"; };
 		52738A594470CDE4FEEBFA72 /* DeeplinkManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeeplinkManager.swift; sourceTree = "<group>"; };
+		53175420FFE5BDA398CA2043 /* UserLocalDataSource.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UserLocalDataSource.swift; sourceTree = "<group>"; };
 		5739FB660BB5FB76257F520F /* DeeplinkResendView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeeplinkResendView.swift; sourceTree = "<group>"; };
 		5B741760D7BB512986960993 /* ValidationUseCase.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ValidationUseCase.swift; sourceTree = "<group>"; };
 		5C13511C4D56B46529E835CA /* User.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
@@ -441,12 +453,17 @@
 		6887C8F01673394522703832 /* UserRepositoryProtocol.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UserRepositoryProtocol.swift; sourceTree = "<group>"; };
 		6F1334B40B3120056C3FDFAF /* UserUseCaseProtocol.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UserUseCaseProtocol.swift; sourceTree = "<group>"; };
 		800DC512C22A3A139B4C82DD /* CustomButton.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomButton.swift; sourceTree = "<group>"; };
+		83EB78C9B598157B9F2F2FA8 /* UserProfileRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UserProfileRepository.swift; sourceTree = "<group>"; };
+		8B2405D4C8AD71FB63FD123B /* OnboardingView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		8F292003225FDB02F35F42CF /* DeeplinkManagerDatasource.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeeplinkManagerDatasource.swift; sourceTree = "<group>"; };
 		9543E6DA3768F2689E931C5F /* DeeplinkManagerRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeeplinkManagerRepository.swift; sourceTree = "<group>"; };
 		9E2AB94B00D62DED9FF47B8F /* UserRemoteDatasource.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UserRemoteDatasource.swift; sourceTree = "<group>"; };
 		A1EC294607249CEB42EFD6F4 /* ConfigTripleA.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ConfigTripleA.swift; sourceTree = "<group>"; };
 		A277B496EC51DE761CEC262E /* UserContactViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UserContactViewModel.swift; sourceTree = "<group>"; };
 		A38959BF91D5B79B84AFE689 /* DeeplinkManagerDatasourceProtocol.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeeplinkManagerDatasourceProtocol.swift; sourceTree = "<group>"; };
+		A4F9231E3DB271227E10B3B0 /* UserProfileUseCaseProtocol.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UserProfileUseCaseProtocol.swift; sourceTree = "<group>"; };
+		AB8D8FB300B4B7E3D9447052 /* OnboardingBuilder.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OnboardingBuilder.swift; sourceTree = "<group>"; };
+		AEBF521051C4F9BDB94D0722 /* UserProfile.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UserProfile.swift; sourceTree = "<group>"; };
 		B41BC41811F5896CA201F3B0 /* ErrorDTO.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ErrorDTO.swift; sourceTree = "<group>"; };
 		B86B345EE695949677562913 /* VerifyPasswordView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VerifyPasswordView.swift; sourceTree = "<group>"; };
 		BAB73D510261EB9EC22B9352 /* UserDTO.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UserDTO.swift; sourceTree = "<group>"; };
@@ -674,6 +691,7 @@
 		C1F34FA02A38FC6D00233D66 /* ChronoBuilder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChronoBuilder.swift; sourceTree = "<group>"; };
 		C1F34FA12A38FC6D00233D66 /* ChronoProtocols.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChronoProtocols.swift; sourceTree = "<group>"; };
 		C3DD3AFA74777E6676549DA8 /* ChangeEmailViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ChangeEmailViewModel.swift; sourceTree = "<group>"; };
+		D1F49521E15A540E81A53E92 /* UserProfileUseCase.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UserProfileUseCase.swift; sourceTree = "<group>"; };
 		D2DCD18B4A02BDE7AFE00726 /* UserUseCase.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UserUseCase.swift; sourceTree = "<group>"; };
 		D8E34F54D6829A10A5772D34 /* AccountViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AccountViewModel.swift; sourceTree = "<group>"; };
 		EA06416D8B1D0CD3561318D9 /* DeeplinkResendViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeeplinkResendViewModel.swift; sourceTree = "<group>"; };
@@ -681,17 +699,19 @@
 		EE66B3EBE8F6925DA4AB1498 /* AccountView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AccountView.swift; sourceTree = "<group>"; };
 		EFD8E098B791BA52701B89FE /* ChangePasswordViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ChangePasswordViewModel.swift; sourceTree = "<group>"; };
 		F21D3A6744AE92C0E6668177 /* ErrorHandlerProtocol.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ErrorHandlerProtocol.swift; sourceTree = "<group>"; };
+		F43AEA95C5E9F8FA3E2CE0FF /* OnboardingViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OnboardingViewModel.swift; sourceTree = "<group>"; };
+		FD1703D6174A762AD782D4EB /* UserProfileContainer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UserProfileContainer.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		C183FE6A2D56809B009EE8B5 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+		C183FE6A2D56809B009EE8B5 /* Exceptions for "gymwidget" folder in "gymwidgetExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
 			target = C183FE562D56809A009EE8B5 /* gymwidgetExtension */;
 		};
-		C183FEC62D5A907B009EE8B5 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+		C183FEC62D5A907B009EE8B5 /* Exceptions for "gymwidget" folder in "microworkout" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				gymwidgetLiveActivity.swift,
@@ -701,7 +721,19 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		C183FE5D2D56809A009EE8B5 /* gymwidget */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (C183FEC62D5A907B009EE8B5 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, C183FE6A2D56809B009EE8B5 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = gymwidget; sourceTree = "<group>"; };
+		C183FE5D2D56809A009EE8B5 /* gymwidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				C183FEC62D5A907B009EE8B5 /* Exceptions for "gymwidget" folder in "microworkout" target */,
+				C183FE6A2D56809B009EE8B5 /* Exceptions for "gymwidget" folder in "gymwidgetExtension" target */,
+			);
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = gymwidget;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -819,6 +851,15 @@
 			path = Modules;
 			sourceTree = "<group>";
 		};
+		33ACE470AB7BD90DE4559B61 /* User */ = {
+			isa = PBXGroup;
+			children = (
+				AEBF521051C4F9BDB94D0722 /* UserProfile.swift */,
+			);
+			name = User;
+			path = User;
+			sourceTree = "<group>";
+		};
 		33BC83BADB9E1BC0A01E2538 /* Screens */ = {
 			isa = PBXGroup;
 			children = (
@@ -829,6 +870,15 @@
 				DB0C81E5E9A8C7DE2A49FC08 /* ChangeEmail */,
 			);
 			path = Screens;
+			sourceTree = "<group>";
+		};
+		368005BA009325B7C37AB824 /* User */ = {
+			isa = PBXGroup;
+			children = (
+				83EB78C9B598157B9F2F2FA8 /* UserProfileRepository.swift */,
+			);
+			name = User;
+			path = User;
 			sourceTree = "<group>";
 		};
 		3941906B3DAFB8F6492AEEAF /* Presentation */ = {
@@ -855,6 +905,16 @@
 				D69378DB296B3C1E70E599E3 /* ErrorHandler */,
 			);
 			path = Error;
+			sourceTree = "<group>";
+		};
+		5648B56C53D76F808D460B82 /* User */ = {
+			isa = PBXGroup;
+			children = (
+				A4F9231E3DB271227E10B3B0 /* UserProfileUseCaseProtocol.swift */,
+				D1F49521E15A540E81A53E92 /* UserProfileUseCase.swift */,
+			);
+			name = User;
+			path = User;
 			sourceTree = "<group>";
 		};
 		58FC9F2CF7F35BE3C5369773 /* DeeplinkResend */ = {
@@ -961,6 +1021,17 @@
 				9543E6DA3768F2689E931C5F /* DeeplinkManagerRepository.swift */,
 			);
 			path = Repository;
+			sourceTree = "<group>";
+		};
+		929F9C548F8952E9390F3D00 /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				8B2405D4C8AD71FB63FD123B /* OnboardingView.swift */,
+				F43AEA95C5E9F8FA3E2CE0FF /* OnboardingViewModel.swift */,
+				AB8D8FB300B4B7E3D9447052 /* OnboardingBuilder.swift */,
+			);
+			name = Onboarding;
+			path = Onboarding;
 			sourceTree = "<group>";
 		};
 		97EE16AFFB3875E31FF0D767 /* Resources */ = {
@@ -1415,6 +1486,7 @@
 				C16051E32E2D6C53003CB9B8 /* ExerciseRepositoryProtocol.swift */,
 				C162D66A2B0E176800CDCA26 /* HealthRepositoryProtocol.swift */,
 				C1398FA52D6DF2D80092DB50 /* TrainingRepositoryProtocol.swift */,
+				3A3D802CFA51B3365D0F0CBD /* UserProfileRepositoryProtocol.swift */,
 			);
 			path = Repositories;
 			sourceTree = "<group>";
@@ -1505,6 +1577,7 @@
 				C183FE782D568571009EE8B5 /* TrainingList */,
 				C1742E4D2A2FC8C10020354D /* Splash */,
 				C183FE6F2D568154009EE8B5 /* Training */,
+				929F9C548F8952E9390F3D00 /* Onboarding */,
 			);
 			path = Modules;
 			sourceTree = "<group>";
@@ -1518,6 +1591,7 @@
 				C1398FC02D6E09570092DB50 /* TrainingUseCase.swift */,
 				C162D66E2B0E17DB00CDCA26 /* Health */,
 				C1762ACD2B0A912D0035318F /* Workout */,
+				5648B56C53D76F808D460B82 /* User */,
 			);
 			path = UseCases;
 			sourceTree = "<group>";
@@ -1535,6 +1609,7 @@
 				C1742E502A3099550020354D /* Exercise.swift */,
 				C1742E542A309EDE0020354D /* WorkoutSet.swift */,
 				C18F6F622A83EAE000914A0A /* Beat.swift */,
+				33ACE470AB7BD90DE4559B61 /* User */,
 			);
 			path = Entities;
 			sourceTree = "<group>";
@@ -1576,6 +1651,7 @@
 				C1398FA82D6DF3210092DB50 /* TrainingRepository.swift */,
 				C162D6692B0E175000CDCA26 /* Health */,
 				C15DC9472B0CBA9200F408B7 /* Workout */,
+				368005BA009325B7C37AB824 /* User */,
 			);
 			path = Repositories;
 			sourceTree = "<group>";
@@ -1589,6 +1665,7 @@
 				C1398FAB2D6DF39C0092DB50 /* Training */,
 				C162D6632B0DECDD00CDCA26 /* Health */,
 				C15DC9452B0CBA5700F408B7 /* Workout */,
+				FC318D25F16EB8A948B25E76 /* User */,
 			);
 			path = Datasources;
 			sourceTree = "<group>";
@@ -1612,6 +1689,7 @@
 				C1398FBD2D6E08970092DB50 /* TrainingContainer.swift */,
 				C11589312B0F741700254218 /* Manager */,
 				C1A953152A5D56E200A2A010 /* Helper */,
+				FD1703D6174A762AD782D4EB /* UserProfileContainer.swift */,
 			);
 			path = DI;
 			sourceTree = "<group>";
@@ -2282,6 +2360,15 @@
 			path = Entities;
 			sourceTree = "<group>";
 		};
+		FC318D25F16EB8A948B25E76 /* User */ = {
+			isa = PBXGroup;
+			children = (
+				53175420FFE5BDA398CA2043 /* UserLocalDataSource.swift */,
+			);
+			name = User;
+			path = User;
+			sourceTree = "<group>";
+		};
 		FD92CBD9B8B1258E75A20045 /* User */ = {
 			isa = PBXGroup;
 			children = (
@@ -2799,6 +2886,16 @@
 				687E705124519BFADFC65AF2 /* ValidationUseCase.swift in Sources */,
 				827DEDA923D46D77B48BFA75 /* User.swift in Sources */,
 				047816D96A3C70BF9B138CA6 /* ToastView.swift in Sources */,
+				E5D9FD9B4AB63F8EA0B0FE69 /* UserProfile.swift in Sources */,
+				DA2998EFC9E3CE6B4E540310 /* UserLocalDataSource.swift in Sources */,
+				93CD144DF3BB76C2A997E774 /* UserProfileRepositoryProtocol.swift in Sources */,
+				742B006DE706E9B67E0D1A44 /* UserProfileRepository.swift in Sources */,
+				80F485AE3E238236C964BDCD /* UserProfileUseCaseProtocol.swift in Sources */,
+				06954E92D46A3D37104F0DD7 /* UserProfileUseCase.swift in Sources */,
+				794041734A1464CCADB08B4C /* UserProfileContainer.swift in Sources */,
+				5A79A85FC1B89AE535A6B74D /* OnboardingView.swift in Sources */,
+				0F7A8C69CC63F8DDD5D2426B /* OnboardingViewModel.swift in Sources */,
+				FBF45EB923FEA9A3EE9ADFF2 /* OnboardingBuilder.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
