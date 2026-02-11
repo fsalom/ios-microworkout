@@ -1,9 +1,7 @@
-
 class ProfileBuilder {
     func build() -> ProfileView {
         let viewModel = ProfileViewModel(
-            exerciseUseCase: ExerciseContainer().makeUseCase(),
-            workoutEntryUseCase: WorkoutEntryContainer().makeUseCase()
+            userProfileUseCase: UserProfileContainer().makeUseCase()
         )
         return ProfileView(viewModel: viewModel)
     }
