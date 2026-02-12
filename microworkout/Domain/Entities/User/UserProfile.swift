@@ -12,6 +12,7 @@ struct UserProfile: Codable {
     var age: Int
     var gender: Gender
     var activityLevel: ActivityLevel
+    var fitnessGoal: FitnessGoal?
 
     enum Gender: String, Codable, CaseIterable {
         case male = "Hombre"
@@ -36,6 +37,31 @@ struct UserProfile: Codable {
         }
     }
 
+    enum FitnessGoal: String, Codable, CaseIterable {
+        case loseWeight = "Perder peso"
+        case maintain = "Mantener"
+        case gainMuscle = "Ganar musculo"
+
+        var calorieAdjustment: Double {
+            switch self {
+            case .loseWeight: return -500
+            case .maintain: return 0
+            case .gainMuscle: return 300
+            }
+        }
+
+        var proteinPerKg: Double {
+            switch self {
+            case .loseWeight, .gainMuscle: return 2.0
+            case .maintain: return 1.6
+            }
+        }
+    }
+
+    var resolvedGoal: FitnessGoal {
+        fitnessGoal ?? .maintain
+    }
+
     /// Calcula las calorías diarias objetivo usando la fórmula Mifflin-St Jeor.
     var dailyCalorieTarget: Double {
         let bmr: Double
@@ -45,6 +71,23 @@ struct UserProfile: Codable {
         case .female:
             bmr = 10 * weight + 6.25 * height - 5 * Double(age) - 161
         }
-        return bmr * activityLevel.multiplier
+        return bmr * activityLevel.multiplier + resolvedGoal.calorieAdjustment
+    }
+
+    var macroTargets: NutritionInfo {
+        let goal = resolvedGoal
+        let proteinGrams = goal.proteinPerKg * weight
+        let fatGrams = 0.9 * weight
+        let proteinCalories = proteinGrams * 4
+        let fatCalories = fatGrams * 9
+        let carbCalories = max(dailyCalorieTarget - proteinCalories - fatCalories, 0)
+        let carbGrams = carbCalories / 4
+
+        return NutritionInfo(
+            calories: dailyCalorieTarget,
+            carbohydrates: carbGrams,
+            proteins: proteinGrams,
+            fats: fatGrams
+        )
     }
 }
