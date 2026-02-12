@@ -38,8 +38,10 @@ struct OnboardingView: View {
                     .tag(0)
                 PhysicalDataStep(viewModel: viewModel)
                     .tag(1)
-                ActivityLevelStep(viewModel: viewModel)
+                FitnessGoalStep(viewModel: viewModel)
                     .tag(2)
+                ActivityLevelStep(viewModel: viewModel)
+                    .tag(3)
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
             .animation(.easeInOut, value: viewModel.currentStep)
@@ -166,7 +168,95 @@ private struct PhysicalDataStep: View {
     }
 }
 
-// MARK: - Step 3: Activity Level
+// MARK: - Step 3: Fitness Goal
+
+private struct FitnessGoalStep: View {
+    @ObservedObject var viewModel: OnboardingViewModel
+
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 24) {
+                Text("Objetivo fisico")
+                    .font(.title)
+                    .fontWeight(.bold)
+                    .padding(.top, 24)
+
+                Text("Selecciona tu objetivo principal.")
+                    .font(.body)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 32)
+
+                VStack(spacing: 12) {
+                    ForEach(UserProfile.FitnessGoal.allCases, id: \.self) { goal in
+                        FitnessGoalCard(
+                            goal: goal,
+                            isSelected: viewModel.fitnessGoal == goal
+                        ) {
+                            viewModel.fitnessGoal = goal
+                        }
+                    }
+                }
+                .padding(.horizontal, 24)
+            }
+        }
+    }
+}
+
+private struct FitnessGoalCard: View {
+    let goal: UserProfile.FitnessGoal
+    let isSelected: Bool
+    let onTap: () -> Void
+
+    private var icon: String {
+        switch goal {
+        case .loseWeight: return "arrow.down.circle"
+        case .maintain: return "equal.circle"
+        case .gainMuscle: return "arrow.up.circle"
+        }
+    }
+
+    private var description: String {
+        switch goal {
+        case .loseWeight: return "Deficit de 500 kcal para perder grasa"
+        case .maintain: return "Mantener tu peso y composicion actual"
+        case .gainMuscle: return "Superavit de 300 kcal para ganar masa muscular"
+        }
+    }
+
+    var body: some View {
+        Button(action: onTap) {
+            HStack {
+                Image(systemName: icon)
+                    .font(.title2)
+                    .foregroundColor(.blue)
+                    .frame(width: 32)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(goal.rawValue)
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                    Text(description)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                Spacer()
+                if isSelected {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundColor(.blue)
+                }
+            }
+            .padding()
+            .background(isSelected ? Color.blue.opacity(0.1) : Color(.systemGray6))
+            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(isSelected ? Color.blue : Color.clear, lineWidth: 2)
+            )
+        }
+    }
+}
+
+// MARK: - Step 4: Activity Level
 
 private struct ActivityLevelStep: View {
     @ObservedObject var viewModel: OnboardingViewModel

@@ -14,11 +14,12 @@ final class OnboardingViewModel: ObservableObject {
     @Published var age: Int = 30
     @Published var gender: UserProfile.Gender = .male
     @Published var activityLevel: UserProfile.ActivityLevel = .moderate
+    @Published var fitnessGoal: UserProfile.FitnessGoal = .maintain
 
     private let userProfileUseCase: UserProfileUseCaseProtocol
     private let appState: AppState
 
-    let totalSteps = 3
+    let totalSteps = 4
 
     init(userProfileUseCase: UserProfileUseCaseProtocol, appState: AppState) {
         self.userProfileUseCase = userProfileUseCase
@@ -48,7 +49,8 @@ final class OnboardingViewModel: ObservableObject {
             weight: weight,
             age: age,
             gender: gender,
-            activityLevel: activityLevel
+            activityLevel: activityLevel,
+            fitnessGoal: fitnessGoal
         )
         userProfileUseCase.saveProfile(profile)
         userProfileUseCase.setOnboardingCompleted(true)
