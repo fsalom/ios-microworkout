@@ -11,8 +11,12 @@ struct HomeUiState {
     var healthInfoForToday: HealthDay = HealthDay(date: Date())
     var isHealthKitAuthorized: Bool = false
     var todayCalories: Double = 0
+    var todayNutrition: NutritionInfo = .zero
     var dailyCalorieTarget: Double? = nil
+    var macroTargets: NutritionInfo? = nil
     var userName: String? = nil
+    var todayIsFreeDay: Bool = false
+    var hasCycling: Bool = false
 }
 
 final class HomeViewModel: ObservableObject {
@@ -111,10 +115,14 @@ final class HomeViewModel: ObservableObject {
     private func loadCalorieData() {
         Task { @MainActor in
             let profile = userProfileUseCase.getProfile()
-            self.uiState.dailyCalorieTarget = profile?.dailyCalorieTarget
+            self.uiState.dailyCalorieTarget = profile?.todayCalorieTarget
+            self.uiState.macroTargets = profile?.todayMacroTargets
             self.uiState.userName = profile?.name
+            self.uiState.todayIsFreeDay = profile?.todayIsFreeDay ?? false
+            self.uiState.hasCycling = profile?.hasCycling ?? false
             if let totals = try? await mealUseCase.getTodayTotals() {
                 self.uiState.todayCalories = totals.calories
+                self.uiState.todayNutrition = totals
             }
         }
     }

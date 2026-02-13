@@ -95,6 +95,17 @@ struct HomeView: View {
                 .font(.headline)
                 .fontWeight(.bold)
 
+            if viewModel.uiState.hasCycling {
+                Text(viewModel.uiState.todayIsFreeDay ? "Dia libre" : "Dia estricto")
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(viewModel.uiState.todayIsFreeDay ? Color.green.opacity(0.2) : Color.blue.opacity(0.2))
+                    .foregroundColor(viewModel.uiState.todayIsFreeDay ? .green : .blue)
+                    .cornerRadius(6)
+            }
+
             if let target = viewModel.uiState.dailyCalorieTarget {
                 let consumed = viewModel.uiState.todayCalories
                 let progress = min(consumed / target, 1.5)
@@ -116,6 +127,13 @@ struct HomeView: View {
                 Text("\(Int(consumed)) / \(Int(target)) kcal")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
+
+                if let macros = viewModel.uiState.macroTargets {
+                    let nutrition = viewModel.uiState.todayNutrition
+                    MacroBar(label: "Proteina", current: nutrition.proteins, target: macros.proteins, color: .purple)
+                    MacroBar(label: "Carbos", current: nutrition.carbohydrates, target: macros.carbohydrates, color: .orange)
+                    MacroBar(label: "Grasa", current: nutrition.fats, target: macros.fats, color: .yellow)
+                }
             } else {
                 let consumed = viewModel.uiState.todayCalories
                 Text("\(Int(consumed)) kcal consumidas")
@@ -130,6 +148,32 @@ struct HomeView: View {
         .padding()
         .background(Color(.systemGray6))
         .cornerRadius(12)
+    }
+
+    @ViewBuilder
+    func MacroBar(label: String, current: Double, target: Double, color: Color) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            HStack {
+                Text(label)
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                Spacer()
+                Text("\(Int(current))g / \(Int(target))g")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+            }
+            GeometryReader { geometry in
+                ZStack(alignment: .leading) {
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(Color(.systemGray5))
+                        .frame(height: 6)
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(color)
+                        .frame(width: geometry.size.width * CGFloat(target > 0 ? min(current / target, 1.0) : 0), height: 6)
+                }
+            }
+            .frame(height: 6)
+        }
     }
 
     private func calorieBarColor(ratio: Double) -> Color {
