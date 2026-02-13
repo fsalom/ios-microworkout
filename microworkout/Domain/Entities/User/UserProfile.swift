@@ -13,6 +13,9 @@ struct UserProfile: Codable {
     var gender: Gender
     var activityLevel: ActivityLevel
     var fitnessGoal: FitnessGoal?
+    var macroProfile: MacroProfile?
+    var freeDays: [Int]?              // weekday indices (Calendar: 1=Dom, 2=Lun...7=Sab)
+    var freeDayExtraCalories: Double? // extra kcal por día libre, default 500
 
     enum Gender: String, Codable, CaseIterable {
         case male = "Hombre"
@@ -58,6 +61,11 @@ struct UserProfile: Codable {
         }
     }
 
+    enum MacroProfile: String, Codable, CaseIterable {
+        case balanced = "Equilibrado"
+        case lowCarb = "Low carb"
+    }
+
     var resolvedGoal: FitnessGoal {
         fitnessGoal ?? .maintain
     }
@@ -74,17 +82,76 @@ struct UserProfile: Codable {
         return bmr * activityLevel.multiplier + resolvedGoal.calorieAdjustment
     }
 
+    var resolvedMacroProfile: MacroProfile {
+        macroProfile ?? .balanced
+    }
+
     var macroTargets: NutritionInfo {
-        let goal = resolvedGoal
-        let proteinGrams = goal.proteinPerKg * weight
-        let fatGrams = 0.9 * weight
+        macrosForCalories(dailyCalorieTarget)
+    }
+
+    // MARK: - Cycling semanal
+
+    var resolvedFreeDays: Set<Int> {
+        Set(freeDays ?? [])
+    }
+
+    var resolvedFreeDayExtra: Double {
+        freeDayExtraCalories ?? 500
+    }
+
+    var hasCycling: Bool {
+        !resolvedFreeDays.isEmpty
+    }
+
+    var freeDayCalorieTarget: Double {
+        dailyCalorieTarget + resolvedFreeDayExtra
+    }
+
+    var strictDayCalorieTarget: Double {
+        let weeklyBudget = dailyCalorieTarget * 7
+        let freeDayCount = Double(resolvedFreeDays.count)
+        let strictDayCount = 7 - freeDayCount
+        guard strictDayCount > 0 else { return dailyCalorieTarget }
+        return (weeklyBudget - freeDayCalorieTarget * freeDayCount) / strictDayCount
+    }
+
+    var todayIsFreeDay: Bool {
+        let weekday = Calendar.current.component(.weekday, from: Date())
+        return resolvedFreeDays.contains(weekday)
+    }
+
+    var todayCalorieTarget: Double {
+        guard hasCycling else { return dailyCalorieTarget }
+        return todayIsFreeDay ? freeDayCalorieTarget : strictDayCalorieTarget
+    }
+
+    var todayMacroTargets: NutritionInfo {
+        macrosForCalories(todayCalorieTarget)
+    }
+
+    // MARK: - Private
+
+    private func macrosForCalories(_ calories: Double) -> NutritionInfo {
+        let proteinGrams = resolvedGoal.proteinPerKg * weight
         let proteinCalories = proteinGrams * 4
-        let fatCalories = fatGrams * 9
-        let carbCalories = max(dailyCalorieTarget - proteinCalories - fatCalories, 0)
-        let carbGrams = carbCalories / 4
+
+        let fatGrams: Double
+        let carbGrams: Double
+
+        switch resolvedMacroProfile {
+        case .balanced:
+            fatGrams = 0.9 * weight
+            let fatCalories = fatGrams * 9
+            carbGrams = max(calories - proteinCalories - fatCalories, 0) / 4
+        case .lowCarb:
+            carbGrams = max(calories * 0.25, 0) / 4
+            let carbCalories = carbGrams * 4
+            fatGrams = max(calories - proteinCalories - carbCalories, 0) / 9
+        }
 
         return NutritionInfo(
-            calories: dailyCalorieTarget,
+            calories: calories,
             carbohydrates: carbGrams,
             proteins: proteinGrams,
             fats: fatGrams
