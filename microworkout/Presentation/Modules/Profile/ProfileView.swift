@@ -49,6 +49,34 @@ struct ProfileView: View {
                 ProfileRow(icon: "flame", label: "Nivel", value: viewModel.uiState.activityLevel.rawValue)
             }
 
+            Section("Objetivo") {
+                ProfileRow(icon: "target", label: "Meta", value: viewModel.uiState.fitnessGoal.rawValue)
+                ProfileRow(icon: "fork.knife", label: "Perfil macros", value: viewModel.uiState.macroProfile.rawValue)
+                ProfileRow(icon: "p.circle", label: "Proteina", value: "\(Int(viewModel.uiState.macroTargets.proteins))g")
+                ProfileRow(icon: "c.circle", label: "Carbos", value: "\(Int(viewModel.uiState.macroTargets.carbohydrates))g")
+                ProfileRow(icon: "f.circle", label: "Grasa", value: "\(Int(viewModel.uiState.macroTargets.fats))g")
+            }
+
+            if viewModel.uiState.hasCycling {
+                Section("Cycling semanal") {
+                    HStack(spacing: 6) {
+                        ForEach(cyclingDayLabels, id: \.weekday) { item in
+                            Text(item.label)
+                                .font(.caption2)
+                                .fontWeight(.bold)
+                                .frame(width: 32, height: 32)
+                                .background(viewModel.uiState.freeDays.contains(item.weekday) ? Color.green.opacity(0.2) : Color(.systemGray5))
+                                .foregroundColor(viewModel.uiState.freeDays.contains(item.weekday) ? .green : .primary)
+                                .cornerRadius(8)
+                        }
+                    }
+
+                    ProfileRow(icon: "plus.circle", label: "Extra dia libre", value: "+\(Int(viewModel.uiState.freeDayExtraCalories)) kcal")
+                    ProfileRow(icon: "flame", label: "Dia estricto", value: "\(Int(viewModel.uiState.strictDayCalorieTarget)) kcal")
+                    ProfileRow(icon: "flame.fill", label: "Dia libre", value: "\(Int(viewModel.uiState.freeDayCalorieTarget)) kcal")
+                }
+            }
+
             Section {
                 Button(action: { viewModel.startEditing() }) {
                     HStack {
@@ -98,6 +126,58 @@ struct ProfileView: View {
                 }
             }
 
+            Section("Objetivo fisico") {
+                Picker("Objetivo", selection: $viewModel.uiState.fitnessGoal) {
+                    ForEach(UserProfile.FitnessGoal.allCases, id: \.self) { goal in
+                        Text(goal.rawValue).tag(goal)
+                    }
+                }
+            }
+
+            Section("Perfil de macros") {
+                Picker("Macros", selection: $viewModel.uiState.macroProfile) {
+                    ForEach(UserProfile.MacroProfile.allCases, id: \.self) { profile in
+                        Text(profile.rawValue).tag(profile)
+                    }
+                }
+            }
+
+            Section("Cycling semanal") {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Dias libres (max 3)")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    HStack(spacing: 6) {
+                        ForEach(cyclingDayLabels, id: \.weekday) { item in
+                            let isSelected = viewModel.uiState.freeDays.contains(item.weekday)
+                            Button {
+                                if isSelected {
+                                    viewModel.uiState.freeDays.remove(item.weekday)
+                                } else if viewModel.uiState.freeDays.count < 3 {
+                                    viewModel.uiState.freeDays.insert(item.weekday)
+                                }
+                            } label: {
+                                Text(item.label)
+                                    .font(.caption)
+                                    .fontWeight(.bold)
+                                    .frame(width: 36, height: 36)
+                                    .background(isSelected ? Color.green.opacity(0.3) : Color(.systemGray5))
+                                    .foregroundColor(isSelected ? .green : .primary)
+                                    .cornerRadius(8)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                }
+
+                if !viewModel.uiState.freeDays.isEmpty {
+                    Stepper("Extra: +\(Int(viewModel.uiState.freeDayExtraCalories)) kcal",
+                            value: $viewModel.uiState.freeDayExtraCalories,
+                            in: 200...1000,
+                            step: 50)
+                }
+            }
+
             Section {
                 Button(action: { viewModel.save() }) {
                     HStack {
@@ -122,6 +202,10 @@ struct ProfileView: View {
         }
     }
 }
+
+private let cyclingDayLabels: [(weekday: Int, label: String)] = [
+    (2, "L"), (3, "M"), (4, "X"), (5, "J"), (6, "V"), (7, "S"), (1, "D")
+]
 
 private struct ProfileRow: View {
     let icon: String

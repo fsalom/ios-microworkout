@@ -8,9 +8,17 @@ struct ProfileUiState {
     var age: Int = 30
     var gender: UserProfile.Gender = .male
     var activityLevel: UserProfile.ActivityLevel = .moderate
+    var fitnessGoal: UserProfile.FitnessGoal = .maintain
+    var macroProfile: UserProfile.MacroProfile = .balanced
     var hasProfile: Bool = false
     var dailyCalorieTarget: Double = 0
+    var macroTargets: NutritionInfo = .zero
     var isEditing: Bool = false
+    var freeDays: Set<Int> = []
+    var freeDayExtraCalories: Double = 500
+    var hasCycling: Bool = false
+    var strictDayCalorieTarget: Double = 0
+    var freeDayCalorieTarget: Double = 0
 }
 
 class ProfileViewModel: ObservableObject {
@@ -31,8 +39,16 @@ class ProfileViewModel: ObservableObject {
         uiState.age = profile.age
         uiState.gender = profile.gender
         uiState.activityLevel = profile.activityLevel
+        uiState.fitnessGoal = profile.resolvedGoal
+        uiState.macroProfile = profile.resolvedMacroProfile
         uiState.hasProfile = true
         uiState.dailyCalorieTarget = profile.dailyCalorieTarget
+        uiState.macroTargets = profile.macroTargets
+        uiState.freeDays = profile.resolvedFreeDays
+        uiState.freeDayExtraCalories = profile.resolvedFreeDayExtra
+        uiState.hasCycling = profile.hasCycling
+        uiState.strictDayCalorieTarget = profile.strictDayCalorieTarget
+        uiState.freeDayCalorieTarget = profile.freeDayCalorieTarget
     }
 
     func startEditing() {
@@ -51,12 +67,20 @@ class ProfileViewModel: ObservableObject {
             weight: uiState.weight,
             age: uiState.age,
             gender: uiState.gender,
-            activityLevel: uiState.activityLevel
+            activityLevel: uiState.activityLevel,
+            fitnessGoal: uiState.fitnessGoal,
+            macroProfile: uiState.macroProfile,
+            freeDays: uiState.freeDays.isEmpty ? nil : Array(uiState.freeDays),
+            freeDayExtraCalories: uiState.freeDays.isEmpty ? nil : uiState.freeDayExtraCalories
         )
         userProfileUseCase.saveProfile(profile)
         userProfileUseCase.setOnboardingCompleted(true)
         uiState.hasProfile = true
         uiState.dailyCalorieTarget = profile.dailyCalorieTarget
+        uiState.macroTargets = profile.macroTargets
+        uiState.hasCycling = profile.hasCycling
+        uiState.strictDayCalorieTarget = profile.strictDayCalorieTarget
+        uiState.freeDayCalorieTarget = profile.freeDayCalorieTarget
         uiState.isEditing = false
     }
 }
