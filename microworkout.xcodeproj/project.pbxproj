@@ -704,14 +704,14 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		C183FE6A2D56809B009EE8B5 /* Exceptions for "gymwidget" folder in "gymwidgetExtension" target */ = {
+		C183FE6A2D56809B009EE8B5 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
 			target = C183FE562D56809A009EE8B5 /* gymwidgetExtension */;
 		};
-		C183FEC62D5A907B009EE8B5 /* Exceptions for "gymwidget" folder in "microworkout" target */ = {
+		C183FEC62D5A907B009EE8B5 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				gymwidgetLiveActivity.swift,
@@ -721,19 +721,7 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		C183FE5D2D56809A009EE8B5 /* gymwidget */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				C183FEC62D5A907B009EE8B5 /* Exceptions for "gymwidget" folder in "microworkout" target */,
-				C183FE6A2D56809B009EE8B5 /* Exceptions for "gymwidget" folder in "gymwidgetExtension" target */,
-			);
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
-			path = gymwidget;
-			sourceTree = "<group>";
-		};
+		C183FE5D2D56809A009EE8B5 /* gymwidget */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (C183FEC62D5A907B009EE8B5 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, C183FE6A2D56809B009EE8B5 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = gymwidget; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -856,7 +844,6 @@
 			children = (
 				AEBF521051C4F9BDB94D0722 /* UserProfile.swift */,
 			);
-			name = User;
 			path = User;
 			sourceTree = "<group>";
 		};
@@ -877,7 +864,6 @@
 			children = (
 				83EB78C9B598157B9F2F2FA8 /* UserProfileRepository.swift */,
 			);
-			name = User;
 			path = User;
 			sourceTree = "<group>";
 		};
@@ -913,7 +899,6 @@
 				A4F9231E3DB271227E10B3B0 /* UserProfileUseCaseProtocol.swift */,
 				D1F49521E15A540E81A53E92 /* UserProfileUseCase.swift */,
 			);
-			name = User;
 			path = User;
 			sourceTree = "<group>";
 		};
@@ -1030,7 +1015,6 @@
 				F43AEA95C5E9F8FA3E2CE0FF /* OnboardingViewModel.swift */,
 				AB8D8FB300B4B7E3D9447052 /* OnboardingBuilder.swift */,
 			);
-			name = Onboarding;
 			path = Onboarding;
 			sourceTree = "<group>";
 		};
@@ -2365,7 +2349,6 @@
 			children = (
 				53175420FFE5BDA398CA2043 /* UserLocalDataSource.swift */,
 			);
-			name = User;
 			path = User;
 			sourceTree = "<group>";
 		};
@@ -3243,7 +3226,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"microworkout/Preview Content\"";
-				DEVELOPMENT_TEAM = 3BJD5A7BSQ;
+				DEVELOPMENT_TEAM = X8Z657K235;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Obtenemos información de tu entrenamiento para registrarla y mejorar tus futuros entrenamientos";
@@ -3259,7 +3242,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = es.fernandosalom.microworkoutapp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.microworkout.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -3277,7 +3260,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"microworkout/Preview Content\"";
-				DEVELOPMENT_TEAM = 3BJD5A7BSQ;
+				DEVELOPMENT_TEAM = X8Z657K235;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Obtenemos información de tu entrenamiento para registrarla y mejorar tus futuros entrenamientos";
@@ -3293,7 +3276,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = es.fernandosalom.microworkoutapp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.microworkout.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -3386,7 +3369,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"gymwatch Watch App/Preview Content\"";
-				DEVELOPMENT_TEAM = 3BJD5A7BSQ;
+				DEVELOPMENT_TEAM = X8Z657K235;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = gymwatch;
@@ -3403,7 +3386,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = es.fernandosalom.microworkoutapp.watchkitapp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.microworkout.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
@@ -3423,7 +3406,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"gymwatch Watch App/Preview Content\"";
-				DEVELOPMENT_TEAM = 3BJD5A7BSQ;
+				DEVELOPMENT_TEAM = X8Z657K235;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = gymwatch;
@@ -3440,7 +3423,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = es.fernandosalom.microworkoutapp.watchkitapp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.microworkout.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
