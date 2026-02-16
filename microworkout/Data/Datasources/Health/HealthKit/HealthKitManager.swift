@@ -12,6 +12,15 @@ class HealthKitManager {
 
     private init() {}
 
+    var isHealthDataAvailable: Bool {
+        HKHealthStore.isHealthDataAvailable()
+    }
+
+    /// Devuelve el estado de autorización de escritura para stepCount (proxy para saber si se pidió permiso)
+    var authorizationStatus: HKAuthorizationStatus {
+        healthStore.authorizationStatus(for: stepCountType)
+    }
+
     /// Solicita permisos de acceso a HealthKit
     func requestAuthorization(completion: @escaping (Bool, Error?) -> Void) {
         guard HKHealthStore.isHealthDataAvailable() else {
