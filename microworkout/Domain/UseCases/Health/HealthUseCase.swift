@@ -12,6 +12,14 @@ class HealthUseCase: HealthUseCaseProtocol {
         self.repository = repository
     }
 
+    var isHealthDataAvailable: Bool {
+        repository.isHealthDataAvailable
+    }
+
+    var authorizationStatus: HealthAuthorizationStatus {
+        repository.authorizationStatus
+    }
+
     func requestAuthorization() async throws -> Bool {
         try await self.repository.requestAuthorization()
     }
