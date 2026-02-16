@@ -13,6 +13,18 @@ class HealthKitDataSource: HealthKitDataSourceProtocol {
         self.healthKitManager = healthKitManager
     }
 
+    var isHealthDataAvailable: Bool {
+        healthKitManager.isHealthDataAvailable
+    }
+
+    var authorizationStatus: HealthAuthorizationStatus {
+        switch healthKitManager.authorizationStatus {
+        case .sharingAuthorized: return .authorized
+        case .sharingDenied: return .denied
+        default: return .notDetermined
+        }
+    }
+
     func requestAuthorization() async throws -> Bool {
         return try await withCheckedThrowingContinuation { continuation in
             self.healthKitManager.requestAuthorization { success, error in
