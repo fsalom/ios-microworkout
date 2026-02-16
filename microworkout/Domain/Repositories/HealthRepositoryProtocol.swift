@@ -1,6 +1,8 @@
 import Foundation
 
 protocol HealthRepositoryProtocol {
+    var isHealthDataAvailable: Bool { get }
+    var authorizationStatus: HealthAuthorizationStatus { get }
     func requestAuthorization() async throws -> Bool
     func fetchExerciseTimeToday() async throws -> Double?
     func fetchExerciseTime(startDate: Date, endDate: Date) async throws -> [Date: Double]?

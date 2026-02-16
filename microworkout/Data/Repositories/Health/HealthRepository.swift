@@ -7,6 +7,14 @@ class HealthRepository: HealthRepositoryProtocol {
         self.dataSource = dataSource
     }
 
+    var isHealthDataAvailable: Bool {
+        dataSource.isHealthDataAvailable
+    }
+
+    var authorizationStatus: HealthAuthorizationStatus {
+        dataSource.authorizationStatus
+    }
+
     func requestAuthorization() async throws -> Bool {
         try await dataSource.requestAuthorization()
     }
