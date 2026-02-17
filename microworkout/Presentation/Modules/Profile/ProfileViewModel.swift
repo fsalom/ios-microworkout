@@ -19,16 +19,22 @@ struct ProfileUiState {
     var hasCycling: Bool = false
     var strictDayCalorieTarget: Double = 0
     var freeDayCalorieTarget: Double = 0
+    var healthKitStatus: HealthAuthorizationStatus = .notDetermined
+    var isHealthDataAvailable: Bool = false
 }
 
 class ProfileViewModel: ObservableObject {
     @Published var uiState: ProfileUiState = .init()
 
     private var userProfileUseCase: UserProfileUseCaseProtocol
+    private var healthUseCase: HealthUseCaseProtocol
 
-    init(userProfileUseCase: UserProfileUseCaseProtocol) {
+    init(userProfileUseCase: UserProfileUseCaseProtocol,
+         healthUseCase: HealthUseCaseProtocol) {
         self.userProfileUseCase = userProfileUseCase
+        self.healthUseCase = healthUseCase
         loadProfile()
+        loadHealthKitStatus()
     }
 
     func loadProfile() {
@@ -82,5 +88,24 @@ class ProfileViewModel: ObservableObject {
         uiState.strictDayCalorieTarget = profile.strictDayCalorieTarget
         uiState.freeDayCalorieTarget = profile.freeDayCalorieTarget
         uiState.isEditing = false
+    }
+
+    // MARK: - HealthKit
+
+    func loadHealthKitStatus() {
+        uiState.isHealthDataAvailable = healthUseCase.isHealthDataAvailable
+        uiState.healthKitStatus = healthUseCase.authorizationStatus
+    }
+
+    func requestHealthKit() {
+        Task { @MainActor in
+            _ = try? await healthUseCase.requestAuthorization()
+            loadHealthKitStatus()
+        }
+    }
+
+    func openHealthSettings() {
+        guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
+        UIApplication.shared.open(url)
     }
 }

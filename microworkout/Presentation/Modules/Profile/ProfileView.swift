@@ -77,6 +77,31 @@ struct ProfileView: View {
                 }
             }
 
+            if viewModel.uiState.isHealthDataAvailable {
+                Section("Salud") {
+                    HStack {
+                        Image(systemName: "heart.fill")
+                            .foregroundColor(viewModel.uiState.healthKitStatus == .authorized ? .green : .secondary)
+                            .frame(width: 24)
+                        Text("HealthKit")
+                        Spacer()
+                        switch viewModel.uiState.healthKitStatus {
+                        case .authorized:
+                            Text("Activado")
+                                .foregroundColor(.green)
+                        case .notDetermined:
+                            Button("Activar") {
+                                viewModel.requestHealthKit()
+                            }
+                        case .denied:
+                            Button("Ir a Ajustes") {
+                                viewModel.openHealthSettings()
+                            }
+                        }
+                    }
+                }
+            }
+
             Section {
                 Button(action: { viewModel.startEditing() }) {
                     HStack {
