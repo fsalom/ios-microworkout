@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ProfileView: View {
     @StateObject var viewModel: ProfileViewModel
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         NavigationView {
@@ -13,6 +14,11 @@ struct ProfileView: View {
                 }
             }
             .navigationTitle("Perfil")
+            .onChange(of: scenePhase) { _, newPhase in
+                if newPhase == .active {
+                    viewModel.loadHealthKitStatus()
+                }
+            }
         }
     }
 
@@ -94,10 +100,15 @@ struct ProfileView: View {
                                 viewModel.requestHealthKit()
                             }
                         case .denied:
-                            Button("Ir a Ajustes") {
-                                viewModel.openHealthSettings()
+                            Button("Abrir Salud") {
+                                viewModel.openHealthApp()
                             }
                         }
+                    }
+                    if viewModel.uiState.healthKitStatus == .denied {
+                        Text("Activa los permisos en Salud > Perfil > Apps y servicios > microworkout")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
                     }
                 }
             }

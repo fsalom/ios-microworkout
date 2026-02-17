@@ -104,8 +104,8 @@ class ProfileViewModel: ObservableObject {
         }
     }
 
-    func openHealthSettings() {
-        guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
+    func openHealthApp() {
+        guard let url = URL(string: "x-apple-health://") else { return }
         UIApplication.shared.open(url)
     }
 }
