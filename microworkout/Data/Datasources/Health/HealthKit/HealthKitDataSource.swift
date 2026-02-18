@@ -108,4 +108,69 @@ class HealthKitDataSource: HealthKitDataSourceProtocol {
             }
         }
     }
+
+    func fetchWorkouts() async throws -> [HealthWorkout] {
+        let hkWorkouts: [HKWorkout] = try await withCheckedThrowingContinuation { continuation in
+            self.healthKitManager.fetchWorkouts { workouts, error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume(returning: workouts ?? [])
+                }
+            }
+        }
+
+        var results: [HealthWorkout] = []
+        for hkWorkout in hkWorkouts {
+            let avgHR: Double? = await withCheckedContinuation { continuation in
+                self.healthKitManager.fetchAverageHeartRate(for: hkWorkout) { hr in
+                    continuation.resume(returning: hr)
+                }
+            }
+
+            let calories = hkWorkout.totalEnergyBurned?.doubleValue(for: .kilocalorie())
+            let distance = hkWorkout.totalDistance?.doubleValue(for: .meter())
+
+            let workout = HealthWorkout(
+                id: hkWorkout.uuid.uuidString,
+                activityTypeName: Self.activityName(for: hkWorkout.workoutActivityType),
+                startDate: hkWorkout.startDate,
+                endDate: hkWorkout.endDate,
+                durationInSeconds: hkWorkout.duration,
+                totalCalories: calories,
+                totalDistance: distance,
+                averageHeartRate: avgHR
+            )
+            results.append(workout)
+        }
+        return results
+    }
+
+    private static func activityName(for type: HKWorkoutActivityType) -> String {
+        switch type {
+        case .running: return "Carrera"
+        case .walking: return "Caminata"
+        case .cycling: return "Ciclismo"
+        case .swimming: return "Natacion"
+        case .yoga: return "Yoga"
+        case .functionalStrengthTraining: return "Fuerza funcional"
+        case .traditionalStrengthTraining: return "Fuerza"
+        case .highIntensityIntervalTraining: return "HIIT"
+        case .coreTraining: return "Core"
+        case .elliptical: return "Eliptica"
+        case .rowing: return "Remo"
+        case .stairClimbing: return "Escaleras"
+        case .flexibility: return "Flexibilidad"
+        case .pilates: return "Pilates"
+        case .dance: return "Baile"
+        case .cooldown: return "Enfriamiento"
+        case .mixedCardio: return "Cardio mixto"
+        case .crossTraining: return "Cross training"
+        case .soccer: return "Futbol"
+        case .basketball: return "Basquetbol"
+        case .tennis: return "Tenis"
+        case .hiking: return "Senderismo"
+        default: return "Ejercicio"
+        }
+    }
 }
