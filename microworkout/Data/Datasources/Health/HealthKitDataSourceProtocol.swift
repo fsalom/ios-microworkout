@@ -10,4 +10,5 @@ protocol HealthKitDataSourceProtocol {
     func fetchStepsCount(startDate: Date, endDate: Date) async throws -> [Date: Double]?
     func fetchStandingTime() async throws -> Double?
     func fetchStandingTime(startDate: Date, endDate: Date) async throws -> [Date: Double]?
+    func fetchWorkouts() async throws -> [HealthWorkout]
 }
