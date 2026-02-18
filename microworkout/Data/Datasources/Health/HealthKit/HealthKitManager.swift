@@ -28,7 +28,7 @@ class HealthKitManager {
             return
         }
 
-        let readTypes: Set<HKObjectType> = [stepCountType, heartRateType, exerciseTimeType, standingTimeType]
+        let readTypes: Set<HKObjectType> = [stepCountType, heartRateType, exerciseTimeType, standingTimeType, HKObjectType.workoutType()]
         let writeTypes: Set<HKSampleType> = [stepCountType]
 
         healthStore.requestAuthorization(toShare: writeTypes, read: readTypes) { success, error in
@@ -213,6 +213,51 @@ class HealthKitManager {
             }
 
             completion(exerciseData, nil)
+        }
+
+        healthStore.execute(query)
+    }
+
+    /// Obtiene los workouts de los ultimos 7 dias
+    func fetchWorkouts(completion: @escaping ([HKWorkout]?, Error?) -> Void) {
+        let now = Date()
+        let sevenDaysAgo = Calendar.current.date(byAdding: .day, value: -7, to: now)!
+        let predicate = HKQuery.predicateForSamples(withStart: sevenDaysAgo, end: now, options: .strictStartDate)
+        let sortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: false)
+
+        let query = HKSampleQuery(
+            sampleType: HKObjectType.workoutType(),
+            predicate: predicate,
+            limit: HKObjectQueryNoLimit,
+            sortDescriptors: [sortDescriptor]
+        ) { _, samples, error in
+            let workouts = samples as? [HKWorkout]
+            completion(workouts, error)
+        }
+
+        healthStore.execute(query)
+    }
+
+    /// Obtiene la frecuencia cardiaca media de un workout usando statistics (iOS 16+)
+    func fetchAverageHeartRate(for workout: HKWorkout, completion: @escaping (Double?) -> Void) {
+        let hrType = HKQuantityType.quantityType(forIdentifier: .heartRate)!
+        let predicate = HKQuery.predicateForSamples(
+            withStart: workout.startDate,
+            end: workout.endDate,
+            options: .strictStartDate
+        )
+
+        let query = HKStatisticsQuery(
+            quantityType: hrType,
+            quantitySamplePredicate: predicate,
+            options: .discreteAverage
+        ) { _, result, _ in
+            guard let avg = result?.averageQuantity() else {
+                completion(nil)
+                return
+            }
+            let bpm = avg.doubleValue(for: HKUnit(from: "count/min"))
+            completion(bpm)
         }
 
         healthStore.execute(query)
