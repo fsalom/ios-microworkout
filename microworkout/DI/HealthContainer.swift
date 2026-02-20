@@ -1,7 +1,8 @@
 class HealthContainer {
     func makeUseCase() -> HealthUseCase {
-        let HealthDataSource = HealthKitDataSource(healthKitManager: HealthKitManager.shared)
-        let healthRepository = HealthRepository(dataSource: HealthDataSource)
-        return HealthUseCase(repository: healthRepository)
+        let healthDataSource = HealthKitDataSource(healthKitManager: HealthKitManager.shared)
+        let healthRepository = HealthRepository(dataSource: healthDataSource)
+        let linkingDataSource = WorkoutLinkLocalDataSource()
+        return HealthUseCase(repository: healthRepository, linkingDataSource: linkingDataSource)
     }
 }
