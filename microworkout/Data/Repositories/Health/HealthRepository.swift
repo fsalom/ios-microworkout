@@ -42,4 +42,8 @@ class HealthRepository: HealthRepositoryProtocol {
     func fetchStandingTime(startDate: Date, endDate: Date) async throws -> [Date : Double]? {
         try await dataSource.fetchStandingTime(startDate: startDate, endDate: endDate)
     }
+
+    func fetchWorkouts() async throws -> [HealthWorkout] {
+        try await dataSource.fetchWorkouts()
+    }
 }
