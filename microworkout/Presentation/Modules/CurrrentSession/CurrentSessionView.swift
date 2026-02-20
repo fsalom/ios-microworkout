@@ -199,6 +199,20 @@ struct CurrentSessionView: View {
                     .presentationDragIndicator(.visible)
                 }
             }
+            .sheet(item: $viewModel.suggestedAWWorkout) { workout in
+                LinkSuggestionSheet(
+                    workout: workout,
+                    trainings: viewModel.getAvailableTrainings(),
+                    onLink: { training in
+                        viewModel.linkAWWorkout(workout, to: training)
+                    },
+                    onDismiss: {
+                        viewModel.dismissAWSuggestion()
+                    }
+                )
+                .presentationDetents([.medium])
+                .presentationDragIndicator(.visible)
+            }
         }
     }
 }

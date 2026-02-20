@@ -14,14 +14,21 @@ class CurrentSessionViewModel: ObservableObject {
     @Published var startTime: Date? = nil
     @Published var now: Date = Date()
     @Published var activeForm: ActiveExerciseForm?
+    @Published var suggestedAWWorkout: HealthWorkout?
 
     private var exerciseUseCase: ExerciseUseCaseProtocol
     private var workoutEntryUseCase: WorkoutEntryUseCaseProtocol
+    private var healthUseCase: HealthUseCaseProtocol
+    private var trainingUseCase: TrainingUseCase
 
     init(exerciseUseCase: ExerciseUseCaseProtocol,
-         workoutEntryUseCase: WorkoutEntryUseCaseProtocol) {
+         workoutEntryUseCase: WorkoutEntryUseCaseProtocol,
+         healthUseCase: HealthUseCaseProtocol,
+         trainingUseCase: TrainingUseCase) {
         self.exerciseUseCase = exerciseUseCase
         self.workoutEntryUseCase = workoutEntryUseCase
+        self.healthUseCase = healthUseCase
+        self.trainingUseCase = trainingUseCase
     }
 
     enum ActiveExerciseForm: Identifiable {
@@ -52,7 +59,19 @@ class CurrentSessionViewModel: ObservableObject {
     }
 
     func stopSession() {
+        let sessionStart = startTime
         Task { @MainActor in
+            if let sessionStart = sessionStart {
+                let sessionEnd = Date()
+                if let workouts = try? await healthUseCase.getRecentWorkouts() {
+                    let overlapping = workouts.first { workout in
+                        workout.linkedTrainingID == nil &&
+                        workout.startDate < sessionEnd &&
+                        workout.endDate > sessionStart
+                    }
+                    suggestedAWWorkout = overlapping
+                }
+            }
             startTime = nil
             workoutEntries.removeAll()
             isSaved = true
@@ -138,5 +157,18 @@ class CurrentSessionViewModel: ObservableObject {
 
     func reorder(_ entries: [WorkoutEntry]) -> [WorkoutEntry] {
         entries.sorted { $0.date > $1.date }
+    }
+
+    func getAvailableTrainings() -> [Training] {
+        trainingUseCase.getTrainings()
+    }
+
+    func linkAWWorkout(_ workout: HealthWorkout, to training: Training) {
+        healthUseCase.linkWorkout(workout.id, to: training.id)
+        suggestedAWWorkout = nil
+    }
+
+    func dismissAWSuggestion() {
+        suggestedAWWorkout = nil
     }
 }
