@@ -7,9 +7,12 @@ enum ErrorHealth: Error {
 
 class HealthUseCase: HealthUseCaseProtocol {
     private var repository: HealthRepositoryProtocol
+    private var linkingDataSource: WorkoutLinkDataSourceProtocol
 
-    init(repository: HealthRepositoryProtocol) {
+    init(repository: HealthRepositoryProtocol,
+         linkingDataSource: WorkoutLinkDataSourceProtocol) {
         self.repository = repository
+        self.linkingDataSource = linkingDataSource
     }
 
     var isHealthDataAvailable: Bool {
@@ -59,6 +62,24 @@ class HealthUseCase: HealthUseCaseProtocol {
         } else {
             throw ErrorHealth.notAuthorized
         }
+    }
+
+    func getRecentWorkouts() async throws -> [HealthWorkout] {
+        _ = try await requestAuthorization()
+        var workouts = try await repository.fetchWorkouts()
+        let links = linkingDataSource.getAll()
+        for i in workouts.indices {
+            workouts[i].linkedTrainingID = links[workouts[i].id]
+        }
+        return workouts
+    }
+
+    func linkWorkout(_ workoutID: String, to trainingID: UUID) {
+        linkingDataSource.saveLink(workoutID: workoutID, trainingID: trainingID)
+    }
+
+    func unlinkWorkout(_ workoutID: String) {
+        linkingDataSource.removeLink(workoutID: workoutID)
     }
 
     private func fetchExerciseTime(startDate: Date, endDate: Date) async throws -> [Date : Double] {

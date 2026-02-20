@@ -12,4 +12,7 @@ protocol HealthUseCaseProtocol {
     func requestAuthorization() async throws -> Bool
     func getDaysPerWeeksWithHealthInfo(for numberOfWeeks: Int) async throws -> [[HealthDay]]
     func getHealthInfoForToday() async throws -> HealthDay
+    func getRecentWorkouts() async throws -> [HealthWorkout]
+    func linkWorkout(_ workoutID: String, to trainingID: UUID)
+    func unlinkWorkout(_ workoutID: String)
 }
