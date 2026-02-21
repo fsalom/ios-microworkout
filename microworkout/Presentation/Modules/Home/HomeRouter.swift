@@ -18,4 +18,8 @@ class HomeRouter {
     func goToStart(this training: Training, and appState: AppState) {
         navigator.push(to: TrainingDetailV2Builder().build(this: training, and: appState))
     }
+
+    func goToHealthWorkoutDetail(_ workout: HealthWorkout) {
+        navigator.push(to: HealthWorkoutDetailBuilder().build(for: workout))
+    }
 }

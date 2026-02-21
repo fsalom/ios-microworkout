@@ -247,23 +247,31 @@ struct HomeView: View {
     @ViewBuilder
     func ListLastLoggedExercises() -> some View {
         LazyVStack(spacing: 16) {
-            ForEach(viewModel.uiState.lastEntriesByDay) { entryDay in
-                HStack(spacing: 10) {
-                    if let parts = entryDay.dateParts {
-                        DateBadge(day: parts.day, monthName: parts.monthName)
+            ForEach(viewModel.uiState.lastWorkoutItems) { item in
+                switch item {
+                case .manual(let entryDay):
+                    HStack(spacing: 10) {
+                        if let parts = entryDay.dateParts {
+                            DateBadge(day: parts.day, monthName: parts.monthName)
+                        }
+                        VStack(alignment: .leading) {
+                            Text(entryDay.exercisesFormatted).fontWeight(.bold)
+                            Text(entryDay.totalSeriesFormatted).fontWeight(.bold)
+                            Text(entryDay.durationFormatted)
+                        }
+                        Spacer(minLength: 0)
                     }
-                    VStack(alignment: .leading) {
-                        Text(entryDay.exercisesFormatted).fontWeight(.bold)
-                        Text(entryDay.totalSeriesFormatted).fontWeight(.bold)
-                        Text(entryDay.durationFormatted)
+                    .padding(12)
+                    .background(Color(.systemGray6))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .onTapGesture {
+                        viewModel.goTo(this: entryDay)
                     }
-                    Spacer(minLength: 0)
-                }
-                .padding(12)
-                .background(Color(.systemGray6))
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-                .onTapGesture {
-                    viewModel.goTo(this: entryDay)
+                case .appleWatch(let workout):
+                    AppleWatchWorkoutCard(workout: workout)
+                        .onTapGesture {
+                            viewModel.goTo(this: workout)
+                        }
                 }
             }
         }

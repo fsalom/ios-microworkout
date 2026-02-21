@@ -6,6 +6,7 @@ struct HomeUiState {
     var trainings: [Training] = []
     var lastTrainings: [Training] = []
     var lastEntriesByDay: [WorkoutEntryByDay] = []
+    var lastWorkoutItems: [WorkoutItem] = []
     var currentTraining: Training?
     var error: String?
     var healthInfoForToday: HealthDay = HealthDay(date: Date())
@@ -57,7 +58,7 @@ final class HomeViewModel: ObservableObject {
     func load() {
         self.loadTrainings()
         self.loadLastTrainings()
-        self.loadLoggedExercises()
+        self.loadAllWorkouts()
         self.loadCalorieData()
     }
 
@@ -105,10 +106,19 @@ final class HomeViewModel: ObservableObject {
         }
     }
 
-    private func loadLoggedExercises() {
+    private func loadAllWorkouts() {
         Task { @MainActor in
             let entries = try await workoutEntryUseCase.getAllByDay()
             self.uiState.lastEntriesByDay = entries
+
+            var items: [WorkoutItem] = entries.map { .manual($0) }
+
+            if let awWorkouts = try? await healthUseCase.getRecentWorkouts() {
+                items += awWorkouts.map { .appleWatch($0) }
+            }
+
+            items.sort { $0.sortDate > $1.sortDate }
+            self.uiState.lastWorkoutItems = items
         }
     }
 
@@ -145,5 +155,9 @@ final class HomeViewModel: ObservableObject {
 
     func goToStart(this training: Training) {
         router.goToStart(this: training, and: appState)
+    }
+
+    func goTo(this healthWorkout: HealthWorkout) {
+        router.goToHealthWorkoutDetail(healthWorkout)
     }
 }
