@@ -1,31 +1,15 @@
-//
-//  ListPlanViewModel.swift
-//  gymwatch Watch App
-//
-//  Created by Fernando Salom Carratala on 30/7/23.
-//
-
 import Foundation
+import Combine
 
 class ListPlanViewModel: ObservableObject {
-    @Published var workouts: [WorkoutPlan]
+    @Published var trainings: [Training] = []
 
-    var useCase: WorkoutUseCaseProtocol!
+    private var cancellable: AnyCancellable?
 
-    init(useCase: WorkoutUseCaseProtocol) {
-        self.useCase = useCase
-        self.workouts = []
-    }
-
-    func load() async {
-        do {
-            let workouts = try await useCase.getWorkouts()
-            
-            await MainActor.run {
-                self.workouts = workouts
-            }
-        } catch {
-
-        }
+    init() {
+        cancellable = WatchConnectivityManager.shared.$trainings
+            .receive(on: RunLoop.main)
+            .assign(to: \.trainings, on: self)
+        trainings = WatchConnectivityManager.shared.trainings
     }
 }

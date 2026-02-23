@@ -1,10 +1,3 @@
-//
-//  ListView.swift
-//  gymwatch Watch App
-//
-//  Created by Fernando Salom Carratala on 30/7/23.
-//
-
 import SwiftUI
 
 struct ListPlanView: View {
@@ -12,23 +5,17 @@ struct ListPlanView: View {
 
     var body: some View {
         List {
-            ForEach(viewModel.workouts) { workout in
+            ForEach(viewModel.trainings) { training in
                 NavigationLink {
-                    DetailWorkoutBuilder().build(with: workout)
+                    DetailWorkoutBuilder().build(with: training)
                 } label: {
-                    VStack {
-                        Text(workout.name)
-                        Text("otro")
+                    HStack {
+                        Image(systemName: training.type == .cardio ? "figure.run" : "dumbbell.fill")
+                            .foregroundColor(.accentColor)
+                        Text(training.name)
                     }
                 }
             }
-        }.task {
-            await viewModel.load()
         }
     }
 }
-/*
- #Preview {
- ListView(viewModel: ListPlanViewModel(useCase: WorkoutUseCase()))
- }
- */
