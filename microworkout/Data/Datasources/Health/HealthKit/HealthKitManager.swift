@@ -9,6 +9,10 @@ class HealthKitManager {
     private let heartRateType = HKQuantityType.quantityType(forIdentifier: .heartRate)!
     private let exerciseTimeType = HKQuantityType.quantityType(forIdentifier: .appleExerciseTime)!
     private let standingTimeType = HKQuantityType.quantityType(forIdentifier: .appleStandTime)!
+    private let activeEnergyType = HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned)!
+    private let distanceType = HKQuantityType.quantityType(forIdentifier: .distanceWalkingRunning)!
+
+    var store: HKHealthStore { healthStore }
 
     private init() {}
 
@@ -28,8 +32,8 @@ class HealthKitManager {
             return
         }
 
-        let readTypes: Set<HKObjectType> = [stepCountType, heartRateType, exerciseTimeType, standingTimeType, HKObjectType.workoutType()]
-        let writeTypes: Set<HKSampleType> = [stepCountType]
+        let readTypes: Set<HKObjectType> = [stepCountType, heartRateType, exerciseTimeType, standingTimeType, activeEnergyType, distanceType, HKObjectType.workoutType()]
+        let writeTypes: Set<HKSampleType> = [stepCountType, HKObjectType.workoutType()]
 
         healthStore.requestAuthorization(toShare: writeTypes, read: readTypes) { success, error in
             completion(success, error)
