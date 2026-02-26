@@ -25,6 +25,10 @@ struct CurrentSessionView: View {
                             .padding(.top, 8)
                     }
 
+                    if viewModel.mirrorManager.isMirroringActive {
+                        liveWorkoutBanner
+                    }
+
                     if viewModel.isSaved {
                         Spacer()
                         CenteredSquareOverlay(size: 180) {
@@ -217,6 +221,69 @@ struct CurrentSessionView: View {
     }
 }
 
+
+// MARK: - Live Workout Banner
+extension CurrentSessionView {
+    var liveWorkoutBanner: some View {
+        let data = viewModel.mirrorManager.liveData
+        let total = Int(data.elapsedSeconds)
+        let h = total / 3600
+        let m = (total % 3600) / 60
+        let s = total % 60
+
+        return VStack(spacing: 10) {
+            HStack {
+                Image(systemName: "applewatch")
+                    .foregroundColor(.green)
+                Text("Entrenamiento en curso")
+                    .font(.headline)
+                    .foregroundColor(.primary)
+            }
+            .padding(.top, 8)
+
+            Text(String(format: "%02d:%02d:%02d", h, m, s))
+                .font(.system(size: 28, weight: .bold, design: .monospaced))
+                .foregroundColor(.primary)
+
+            HStack(spacing: 20) {
+                Label("\(Int(data.heartRate)) bpm", systemImage: "heart.fill")
+                    .foregroundColor(.red)
+                Label("\(Int(data.activeCalories)) kcal", systemImage: "flame.fill")
+                    .foregroundColor(.orange)
+            }
+            .font(.subheadline)
+
+            if data.distance > 0 {
+                Label(
+                    data.distance >= 1000
+                        ? String(format: "%.2f km", data.distance / 1000)
+                        : String(format: "%.0f m", data.distance),
+                    systemImage: "figure.run"
+                )
+                .font(.subheadline)
+                .foregroundColor(.cyan)
+            }
+
+            Button(role: .destructive) {
+                viewModel.mirrorManager.stopMirroredSession()
+            } label: {
+                Label("Detener desde iPhone", systemImage: "stop.fill")
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(.red)
+            .padding(.top, 4)
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color(.systemBackground))
+                .shadow(radius: 4)
+        )
+        .padding(.horizontal)
+    }
+}
 
 #Preview {
     CurrentSessionBuilder().build()

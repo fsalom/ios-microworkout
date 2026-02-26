@@ -16,10 +16,13 @@ class CurrentSessionViewModel: ObservableObject {
     @Published var activeForm: ActiveExerciseForm?
     @Published var suggestedAWWorkout: HealthWorkout?
 
+    let mirrorManager = WorkoutMirrorManager.shared
+
     private var exerciseUseCase: ExerciseUseCaseProtocol
     private var workoutEntryUseCase: WorkoutEntryUseCaseProtocol
     private var healthUseCase: HealthUseCaseProtocol
     private var trainingUseCase: TrainingUseCase
+    private var mirrorCancellable: AnyCancellable?
 
     init(exerciseUseCase: ExerciseUseCaseProtocol,
          workoutEntryUseCase: WorkoutEntryUseCaseProtocol,
@@ -29,6 +32,9 @@ class CurrentSessionViewModel: ObservableObject {
         self.workoutEntryUseCase = workoutEntryUseCase
         self.healthUseCase = healthUseCase
         self.trainingUseCase = trainingUseCase
+        mirrorCancellable = mirrorManager.objectWillChange
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in self?.objectWillChange.send() }
     }
 
     enum ActiveExerciseForm: Identifiable {
