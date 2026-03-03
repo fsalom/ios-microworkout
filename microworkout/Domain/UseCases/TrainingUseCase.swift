@@ -1,4 +1,4 @@
-class TrainingUseCase {
+class TrainingUseCase: TrainingUseCaseProtocol {
 
     private var repository: TrainingRepositoryProtocol
 
