@@ -9,11 +9,11 @@ struct TrainingDetailUIState {
 final class TrainingDetailV2ViewModel: ObservableObject {
     var appState: AppState
     private var router: TrainingDetailV2Router
-    private var trainingUseCase: TrainingUseCase
+    private var trainingUseCase: TrainingUseCaseProtocol
     @Published var training: Training
     @Published var uiState: TrainingDetailUIState = .init()
 
-    init(trainingUseCase: TrainingUseCase,
+    init(trainingUseCase: TrainingUseCaseProtocol,
          router: TrainingDetailV2Router,
          training: Training,
          appState: AppState) {
