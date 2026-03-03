@@ -7,7 +7,7 @@ struct CurrentTrainingUIState {
 
 class CurrentTrainingViewModel: ObservableObject {
     @Published var uiState: CurrentTrainingUIState = .init(training: Training.mock())
-    private var useCase: TrainingUseCase = TrainingContainer().makeUseCase()
+    private var useCase: TrainingUseCaseProtocol = TrainingContainer().makeUseCase()
     private var appState: AppState
 
     init(appState: AppState) {
