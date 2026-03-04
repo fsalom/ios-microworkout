@@ -10,11 +10,11 @@ final class HealthWorkoutDetailViewModel: ObservableObject {
     @Published var uiState: HealthWorkoutDetailUiState
 
     private var healthUseCase: HealthUseCaseProtocol
-    private var trainingUseCase: TrainingUseCase
+    private var trainingUseCase: TrainingUseCaseProtocol
 
     init(workout: HealthWorkout,
          healthUseCase: HealthUseCaseProtocol,
-         trainingUseCase: TrainingUseCase) {
+         trainingUseCase: TrainingUseCaseProtocol) {
         self.healthUseCase = healthUseCase
         self.trainingUseCase = trainingUseCase
         self.uiState = HealthWorkoutDetailUiState(workout: workout)
