@@ -21,13 +21,13 @@ class CurrentSessionViewModel: ObservableObject {
     private var exerciseUseCase: ExerciseUseCaseProtocol
     private var workoutEntryUseCase: WorkoutEntryUseCaseProtocol
     private var healthUseCase: HealthUseCaseProtocol
-    private var trainingUseCase: TrainingUseCase
+    private var trainingUseCase: TrainingUseCaseProtocol
     private var mirrorCancellable: AnyCancellable?
 
     init(exerciseUseCase: ExerciseUseCaseProtocol,
          workoutEntryUseCase: WorkoutEntryUseCaseProtocol,
          healthUseCase: HealthUseCaseProtocol,
-         trainingUseCase: TrainingUseCase) {
+         trainingUseCase: TrainingUseCaseProtocol) {
         self.exerciseUseCase = exerciseUseCase
         self.workoutEntryUseCase = workoutEntryUseCase
         self.healthUseCase = healthUseCase
