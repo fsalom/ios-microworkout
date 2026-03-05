@@ -7,7 +7,6 @@ class HomeBuilder {
             workoutEntryUseCase: WorkoutEntryContainer().makeUseCase(),
             mealUseCase: MealContainer().makeUseCase(),
             userProfileUseCase: UserProfileContainer().makeUseCase(),
-            healthKitManager: HealthKitManager.shared,
             appState: appState)
         return HomeView(viewModel: viewModel)
     }
