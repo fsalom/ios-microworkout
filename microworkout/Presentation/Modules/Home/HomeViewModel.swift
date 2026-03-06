@@ -23,22 +23,20 @@ struct HomeUiState {
 final class HomeViewModel: ObservableObject {
     @Published var uiState: HomeUiState = .init(weeks: [[]], error: nil)
     private var router: HomeRouter
-    private var healthKitManager: HealthKitManager!
     private var currentTraining: Training = Training.mock()
-    private var trainingUseCase: TrainingUseCase
-    private var healthUseCase: HealthUseCase
+    private var trainingUseCase: TrainingUseCaseProtocol
+    private var healthUseCase: HealthUseCaseProtocol
     private var workoutEntryUseCase: WorkoutEntryUseCaseProtocol
     private var mealUseCase: MealUseCaseProtocol
     private var userProfileUseCase: UserProfileUseCaseProtocol
     private var appState: AppState
 
     init(router: HomeRouter,
-         trainingUseCase: TrainingUseCase,
-         healthUseCase: HealthUseCase,
+         trainingUseCase: TrainingUseCaseProtocol,
+         healthUseCase: HealthUseCaseProtocol,
          workoutEntryUseCase: WorkoutEntryUseCaseProtocol,
          mealUseCase: MealUseCaseProtocol,
          userProfileUseCase: UserProfileUseCaseProtocol,
-         healthKitManager: HealthKitManager,
          appState: AppState) {
         self.router = router
         self.trainingUseCase = trainingUseCase
@@ -46,7 +44,6 @@ final class HomeViewModel: ObservableObject {
         self.workoutEntryUseCase = workoutEntryUseCase
         self.mealUseCase = mealUseCase
         self.userProfileUseCase = userProfileUseCase
-        self.healthKitManager = healthKitManager
         self.appState = appState
         self.load()
         self.askForPermissions()
@@ -138,10 +135,9 @@ final class HomeViewModel: ObservableObject {
     }
 
     private func askForPermissions() {
-        healthKitManager.requestAuthorization { authorization, error in
-            DispatchQueue.main.async {
-                self.uiState.isHealthKitAuthorized = authorization
-            }
+        Task { @MainActor in
+            let authorized = (try? await healthUseCase.requestAuthorization()) ?? false
+            self.uiState.isHealthKitAuthorized = authorized
         }
     }
 
