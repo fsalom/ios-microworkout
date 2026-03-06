@@ -26,6 +26,7 @@
 		51CA4DAA2C19E3E17E982759 /* ErrorHandlerProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = F21D3A6744AE92C0E6668177 /* ErrorHandlerProtocol.swift */; };
 		57FBB9672DD70BBF430B419C /* UserRemoteDatasourceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 230A637BB2F7B028F8E07F42 /* UserRemoteDatasourceProtocol.swift */; };
 		5A79A85FC1B89AE535A6B74D /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B2405D4C8AD71FB63FD123B /* OnboardingView.swift */; };
+		5EA45F88387AB24DBF40B7BE /* TrainingUseCaseProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 956892EA48F90861B855D890 /* TrainingUseCaseProtocol.swift */; };
 		64F5DB08F1F83E88A042C984 /* HealthWorkoutDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88D8D5A993CB3528C2A7DEF3 /* HealthWorkoutDetailViewModel.swift */; };
 		687E705124519BFADFC65AF2 /* ValidationUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B741760D7BB512986960993 /* ValidationUseCase.swift */; };
 		69B6413C2D8F60956E2AD952 /* WatchConnectivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F604E2D543CBD9D8CEA0107E /* WatchConnectivityManager.swift */; };
@@ -55,6 +56,7 @@
 		B1765F72627CAB269AE7D34F /* ConfigTripleA.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1EC294607249CEB42EFD6F4 /* ConfigTripleA.swift */; };
 		B6AEE4C408BF6B0C2237D4A0 /* AppleWatchWorkoutCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8863D1987D8FB65B7A10D2CD /* AppleWatchWorkoutCard.swift */; };
 		BBCE82D1C9788F1D913A5880 /* DeeplinkManagerRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9543E6DA3768F2689E931C5F /* DeeplinkManagerRepository.swift */; };
+		BC0CC337F6EC0232199C37F6 /* TrainingUseCaseProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 956892EA48F90861B855D890 /* TrainingUseCaseProtocol.swift */; };
 		BC0F8E6DE680C95DC2B4B59B /* WorkoutItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 342217668B88D236BED457F7 /* WorkoutItem.swift */; };
 		BD501C3148039F50CACA2B7E /* ValidationUseCaseProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F5E819E30AD9EE4A2DCDE66 /* ValidationUseCaseProtocol.swift */; };
 		BE9A519141736E6CE3026CDC /* CustomTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF384417700A12694577E31 /* CustomTextField.swift */; };
@@ -363,6 +365,7 @@
 		EA2479CC58D19529090666C7 /* WorkoutSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15332602834DF5736B3BB987 /* WorkoutSessionManager.swift */; };
 		EB12CBF377694C6DF6749CCC /* UserRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B006261E436D32136E1A201 /* UserRepository.swift */; };
 		F4C9DBBED5692706AE2AA895 /* VerifyPasswordBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE0DA4B8C3BC0D66F8C03BC8 /* VerifyPasswordBuilder.swift */; };
+		F54D808E00B4E003DCF990E6 /* TrainingUseCaseProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 956892EA48F90861B855D890 /* TrainingUseCaseProtocol.swift */; };
 		F7FF9214EFCA3F9FEE87128D /* UserContactBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E24FBAAC510E4839DD73BDB /* UserContactBuilder.swift */; };
 		FB3F04985C20635230155B40 /* UserUseCaseProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F1334B40B3120056C3FDFAF /* UserUseCaseProtocol.swift */; };
 		FBF45EB923FEA9A3EE9ADFF2 /* OnboardingBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB8D8FB300B4B7E3D9447052 /* OnboardingBuilder.swift */; };
@@ -480,6 +483,7 @@
 		8B2405D4C8AD71FB63FD123B /* OnboardingView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		8F292003225FDB02F35F42CF /* DeeplinkManagerDatasource.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeeplinkManagerDatasource.swift; sourceTree = "<group>"; };
 		9543E6DA3768F2689E931C5F /* DeeplinkManagerRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeeplinkManagerRepository.swift; sourceTree = "<group>"; };
+		956892EA48F90861B855D890 /* TrainingUseCaseProtocol.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TrainingUseCaseProtocol.swift; sourceTree = "<group>"; };
 		9E2AB94B00D62DED9FF47B8F /* UserRemoteDatasource.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UserRemoteDatasource.swift; sourceTree = "<group>"; };
 		A0C9D23E4D7E95B250435590 /* LiveWorkoutData.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LiveWorkoutData.swift; sourceTree = "<group>"; };
 		A1EC294607249CEB42EFD6F4 /* ConfigTripleA.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ConfigTripleA.swift; sourceTree = "<group>"; };
@@ -1447,6 +1451,7 @@
 				C1B670E72D626218005E9173 /* HealthKitManager.swift */,
 				C162D6732B0E234100CDCA26 /* Model */,
 				C162D6672B0DEE3400CDCA26 /* HealthKitDataSource.swift */,
+				BD17D91B373B226020FA794F /* TrainingTypeMapping.swift */,
 			);
 			path = HealthKit;
 			sourceTree = "<group>";
@@ -1635,6 +1640,7 @@
 				C162D66E2B0E17DB00CDCA26 /* Health */,
 				C1762ACD2B0A912D0035318F /* Workout */,
 				5648B56C53D76F808D460B82 /* User */,
+				956892EA48F90861B855D890 /* TrainingUseCaseProtocol.swift */,
 			);
 			path = UseCases;
 			sourceTree = "<group>";
@@ -1656,7 +1662,6 @@
 				C8EDECBDB160AF6ED0B40B36 /* HealthWorkout.swift */,
 				342217668B88D236BED457F7 /* WorkoutItem.swift */,
 				A0C9D23E4D7E95B250435590 /* LiveWorkoutData.swift */,
-				BD17D91B373B226020FA794F /* TrainingTypeMapping.swift */,
 			);
 			path = Entities;
 			sourceTree = "<group>";
@@ -2716,6 +2721,7 @@
 				C17040AD2DA93CA0000E97C0 /* TrainingRepository.swift in Sources */,
 				C17040AE2DA93CAA000E97C0 /* TrainingRepositoryProtocol.swift in Sources */,
 				C17040AF2DA93CB2000E97C0 /* TrainingUseCase.swift in Sources */,
+				BC0CC337F6EC0232199C37F6 /* TrainingUseCaseProtocol.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2970,6 +2976,7 @@
 				4FD6FD96BA159EAB4FB31BAD /* PhoneConnectivityManager.swift in Sources */,
 				70A8833FC69ABADF53B7583B /* LiveWorkoutData.swift in Sources */,
 				DD8E479E5599E9CF372090D5 /* TrainingTypeMapping.swift in Sources */,
+				5EA45F88387AB24DBF40B7BE /* TrainingUseCaseProtocol.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3076,6 +3083,7 @@
 				8458035E5DCEFDA28A7A1B5A /* TrainingTypeMapping.swift in Sources */,
 				EA2479CC58D19529090666C7 /* WorkoutSessionManager.swift in Sources */,
 				69B6413C2D8F60956E2AD952 /* WatchConnectivityManager.swift in Sources */,
+				F54D808E00B4E003DCF990E6 /* TrainingUseCaseProtocol.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
