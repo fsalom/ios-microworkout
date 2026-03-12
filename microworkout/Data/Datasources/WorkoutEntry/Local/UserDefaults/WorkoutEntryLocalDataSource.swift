@@ -8,7 +8,9 @@ class WorkoutEntryLocalDataSource: WorkoutEntryDataSourceProtocol {
         case entries
     }
 
-    init(storage: UserDefaultsManagerProtocol = UserDefaultsManager()) {
+    init(storage: UserDefaultsManagerProtocol) {
+        self.storage = storage
+    }
         self.storage = storage
     }
 
