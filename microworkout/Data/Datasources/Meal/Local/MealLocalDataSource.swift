@@ -13,7 +13,7 @@ class MealLocalDataSource: MealDataSourceProtocol {
         case meals
     }
 
-    init(storage: UserDefaultsManagerProtocol = UserDefaultsManager()) {
+    init(storage: UserDefaultsManagerProtocol) {
         self.storage = storage
     }
 
