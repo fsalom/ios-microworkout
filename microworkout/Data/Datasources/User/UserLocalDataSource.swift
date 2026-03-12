@@ -14,7 +14,7 @@ class UserLocalDataSource {
         case onboardingCompleted = "onboarding_completed"
     }
 
-    init(storage: UserDefaultsManagerProtocol = UserDefaultsManager()) {
+    init(storage: UserDefaultsManagerProtocol) {
         self.storage = storage
     }
 
