@@ -3,13 +3,6 @@
 
 import Foundation
 
-// Wrapper/protocolo para HealthKitManager. Permite reemplazar el singleton en tests.
-protocol HealthKitManagerProtocol: AnyObject {}
-
-// Hace que la implementación existente HealthKitManager se adapte al protocolo
-// (esto se puede añadir como archivo separado en el proyecto para mantener compatibilidad).
-extension HealthKitManager: HealthKitManagerProtocol {}
-
 // AppComponent actualizado: añade un proveedor de HealthKitManagerProtocol.
 // Reemplaza o extiende el AppComponentProtocol actual en una migración incremental.
 protocol AppComponentProtocol {
