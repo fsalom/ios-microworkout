@@ -1,6 +1,8 @@
 import HealthKit
 
-class HealthKitManager {
+// Protocol moved to HealthKitManagerProtocol.swift
+
+class HealthKitManager: HealthKitManagerProtocol {
     static let shared = HealthKitManager()
 
     private let healthStore = HKHealthStore()
@@ -14,7 +16,7 @@ class HealthKitManager {
 
     var store: HKHealthStore { healthStore }
 
-    private init() {}
+    init() {}
 
     var isHealthDataAvailable: Bool {
         HKHealthStore.isHealthDataAvailable()
