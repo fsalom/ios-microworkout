@@ -10,7 +10,8 @@ class WorkoutLinkLocalDataSource: WorkoutLinkDataSourceProtocol {
     private let userDefaults: UserDefaultsManagerProtocol
     private let key = "workoutLinks"
 
-    init(userDefaults: UserDefaultsManagerProtocol = UserDefaultsManager()) {
+    // Forzar inyección de dependencias: no crear DefaultAppComponent aquí.
+    init(userDefaults: UserDefaultsManagerProtocol) {
         self.userDefaults = userDefaults
     }
 
