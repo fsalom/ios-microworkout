@@ -405,6 +405,6 @@ struct BarcodeCameraView: UIViewRepresentable {
 
 #Preview {
     NavigationStack {
-        BarcodeScannerBuilder().build(onScanComplete: { _ in })
+        BarcodeScannerBuilder(component: TestAppComponent()).build(onScanComplete: { _ in })
     }
 }

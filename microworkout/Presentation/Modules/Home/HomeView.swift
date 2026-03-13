@@ -310,6 +310,6 @@ struct HomeView: View {
 
 struct HomeView_Previews: PreviewProvider {
     static var previews: some View {
-        HomeBuilder().build(appState: AppState())
+        HomeBuilder(component: TestAppComponent()).build(appState: AppState())
     }
 }

@@ -10,10 +10,12 @@ import SwiftUI
 struct RootView: View {
     @EnvironmentObject var appState: AppState
     @State var navigator: NavigatorProtocol
+    private let component: AppComponentProtocol
     let rootTransition: AnyTransition = .opacity
 
-    public init(navigator: NavigatorProtocol = Navigator.shared, root: any View) {
+    public init(navigator: NavigatorProtocol = Navigator.shared, root: any View, component: AppComponentProtocol) {
         self._navigator = State(initialValue: navigator)
+        self.component = component
         navigator.initialize(root: root)
     }
 
@@ -29,7 +31,7 @@ struct RootView: View {
         }
         .fullScreenCover(isPresented: .constant(appState.isWorkoutScreen)) {
             if let _ = appState.currentTraining {
-                CurrentTrainingBuilder().build(appState: appState)
+                CurrentTrainingBuilder(component: component).build(appState: appState)
             }
         }
     }

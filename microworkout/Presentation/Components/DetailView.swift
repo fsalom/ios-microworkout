@@ -2,6 +2,7 @@ import SwiftUI
 
 struct DetailView: View {
     var animation: Namespace.ID
+    private let component: AppComponentProtocol
     @State private var numberOfSetsForSlider: Double = 1
     @State private var numberOfRepsForSlider: Double = 1
     @State private var numberOfMinutesPerSetForSlider: Double = 10
@@ -9,9 +10,16 @@ struct DetailView: View {
     @Binding var training: Training
     @State var hasTrainingStarted: Bool = false
 
+    init(animation: Namespace.ID, showDetail: Binding<Bool>, training: Binding<Training>, component: AppComponentProtocol) {
+        self.animation = animation
+        self._showDetail = showDetail
+        self._training = training
+        self.component = component
+    }
+
     var body: some View {
         if hasTrainingStarted {
-            CurrentTrainingBuilder().build(appState: AppState())
+            CurrentTrainingBuilder(component: component).build(appState: AppState())
         } else {
             VStack{
                 ZStack(alignment: .top) {

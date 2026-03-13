@@ -499,6 +499,6 @@ struct SaveButton: View {
 
 #Preview {
     NavigationStack {
-        AddMealBuilder().build()
+        AddMealBuilder(component: TestAppComponent()).build()
     }
 }

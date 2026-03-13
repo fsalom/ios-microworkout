@@ -12,7 +12,7 @@ struct Provider: TimelineProvider {
     var usecase: TrainingUseCase
 
     init() {
-        let datasource: TrainingLocalDataSourceProtocol = TrainingLocalDataSource(localStorage: UserDefaultsManager())
+        let datasource: TrainingLocalDataSourceProtocol = TrainingLocalDataSource(localStorage: DefaultAppComponent().makeUserDefaultsManager())
         let repository: TrainingRepositoryProtocol = TrainingRepository(local: datasource)
         self.usecase = TrainingUseCase(repository: repository)
     }

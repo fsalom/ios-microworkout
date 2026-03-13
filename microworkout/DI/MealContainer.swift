@@ -7,8 +7,14 @@ import Foundation
 
 /// Contenedor de dependencias para casos de uso de comidas.
 class MealContainer {
+    private let component: AppComponentProtocol
+
+    init(component: AppComponentProtocol) {
+        self.component = component
+    }
+
     func makeUseCase() -> MealUseCase {
-        let storage = UserDefaultsManager()
+        let storage = component.makeUserDefaultsManager()
         let localDataSource = MealLocalDataSource(storage: storage)
         let remoteApi = OpenFoodFactsApi()
         let repository = MealRepository(

@@ -7,11 +7,12 @@ struct CurrentTrainingUIState {
 
 class CurrentTrainingViewModel: ObservableObject {
     @Published var uiState: CurrentTrainingUIState = .init(training: Training.mock())
-    private var useCase: TrainingUseCaseProtocol = TrainingContainer().makeUseCase()
+    private var useCase: TrainingUseCaseProtocol
     private var appState: AppState
 
-    init(appState: AppState) {
+    init(appState: AppState, useCase: TrainingUseCaseProtocol) {
         self.appState = appState
+        self.useCase = useCase
         guard let training = self.useCase.getCurrent() else {
             fatalError()
         }
