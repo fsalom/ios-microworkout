@@ -13,6 +13,4 @@ protocol HealthKitManagerProtocol {
     func fetchExerciseTime(startDate: Date, endDate: Date, completion: @escaping ([Date: Double]?, Error?) -> Void)
     func fetchStandingTime(completion: @escaping (Double?, Error?) -> Void)
     func fetchStandingTime(startDate: Date, endDate: Date, completion: @escaping ([Date: Double]?, Error?) -> Void)
-    func fetchWorkouts(completion: @escaping ([HKWorkout]?, Error?) -> Void)
-    func fetchAverageHeartRate(for workout: HKWorkout, completion: @escaping (Double?) -> Void)
 }

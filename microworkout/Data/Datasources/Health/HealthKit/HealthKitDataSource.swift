@@ -7,9 +7,9 @@ enum HealthKitError: Error {
 
 class HealthKitDataSource: HealthKitDataSourceProtocol {
     
-    var healthKitManager: HealthKitManager
+    var healthKitManager: HealthKitManagerProtocol
 
-    init(healthKitManager: HealthKitManager) {
+    init(healthKitManager: HealthKitManagerProtocol) {
         self.healthKitManager = healthKitManager
     }
 

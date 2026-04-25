@@ -43,3 +43,24 @@ class MealRepository: MealRepositoryProtocol {
         return products.map { $0.toDomain() }
     }
 }
+
+fileprivate extension OpenFoodFactsProductDTO {
+    /// Convierte el DTO a entidad de dominio FoodItem.
+    func toDomain(barcode: String? = nil) -> FoodItem {
+        FoodItem(
+            id: UUID(),
+            name: displayName,
+            barcode: barcode ?? code,
+            nutritionPer100g: NutritionInfo(
+                calories: nutriments?.energyKcal100g ?? 0,
+                carbohydrates: nutriments?.carbohydrates100g ?? 0,
+                proteins: nutriments?.proteins100g ?? 0,
+                fats: nutriments?.fat100g ?? 0,
+                fiber: nutriments?.fiber100g
+            ),
+            quantity: 100,
+            servingSize: nil,
+            imageUrl: thumbnailUrl ?? imageUrl
+        )
+    }
+}

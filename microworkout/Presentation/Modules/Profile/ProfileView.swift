@@ -262,5 +262,5 @@ private struct ProfileRow: View {
 }
 
 #Preview {
-    ProfileBuilder().build()
+    ProfileBuilder(component: DefaultAppComponent()).build()
 }

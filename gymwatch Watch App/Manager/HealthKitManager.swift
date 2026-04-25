@@ -275,32 +275,4 @@ class HealthKitManager: HealthKitManagerProtocol {
 
         healthStore.execute(query)
     }
-
-    /// Obtiene los entrenamientos registrados en HealthKit
-    func fetchWorkouts(completion: @escaping ([HKWorkout]?, Error?) -> Void) {
-        let workoutType = HKObjectType.workoutType()
-        let sortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: false)
-        let query = HKSampleQuery(sampleType: workoutType, predicate: nil, limit: 50, sortDescriptors: [sortDescriptor]) { _, samples, error in
-            let workouts = samples as? [HKWorkout]
-            completion(workouts, error)
-        }
-        healthStore.execute(query)
-    }
-
-    /// Obtiene la frecuencia cardíaca promedio para un entrenamiento
-    func fetchAverageHeartRate(for workout: HKWorkout, completion: @escaping (Double?) -> Void) {
-        guard let hrType = heartRateType else {
-            completion(nil)
-            return
-        }
-        let predicate = HKQuery.predicateForSamples(withStart: workout.startDate, end: workout.endDate, options: .strictStartDate)
-        let query = HKStatisticsQuery(quantityType: hrType, quantitySamplePredicate: predicate, options: .discreteAverage) { _, result, _ in
-            guard let avg = result?.averageQuantity() else {
-                completion(nil)
-                return
-            }
-            completion(avg.doubleValue(for: HKUnit(from: "count/min")))
-        }
-        healthStore.execute(query)
-    }
 }

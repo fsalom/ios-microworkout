@@ -2,6 +2,7 @@
 // Este archivo es una propuesta. No modifica archivos existentes; muestra implementaciones de test.
 
 import Foundation
+import HealthKit
 
 // Mock in-memory de UserDefaultsManagerProtocol para tests rápidos.
 final class InMemoryUserDefaultsManager: UserDefaultsManagerProtocol {
@@ -30,7 +31,40 @@ final class InMemoryUserDefaultsManager: UserDefaultsManagerProtocol {
 
 // Mock básico para HealthKitManagerProtocol que permite tests sin HealthKit.
 final class MockHealthKitManager: HealthKitManagerProtocol {
-    // Implementar métodos mínimos si los tests los requieren.
+    var store: HealthStoreProtocol { MockHealthStore() }
+    var isHealthDataAvailable: Bool { false }
+    var authorizationStatus: HKAuthorizationStatus { .notDetermined }
+
+    func requestAuthorization(completion: @escaping (Bool, Error?) -> Void) {
+        completion(true, nil)
+    }
+    func fetchStepCount(completion: @escaping (Double?, Error?) -> Void) {
+        completion(nil, nil)
+    }
+    func fetchStepCount(startDate: Date, endDate: Date, completion: @escaping ([Date: Double]?, Error?) -> Void) {
+        completion(nil, nil)
+    }
+    func fetchLatestHeartRate(completion: @escaping (Double?, Error?) -> Void) {
+        completion(nil, nil)
+    }
+    func fetchExerciseTimeToday(completion: @escaping (Double?, Error?) -> Void) {
+        completion(nil, nil)
+    }
+    func fetchExerciseTime(startDate: Date, endDate: Date, completion: @escaping ([Date: Double]?, Error?) -> Void) {
+        completion(nil, nil)
+    }
+    func fetchStandingTime(completion: @escaping (Double?, Error?) -> Void) {
+        completion(nil, nil)
+    }
+    func fetchStandingTime(startDate: Date, endDate: Date, completion: @escaping ([Date: Double]?, Error?) -> Void) {
+        completion(nil, nil)
+    }
+    func fetchWorkouts(completion: @escaping ([HKWorkout]?, Error?) -> Void) {
+        completion(nil, nil)
+    }
+    func fetchAverageHeartRate(for workout: HKWorkout, completion: @escaping (Double?) -> Void) {
+        completion(nil)
+    }
 }
 
 // Test AppComponent que inyecta mocks.

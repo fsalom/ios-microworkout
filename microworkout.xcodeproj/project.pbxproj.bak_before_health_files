@@ -375,8 +375,6 @@
 		FB3F04985C20635230155B40 /* UserUseCaseProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F1334B40B3120056C3FDFAF /* UserUseCaseProtocol.swift */; };
 		FBF45EB923FEA9A3EE9ADFF2 /* OnboardingBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB8D8FB300B4B7E3D9447052 /* OnboardingBuilder.swift */; };
 		FCD1096EA4728492DF418790 /* AppError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E0E7A0BC387147668FFA3A3 /* AppError.swift */; };
-		DA11000002BB000000000001 /* HealthStoreProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA11000001AA000000000001 /* HealthStoreProtocol.swift */; };
-		DA11000002BB000000000002 /* HealthKitStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA11000001AA000000000002 /* HealthKitStore.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -748,8 +746,6 @@
 		F604E2D543CBD9D8CEA0107E /* WatchConnectivityManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatchConnectivityManager.swift; sourceTree = "<group>"; };
 		FAA2C0D1398AB0BEFF278279 /* AppComponent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppComponent.swift; sourceTree = "<group>"; };
 		FD1703D6174A762AD782D4EB /* UserProfileContainer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UserProfileContainer.swift; sourceTree = "<group>"; };
-		DA11000001AA000000000001 /* HealthStoreProtocol.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HealthStoreProtocol.swift; path = microworkout/Data/Datasources/Health/HealthStoreProtocol.swift; sourceTree = "<group>"; };
-		DA11000001AA000000000002 /* HealthKitStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HealthKitStore.swift; path = microworkout/Data/Datasources/Health/HealthKitStore.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -2982,8 +2978,6 @@
 				15A04C01BC80A8C16E320F36 /* AppComponentProtocol.swift in Sources */,
 				928D1AF6D14975952D6CBBE9 /* AppComponent.swift in Sources */,
 				51A6608719471CA199D6F540 /* HealthKitManagerProtocol.swift in Sources */,
-				DA11000002BB000000000001 /* HealthStoreProtocol.swift in Sources */,
-				DA11000002BB000000000002 /* HealthKitStore.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3491,7 +3485,7 @@
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_NSSupportsLiveActivitiesFrequentUpdates = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.workouthack.app;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = es.fernandosalom.microworkoutapp;
 				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -3528,7 +3522,7 @@
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_NSSupportsLiveActivitiesFrequentUpdates = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.workouthack.app;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = es.fernandosalom.microworkoutapp;
 				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

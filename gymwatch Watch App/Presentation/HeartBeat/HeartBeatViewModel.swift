@@ -9,7 +9,7 @@ import Foundation
 import HealthKit
 
 class HeartBeatViewModel: ObservableObject {
-    private var healthStore = HKHealthStore()
+    private var healthStore: HealthStoreProtocol = HealthKitStore()
     let heartRateQuantity = HKUnit(from: "count/min")
     @Published var value = 0
     
@@ -19,8 +19,11 @@ class HeartBeatViewModel: ObservableObject {
     }
     
     func autorizeHealthKit() {
-        let healthKitTypes: Set = [
-            HKObjectType.quantityType(forIdentifier: HKQuantityTypeIdentifier.heartRate)!]
+        guard let heartType = HKObjectType.quantityType(forIdentifier: HKQuantityTypeIdentifier.heartRate) else {
+            print("Heart rate quantity type is not available on this device")
+            return
+        }
+        let healthKitTypes: Set = [heartType]
 
         healthStore.requestAuthorization(toShare: healthKitTypes, read: healthKitTypes) { hasAuthorization, error in
             print(hasAuthorization)
@@ -29,6 +32,10 @@ class HeartBeatViewModel: ObservableObject {
     }
     
     private func startHeartRateQuery(quantityTypeIdentifier: HKQuantityTypeIdentifier) {
+        guard let quantityType = HKObjectType.quantityType(forIdentifier: quantityTypeIdentifier) else {
+            print("Requested quantity type is not available: \(quantityTypeIdentifier)")
+            return
+        }
         let devicePredicate = HKQuery.predicateForObjects(from: [HKDevice.local()])
         let updateHandler: (HKAnchoredObjectQuery, [HKSample]?, [HKDeletedObject]?, HKQueryAnchor?, Error?) -> Void = {
             query, samples, deletedObjects, queryAnchor, error in
@@ -40,7 +47,7 @@ class HeartBeatViewModel: ObservableObject {
             }
             
         }
-        let query = HKAnchoredObjectQuery(type: HKObjectType.quantityType(forIdentifier: quantityTypeIdentifier)!,
+        let query = HKAnchoredObjectQuery(type: quantityType,
                                           predicate: devicePredicate,
                                           anchor: nil,
                                           limit: HKObjectQueryNoLimit,

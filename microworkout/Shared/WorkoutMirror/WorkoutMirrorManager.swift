@@ -10,7 +10,7 @@ class WorkoutMirrorManager: NSObject, ObservableObject {
     @Published var liveData: LiveWorkoutData = .empty
 
     private var mirroredSession: HKWorkoutSession?
-    private let healthStore = HKHealthStore()
+    private var healthStore: HealthStoreProtocol = HealthKitStore()
 
     private override init() {
         super.init()

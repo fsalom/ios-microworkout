@@ -11,7 +11,7 @@ import HealthKit
 class HealthKitViewModel: ObservableObject, HealthKitViewModelProtocol {
     @Published var workouts: [WorkoutPlan]
     @Published var beats: [Beat] = []
-    private let healthStore: HKHealthStore
+    private let healthStore: HealthStoreProtocol
     let heartRateUnit:HKUnit = HKUnit(from: "count/min")
 
 
@@ -20,9 +20,14 @@ class HealthKitViewModel: ObservableObject, HealthKitViewModelProtocol {
     init(useCase: WorkoutUseCaseProtocol) {
         self.useCase = useCase
         self.workouts = []
-        guard HKHealthStore.isHealthDataAvailable() else {  fatalError("This app requires a device that supports HealthKit") }
-        healthStore = HKHealthStore()
-        requestHealthkitPermissions()
+        if HKHealthStore.isHealthDataAvailable() {
+            healthStore = HealthKitStore()
+            requestHealthkitPermissions()
+        } else {
+            assertionFailure("HealthKit not available on this device")
+            // Fallback: initialize healthStore to keep the app running; HealthKit features will be inactive.
+            healthStore = HealthKitStore()
+        }
     }
 
     func load() async {
@@ -38,11 +43,15 @@ class HealthKitViewModel: ObservableObject, HealthKitViewModelProtocol {
     }
 
     private func requestHealthkitPermissions() {
-        let sampleTypesToRead = Set([
-            HKObjectType.quantityType(forIdentifier: .heartRate)!,
-            HKObjectType.quantityType(forIdentifier: .stepCount)!,
-            HKObjectType.categoryType(forIdentifier: .sleepAnalysis)!,
-        ])
+        var sampleTypesToRead = Set<HKObjectType>()
+        if let heart = HKObjectType.quantityType(forIdentifier: .heartRate) { sampleTypesToRead.insert(heart) } else { print("HK heartRate type unavailable") }
+        if let steps = HKObjectType.quantityType(forIdentifier: .stepCount) { sampleTypesToRead.insert(steps) } else { print("HK stepCount type unavailable") }
+        if let sleep = HKObjectType.categoryType(forIdentifier: .sleepAnalysis) { sampleTypesToRead.insert(sleep) } else { print("HK sleepAnalysis type unavailable") }
+
+        guard !sampleTypesToRead.isEmpty else {
+            print("No HealthKit types available to request authorization.")
+            return
+        }
 
         healthStore.requestAuthorization(toShare: nil, read: sampleTypesToRead) { (success, error) in
             print("Request Authorization -- Success: ", success, " Error: ", error ?? "nil")
@@ -57,7 +66,10 @@ class HealthKitViewModel: ObservableObject, HealthKitViewModelProtocol {
     }
 
     private func readHeartRate(){
-        let quantityType  = HKObjectType.quantityType(forIdentifier: .heartRate)!
+        guard let quantityType  = HKObjectType.quantityType(forIdentifier: .heartRate) else {
+            print("HK quantity type for heart rate unavailable.")
+            return
+        }
         let sortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: false)
         let sampleQuery = HKSampleQuery.init(sampleType: quantityType,
                                              predicate: get24hPredicate(),
@@ -65,8 +77,13 @@ class HealthKitViewModel: ObservableObject, HealthKitViewModelProtocol {
                                              sortDescriptors: [sortDescriptor],
                                              resultsHandler: { (query, results, error) in
 
+            if let error = error {
+                print("HealthKit sample query error: \(error)")
+                return
+            }
+
             guard let samples = results as? [HKQuantitySample] else {
-                print(error!)
+                print("No heart rate samples found.")
                 return
             }
             DispatchQueue.main.async {

@@ -13,10 +13,12 @@ class CurrentTrainingViewModel: ObservableObject {
     init(appState: AppState, useCase: TrainingUseCaseProtocol) {
         self.appState = appState
         self.useCase = useCase
-        guard let training = self.useCase.getCurrent() else {
-            fatalError()
+        if let training = self.useCase.getCurrent() {
+            self.uiState.training = training
+        } else {
+            assertionFailure("No current training available")
+            self.uiState.training = Training.mock()
         }
-        self.uiState.training = training
         self.uiState.training.startedAt = Date()
     }
 

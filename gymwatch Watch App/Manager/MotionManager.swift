@@ -1,5 +1,7 @@
 import CoreMotion
+#if canImport(WatchKit)
 import WatchKit
+#endif
 
 class MotionManager {
     private let motionManager = CMMotionManager()

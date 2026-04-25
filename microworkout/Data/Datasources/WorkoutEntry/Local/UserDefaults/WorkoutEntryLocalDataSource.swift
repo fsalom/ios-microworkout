@@ -11,8 +11,6 @@ class WorkoutEntryLocalDataSource: WorkoutEntryDataSourceProtocol {
     init(storage: UserDefaultsManagerProtocol) {
         self.storage = storage
     }
-        self.storage = storage
-    }
 
     func getAll() async throws -> [WorkoutEntry] {
         storage.get(forKey: Keys.entries.rawValue) ?? []

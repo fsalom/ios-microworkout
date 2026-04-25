@@ -1,3 +1,5 @@
+import Foundation
+
 class TrainingLocalDataSource: TrainingLocalDataSourceProtocol {
     private var localStorage: UserDefaultsManagerProtocol
 

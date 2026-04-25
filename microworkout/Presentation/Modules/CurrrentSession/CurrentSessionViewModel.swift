@@ -51,7 +51,12 @@ class CurrentSessionViewModel: ObservableObject {
 
     func search(with text: String) {
         Task { @MainActor in
-            self.exercises = try! await self.exerciseUseCase.getAll(contains: self.searchText)
+            do {
+                self.exercises = try await self.exerciseUseCase.getAll(contains: self.searchText)
+            } catch {
+                print("Failed to fetch exercises: \(error)")
+                self.exercises = []
+            }
         }
     }
 

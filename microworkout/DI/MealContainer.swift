@@ -5,6 +5,8 @@
 
 import Foundation
 
+// AppComponentProtocol es accesible desde aquí (está en DI/AppComponentProtocol.swift)
+
 /// Contenedor de dependencias para casos de uso de comidas.
 class MealContainer {
     private let component: AppComponentProtocol

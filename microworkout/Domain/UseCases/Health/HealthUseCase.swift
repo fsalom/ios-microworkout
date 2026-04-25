@@ -147,12 +147,24 @@ class HealthUseCase: HealthUseCaseProtocol {
         let today = Date()
         let weekday = calendar.component(.weekday, from: today)
         let daysToSubtract = (weekday == 1) ? 6 : weekday - 2  // Monday first day
-        let currentWeekStart = calendar.date(byAdding: .day, value: -daysToSubtract, to: today)!
+        let currentWeekStart: Date
+        if let cw = calendar.date(byAdding: .day, value: -daysToSubtract, to: today) {
+            currentWeekStart = cw
+        } else {
+            assertionFailure("Failed to compute currentWeekStart; falling back to today")
+            currentWeekStart = today
+        }
         var weeksArray: [[HealthDay]] = []
 
         for week in (0..<numberOfWeeks).reversed() {
             var weekDates: [HealthDay] = []
-            let startOfWeek = calendar.date(byAdding: .weekOfYear, value: -week, to: currentWeekStart)!
+            let startOfWeek: Date
+            if let sow = calendar.date(byAdding: .weekOfYear, value: -week, to: currentWeekStart) {
+                startOfWeek = sow
+            } else {
+                assertionFailure("Failed to compute startOfWeek; falling back to currentWeekStart")
+                startOfWeek = currentWeekStart
+            }
 
             for day in 0..<7 {
                 if let date = calendar.date(byAdding: .day, value: day, to: startOfWeek) {

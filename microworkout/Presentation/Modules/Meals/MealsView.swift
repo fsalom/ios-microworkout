@@ -192,7 +192,7 @@ struct MealRow: View {
 struct MealsView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationStack {
-            MealsBuilder(component: TestAppComponent()).build()
+            MealsBuilder(component: DefaultAppComponent()).build()
         }
     }
 }

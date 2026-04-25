@@ -45,7 +45,13 @@ class MealUseCase: MealUseCaseProtocol {
 
     func getRecentFoods(limit: Int) async throws -> [FoodItem] {
         let now = Date()
-        let sixtyDaysAgo = Calendar.current.date(byAdding: .day, value: -60, to: now)!
+        let sixtyDaysAgo: Date
+        if let date = Calendar.current.date(byAdding: .day, value: -60, to: now) {
+            sixtyDaysAgo = date
+        } else {
+            assertionFailure("Failed to compute date 60 days ago; falling back to now")
+            sixtyDaysAgo = now
+        }
         let meals = try await repository.getMeals(from: sixtyDaysAgo, to: now)
 
         // Extract all food items sorted by meal timestamp (most recent first)

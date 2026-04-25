@@ -1,0 +1,436 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -workspace microworkout.xcodeproj/project.xcworkspace -scheme gymwidgetExtension -configuration Debug -sdk iphonesimulator -destination "platform=iOS Simulator,name=iPhone 17" CODE_SIGNING_ALLOWED=NO clean build
+
+Build settings from command line:
+    CODE_SIGNING_ALLOWED = NO
+    SDKROOT = iphonesimulator26.1
+
+Resolve Package Graph
+2026-03-21 20:23:06.661 xcodebuild[20486:9829650]  DVTDeviceOperation: Encountered a build number "" that is incompatible with DVTBuildVersion.
+2026-03-21 20:23:06.695 xcodebuild[20486:9829590] [MT] DVTDeviceOperation: Encountered a build number "" that is incompatible with DVTBuildVersion.
+
+
+Resolved source packages:
+  TripleA: https://github.com/fsalom/TripleA @ 2.5.1
+
+CreateBuildRequest
+
+SendProjectDescription
+
+CreateBuildOperation
+
+** CLEAN SUCCEEDED **
+
+ComputePackagePrebuildTargetDependencyGraph
+
+Prepare packages
+
+CreateBuildRequest
+
+SendProjectDescription
+
+CreateBuildOperation
+
+ComputeTargetDependencyGraph
+note: Building targets in dependency order
+note: Target dependency graph (5 targets)
+    Target 'microworkout' in project 'microworkout'
+        ➜ Explicit dependency on target 'gymwatch Watch App' in project 'microworkout'
+        ➜ Explicit dependency on target 'gymwidgetExtension' in project 'microworkout'
+        ➜ Explicit dependency on target 'TripleA' in project 'TripleA'
+    Target 'TripleA' in project 'TripleA'
+        ➜ Explicit dependency on target 'TripleA' in project 'TripleA'
+    Target 'TripleA' in project 'TripleA' (no dependencies)
+    Target 'gymwatch Watch App' in project 'microworkout' (no dependencies)
+    Target 'gymwidgetExtension' in project 'microworkout' (no dependencies)
+
+GatherProvisioningInputs
+
+CreateBuildDescription
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.1.sdk -x c -c /dev/null
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/usr/bin/actool --version --output-format xml1
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc --version
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/usr/bin/actool --print-asset-tag-combinations --output-format xml1 /Users/fer/ios-microworkout/microworkout/Preview Content/Preview Assets.xcassets /Users/fer/ios-microworkout/Assets.xcassets
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/usr/bin/actool --print-asset-tag-combinations --output-format xml1 /Users/fer/ios-microworkout/microworkout/Preview Content/Preview Assets.xcassets /Users/fer/ios-microworkout/Assets.xcassets
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld -version_details
+
+Build description signature: c3907babffcf2b7096f0ef7aa354bbf1
+Build description path: /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/XCBuildData/c3907babffcf2b7096f0ef7aa354bbf1.xcbuilddata
+ClangStatCache /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.1.sdk /Users/fer/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphonesimulator26.1-23B77-90cf18a4295e390e64c810bc6bd7acbc.sdkstatcache
+    cd /Users/fer/ios-microworkout/microworkout.xcodeproj
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.1.sdk -o /Users/fer/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphonesimulator26.1-23B77-90cf18a4295e390e64c810bc6bd7acbc.sdkstatcache
+
+CreateBuildDirectory /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Products
+    cd /Users/fer/ios-microworkout/microworkout.xcodeproj
+    builtin-create-build-directory /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Products
+
+CreateBuildDirectory /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex
+    cd /Users/fer/ios-microworkout/microworkout.xcodeproj
+    builtin-create-build-directory /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex
+
+CreateBuildDirectory /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Products/Debug-iphonesimulator
+    cd /Users/fer/ios-microworkout/microworkout.xcodeproj
+    builtin-create-build-directory /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Products/Debug-iphonesimulator
+
+CreateBuildDirectory /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/ExplicitPrecompiledModules
+    cd /Users/fer/ios-microworkout/microworkout.xcodeproj
+    builtin-create-build-directory /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/ExplicitPrecompiledModules
+
+CreateBuildDirectory /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules
+    cd /Users/fer/ios-microworkout/microworkout.xcodeproj
+    builtin-create-build-directory /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules
+
+CreateBuildDirectory /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphonesimulator
+    cd /Users/fer/ios-microworkout/microworkout.xcodeproj
+    builtin-create-build-directory /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphonesimulator
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/microworkout-789f592607fdefbf2c2341b1f259f033-VFS-iphonesimulator/all-product-headers.yaml
+    cd /Users/fer/ios-microworkout/microworkout.xcodeproj
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/microworkout-789f592607fdefbf2c2341b1f259f033-VFS-iphonesimulator/all-product-headers.yaml
+
+CreateBuildDirectory /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Products/Debug-iphonesimulator/PackageFrameworks
+    cd /Users/fer/ios-microworkout/microworkout.xcodeproj
+    builtin-create-build-directory /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Products/Debug-iphonesimulator/PackageFrameworks
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/gymwidgetExtension-own-target-headers.hmap (in target 'gymwidgetExtension' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/gymwidgetExtension-own-target-headers.hmap
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/gymwidgetExtension-project-headers.hmap (in target 'gymwidgetExtension' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/gymwidgetExtension-project-headers.hmap
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/gymwidgetExtension.hmap (in target 'gymwidgetExtension' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/gymwidgetExtension.hmap
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/gymwidgetExtension-generated-files.hmap (in target 'gymwidgetExtension' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/gymwidgetExtension-generated-files.hmap
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/gymwidgetExtension-all-non-framework-target-headers.hmap (in target 'gymwidgetExtension' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/gymwidgetExtension-all-non-framework-target-headers.hmap
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/gymwidgetExtension-all-target-headers.hmap (in target 'gymwidgetExtension' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/gymwidgetExtension-all-target-headers.hmap
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/gymwidgetExtension.DependencyMetadataFileList (in target 'gymwidgetExtension' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/gymwidgetExtension.DependencyMetadataFileList
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/gymwidgetExtension.DependencyStaticMetadataFileList (in target 'gymwidgetExtension' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/gymwidgetExtension.DependencyStaticMetadataFileList
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/microworkout.build/microworkout.DependencyStaticMetadataFileList (in target 'microworkout' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/microworkout.build/microworkout.DependencyStaticMetadataFileList
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/microworkout.build/microworkout.hmap (in target 'microworkout' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/microworkout.build/microworkout.hmap
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/microworkout.build/microworkout.DependencyMetadataFileList (in target 'microworkout' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/microworkout.build/microworkout.DependencyMetadataFileList
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/microworkout.build/microworkout-project-headers.hmap (in target 'microworkout' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/microworkout.build/microworkout-project-headers.hmap
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/microworkout.build/microworkout-generated-files.hmap (in target 'microworkout' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/microworkout.build/microworkout-generated-files.hmap
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/microworkout.build/microworkout-own-target-headers.hmap (in target 'microworkout' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/microworkout.build/microworkout-own-target-headers.hmap
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/microworkout.build/microworkout-all-target-headers.hmap (in target 'microworkout' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/microworkout.build/microworkout-all-target-headers.hmap
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/microworkout.build/microworkout-DebugDylibInstallName-normal-arm64.txt (in target 'microworkout' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/microworkout.build/microworkout-DebugDylibInstallName-normal-arm64.txt
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/microworkout.build/microworkout-all-non-framework-target-headers.hmap (in target 'microworkout' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/microworkout.build/microworkout-all-non-framework-target-headers.hmap
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/microworkout.build/microworkout-DebugDylibPath-normal-arm64.txt (in target 'microworkout' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/microworkout.build/microworkout-DebugDylibPath-normal-arm64.txt
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/microworkout.build/empty-microworkout.plist (in target 'microworkout' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/microworkout.build/empty-microworkout.plist
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/microworkout.build/Objects-normal/arm64/microworkout.SwiftConstValuesFileList (in target 'microworkout' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/microworkout.build/Objects-normal/arm64/microworkout.SwiftConstValuesFileList
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/microworkout.build/Objects-normal/arm64/microworkout_const_extract_protocols.json (in target 'microworkout' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/microworkout.build/Objects-normal/arm64/microworkout_const_extract_protocols.json
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/microworkout.build/Objects-normal/arm64/microworkout.LinkFileList (in target 'microworkout' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/microworkout.build/Objects-normal/arm64/microworkout.LinkFileList
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/gymwidgetExtension-DebugDylibPath-normal-arm64.txt (in target 'gymwidgetExtension' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/gymwidgetExtension-DebugDylibPath-normal-arm64.txt
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/gymwidgetExtension-DebugEntryPoint-normal-arm64.txt (in target 'gymwidgetExtension' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/gymwidgetExtension-DebugEntryPoint-normal-arm64.txt
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/microworkout.build/Objects-normal/arm64/microworkout-OutputFileMap.json (in target 'microworkout' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/microworkout.build/Objects-normal/arm64/microworkout-OutputFileMap.json
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/microworkout.build/Objects-normal/arm64/microworkout.SwiftFileList (in target 'microworkout' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/microworkout.build/Objects-normal/arm64/microworkout.SwiftFileList
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/gymwidgetExtension-DebugDylibInstallName-normal-arm64.txt (in target 'gymwidgetExtension' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/gymwidgetExtension-DebugDylibInstallName-normal-arm64.txt
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/Objects-normal/arm64/gymwidgetExtension_const_extract_protocols.json (in target 'gymwidgetExtension' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/Objects-normal/arm64/gymwidgetExtension_const_extract_protocols.json
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/Objects-normal/arm64/gymwidgetExtension.SwiftFileList (in target 'gymwidgetExtension' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/Objects-normal/arm64/gymwidgetExtension.SwiftFileList
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/Objects-normal/arm64/gymwidgetExtension.LinkFileList (in target 'gymwidgetExtension' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/Objects-normal/arm64/gymwidgetExtension.LinkFileList
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/Objects-normal/arm64/gymwidgetExtension.SwiftConstValuesFileList (in target 'gymwidgetExtension' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/Objects-normal/arm64/gymwidgetExtension.SwiftConstValuesFileList
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/Objects-normal/arm64/gymwidgetExtension-OutputFileMap.json (in target 'gymwidgetExtension' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/Objects-normal/arm64/gymwidgetExtension-OutputFileMap.json
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwatch\ Watch\ App.build/gymwatch\ Watch\ App.hmap (in target 'gymwatch Watch App' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwatch\ Watch\ App.build/gymwatch\ Watch\ App.hmap
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwatch\ Watch\ App.build/gymwatch\ Watch\ App.DependencyStaticMetadataFileList (in target 'gymwatch Watch App' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwatch\ Watch\ App.build/gymwatch\ Watch\ App.DependencyStaticMetadataFileList
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwatch\ Watch\ App.build/gymwatch\ Watch\ App.DependencyMetadataFileList (in target 'gymwatch Watch App' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwatch\ Watch\ App.build/gymwatch\ Watch\ App.DependencyMetadataFileList
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwatch\ Watch\ App.build/gymwatch\ Watch\ App-project-headers.hmap (in target 'gymwatch Watch App' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwatch\ Watch\ App.build/gymwatch\ Watch\ App-project-headers.hmap
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwatch\ Watch\ App.build/gymwatch\ Watch\ App-own-target-headers.hmap (in target 'gymwatch Watch App' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwatch\ Watch\ App.build/gymwatch\ Watch\ App-own-target-headers.hmap
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwatch\ Watch\ App.build/gymwatch\ Watch\ App-generated-files.hmap (in target 'gymwatch Watch App' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwatch\ Watch\ App.build/gymwatch\ Watch\ App-generated-files.hmap
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwatch\ Watch\ App.build/gymwatch\ Watch\ App-all-target-headers.hmap (in target 'gymwatch Watch App' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwatch\ Watch\ App.build/gymwatch\ Watch\ App-all-target-headers.hmap
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwatch\ Watch\ App.build/gymwatch\ Watch\ App-all-non-framework-target-headers.hmap (in target 'gymwatch Watch App' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwatch\ Watch\ App.build/gymwatch\ Watch\ App-all-non-framework-target-headers.hmap
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwatch\ Watch\ App.build/gymwatch\ Watch\ App-DebugDylibPath-normal-arm64.txt (in target 'gymwatch Watch App' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwatch\ Watch\ App.build/gymwatch\ Watch\ App-DebugDylibPath-normal-arm64.txt
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwatch\ Watch\ App.build/gymwatch\ Watch\ App-DebugDylibInstallName-normal-arm64.txt (in target 'gymwatch Watch App' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwatch\ Watch\ App.build/gymwatch\ Watch\ App-DebugDylibInstallName-normal-arm64.txt
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwatch\ Watch\ App.build/empty-gymwatch\ Watch\ App.plist (in target 'gymwatch Watch App' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwatch\ Watch\ App.build/empty-gymwatch\ Watch\ App.plist
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwatch\ Watch\ App.build/Objects-normal/arm64/gymwatch\ Watch\ App_const_extract_protocols.json (in target 'gymwatch Watch App' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwatch\ Watch\ App.build/Objects-normal/arm64/gymwatch\ Watch\ App_const_extract_protocols.json
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwatch\ Watch\ App.build/Objects-normal/arm64/gymwatch\ Watch\ App.SwiftFileList (in target 'gymwatch Watch App' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwatch\ Watch\ App.build/Objects-normal/arm64/gymwatch\ Watch\ App.SwiftFileList
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwatch\ Watch\ App.build/Objects-normal/arm64/gymwatch\ Watch\ App.SwiftConstValuesFileList (in target 'gymwatch Watch App' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwatch\ Watch\ App.build/Objects-normal/arm64/gymwatch\ Watch\ App.SwiftConstValuesFileList
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwatch\ Watch\ App.build/Objects-normal/arm64/gymwatch\ Watch\ App.LinkFileList (in target 'gymwatch Watch App' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwatch\ Watch\ App.build/Objects-normal/arm64/gymwatch\ Watch\ App.LinkFileList
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwatch\ Watch\ App.build/Objects-normal/arm64/gymwatch\ Watch\ App-OutputFileMap.json (in target 'gymwatch Watch App' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwatch\ Watch\ App.build/Objects-normal/arm64/gymwatch\ Watch\ App-OutputFileMap.json
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/TripleA.build/Debug-iphonesimulator/TripleA.build/TripleA.modulemap (in target 'TripleA' from project 'TripleA')
+    cd /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/SourcePackages/checkouts/TripleA
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/TripleA.build/Debug-iphonesimulator/TripleA.build/TripleA.modulemap
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/TripleA.build/Debug-iphonesimulator/TripleA.build/TripleA.DependencyStaticMetadataFileList (in target 'TripleA' from project 'TripleA')
+    cd /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/SourcePackages/checkouts/TripleA
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/TripleA.build/Debug-iphonesimulator/TripleA.build/TripleA.DependencyStaticMetadataFileList
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/TripleA.build/Debug-iphonesimulator/TripleA.build/TripleA.DependencyMetadataFileList (in target 'TripleA' from project 'TripleA')
+    cd /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/SourcePackages/checkouts/TripleA
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/TripleA.build/Debug-iphonesimulator/TripleA.build/TripleA.DependencyMetadataFileList
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/TripleA.build/Debug-iphonesimulator/TripleA.build/Objects-normal/arm64/TripleA_const_extract_protocols.json (in target 'TripleA' from project 'TripleA')
+    cd /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/SourcePackages/checkouts/TripleA
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/TripleA.build/Debug-iphonesimulator/TripleA.build/Objects-normal/arm64/TripleA_const_extract_protocols.json
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/TripleA.build/Debug-iphonesimulator/TripleA.build/Objects-normal/arm64/TripleA.SwiftFileList (in target 'TripleA' from project 'TripleA')
+    cd /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/SourcePackages/checkouts/TripleA
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/TripleA.build/Debug-iphonesimulator/TripleA.build/Objects-normal/arm64/TripleA.SwiftFileList
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/TripleA.build/Debug-iphonesimulator/TripleA.build/Objects-normal/arm64/TripleA.SwiftConstValuesFileList (in target 'TripleA' from project 'TripleA')
+    cd /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/SourcePackages/checkouts/TripleA
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/TripleA.build/Debug-iphonesimulator/TripleA.build/Objects-normal/arm64/TripleA.SwiftConstValuesFileList
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/TripleA.build/Debug-iphonesimulator/TripleA.build/Objects-normal/arm64/TripleA.LinkFileList (in target 'TripleA' from project 'TripleA')
+    cd /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/SourcePackages/checkouts/TripleA
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/TripleA.build/Debug-iphonesimulator/TripleA.build/Objects-normal/arm64/TripleA.LinkFileList
+
+WriteAuxiliaryFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/TripleA.build/Debug-iphonesimulator/TripleA.build/Objects-normal/arm64/TripleA-OutputFileMap.json (in target 'TripleA' from project 'TripleA')
+    cd /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/SourcePackages/checkouts/TripleA
+    write-file /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/TripleA.build/Debug-iphonesimulator/TripleA.build/Objects-normal/arm64/TripleA-OutputFileMap.json
+
+MkDir /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Products/Debug-iphonesimulator/microworkout.app/PlugIns (in target 'microworkout' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    /bin/mkdir -p /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Products/Debug-iphonesimulator/microworkout.app/PlugIns
+
+MkDir /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Products/Debug-iphonesimulator/microworkout.app (in target 'microworkout' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    /bin/mkdir -p /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Products/Debug-iphonesimulator/microworkout.app
+
+Copy /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/TripleA.modulemap /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/TripleA.build/Debug-iphonesimulator/TripleA.build/TripleA.modulemap (in target 'TripleA' from project 'TripleA')
+    cd /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/SourcePackages/checkouts/TripleA
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/TripleA.build/Debug-iphonesimulator/TripleA.build/TripleA.modulemap /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator
+
+MkDir /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Products/Debug-iphonesimulator/gymwidgetExtension.appex (in target 'gymwidgetExtension' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    /bin/mkdir -p /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Products/Debug-iphonesimulator/gymwidgetExtension.appex
+
+MkDir /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Products/Debug-iphonesimulator/gymwatch\ Watch\ App.app (in target 'gymwatch Watch App' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    /bin/mkdir -p /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Products/Debug-iphonesimulator/gymwatch\ Watch\ App.app
+
+ValidateDevelopmentAssets /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwatch\ Watch\ App.build (in target 'gymwatch Watch App' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    builtin-validate-development-assets --validate YES_ERROR /Users/fer/ios-microworkout/gymwatch\ Watch\ App/Preview\ Content
+
+Ld /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Products/Debug-iphonesimulator/gymwidgetExtension.appex/__preview.dylib normal (in target 'gymwidgetExtension' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-ios18.2-simulator -dynamiclib -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.1.sdk -O0 -L/Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Products/Debug-iphonesimulator -F/Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Products/Debug-iphonesimulator -install_name @rpath/gymwidgetExtension.debug.dylib -dead_strip -rdynamic -Xlinker -no_deduplicate -Xlinker -objc_abi_version -Xlinker 2 -Xlinker -dependency_info -Xlinker /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/Objects-normal/arm64/gymwidgetExtension_dependency_info.dat -o /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Products/Debug-iphonesimulator/gymwidgetExtension.appex/__preview.dylib
+
+MkDir /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/assetcatalog_output/thinned (in target 'gymwidgetExtension' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    /bin/mkdir -p /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/assetcatalog_output/thinned
+
+GenerateAssetSymbols /Users/fer/ios-microworkout/gymwidget/Assets.xcassets (in target 'gymwidgetExtension' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    /Applications/Xcode.app/Contents/Developer/usr/bin/actool /Users/fer/ios-microworkout/gymwidget/Assets.xcassets --compile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Products/Debug-iphonesimulator/gymwidgetExtension.appex --output-format human-readable-text --notices --warnings --export-dependency-info /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/assetcatalog_dependencies --output-partial-info-plist /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/assetcatalog_generated_info.plist --accent-color AccentColor --widget-background-color WidgetBackground --compress-pngs --enable-on-demand-resources NO --standalone-icon-behavior all --development-region en --target-device iphone --target-device ipad --minimum-deployment-target 18.2 --platform iphonesimulator --bundle-identifier es.fernandosalom.microworkoutapp.gymwidget --generate-swift-asset-symbols /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/DerivedSources/GeneratedAssetSymbols.swift --generate-objc-asset-symbols /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/DerivedSources/GeneratedAssetSymbols.h --generate-asset-symbol-index /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/DerivedSources/GeneratedAssetSymbols-Index.plist
+/* com.apple.actool.compilation-results */
+/Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/DerivedSources/GeneratedAssetSymbols-Index.plist
+/Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/DerivedSources/GeneratedAssetSymbols.h
+/Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/DerivedSources/GeneratedAssetSymbols.swift
+
+
+MkDir /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/assetcatalog_output/unthinned (in target 'gymwidgetExtension' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    /bin/mkdir -p /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/assetcatalog_output/unthinned
+
+CompileAssetCatalogVariant thinned /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Products/Debug-iphonesimulator/gymwidgetExtension.appex /Users/fer/ios-microworkout/gymwidget/Assets.xcassets (in target 'gymwidgetExtension' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    /Applications/Xcode.app/Contents/Developer/usr/bin/actool /Users/fer/ios-microworkout/gymwidget/Assets.xcassets --compile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/assetcatalog_output/thinned --output-format human-readable-text --notices --warnings --export-dependency-info /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/assetcatalog_dependencies_thinned --output-partial-info-plist /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/assetcatalog_generated_info.plist_thinned --accent-color AccentColor --widget-background-color WidgetBackground --compress-pngs --enable-on-demand-resources NO --standalone-icon-behavior all --filter-for-thinning-device-configuration iPhone18,3 --filter-for-device-os-version 26.1 --development-region en --target-device iphone --target-device ipad --minimum-deployment-target 18.2 --platform iphonesimulator
+/* com.apple.actool.compilation-results */
+/Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/assetcatalog_generated_info.plist_thinned
+
+
+Ld /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Products/Debug-iphonesimulator/gymwatch\ Watch\ App.app/__preview.dylib normal (in target 'gymwatch Watch App' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-ios18.0-simulator -dynamiclib -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.1.sdk -O0 -L/Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Products/Debug-iphonesimulator -F/Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Products/Debug-iphonesimulator -install_name @rpath/gymwatch\ Watch\ App.debug.dylib -dead_strip -rdynamic -Xlinker -no_deduplicate -Xlinker -objc_abi_version -Xlinker 2 -Xlinker -dependency_info -Xlinker /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwatch\ Watch\ App.build/Objects-normal/arm64/gymwatch\ Watch\ App_dependency_info.dat -o /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Products/Debug-iphonesimulator/gymwatch\ Watch\ App.app/__preview.dylib
+
+MkDir /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwatch\ Watch\ App.build/assetcatalog_output/thinned (in target 'gymwatch Watch App' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    /bin/mkdir -p /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwatch\ Watch\ App.build/assetcatalog_output/thinned
+
+MkDir /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwatch\ Watch\ App.build/assetcatalog_output/unthinned (in target 'gymwatch Watch App' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    /bin/mkdir -p /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwatch\ Watch\ App.build/assetcatalog_output/unthinned
+
+GenerateAssetSymbols /Users/fer/ios-microworkout/microworkout/Preview\ Content/Preview\ Assets.xcassets /Users/fer/ios-microworkout/Assets.xcassets (in target 'gymwatch Watch App' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    /Applications/Xcode.app/Contents/Developer/usr/bin/actool /Users/fer/ios-microworkout/microworkout/Preview\ Content/Preview\ Assets.xcassets /Users/fer/ios-microworkout/Assets.xcassets --compile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Products/Debug-iphonesimulator/gymwatch\ Watch\ App.app --output-format human-readable-text --notices --warnings --export-dependency-info /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwatch\ Watch\ App.build/assetcatalog_dependencies --output-partial-info-plist /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwatch\ Watch\ App.build/assetcatalog_generated_info.plist --app-icon AppIcon --accent-color AccentColor --compress-pngs --enable-on-demand-resources YES --development-region en --target-device iphone --target-device ipad --minimum-deployment-target 18.0 --platform iphonesimulator --bundle-identifier es.fernandosalom.microworkoutapp.watchkitapp --generate-swift-asset-symbol-extensions NO --generate-swift-asset-symbols /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwatch\ Watch\ App.build/DerivedSources/GeneratedAssetSymbols.swift --generate-objc-asset-symbols /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwatch\ Watch\ App.build/DerivedSources/GeneratedAssetSymbols.h --generate-asset-symbol-index /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwatch\ Watch\ App.build/DerivedSources/GeneratedAssetSymbols-Index.plist
+
+CompileAssetCatalogVariant thinned /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Products/Debug-iphonesimulator/gymwatch\ Watch\ App.app /Users/fer/ios-microworkout/microworkout/Preview\ Content/Preview\ Assets.xcassets /Users/fer/ios-microworkout/Assets.xcassets (in target 'gymwatch Watch App' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    /Applications/Xcode.app/Contents/Developer/usr/bin/actool /Users/fer/ios-microworkout/microworkout/Preview\ Content/Preview\ Assets.xcassets /Users/fer/ios-microworkout/Assets.xcassets --compile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwatch\ Watch\ App.build/assetcatalog_output/thinned --output-format human-readable-text --notices --warnings --export-dependency-info /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwatch\ Watch\ App.build/assetcatalog_dependencies_thinned --output-partial-info-plist /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwatch\ Watch\ App.build/assetcatalog_generated_info.plist_thinned --app-icon AppIcon --accent-color AccentColor --compress-pngs --enable-on-demand-resources YES --filter-for-thinning-device-configuration iPhone18,3 --filter-for-device-os-version 26.1 --development-region en --target-device iphone --target-device ipad --minimum-deployment-target 18.0 --platform iphonesimulator
+/* com.apple.actool.errors */
+error: None of the input catalogs contained a matching stickers icon set, app icon set, or icon stack named  "AppIcon".
+/* com.apple.actool.notices */
+warning: Failed to read file attributes for "/Users/fer/ios-microworkout/Assets.xcassets"
+    Failure Reason: No such file or directory
+warning: Accent color ‘AccentColor’ is not present in any asset catalogs.
+/* com.apple.actool.compilation-results */
+/Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwatch Watch App.build/assetcatalog_generated_info.plist_thinned
+
+
+LinkAssetCatalog /Users/fer/ios-microworkout/gymwidget/Assets.xcassets (in target 'gymwidgetExtension' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    builtin-linkAssetCatalog --thinned /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/assetcatalog_output/thinned --thinned-dependencies /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/assetcatalog_dependencies_thinned --thinned-info-plist-content /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/assetcatalog_generated_info.plist_thinned --unthinned /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/assetcatalog_output/unthinned --unthinned-dependencies /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/assetcatalog_dependencies_unthinned --unthinned-info-plist-content /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/assetcatalog_generated_info.plist_unthinned --output /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Products/Debug-iphonesimulator/gymwidgetExtension.appex --plist-output /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/assetcatalog_generated_info.plist
+
+SwiftDriver TripleA normal arm64 com.apple.xcode.tools.swift.compiler (in target 'TripleA' from project 'TripleA')
+    cd /Users/fer/ios-microworkout/microworkout.xcodeproj
+    builtin-SwiftDriver -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name TripleA -Onone -enforce-exclusivity\=checked @/Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/TripleA.build/Debug-iphonesimulator/TripleA.build/Objects-normal/arm64/TripleA.SwiftFileList -DSWIFT_PACKAGE -DDEBUG -DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE -DXcode -plugin-path /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.1.sdk -target arm64-apple-ios15.0-simulator -g -module-cache-path /Users/fer/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -Xfrontend -serialize-debugging-options -enable-testing -suppress-warnings -index-store-path /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Products/Debug-iphonesimulator -Isystem /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/lib -F /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Products/Debug-iphonesimulator -F /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks -F /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.1.sdk/Developer/Library/Frameworks -c -j11 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/fer/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphonesimulator26.1-23B77-90cf18a4295e390e64c810bc6bd7acbc.sdkstatcache -output-file-map /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/TripleA.build/Debug-iphonesimulator/TripleA.build/Objects-normal/arm64/TripleA-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/fer/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -sdk-module-cache-path /Users/fer/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/TripleA.build/Debug-iphonesimulator/TripleA.build/Objects-normal/arm64/TripleA.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/fer/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/TripleA.build/Debug-iphonesimulator/TripleA.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/TripleA.build/Debug-iphonesimulator/TripleA.build/Objects-normal/arm64/TripleA_const_extract_protocols.json -Xcc -I/Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Products/Debug-iphonesimulator/include -Xcc -I/Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/TripleA.build/Debug-iphonesimulator/TripleA.build/DerivedSources-normal/arm64 -Xcc -I/Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/TripleA.build/Debug-iphonesimulator/TripleA.build/DerivedSources/arm64 -Xcc -I/Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/TripleA.build/Debug-iphonesimulator/TripleA.build/DerivedSources -Xcc -DSWIFT_PACKAGE -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/TripleA.build/Debug-iphonesimulator/TripleA.build/Objects-normal/arm64/TripleA-Swift.h -working-directory /Users/fer/ios-microworkout/microworkout.xcodeproj -experimental-emit-module-separately -disable-cmo
+
+ProcessInfoPlistFile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Products/Debug-iphonesimulator/gymwidgetExtension.appex/Info.plist /Users/fer/ios-microworkout/gymwidget/Info.plist (in target 'gymwidgetExtension' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    builtin-infoPlistUtility /Users/fer/ios-microworkout/gymwidget/Info.plist -producttype com.apple.product-type.app-extension -expandbuildsettings -format binary -platform iphonesimulator -additionalcontentfile /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/assetcatalog_generated_info.plist -o /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Products/Debug-iphonesimulator/gymwidgetExtension.appex/Info.plist
+
+SwiftDriver\ Compilation\ Requirements gymwidgetExtension normal arm64 com.apple.xcode.tools.swift.compiler (in target 'gymwidgetExtension' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    builtin-Swift-Compilation-Requirements -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name gymwidgetExtension -Onone -enforce-exclusivity\=checked @/Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/Objects-normal/arm64/gymwidgetExtension.SwiftFileList -DDEBUG -DDEBUG -enable-bare-slash-regex -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.1.sdk -target arm64-apple-ios18.2-simulator -g -module-cache-path /Users/fer/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -Xfrontend -serialize-debugging-options -application-extension -enable-testing -index-store-path /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Products/Debug-iphonesimulator -F /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Products/Debug-iphonesimulator -emit-localized-strings -emit-localized-strings-path /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/Objects-normal/arm64 -c -j11 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/fer/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphonesimulator26.1-23B77-90cf18a4295e390e64c810bc6bd7acbc.sdkstatcache -output-file-map /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/Objects-normal/arm64/gymwidgetExtension-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/fer/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -sdk-module-cache-path /Users/fer/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/Objects-normal/arm64/gymwidgetExtension.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/fer/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/Objects-normal/arm64/gymwidgetExtension_const_extract_protocols.json -Xcc -iquote -Xcc /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/gymwidgetExtension-generated-files.hmap -Xcc -I/Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/gymwidgetExtension-own-target-headers.hmap -Xcc -I/Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/gymwidgetExtension-all-non-framework-target-headers.hmap -Xcc -ivfsoverlay -Xcc /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/microworkout-789f592607fdefbf2c2341b1f259f033-VFS-iphonesimulator/all-product-headers.yaml -Xcc -iquote -Xcc /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/gymwidgetExtension-project-headers.hmap -Xcc -I/Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Products/Debug-iphonesimulator/include -Xcc -I/Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/DerivedSources-normal/arm64 -Xcc -I/Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/DerivedSources/arm64 -Xcc -I/Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/Objects-normal/arm64/gymwidgetExtension-Swift.h -working-directory /Users/fer/ios-microworkout -experimental-emit-module-separately -disable-cmo
+error: Build input files cannot be found: '/Users/fer/ios-microworkout/TrainingLocalDataSource.swift', '/Users/fer/ios-microworkout/TrainingDTO.swift', '/Users/fer/ios-microworkout/Exercise.swift', '/Users/fer/ios-microworkout/TrainingRepository.swift', '/Users/fer/ios-microworkout/TrainingUseCase.swift', '/Users/fer/ios-microworkout/MealType.swift', '/Users/fer/ios-microworkout/NutritionInfo.swift', '/Users/fer/ios-microworkout/Meal.swift', '/Users/fer/ios-microworkout/FoodItem.swift', '/Users/fer/ios-microworkout/TrainingRepositoryProtocol.swift', '/Users/fer/ios-microworkout/Training.swift', '/Users/fer/ios-microworkout/WorkoutEntry.swift', '/Users/fer/ios-microworkout/WorkoutEntryByDay.swift', '/Users/fer/ios-microworkout/TrainingLocalDataStoreProtocol.swift', '/Users/fer/ios-microworkout/TrainingUseCaseProtocol.swift', '/Users/fer/ios-microworkout/UserDefaultsManagerProtocol.swift'. Did you forget to declare these files as outputs of any script phases or custom build rules which produce them? (in target 'gymwidgetExtension' from project 'microworkout')
+
+SwiftDriver\ Compilation gymwidgetExtension normal arm64 com.apple.xcode.tools.swift.compiler (in target 'gymwidgetExtension' from project 'microworkout')
+    cd /Users/fer/ios-microworkout
+    builtin-Swift-Compilation -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name gymwidgetExtension -Onone -enforce-exclusivity\=checked @/Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/Objects-normal/arm64/gymwidgetExtension.SwiftFileList -DDEBUG -DDEBUG -enable-bare-slash-regex -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.1.sdk -target arm64-apple-ios18.2-simulator -g -module-cache-path /Users/fer/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -Xfrontend -serialize-debugging-options -application-extension -enable-testing -index-store-path /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Products/Debug-iphonesimulator -F /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Products/Debug-iphonesimulator -emit-localized-strings -emit-localized-strings-path /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/Objects-normal/arm64 -c -j11 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/fer/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphonesimulator26.1-23B77-90cf18a4295e390e64c810bc6bd7acbc.sdkstatcache -output-file-map /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/Objects-normal/arm64/gymwidgetExtension-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/fer/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -sdk-module-cache-path /Users/fer/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/Objects-normal/arm64/gymwidgetExtension.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/fer/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/Objects-normal/arm64/gymwidgetExtension_const_extract_protocols.json -Xcc -iquote -Xcc /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/gymwidgetExtension-generated-files.hmap -Xcc -I/Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/gymwidgetExtension-own-target-headers.hmap -Xcc -I/Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/gymwidgetExtension-all-non-framework-target-headers.hmap -Xcc -ivfsoverlay -Xcc /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/microworkout-789f592607fdefbf2c2341b1f259f033-VFS-iphonesimulator/all-product-headers.yaml -Xcc -iquote -Xcc /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/gymwidgetExtension-project-headers.hmap -Xcc -I/Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Products/Debug-iphonesimulator/include -Xcc -I/Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/DerivedSources-normal/arm64 -Xcc -I/Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/DerivedSources/arm64 -Xcc -I/Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Intermediates.noindex/microworkout.build/Debug-iphonesimulator/gymwidgetExtension.build/Objects-normal/arm64/gymwidgetExtension-Swift.h -working-directory /Users/fer/ios-microworkout -experimental-emit-module-separately -disable-cmo
+error: Build input files cannot be found: '/Users/fer/ios-microworkout/TrainingLocalDataSource.swift', '/Users/fer/ios-microworkout/TrainingDTO.swift', '/Users/fer/ios-microworkout/Exercise.swift', '/Users/fer/ios-microworkout/TrainingRepository.swift', '/Users/fer/ios-microworkout/TrainingUseCase.swift', '/Users/fer/ios-microworkout/MealType.swift', '/Users/fer/ios-microworkout/NutritionInfo.swift', '/Users/fer/ios-microworkout/Meal.swift', '/Users/fer/ios-microworkout/FoodItem.swift', '/Users/fer/ios-microworkout/TrainingRepositoryProtocol.swift', '/Users/fer/ios-microworkout/Training.swift', '/Users/fer/ios-microworkout/WorkoutEntry.swift', '/Users/fer/ios-microworkout/WorkoutEntryByDay.swift', '/Users/fer/ios-microworkout/TrainingLocalDataStoreProtocol.swift', '/Users/fer/ios-microworkout/TrainingUseCaseProtocol.swift', '/Users/fer/ios-microworkout/UserDefaultsManagerProtocol.swift'. Did you forget to declare these files as outputs of any script phases or custom build rules which produce them? (in target 'gymwidgetExtension' from project 'microworkout')
+
+** BUILD FAILED **
+
+
+The following build commands failed:
+	CompileAssetCatalogVariant thinned /Users/fer/Library/Developer/Xcode/DerivedData/microworkout-ebcugufwelcrxichnhmtufprjkdu/Build/Products/Debug-iphonesimulator/gymwatch\ Watch\ App.app /Users/fer/ios-microworkout/microworkout/Preview\ Content/Preview\ Assets.xcassets /Users/fer/ios-microworkout/Assets.xcassets (in target 'gymwatch Watch App' from project 'microworkout')
+	SwiftDriver\ Compilation\ Requirements gymwidgetExtension normal arm64 com.apple.xcode.tools.swift.compiler (in target 'gymwidgetExtension' from project 'microworkout')
+	SwiftDriver\ Compilation gymwidgetExtension normal arm64 com.apple.xcode.tools.swift.compiler (in target 'gymwidgetExtension' from project 'microworkout')
+	Building workspace microworkout with scheme gymwidgetExtension and configuration Debug
+(4 failures)

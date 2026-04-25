@@ -10,7 +10,7 @@ import SwiftUI
 struct TabbarView: View {
     var body: some View {
         TabView {
-            HomeBuilder(component: TestAppComponent()).build(appState: AppState())
+            HomeBuilder(component: DefaultAppComponent()).build(appState: AppState())
                 .tabItem {
                     Label("Entrenamiento", systemImage: "dumbbell.fill")
                 }
