@@ -156,4 +156,8 @@ final class HomeViewModel: ObservableObject {
     func goTo(this healthWorkout: HealthWorkout) {
         router.goToHealthWorkoutDetail(healthWorkout)
     }
+
+    func goToAddMeal() {
+        router.goToAddMeal()
+    }
 }

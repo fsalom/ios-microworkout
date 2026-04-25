@@ -1,9 +1,34 @@
 import SwiftUI
 
+enum AppearancePreference: String, CaseIterable, Identifiable {
+    case system
+    case light
+    case dark
+
+    var id: String { rawValue }
+
+    var label: String {
+        switch self {
+        case .system: return "Automático"
+        case .light:  return "Claro"
+        case .dark:   return "Oscuro"
+        }
+    }
+
+    var colorScheme: ColorScheme? {
+        switch self {
+        case .system: return nil
+        case .light:  return .light
+        case .dark:   return .dark
+        }
+    }
+}
+
 @main
 struct MicroWorkoutApp: App {
     @StateObject var appState: AppState
     @StateObject var mirrorManager = WorkoutMirrorManager.shared
+    @AppStorage("appearance_preference") private var appearanceRaw: String = AppearancePreference.system.rawValue
     private let component: AppComponentProtocol
 
     init() {
@@ -24,6 +49,7 @@ struct MicroWorkoutApp: App {
             RootView(root: SwitcherView(component: component), component: component)
                 .environmentObject(appState)
                 .environmentObject(mirrorManager)
+                .preferredColorScheme(AppearancePreference(rawValue: appearanceRaw)?.colorScheme)
                 .onAppear {
                     _ = PhoneConnectivityManager.shared
                     let trainings = TrainingContainer(component: component).makeUseCase().getTrainings()

@@ -24,4 +24,8 @@ class HomeRouter {
     func goToHealthWorkoutDetail(_ workout: HealthWorkout) {
         navigator.push(to: HealthWorkoutDetailBuilder(component: component).build(for: workout))
     }
+
+    func goToAddMeal() {
+        navigator.push(to: AddMealBuilder(component: component).build())
+    }
 }

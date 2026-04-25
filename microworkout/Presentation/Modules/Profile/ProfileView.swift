@@ -3,6 +3,7 @@ import SwiftUI
 struct ProfileView: View {
     @StateObject var viewModel: ProfileViewModel
     @Environment(\.scenePhase) private var scenePhase
+    @AppStorage("appearance_preference") private var appearanceRaw: String = AppearancePreference.system.rawValue
 
     var body: some View {
         NavigationView {
@@ -109,6 +110,21 @@ struct ProfileView: View {
                         Text("Activa los permisos en Salud > Perfil > Apps y servicios > microworkout")
                             .font(.caption)
                             .foregroundColor(.secondary)
+                    }
+                }
+            }
+
+            Section("Apariencia") {
+                Picker(selection: $appearanceRaw) {
+                    ForEach(AppearancePreference.allCases) { option in
+                        Text(option.label).tag(option.rawValue)
+                    }
+                } label: {
+                    HStack {
+                        Image(systemName: "moon.circle")
+                            .foregroundColor(.blue)
+                            .frame(width: 24)
+                        Text("Modo")
                     }
                 }
             }
