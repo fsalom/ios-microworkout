@@ -13,47 +13,38 @@ struct HomeView: View {
 
     var body: some View {
         ZStack(alignment: .top) {
-            List {
-                CalorieProgressCard()
-                    .padding(.horizontal, 8)
-                    .listRowSeparator(.hidden)
-                    .listRowBackground(Color.clear)
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: 20) {
+                    CalorieProgressCard()
+                        .padding(.horizontal, 8)
 
-                TodayStatsSection()
-                    .padding(.horizontal, 8)
-                    .listRowSeparator(.hidden)
-                    .listRowBackground(Color.clear)
+                    TodayStatsSection()
+                        .padding(.horizontal, 8)
 
-                HealthGrid()
-                    .padding(.horizontal, 8)
-                    .listRowSeparator(.hidden)
-                    .listRowBackground(Color.clear)
+                    HealthGrid()
+                        .padding(.horizontal, 8)
 
-                Text("Micro entrenamientos")
-                    .font(.title2)
-                    .fontWeight(.bold)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 8)
-                    .listRowSeparator(.hidden)
+                    if !viewModel.uiState.lastTrainings.isEmpty {
+                        Text("Micro entrenamientos")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .padding(.horizontal, 8)
 
-                ListMicroTrainings()
-                    .listRowSeparator(.hidden)
+                        ListMicroTrainings()
+                    }
 
-                Text("Últimos entrenamientos")
-                    .font(.title2)
-                    .fontWeight(.bold)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 8)
-                    .listRowSeparator(.hidden)
+                    if !viewModel.uiState.lastWorkoutItems.isEmpty {
+                        Text("Últimos entrenamientos")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .padding(.horizontal, 8)
 
-                ListLastLoggedExercises()
-                    .padding(.horizontal, 8)
-                    .listRowSeparator(.hidden)
+                        ListLastLoggedExercises()
+                            .padding(.horizontal, 8)
+                    }
+                }
+                .padding(.vertical, 16)
             }
-            .listStyle(.plain)
-            .padding(0)
             .onAppear {
                 if !hasAppeared {
                     viewModel.loadWeeksWithHealthInfo()
