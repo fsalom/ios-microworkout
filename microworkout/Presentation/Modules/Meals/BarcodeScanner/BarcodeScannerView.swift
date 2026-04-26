@@ -62,6 +62,9 @@ struct BarcodeScannerView: View {
                 .foregroundColor(.white)
             }
         }
+        .onChange(of: viewModel.shouldDismiss) { _, value in
+            if value { dismiss() }
+        }
     }
 }
 
@@ -340,7 +343,7 @@ struct BarcodeCameraView: UIViewRepresentable {
         if captureSession.canAddOutput(metadataOutput) {
             captureSession.addOutput(metadataOutput)
             metadataOutput.setMetadataObjectsDelegate(context.coordinator, queue: DispatchQueue.main)
-            metadataOutput.metadataObjectTypes = [.ean8, .ean13, .upce, .code128, .code39, .code93]
+            metadataOutput.metadataObjectTypes = [.ean8, .ean13, .upce, .code128, .code39, .code93, .qr, .dataMatrix]
         } else {
             return view
         }

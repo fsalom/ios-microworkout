@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tree:*)",
+      "Bash(xcodebuild:*)",
+      "Bash(xargs basename:*)",
+      "Bash(gem list:*)",
+      "Bash(ruby add_files_to_project.rb:*)",
+      "WebSearch",
+      "Bash(find:*)",
+      "Bash(ruby:*)"
+    ]
+  }
+}

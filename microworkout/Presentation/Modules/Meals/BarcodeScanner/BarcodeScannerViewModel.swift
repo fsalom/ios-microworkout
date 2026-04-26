@@ -25,6 +25,7 @@ final class BarcodeScannerViewModel: ObservableObject {
     @Published var scannedBarcode: String = ""
     @Published var foundItem: FoodItem?
     @Published var quantity: Double = 100
+    @Published var shouldDismiss: Bool = false
 
     private let mealUseCase: MealUseCaseProtocol
     private let navigator: NavigatorProtocol
@@ -76,7 +77,7 @@ final class BarcodeScannerViewModel: ObservableObject {
         guard var item = foundItem else { return }
         item.quantity = quantity
         onScanComplete(item)
-        navigator.dismiss()
+        shouldDismiss = true
     }
 
     func scanAgain() {
@@ -87,6 +88,6 @@ final class BarcodeScannerViewModel: ObservableObject {
     }
 
     func goBack() {
-        navigator.dismiss()
+        shouldDismiss = true
     }
 }
