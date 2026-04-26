@@ -87,6 +87,66 @@ final class MealsViewModel: ObservableObject {
         }
     }
 
+    /// Replaces the quantity of a single food item in a meal. Re-saves the meal
+    /// (delete + save workaround since there is no `updateMeal` API).
+    func updateFoodItem(itemId: UUID, mealId: UUID, newQuantity: Double) {
+        guard let meal = uiState.todayMeals.first(where: { $0.id == mealId }) else { return }
+        guard newQuantity > 0 else { return }
+
+        let updatedItems: [FoodItem] = meal.items.map { item in
+            guard item.id == itemId else { return item }
+            var copy = item
+            copy.quantity = newQuantity
+            return copy
+        }
+
+        let updatedMeal = Meal(
+            id: meal.id,
+            type: meal.type,
+            timestamp: meal.timestamp,
+            items: updatedItems
+        )
+
+        Task {
+            do {
+                try await mealUseCase.deleteMeal(meal.id)
+                try await mealUseCase.saveMeal(updatedMeal)
+                await MainActor.run { self.loadMeals() }
+            } catch {
+                await MainActor.run { self.uiState.error = "Error al actualizar" }
+            }
+        }
+    }
+
+    /// Deletes a single food item from a meal. If the meal had only that item,
+    /// the entire meal is removed. Otherwise the meal is updated removing the item.
+    func deleteFoodItem(itemId: UUID, mealId: UUID) {
+        guard let meal = uiState.todayMeals.first(where: { $0.id == mealId }) else { return }
+
+        Task {
+            do {
+                try await mealUseCase.deleteMeal(mealId)
+                if meal.items.count > 1 {
+                    let remaining = meal.items.filter { $0.id != itemId }
+                    let updated = Meal(
+                        id: meal.id,
+                        type: meal.type,
+                        timestamp: meal.timestamp,
+                        items: remaining
+                    )
+                    try await mealUseCase.saveMeal(updated)
+                }
+                await MainActor.run {
+                    self.loadMeals()
+                }
+            } catch {
+                await MainActor.run {
+                    self.uiState.error = "Error al eliminar"
+                }
+            }
+        }
+    }
+
     func changeDate(to date: Date) {
         uiState.selectedDate = date
         loadProfileTargets()

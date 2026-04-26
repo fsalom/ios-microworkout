@@ -10,6 +10,7 @@ struct MealsView: View {
     let component: AppComponentProtocol
     @Environment(\.scenePhase) private var scenePhase
     @State private var addMealSheet: AddMealSheetData?
+    @State private var editingEntry: EditFoodEntry?
 
     var body: some View {
         ZStack {
@@ -28,18 +29,17 @@ struct MealsView: View {
                     SummaryCard(state: viewModel.uiState)
                         .padding(.horizontal)
 
-                    ActionButtonsRow(
-                        onScan: { viewModel.goToBarcodeScanner() },
-                        onSearch: { addMealSheet = AddMealSheetData(mealType: nil) }
-                    )
-                    .padding(.horizontal)
-
                     ForEach(MealType.allCases) { type in
                         MealSectionCard(
                             type: type,
                             meals: viewModel.uiState.mealsByType[type] ?? [],
                             onAdd: { addMealSheet = AddMealSheetData(mealType: type) },
-                            onDelete: { mealId in viewModel.deleteMeal(id: mealId) }
+                            onDeleteItem: { itemId, mealId in
+                                viewModel.deleteFoodItem(itemId: itemId, mealId: mealId)
+                            },
+                            onEditItem: { item, mealId in
+                                editingEntry = EditFoodEntry(food: item, mealId: mealId)
+                            }
                         )
                         .padding(.horizontal)
                     }
@@ -60,12 +60,30 @@ struct MealsView: View {
         .sheet(item: $addMealSheet, onDismiss: { viewModel.loadMeals() }) { data in
             AddMealBuilder(component: component).build(prefilledType: data.mealType)
         }
+        .sheet(item: $editingEntry) { entry in
+            QuantityPickerSheet(
+                food: entry.food,
+                onConfirm: { adjusted in
+                    viewModel.updateFoodItem(itemId: entry.food.id, mealId: entry.mealId, newQuantity: adjusted.quantity)
+                    editingEntry = nil
+                },
+                onCancel: { editingEntry = nil }
+            )
+            .presentationDetents([.medium])
+            .presentationDragIndicator(.visible)
+        }
     }
 }
 
 struct AddMealSheetData: Identifiable {
     let id = UUID()
     let mealType: MealType?
+}
+
+struct EditFoodEntry: Identifiable {
+    let id = UUID()
+    let food: FoodItem
+    let mealId: UUID
 }
 
 // MARK: - Date Header
@@ -322,65 +340,35 @@ private struct MealsProgressBar: View {
     }
 }
 
-// MARK: - Action Buttons
-
-private struct ActionButtonsRow: View {
-    let onScan: () -> Void
-    let onSearch: () -> Void
-
-    var body: some View {
-        HStack(spacing: 12) {
-            Button(action: onScan) {
-                ActionButtonLabel(icon: "barcode.viewfinder", title: "Escanear", filled: true)
-            }
-            .buttonStyle(.plain)
-
-            Button(action: onSearch) {
-                ActionButtonLabel(icon: "plus", title: "Buscar", filled: false)
-            }
-            .buttonStyle(.plain)
-        }
-    }
-}
-
-private struct ActionButtonLabel: View {
-    let icon: String
-    let title: String
-    let filled: Bool
-
-    var body: some View {
-        VStack(spacing: 6) {
-            Image(systemName: icon)
-                .font(.system(size: 18, weight: .semibold))
-            Text(title)
-                .font(.subheadline)
-                .fontWeight(.medium)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 14)
-        .foregroundColor(filled ? .white : .primary)
-        .background(
-            RoundedRectangle(cornerRadius: 14)
-                .fill(filled ? Color.green : Color(.secondarySystemGroupedBackground))
-                .shadow(color: Color.black.opacity(filled ? 0 : 0.05), radius: 8, x: 0, y: 2)
-        )
-    }
-}
-
 // MARK: - Meal Section Card
 
 private struct MealSectionCard: View {
     let type: MealType
     let meals: [Meal]
     let onAdd: () -> Void
-    let onDelete: (UUID) -> Void
+    let onDelete: (_ itemId: UUID, _ mealId: UUID) -> Void
+    let onEdit: (_ item: FoodItem, _ mealId: UUID) -> Void
+
+    @State private var openSwipeRowId: UUID? = nil
+
+    init(type: MealType,
+         meals: [Meal],
+         onAdd: @escaping () -> Void,
+         onDeleteItem: @escaping (_ itemId: UUID, _ mealId: UUID) -> Void,
+         onEditItem: @escaping (_ item: FoodItem, _ mealId: UUID) -> Void) {
+        self.type = type
+        self.meals = meals
+        self.onAdd = onAdd
+        self.onDelete = onDeleteItem
+        self.onEdit = onEditItem
+    }
 
     private var totalNutrition: NutritionInfo {
         meals.reduce(.zero) { $0 + $1.totalNutrition }
     }
 
-    private var allItems: [FoodItem] {
-        meals.flatMap { $0.items }
+    private var entries: [(mealId: UUID, item: FoodItem)] {
+        meals.flatMap { meal in meal.items.map { (meal.id, $0) } }
     }
 
     var body: some View {
@@ -398,7 +386,7 @@ private struct MealSectionCard: View {
                     Text(type.rawValue)
                         .font(.headline)
                         .fontWeight(.bold)
-                    Text(allItems.isEmpty ? "Sin comidas registradas" : macrosSummary)
+                    Text(entries.isEmpty ? "Sin comidas registradas" : macrosSummary)
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
@@ -417,16 +405,25 @@ private struct MealSectionCard: View {
             }
             .padding(14)
 
-            if !allItems.isEmpty {
+            if !entries.isEmpty {
                 Divider().padding(.leading, 14)
 
                 VStack(spacing: 0) {
-                    ForEach(Array(allItems.enumerated()), id: \.element.id) { index, item in
-                        FoodItemRowView(item: item)
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 10)
+                    ForEach(Array(entries.enumerated()), id: \.element.item.id) { index, entry in
+                        SwipeableRow(
+                            id: entry.item.id,
+                            openId: $openSwipeRowId,
+                            onDelete: { onDelete(entry.item.id, entry.mealId) },
+                            onTap: { onEdit(entry.item, entry.mealId) }
+                        ) {
+                            FoodItemRowView(item: entry.item)
+                                .padding(.horizontal, 14)
+                                .padding(.vertical, 10)
+                                .background(Color(.secondarySystemGroupedBackground))
+                                .contentShape(Rectangle())
+                        }
 
-                        if index < allItems.count - 1 {
+                        if index < entries.count - 1 {
                             Divider().padding(.leading, 14)
                         }
                     }
@@ -439,9 +436,7 @@ private struct MealSectionCard: View {
                 .fill(Color(.secondarySystemGroupedBackground))
                 .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 2)
         )
-        .swipeActions(edge: .trailing) {
-            // ForEach swipe actions per meal could be added; deletion is per-meal so we skip section-wide
-        }
+        .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 
     private var macrosSummary: String {
@@ -450,6 +445,142 @@ private struct MealSectionCard: View {
         let c = Int(totalNutrition.carbohydrates)
         let f = Int(totalNutrition.fats)
         return "\(kcal) kcal · P\(p) · C\(c) · F\(f)"
+    }
+}
+
+// MARK: - Horizontal Pan Recognizer (UIKit) — coexists with parent ScrollView
+
+private struct HorizontalPanRecognizer: UIViewRepresentable {
+    let onChanged: (CGFloat) -> Void
+    let onEnded: (CGFloat, CGFloat) -> Void
+
+    func makeUIView(context: Context) -> UIView {
+        let view = UIView()
+        view.backgroundColor = .clear
+        let pan = UIPanGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handlePan(_:)))
+        pan.delegate = context.coordinator
+        view.addGestureRecognizer(pan)
+        return view
+    }
+
+    func updateUIView(_ uiView: UIView, context: Context) {
+        context.coordinator.onChanged = onChanged
+        context.coordinator.onEnded = onEnded
+    }
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(onChanged: onChanged, onEnded: onEnded)
+    }
+
+    class Coordinator: NSObject, UIGestureRecognizerDelegate {
+        var onChanged: (CGFloat) -> Void
+        var onEnded: (CGFloat, CGFloat) -> Void
+
+        init(onChanged: @escaping (CGFloat) -> Void, onEnded: @escaping (CGFloat, CGFloat) -> Void) {
+            self.onChanged = onChanged
+            self.onEnded = onEnded
+        }
+
+        @objc func handlePan(_ recognizer: UIPanGestureRecognizer) {
+            let translation = recognizer.translation(in: recognizer.view)
+            let velocity = recognizer.velocity(in: recognizer.view)
+            switch recognizer.state {
+            case .changed:
+                onChanged(translation.x)
+            case .ended, .cancelled, .failed:
+                onEnded(translation.x, velocity.x)
+            default:
+                break
+            }
+        }
+
+        // Only start if horizontal motion dominates — otherwise let the ScrollView scroll.
+        func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+            guard let pan = gestureRecognizer as? UIPanGestureRecognizer else { return false }
+            let velocity = pan.velocity(in: pan.view)
+            return abs(velocity.x) > abs(velocity.y)
+        }
+
+        // Allow the row's pan and the ScrollView's pan to recognize at the same time.
+        func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer,
+                               shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+            return true
+        }
+    }
+}
+
+// MARK: - Swipeable Row
+
+private struct SwipeableRow<Content: View>: View {
+    let id: UUID
+    @Binding var openId: UUID?
+    let onDelete: () -> Void
+    var onTap: (() -> Void)? = nil
+    @ViewBuilder let content: () -> Content
+
+    @State private var dragOffset: CGFloat = 0
+    private let revealedOffset: CGFloat = -88
+
+    private var isOpen: Bool { openId == id }
+
+    private var totalOffset: CGFloat {
+        if isOpen {
+            return min(0, revealedOffset + dragOffset)
+        }
+        return max(revealedOffset, min(0, dragOffset))
+    }
+
+    var body: some View {
+        ZStack(alignment: .trailing) {
+            Button(action: {
+                onDelete()
+                openId = nil
+            }) {
+                VStack(spacing: 4) {
+                    Image(systemName: "trash.fill")
+                        .font(.system(size: 14, weight: .semibold))
+                    Text("Borrar")
+                        .font(.caption2)
+                        .fontWeight(.semibold)
+                }
+                .foregroundColor(.white)
+                .frame(width: 88)
+                .frame(maxHeight: .infinity)
+                .background(Color.red)
+            }
+            .buttonStyle(.plain)
+            .opacity(totalOffset < -8 ? 1 : 0)
+
+            content()
+                .offset(x: totalOffset)
+                .overlay(
+                    HorizontalPanRecognizer(
+                        onChanged: { dx in
+                            dragOffset = dx
+                        },
+                        onEnded: { dx, _ in
+                            withAnimation(.easeOut(duration: 0.2)) {
+                                let projected = isOpen ? revealedOffset + dx : dx
+                                if projected < revealedOffset / 2 {
+                                    openId = id
+                                } else {
+                                    if isOpen { openId = nil }
+                                }
+                                dragOffset = 0
+                            }
+                        }
+                    )
+                    .allowsHitTesting(true)
+                )
+                .onTapGesture {
+                    if isOpen {
+                        withAnimation(.easeOut(duration: 0.2)) { openId = nil }
+                    } else {
+                        onTap?()
+                    }
+                }
+        }
+        .clipped()
     }
 }
 
