@@ -132,7 +132,7 @@ final class AddMealViewModel: ObservableObject {
 
         searchTask = Task {
             // Debounce
-            try? await Task.sleep(nanoseconds: 300_000_000) // 300ms
+            try? await Task.sleep(nanoseconds: 500_000_000) // 500ms
 
             guard !Task.isCancelled else { return }
 
@@ -143,6 +143,10 @@ final class AddMealViewModel: ObservableObject {
                     self.uiState.searchResults = results
                     self.uiState.isSearching = false
                 }
+            } catch is CancellationError {
+                return
+            } catch let urlError as URLError where urlError.code == .cancelled {
+                return
             } catch {
                 print("[AddMeal] searchFoods error: \(error)")
                 await MainActor.run {

@@ -20,6 +20,6 @@ class AddMealBuilder {
         if let prefilledType = prefilledType {
             viewModel.selectMealType(prefilledType)
         }
-        return AddMealView(viewModel: viewModel)
+        return AddMealView(viewModel: viewModel, component: component)
     }
 }

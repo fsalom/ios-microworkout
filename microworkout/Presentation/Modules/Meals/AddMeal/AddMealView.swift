@@ -7,9 +7,14 @@ import SwiftUI
 
 struct AddMealView: View {
     @ObservedObject var viewModel: AddMealViewModel
+    let component: AppComponentProtocol
     @Environment(\.dismiss) private var dismiss
     @FocusState private var isSearchFocused: Bool
     @State private var pendingFood: FoodItem?
+    @State private var toastMessage: String?
+    @State private var toastDismissTask: Task<Void, Never>?
+    @State private var showScanner: Bool = false
+    @State private var scannedFood: FoodItem?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -27,7 +32,7 @@ struct AddMealView: View {
                     )
 
                     QuickActionsRow(
-                        onScan: { viewModel.scanBarcode() },
+                        onScan: { showScanner = true },
                         onCreate: { viewModel.toggleManualEntry() }
                     )
 
@@ -50,9 +55,18 @@ struct AddMealView: View {
             }
         }
         .background(Color(.systemBackground).ignoresSafeArea())
+        .overlay(alignment: .bottom) {
+            if let toastMessage {
+                ToastBanner(message: toastMessage)
+                    .padding(.bottom, 32)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+        }
+        .animation(.easeInOut(duration: 0.25), value: toastMessage)
         .sheet(item: $pendingFood) { food in
             QuantityPickerSheet(food: food, onConfirm: { adjusted in
                 viewModel.quickAdd(adjusted)
+                showToast("\(adjusted.name) añadido")
                 pendingFood = nil
             }, onCancel: {
                 pendingFood = nil
@@ -60,6 +74,53 @@ struct AddMealView: View {
             .presentationDetents([.medium])
             .presentationDragIndicator(.visible)
         }
+        .fullScreenCover(isPresented: $showScanner, onDismiss: {
+            if let food = scannedFood {
+                scannedFood = nil
+                pendingFood = food
+            }
+        }) {
+            NavigationStack {
+                BarcodeScannerBuilder(component: component).build(onScanComplete: { food in
+                    scannedFood = food
+                })
+            }
+        }
+    }
+
+    private func showToast(_ message: String) {
+        toastMessage = message
+        toastDismissTask?.cancel()
+        toastDismissTask = Task {
+            try? await Task.sleep(nanoseconds: 2_000_000_000)
+            await MainActor.run {
+                toastMessage = nil
+            }
+        }
+    }
+}
+
+// MARK: - Toast
+
+private struct ToastBanner: View {
+    let message: String
+
+    var body: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundColor(.white)
+            Text(message)
+                .font(.subheadline)
+                .fontWeight(.semibold)
+                .foregroundColor(.white)
+                .lineLimit(1)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(Color.green)
+        .clipShape(Capsule())
+        .shadow(color: Color.black.opacity(0.2), radius: 10, x: 0, y: 4)
     }
 }
 
@@ -220,8 +281,11 @@ private struct FoodListContent: View {
     @ViewBuilder
     private var searchResults: some View {
         if viewModel.uiState.isSearching {
-            HStack { Spacer(); ProgressView(); Spacer() }
-                .padding(.top, 16)
+            VStack(spacing: 8) {
+                ForEach(0..<5, id: \.self) { _ in
+                    SkeletonFoodRow()
+                }
+            }
         } else if viewModel.uiState.searchResults.isEmpty {
             EmptyState(message: "Sin resultados para \"\(trimmedQuery)\"")
         } else {
@@ -338,9 +402,61 @@ private struct FoodRow: View {
     }
 }
 
+// MARK: - Skeleton (loading)
+
+private struct SkeletonFoodRow: View {
+    @State private var isPulsing = false
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Circle()
+                .fill(Color(.systemGray5))
+                .frame(width: 32, height: 32)
+
+            VStack(alignment: .leading, spacing: 6) {
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(Color(.systemGray5))
+                    .frame(height: 12)
+                    .frame(maxWidth: 160)
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(Color(.systemGray5))
+                    .frame(height: 10)
+                    .frame(maxWidth: 70)
+            }
+
+            Spacer()
+
+            VStack(alignment: .trailing, spacing: 6) {
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(Color(.systemGray5))
+                    .frame(width: 36, height: 12)
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(Color(.systemGray5))
+                    .frame(width: 24, height: 8)
+            }
+
+            Circle()
+                .fill(Color(.systemGray5))
+                .frame(width: 28, height: 28)
+        }
+        .padding(.vertical, 8)
+        .padding(.horizontal, 12)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color(.systemGray5), lineWidth: 1)
+        )
+        .opacity(isPulsing ? 0.45 : 1)
+        .onAppear {
+            withAnimation(.easeInOut(duration: 0.9).repeatForever(autoreverses: true)) {
+                isPulsing = true
+            }
+        }
+    }
+}
+
 // MARK: - Quantity Picker Sheet
 
-private struct QuantityPickerSheet: View {
+struct QuantityPickerSheet: View {
     let food: FoodItem
     let onConfirm: (FoodItem) -> Void
     let onCancel: () -> Void
@@ -464,7 +580,7 @@ private struct QuantityPickerSheet: View {
     }
 }
 
-private struct MacroPill: View {
+struct MacroPill: View {
     let label: String
     let value: Double
     let color: Color
