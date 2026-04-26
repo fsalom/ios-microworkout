@@ -78,3 +78,53 @@ struct OpenFoodFactsNutrimentsDTO: Codable {
     }
 }
 
+// MARK: - search-a-licious (search.openfoodfacts.org)
+
+/// Respuesta del endpoint moderno search-a-licious.
+struct SearchALicousResponseDTO: Codable {
+    let hits: [SearchALicousHitDTO]?
+    let count: Int?
+    let page: Int?
+    let pageSize: Int?
+
+    enum CodingKeys: String, CodingKey {
+        case hits, count, page
+        case pageSize = "page_size"
+    }
+}
+
+/// Cada hit es un producto. Los campos coinciden con OpenFoodFactsProductDTO,
+/// salvo `brands` que aquí es un array.
+struct SearchALicousHitDTO: Codable {
+    let code: String?
+    let productName: String?
+    let productNameEs: String?
+    let brands: [String]?
+    let imageUrl: String?
+    let imageFrontSmallUrl: String?
+    let nutriments: OpenFoodFactsNutrimentsDTO?
+
+    enum CodingKeys: String, CodingKey {
+        case code
+        case productName = "product_name"
+        case productNameEs = "product_name_es"
+        case brands
+        case imageUrl = "image_url"
+        case imageFrontSmallUrl = "image_front_small_url"
+        case nutriments
+    }
+
+    /// Convierte un hit del nuevo endpoint al DTO unificado.
+    func toProductDTO() -> OpenFoodFactsProductDTO {
+        OpenFoodFactsProductDTO(
+            code: code,
+            productName: productName,
+            productNameEs: productNameEs,
+            brands: brands?.joined(separator: ", "),
+            imageUrl: imageUrl,
+            imageFrontSmallUrl: imageFrontSmallUrl,
+            nutriments: nutriments
+        )
+    }
+}
+
