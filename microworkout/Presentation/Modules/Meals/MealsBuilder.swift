@@ -15,8 +15,9 @@ class MealsBuilder {
     func build() -> MealsView {
         let viewModel = MealsViewModel(
             router: MealsRouter(navigator: Navigator.shared, component: component),
-            mealUseCase: MealContainer(component: component).makeUseCase()
+            mealUseCase: MealContainer(component: component).makeUseCase(),
+            userProfileUseCase: UserProfileContainer(component: component).makeUseCase()
         )
-        return MealsView(viewModel: viewModel)
+        return MealsView(viewModel: viewModel, component: component)
     }
 }

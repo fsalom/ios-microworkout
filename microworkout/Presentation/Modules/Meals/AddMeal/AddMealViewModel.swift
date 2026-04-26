@@ -7,11 +7,21 @@ import Foundation
 import SwiftUI
 import Combine
 
+enum AddMealListTab: String, CaseIterable, Identifiable {
+    case recent = "Recientes"
+    case favorites = "Favoritos"
+    case myFoods = "Mis comidas"
+
+    var id: String { rawValue }
+}
+
 struct AddMealUiState {
     var selectedType: MealType = .forCurrentTime()
     var selectedTime: Date = Date()
     var items: [FoodItem] = []
     var recentFoods: [FoodItem] = []
+    var selectedTab: AddMealListTab = .recent
+    var recentlyAddedIds: Set<UUID> = []
     var isLoading: Bool = false
     var error: String?
 
@@ -58,12 +68,60 @@ final class AddMealViewModel: ObservableObject {
         uiState.selectedType = type
     }
 
+    func selectTab(_ tab: AddMealListTab) {
+        uiState.selectedTab = tab
+    }
+
+    /// Saves a single-item meal of the current selectedType with the given food.
+    /// Used by the quick "+" buttons in the food list. Tracks `recentlyAddedIds`
+    /// so the row can show feedback and prevent double-taps.
+    func quickAdd(_ food: FoodItem) {
+        guard !uiState.recentlyAddedIds.contains(food.id) else { return }
+        uiState.recentlyAddedIds.insert(food.id)
+
+        let item = FoodItem(
+            name: food.name,
+            barcode: food.barcode,
+            nutritionPer100g: food.nutritionPer100g,
+            quantity: food.quantity,
+            servingSize: food.servingSize,
+            imageUrl: food.imageUrl
+        )
+        let meal = Meal(
+            type: uiState.selectedType,
+            timestamp: Date(),
+            items: [item]
+        )
+
+        let generator = UIImpactFeedbackGenerator(style: .medium)
+        generator.impactOccurred()
+
+        Task {
+            do {
+                try await mealUseCase.saveMeal(meal)
+                await MainActor.run {
+                    self.loadRecentFoods()
+                }
+                try? await Task.sleep(nanoseconds: 1_500_000_000) // 1.5s feedback
+                await MainActor.run {
+                    self.uiState.recentlyAddedIds.remove(food.id)
+                }
+            } catch {
+                await MainActor.run {
+                    self.uiState.error = "Error al guardar"
+                    self.uiState.recentlyAddedIds.remove(food.id)
+                }
+            }
+        }
+    }
+
     // MARK: - Search
 
     func searchFoods() {
         let query = uiState.searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
         guard query.count >= 2 else {
             uiState.searchResults = []
+            uiState.isSearching = false
             return
         }
 
@@ -86,9 +144,12 @@ final class AddMealViewModel: ObservableObject {
                     self.uiState.isSearching = false
                 }
             } catch {
+                print("[AddMeal] searchFoods error: \(error)")
                 await MainActor.run {
+                    guard !Task.isCancelled else { return }
                     self.uiState.searchResults = []
                     self.uiState.isSearching = false
+                    self.uiState.error = "Error de búsqueda"
                 }
             }
         }
