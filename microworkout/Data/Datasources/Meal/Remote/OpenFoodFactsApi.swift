@@ -58,7 +58,8 @@ class OpenFoodFactsApi: OpenFoodFactsApiProtocol {
             URLQueryItem(name: "q", value: trimmed),
             URLQueryItem(name: "page", value: "\(page)"),
             URLQueryItem(name: "page_size", value: "\(pageSize)"),
-            URLQueryItem(name: "fields", value: "code,product_name,product_name_es,brands,image_url,image_front_small_url,nutriments")
+            URLQueryItem(name: "fields", value: "code,product_name,product_name_es,brands,image_url,image_front_small_url,nutriments,countries_tags,states_tags"),
+            URLQueryItem(name: "langs", value: "es")
         ]
         guard let url = components.url else {
             throw OpenFoodFactsApiError.invalidURL
@@ -78,7 +79,18 @@ class OpenFoodFactsApi: OpenFoodFactsApiProtocol {
             let decoder = JSONDecoder()
             do {
                 let parsed = try decoder.decode(SearchALicousResponseDTO.self, from: data)
-                let products = (parsed.hits ?? []).map { $0.toProductDTO() }
+                // Stable sort by priority (Spain / verified first), preserving the original
+                // relevance order within each group.
+                let sortedHits = (parsed.hits ?? [])
+                    .enumerated()
+                    .sorted {
+                        if $0.element.priorityRank != $1.element.priorityRank {
+                            return $0.element.priorityRank < $1.element.priorityRank
+                        }
+                        return $0.offset < $1.offset
+                    }
+                    .map { $0.element }
+                let products = sortedHits.map { $0.toProductDTO() }
                 print("[OpenFoodFacts] received \(products.count) products for \"\(trimmed)\"")
                 return products
             } catch let error as DecodingError {

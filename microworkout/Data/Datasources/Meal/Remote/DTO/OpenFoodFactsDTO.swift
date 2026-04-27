@@ -103,6 +103,8 @@ struct SearchALicousHitDTO: Codable {
     let imageUrl: String?
     let imageFrontSmallUrl: String?
     let nutriments: OpenFoodFactsNutrimentsDTO?
+    let countriesTags: [String]?
+    let statesTags: [String]?
 
     enum CodingKeys: String, CodingKey {
         case code
@@ -112,6 +114,8 @@ struct SearchALicousHitDTO: Codable {
         case imageUrl = "image_url"
         case imageFrontSmallUrl = "image_front_small_url"
         case nutriments
+        case countriesTags = "countries_tags"
+        case statesTags = "states_tags"
     }
 
     /// Convierte un hit del nuevo endpoint al DTO unificado.
@@ -125,6 +129,25 @@ struct SearchALicousHitDTO: Codable {
             imageFrontSmallUrl: imageFrontSmallUrl,
             nutriments: nutriments
         )
+    }
+
+    /// Heurística de prioridad para ordenar resultados:
+    /// - 0: producto español Y verificado
+    /// - 1: producto español
+    /// - 2: producto verificado
+    /// - 3: resto
+    var priorityRank: Int {
+        let isSpanish = countriesTags?.contains(where: { $0.lowercased().hasSuffix("spain") || $0.lowercased().hasSuffix("españa") }) ?? false
+        let isVerified = statesTags?.contains(where: {
+            let lower = $0.lowercased()
+            return lower.contains("checked") || lower == "en:complete"
+        }) ?? false
+        switch (isSpanish, isVerified) {
+        case (true, true):  return 0
+        case (true, false): return 1
+        case (false, true): return 2
+        case (false, false): return 3
+        }
     }
 }
 
