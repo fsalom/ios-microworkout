@@ -18,6 +18,8 @@ struct HomeUiState {
     var userName: String? = nil
     var todayIsFreeDay: Bool = false
     var hasCycling: Bool = false
+    var isLoadingCalories: Bool = true
+    var isLoadingHealth: Bool = true
 }
 
 final class HomeViewModel: ObservableObject {
@@ -72,15 +74,17 @@ final class HomeViewModel: ObservableObject {
     func loadWeeksWithHealthInfo() {
         Task {
             do {
-                let weeks = try await healthUseCase.getDaysPerWeeksWithHealthInfo(for: 4)
+                let weeks = try await healthUseCase.getDaysPerWeeksWithHealthInfo(for: 1)
                 let healthInfoForToday = try await healthUseCase.getHealthInfoForToday()
                 await MainActor.run {
                     self.uiState.weeks = weeks
                     self.uiState.healthInfoForToday = healthInfoForToday
+                    self.uiState.isLoadingHealth = false
                 }
             } catch {
                 await MainActor.run {
                     self.uiState.error = "Se ha producido un error obteniendo la información de salud"
+                    self.uiState.isLoadingHealth = false
                 }
             }
         }
@@ -131,6 +135,7 @@ final class HomeViewModel: ObservableObject {
                 self.uiState.todayCalories = totals.calories
                 self.uiState.todayNutrition = totals
             }
+            self.uiState.isLoadingCalories = false
         }
     }
 

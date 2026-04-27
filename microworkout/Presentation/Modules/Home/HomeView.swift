@@ -2,7 +2,7 @@ import SwiftUI
 
 struct HomeView: View {
     @EnvironmentObject var appState: AppState
-    @ObservedObject var viewModel: HomeViewModel
+    @StateObject var viewModel: HomeViewModel
     @Namespace var animation
     @State private var showDetail = false
     @State private var hasAppeared = false
@@ -15,14 +15,29 @@ struct HomeView: View {
         ZStack(alignment: .top) {
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 20) {
-                    CalorieProgressCard()
-                        .padding(.horizontal, 8)
+                    if viewModel.uiState.isLoadingCalories {
+                        SkeletonCard(height: 130)
+                            .padding(.horizontal, 8)
+                    } else {
+                        CalorieProgressCard()
+                            .padding(.horizontal, 8)
+                    }
 
-                    TodayStatsSection()
-                        .padding(.horizontal, 8)
+                    if viewModel.uiState.isLoadingHealth {
+                        SkeletonStatsRow()
+                            .padding(.horizontal, 8)
+                    } else {
+                        TodayStatsSection()
+                            .padding(.horizontal, 8)
+                    }
 
-                    HealthGrid()
-                        .padding(.horizontal, 8)
+                    if viewModel.uiState.isLoadingHealth {
+                        SkeletonHeatmap()
+                            .padding(.horizontal, 8)
+                    } else {
+                        HealthGrid()
+                            .padding(.horizontal, 8)
+                    }
 
                     if !viewModel.uiState.lastTrainings.isEmpty {
                         Text("Micro entrenamientos")
@@ -33,15 +48,6 @@ struct HomeView: View {
                         ListMicroTrainings()
                     }
 
-                    if !viewModel.uiState.lastWorkoutItems.isEmpty {
-                        Text("Últimos entrenamientos")
-                            .font(.title2)
-                            .fontWeight(.bold)
-                            .padding(.horizontal, 8)
-
-                        ListLastLoggedExercises()
-                            .padding(.horizontal, 8)
-                    }
                 }
                 .padding(.vertical, 16)
             }
@@ -56,6 +62,15 @@ struct HomeView: View {
                 if newPhase == .active && hasAppeared {
                     viewModel.loadWeeksWithHealthInfo()
                 }
+            }
+            .onChange(of: appState.selectedTab) { _, newTab in
+                if newTab == 0 {
+                    viewModel.load()
+                }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .NSCalendarDayChanged)) { _ in
+                viewModel.loadWeeksWithHealthInfo()
+                viewModel.load()
             }
             .background(Color(.systemGroupedBackground))
             .scrollContentBackground(.hidden)
@@ -97,7 +112,7 @@ struct HomeView: View {
                     .font(.headline)
                     .fontWeight(.bold)
                 Spacer()
-                Button(action: { viewModel.goToAddMeal() }) {
+                Button(action: { appState.selectedTab = 3 }) {
                     Text("Añadir")
                         .font(.subheadline)
                         .fontWeight(.medium)
@@ -320,40 +335,6 @@ struct HomeView: View {
     }
 
     @ViewBuilder
-    func ListLastLoggedExercises() -> some View {
-        LazyVStack(spacing: 16) {
-            ForEach(viewModel.uiState.lastWorkoutItems) { item in
-                switch item {
-                case .manual(let entryDay):
-                    HStack(spacing: 10) {
-                        if let parts = entryDay.dateParts {
-                            DateBadge(day: parts.day, monthName: parts.monthName)
-                        }
-                        VStack(alignment: .leading) {
-                            Text(entryDay.exercisesFormatted).fontWeight(.bold)
-                            Text(entryDay.totalSeriesFormatted).fontWeight(.bold)
-                            Text(entryDay.durationFormatted)
-                        }
-                        Spacer(minLength: 0)
-                    }
-                    .padding(12)
-                    .background(Color(.systemGray6))
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                    .onTapGesture {
-                        viewModel.goTo(this: entryDay)
-                    }
-                case .appleWatch(let workout):
-                    AppleWatchWorkoutCard(workout: workout)
-                        .onTapGesture {
-                            viewModel.goTo(this: workout)
-                        }
-                }
-            }
-        }
-    }
-
-
-    @ViewBuilder
     func ListLastTrainings() -> some View {
         ScrollView(.horizontal, showsIndicators: false) {
             LazyHStack(spacing: 16) {
@@ -379,6 +360,64 @@ struct HomeView: View {
                 }
             }
             .padding()
+        }
+    }
+}
+
+// MARK: - Skeleton loaders
+
+private struct SkeletonCard: View {
+    let height: CGFloat
+    @State private var pulse = false
+
+    var body: some View {
+        RoundedRectangle(cornerRadius: 16)
+            .fill(Color(.secondarySystemGroupedBackground))
+            .frame(height: height)
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(Color(.systemGray5))
+                    .opacity(pulse ? 0.3 : 0.7)
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .onAppear {
+                withAnimation(.easeInOut(duration: 0.9).repeatForever(autoreverses: true)) {
+                    pulse = true
+                }
+            }
+    }
+}
+
+private struct SkeletonStatsRow: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            RoundedRectangle(cornerRadius: 4)
+                .fill(Color(.systemGray5))
+                .frame(width: 60, height: 22)
+
+            HStack(spacing: 12) {
+                ForEach(0..<3, id: \.self) { _ in
+                    SkeletonCard(height: 90)
+                }
+            }
+        }
+    }
+}
+
+private struct SkeletonHeatmap: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            RoundedRectangle(cornerRadius: 4)
+                .fill(Color(.systemGray5))
+                .frame(width: 160, height: 22)
+
+            HStack(spacing: 5) {
+                ForEach(0..<7, id: \.self) { _ in
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(Color(.systemGray5))
+                        .frame(height: 40)
+                }
+            }
         }
     }
 }
