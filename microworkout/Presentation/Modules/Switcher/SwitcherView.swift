@@ -11,27 +11,37 @@ struct SwitcherView: View {
     var body: some View {
         switch appState.screen {
         case .home:
-            TabView {
+            TabView(selection: $appState.selectedTab) {
                 HomeBuilder(component: component).build(appState: appState)
                     .navigationTitle("Inicio")
                     .tabItem {
                         Image(systemName: "house.circle.fill")
                     }
+                    .tag(0)
+                ExerciseTabBuilder(component: component).build()
+                    .navigationTitle("Ejercicio")
+                    .tabItem {
+                        Image(systemName: "dumbbell.fill")
+                    }
+                    .tag(1)
                 CurrentSessionBuilder(component: component).build()
                     .navigationTitle("Entrenamiento")
                     .tabItem {
                         Image(systemName: "figure.strengthtraining.traditional.circle.fill")
                     }
+                    .tag(2)
                 MealsBuilder(component: component).build()
                     .navigationTitle("Comidas")
                     .tabItem {
                         Image(systemName: "fork.knife.circle.fill")
                     }
+                    .tag(3)
                 ProfileBuilder(component: component).build()
                     .navigationTitle("Perfil")
                     .tabItem {
                         Image(systemName: "person.crop.circle.fill")
                     }
+                    .tag(4)
             }
         case .onboarding:
             OnboardingBuilder(component: component).build(appState: appState)

@@ -25,6 +25,8 @@ final class AppState: ObservableObject {
         }
     }
 
+    @Published public var selectedTab: Int = 0
+
     init(initialScreen: Screen = .home) {
         self.screen = initialScreen
     }
