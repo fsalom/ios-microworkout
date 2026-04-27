@@ -23,6 +23,6 @@ class MealContainer {
             localDataSource: localDataSource,
             remoteApi: remoteApi
         )
-        return MealUseCase(repository: repository)
+        return MealUseCase(repository: repository, userDefaults: storage)
     }
 }
