@@ -54,7 +54,38 @@ struct MicroWorkoutApp: App {
                     _ = PhoneConnectivityManager.shared
                     let trainings = TrainingContainer(component: component).makeUseCase().getTrainings()
                     PhoneConnectivityManager.shared.sendTrainings(trainings)
+                    KeyboardPreWarm.warm()
                 }
+        }
+    }
+}
+
+/// Pre-warm the iOS keyboard subsystem on app launch so the first text-field
+/// focus does not pay the lazy initialization cost (~1-3s on first tap).
+enum KeyboardPreWarm {
+    private static var didWarm = false
+
+    static func warm() {
+        guard !didWarm else { return }
+        didWarm = true
+
+        // Run after a short delay to let the app finish its first layout.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+            guard let window = UIApplication.shared
+                .connectedScenes
+                .compactMap({ ($0 as? UIWindowScene)?.windows.first(where: { $0.isKeyWindow }) })
+                .first else { return }
+
+            let dummy = UITextField(frame: .zero)
+            dummy.isHidden = true
+            dummy.alpha = 0
+            window.addSubview(dummy)
+
+            dummy.becomeFirstResponder()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                dummy.resignFirstResponder()
+                dummy.removeFromSuperview()
+            }
         }
     }
 }
