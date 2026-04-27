@@ -34,15 +34,16 @@ struct HealthWeeksView: View {
                         let healthDay = weeks[weekIndex][dayIndex]
                         let opacity = maxMinutes > 0 ? Double(healthDay.minutesOfExercise) / Double(maxMinutes) : 0.2
 
+                        let isToday = Calendar.current.isDate(healthDay.date, inSameDayAs: Date())
                         Text("\(healthDay.date, formatter: dateFormatter)")
                             .font(.caption)
-                            .fontWeight(Calendar.current.isDate(healthDay.date, inSameDayAs: Date()) ? .bold : .thin)
+                            .fontWeight(isToday ? .bold : .thin)
                             .frame(width: 40, height: 40)
                             .background(Color.green.opacity(opacity))
-                            .clipShape(RoundedRectangle(cornerRadius: 5))
+                            .clipShape(RoundedRectangle(cornerRadius: 6))
                             .overlay(
-                                RoundedRectangle(cornerRadius: 5)
-                                    .stroke(Color.green, lineWidth: Calendar.current.isDate(healthDay.date, inSameDayAs: Date()) ? 1 : 0)
+                                RoundedRectangle(cornerRadius: 6)
+                                    .stroke(Color.primary, lineWidth: isToday ? 2 : 0)
                             )
                             .onTapGesture {
                                 onDayTap?(healthDay)
