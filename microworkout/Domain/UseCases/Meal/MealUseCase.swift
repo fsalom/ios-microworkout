@@ -8,9 +8,13 @@ import Foundation
 /// Implementación de los casos de uso para gestionar comidas.
 class MealUseCase: MealUseCaseProtocol {
     private let repository: MealRepositoryProtocol
+    private let userDefaults: UserDefaultsManagerProtocol
+    private let favoritesKey = "favoriteFoods"
+    private let myMealsKey = "myMeals"
 
-    init(repository: MealRepositoryProtocol) {
+    init(repository: MealRepositoryProtocol, userDefaults: UserDefaultsManagerProtocol) {
         self.repository = repository
+        self.userDefaults = userDefaults
     }
 
     func saveMeal(_ meal: Meal) async throws {
@@ -73,5 +77,59 @@ class MealUseCase: MealUseCaseProtocol {
         }
 
         return recentFoods
+    }
+
+    // MARK: - Favorites
+
+    private func favoriteKey(for food: FoodItem) -> String {
+        if let barcode = food.barcode, !barcode.isEmpty { return "barcode:\(barcode)" }
+        return "name:\(food.name.lowercased())"
+    }
+
+    func getFavorites() -> [FoodItem] {
+        userDefaults.get(forKey: favoritesKey) ?? []
+    }
+
+    func isFavorite(_ food: FoodItem) -> Bool {
+        let key = favoriteKey(for: food)
+        return getFavorites().contains { favoriteKey(for: $0) == key }
+    }
+
+    func toggleFavorite(_ food: FoodItem) {
+        var favorites = getFavorites()
+        let key = favoriteKey(for: food)
+        if let index = favorites.firstIndex(where: { favoriteKey(for: $0) == key }) {
+            favorites.remove(at: index)
+        } else {
+            // Store a clean copy at quantity 100g (canonical) so future quick-adds use a
+            // standard reference; the user adjusts via the picker anyway.
+            var copy = food
+            copy.quantity = 100
+            favorites.insert(copy, at: 0)
+        }
+        userDefaults.save(favorites, forKey: favoritesKey)
+    }
+
+    // MARK: - My meals
+
+    func getMyMeals() -> [MyMeal] {
+        let meals: [MyMeal] = userDefaults.get(forKey: myMealsKey) ?? []
+        return meals.sorted { $0.createdAt > $1.createdAt }
+    }
+
+    func saveMyMeal(_ myMeal: MyMeal) {
+        var meals = getMyMeals()
+        if let index = meals.firstIndex(where: { $0.id == myMeal.id }) {
+            meals[index] = myMeal
+        } else {
+            meals.insert(myMeal, at: 0)
+        }
+        userDefaults.save(meals, forKey: myMealsKey)
+    }
+
+    func deleteMyMeal(id: UUID) {
+        var meals = getMyMeals()
+        meals.removeAll { $0.id == id }
+        userDefaults.save(meals, forKey: myMealsKey)
     }
 }

@@ -30,4 +30,26 @@ protocol MealUseCaseProtocol {
 
     /// Devuelve los alimentos usados recientemente, deduplicados por nombre.
     func getRecentFoods(limit: Int) async throws -> [FoodItem]
+
+    // MARK: Favorites
+
+    /// Devuelve la lista de alimentos marcados como favoritos.
+    func getFavorites() -> [FoodItem]
+
+    /// Indica si un alimento está marcado como favorito.
+    func isFavorite(_ food: FoodItem) -> Bool
+
+    /// Alterna el estado de favorito del alimento.
+    func toggleFavorite(_ food: FoodItem)
+
+    // MARK: My meals (recipes)
+
+    /// Devuelve la lista de "Mis comidas" guardadas (recetas).
+    func getMyMeals() -> [MyMeal]
+
+    /// Guarda o actualiza una receta personalizada.
+    func saveMyMeal(_ myMeal: MyMeal)
+
+    /// Elimina una receta por id.
+    func deleteMyMeal(id: UUID)
 }
