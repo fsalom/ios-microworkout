@@ -377,6 +377,9 @@
 		FCD1096EA4728492DF418790 /* AppError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E0E7A0BC387147668FFA3A3 /* AppError.swift */; };
 		DA11000002BB000000000001 /* HealthStoreProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA11000001AA000000000001 /* HealthStoreProtocol.swift */; };
 		DA11000002BB000000000002 /* HealthKitStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA11000001AA000000000002 /* HealthKitStore.swift */; };
+		DA22000002BB000000000003 /* ExerciseTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA22000001AA000000000003 /* ExerciseTabView.swift */; };
+		DA33000002BB000000000004 /* HealthWorkoutDetailRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA33000001AA000000000004 /* HealthWorkoutDetailRouter.swift */; };
+		DA44000002BB000000000005 /* MyMeal.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA44000001AA000000000005 /* MyMeal.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -750,6 +753,9 @@
 		FD1703D6174A762AD782D4EB /* UserProfileContainer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UserProfileContainer.swift; sourceTree = "<group>"; };
 		DA11000001AA000000000001 /* HealthStoreProtocol.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HealthStoreProtocol.swift; path = microworkout/Data/Datasources/Health/HealthStoreProtocol.swift; sourceTree = "<group>"; };
 		DA11000001AA000000000002 /* HealthKitStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HealthKitStore.swift; path = microworkout/Data/Datasources/Health/HealthKitStore.swift; sourceTree = "<group>"; };
+		DA22000001AA000000000003 /* ExerciseTabView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExerciseTabView.swift; path = microworkout/Presentation/Modules/ExerciseTab/ExerciseTabView.swift; sourceTree = "<group>"; };
+		DA33000001AA000000000004 /* HealthWorkoutDetailRouter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HealthWorkoutDetailRouter.swift; path = microworkout/Presentation/Modules/HealthWorkoutDetail/HealthWorkoutDetailRouter.swift; sourceTree = "<group>"; };
+		DA44000001AA000000000005 /* MyMeal.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = MyMeal.swift; path = microworkout/Domain/Entities/Meal/MyMeal.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -2984,6 +2990,9 @@
 				51A6608719471CA199D6F540 /* HealthKitManagerProtocol.swift in Sources */,
 				DA11000002BB000000000001 /* HealthStoreProtocol.swift in Sources */,
 				DA11000002BB000000000002 /* HealthKitStore.swift in Sources */,
+				DA22000002BB000000000003 /* ExerciseTabView.swift in Sources */,
+				DA33000002BB000000000004 /* HealthWorkoutDetailRouter.swift in Sources */,
+				DA44000002BB000000000005 /* MyMeal.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3341,6 +3350,7 @@
 				DEVELOPMENT_TEAM = X8Z657K235;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Necesitamos acceso a la cámara para escanear códigos de barras de productos.";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Obtenemos información de tu entrenamiento para registrarla y mejorar tus futuros entrenamientos";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Queremos poder actualizar tu información de ejercicio";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -3375,6 +3385,7 @@
 				DEVELOPMENT_TEAM = X8Z657K235;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Necesitamos acceso a la cámara para escanear códigos de barras de productos.";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Obtenemos información de tu entrenamiento para registrarla y mejorar tus futuros entrenamientos";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Queremos poder actualizar tu información de ejercicio";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;

@@ -3,6 +3,10 @@ import SwiftUI
 struct AppleWatchWorkoutCard: View {
     let workout: HealthWorkout
 
+    private var isLinked: Bool {
+        workout.linkedTrainingID != nil || workout.linkedEntryDate != nil
+    }
+
     var body: some View {
         HStack(spacing: 10) {
             if let parts = workout.dateParts {
@@ -10,15 +14,13 @@ struct AppleWatchWorkoutCard: View {
             }
 
             VStack(alignment: .leading, spacing: 4) {
-                HStack {
+                HStack(spacing: 6) {
                     Image(systemName: "applewatch")
                         .foregroundColor(.green)
                     Text(workout.activityTypeName)
                         .fontWeight(.bold)
-                    if workout.linkedTrainingID != nil {
-                        Image(systemName: "link")
-                            .font(.caption)
-                            .foregroundColor(.green)
+                    if isLinked {
+                        LinkedTag()
                     }
                 }
 
@@ -43,9 +45,26 @@ struct AppleWatchWorkoutCard: View {
         .background(Color(.systemGray6))
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.green.opacity(0.3), lineWidth: 1)
+                .stroke(isLinked ? Color.green.opacity(0.55) : Color.green.opacity(0.25),
+                        lineWidth: isLinked ? 1.5 : 1)
         )
         .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+}
+
+private struct LinkedTag: View {
+    var body: some View {
+        HStack(spacing: 3) {
+            Image(systemName: "link")
+                .font(.system(size: 9, weight: .bold))
+            Text("Vinculado")
+                .font(.system(size: 10, weight: .semibold))
+        }
+        .foregroundColor(.green)
+        .padding(.horizontal, 6)
+        .padding(.vertical, 2)
+        .background(Color.green.opacity(0.15))
+        .clipShape(Capsule())
     }
 }
 

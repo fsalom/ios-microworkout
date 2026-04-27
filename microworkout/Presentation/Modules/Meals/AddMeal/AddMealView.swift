@@ -9,7 +9,6 @@ struct AddMealView: View {
     @ObservedObject var viewModel: AddMealViewModel
     let component: AppComponentProtocol
     @Environment(\.dismiss) private var dismiss
-    @FocusState private var isSearchFocused: Bool
     @State private var pendingFood: FoodItem?
     @State private var toastMessage: String?
     @State private var toastDismissTask: Task<Void, Never>?
@@ -23,14 +22,22 @@ struct AddMealView: View {
                 onClose: { dismiss() }
             )
 
-            ScrollView {
-                VStack(spacing: 16) {
-                    SearchField(
-                        query: $viewModel.uiState.searchQuery,
-                        isFocused: $isSearchFocused,
-                        onChange: { viewModel.searchFoods() }
-                    )
+            // SearchField OUTSIDE the ScrollView so per-keystroke re-renders
+            // don't force layout recomputation of the food list.
+            SearchField(
+                initialQuery: viewModel.uiState.searchQuery,
+                isSearching: viewModel.uiState.isSearching,
+                onTextChanged: { newText in
+                    viewModel.uiState.searchQuery = newText
+                    viewModel.searchFoods()
+                }
+            )
+            .padding(.horizontal, 16)
+            .padding(.top, 4)
+            .padding(.bottom, 12)
 
+            ScrollView {
+                LazyVStack(spacing: 16) {
                     QuickActionsRow(
                         onScan: { showScanner = true },
                         onCreate: { viewModel.toggleManualEntry() }
@@ -46,13 +53,14 @@ struct AddMealView: View {
                         onSelect: { viewModel.selectTab($0) }
                     )
 
-                    FoodListContent(viewModel: viewModel, onSelect: { food in
+                    FoodListContent(viewModel: viewModel, component: component, onSelect: { food in
                         pendingFood = food
                     })
                 }
                 .padding(.horizontal, 16)
                 .padding(.bottom, 24)
             }
+            .scrollDismissesKeyboard(.interactively)
         }
         .background(Color(.systemBackground).ignoresSafeArea())
         .overlay(alignment: .bottom) {
@@ -162,21 +170,38 @@ private struct HeaderBar: View {
 // MARK: - Search
 
 private struct SearchField: View {
-    @Binding var query: String
-    var isFocused: FocusState<Bool>.Binding
-    let onChange: () -> Void
+    let initialQuery: String
+    let isSearching: Bool
+    let onTextChanged: (String) -> Void
+
+    @State private var localText: String = ""
+    @FocusState private var isFocused: Bool
+    @State private var didInitialize = false
+    @State private var debounceTask: Task<Void, Never>?
 
     var body: some View {
         HStack(spacing: 8) {
-            Image(systemName: "viewfinder")
-                .font(.system(size: 16))
-                .foregroundColor(.secondary)
-            TextField("Buscar alimento o marca...", text: $query)
-                .focused(isFocused)
-                .onChange(of: query) { _, _ in onChange() }
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: 16, weight: .medium))
+                .foregroundColor(isFocused ? .green : .secondary)
+
+            TextField("Buscar alimento o marca...", text: $localText)
+                .focused($isFocused)
                 .submitLabel(.search)
-            if !query.isEmpty {
-                Button(action: { query = "" }) {
+                .autocorrectionDisabled()
+                .textInputAutocapitalization(.never)
+                .onChange(of: localText) { _, _ in scheduleDebouncedPropagation() }
+
+            if isSearching {
+                ProgressView()
+                    .controlSize(.small)
+                    .tint(.green)
+            } else if !localText.isEmpty {
+                Button(action: {
+                    debounceTask?.cancel()
+                    localText = ""
+                    onTextChanged("")
+                }) {
                     Image(systemName: "xmark.circle.fill")
                         .foregroundColor(.secondary)
                 }
@@ -187,6 +212,26 @@ private struct SearchField: View {
         .padding(.vertical, 10)
         .background(Color(.systemGray6))
         .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(isFocused ? Color.green.opacity(0.5) : Color.clear, lineWidth: 1.5)
+        )
+        .onAppear {
+            if !didInitialize {
+                localText = initialQuery
+                didInitialize = true
+            }
+        }
+    }
+
+    private func scheduleDebouncedPropagation() {
+        let value = localText
+        debounceTask?.cancel()
+        debounceTask = Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 200_000_000) // 200ms debounce
+            guard !Task.isCancelled else { return }
+            onTextChanged(value)
+        }
     }
 }
 
@@ -262,6 +307,7 @@ private struct TabsBar: View {
 
 private struct FoodListContent: View {
     @ObservedObject var viewModel: AddMealViewModel
+    let component: AppComponentProtocol
     let onSelect: (FoodItem) -> Void
 
     private var trimmedQuery: String {
@@ -281,7 +327,7 @@ private struct FoodListContent: View {
     @ViewBuilder
     private var searchResults: some View {
         if viewModel.uiState.isSearching {
-            VStack(spacing: 8) {
+            LazyVStack(spacing: 8) {
                 ForEach(0..<5, id: \.self) { _ in
                     SkeletonFoodRow()
                 }
@@ -289,12 +335,14 @@ private struct FoodListContent: View {
         } else if viewModel.uiState.searchResults.isEmpty {
             EmptyState(message: "Sin resultados para \"\(trimmedQuery)\"")
         } else {
-            VStack(spacing: 8) {
+            LazyVStack(spacing: 8) {
                 ForEach(viewModel.uiState.searchResults) { food in
                     FoodRow(
                         food: food,
                         isAdded: viewModel.uiState.recentlyAddedIds.contains(food.id),
-                        onAdd: { onSelect(food) }
+                        isFavorite: viewModel.isFavorite(food),
+                        onAdd: { onSelect(food) },
+                        onToggleFavorite: { viewModel.toggleFavorite(food) }
                     )
                 }
             }
@@ -308,21 +356,429 @@ private struct FoodListContent: View {
             if viewModel.uiState.recentFoods.isEmpty {
                 EmptyState(message: "Aún no has añadido alimentos")
             } else {
-                VStack(spacing: 8) {
+                LazyVStack(spacing: 8) {
                     ForEach(viewModel.uiState.recentFoods) { food in
                         FoodRow(
                             food: food,
                             isAdded: viewModel.uiState.recentlyAddedIds.contains(food.id),
-                            onAdd: { onSelect(food) }
+                            isFavorite: viewModel.isFavorite(food),
+                            onAdd: { onSelect(food) },
+                            onToggleFavorite: { viewModel.toggleFavorite(food) }
                         )
                     }
                 }
             }
         case .favorites:
-            EmptyState(message: "Próximamente")
+            if viewModel.uiState.favoriteFoods.isEmpty {
+                EmptyState(message: "Aún no tienes favoritos. Pulsa el corazón en un alimento para guardarlo aquí.")
+            } else {
+                LazyVStack(spacing: 8) {
+                    ForEach(viewModel.uiState.favoriteFoods) { food in
+                        FoodRow(
+                            food: food,
+                            isAdded: viewModel.uiState.recentlyAddedIds.contains(food.id),
+                            isFavorite: true,
+                            onAdd: { onSelect(food) },
+                            onToggleFavorite: { viewModel.toggleFavorite(food) }
+                        )
+                    }
+                }
+            }
         case .myFoods:
-            EmptyState(message: "Próximamente")
+            MyMealsContent(viewModel: viewModel, component: component)
         }
+    }
+}
+
+private struct MyMealsContent: View {
+    @ObservedObject var viewModel: AddMealViewModel
+    let component: AppComponentProtocol
+    @State private var showCreateSheet = false
+
+    var body: some View {
+        VStack(spacing: 12) {
+            Button(action: { showCreateSheet = true }) {
+                HStack(spacing: 8) {
+                    Image(systemName: "plus.circle.fill")
+                    Text("Crear nueva comida")
+                        .fontWeight(.semibold)
+                }
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+                .background(Color.green)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+            }
+            .buttonStyle(.plain)
+
+            if viewModel.uiState.myMeals.isEmpty {
+                EmptyState(message: "Aún no tienes comidas guardadas. Crea una para añadirla con un solo toque.")
+            } else {
+                LazyVStack(spacing: 8) {
+                    ForEach(viewModel.uiState.myMeals) { meal in
+                        MyMealRow(
+                            meal: meal,
+                            onAdd: { viewModel.addMyMeal(meal) },
+                            onDelete: { viewModel.deleteMyMeal(id: meal.id) }
+                        )
+                    }
+                }
+            }
+        }
+        .sheet(isPresented: $showCreateSheet) {
+            CreateMyMealSheet(
+                viewModel: viewModel,
+                component: component,
+                onSave: { name, items in
+                    viewModel.saveMyMeal(name: name, items: items)
+                    showCreateSheet = false
+                },
+                onCancel: { showCreateSheet = false }
+            )
+        }
+    }
+}
+
+private struct MyMealRow: View {
+    let meal: MyMeal
+    let onAdd: () -> Void
+    let onDelete: () -> Void
+
+    private var summary: String {
+        let count = meal.items.count
+        let kcal = Int(meal.totalNutrition.calories)
+        return "\(count) \(count == 1 ? "ingrediente" : "ingredientes") · \(kcal) kcal"
+    }
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "fork.knife")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(.green)
+                .frame(width: 32, height: 32)
+                .background(Color.green.opacity(0.15))
+                .clipShape(Circle())
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(meal.name)
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.primary)
+                    .lineLimit(1)
+                Text(summary)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+
+            Spacer()
+
+            Button(action: onAdd) {
+                ZStack {
+                    Circle()
+                        .fill(Color.green)
+                        .frame(width: 28, height: 28)
+                    Image(systemName: "plus")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(.white)
+                }
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.vertical, 8)
+        .padding(.horizontal, 12)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color(.systemGray5), lineWidth: 1)
+        )
+        .contextMenu {
+            Button(role: .destructive, action: onDelete) {
+                Label("Eliminar", systemImage: "trash")
+            }
+        }
+    }
+}
+
+// MARK: - Create my meal sheet (reuses the AddMeal search/scan UX)
+
+private struct CreateMyMealSheet: View {
+    @ObservedObject var viewModel: AddMealViewModel
+    let component: AppComponentProtocol
+    let onSave: (String, [FoodItem]) -> Void
+    let onCancel: () -> Void
+
+    @State private var name: String = ""
+    @State private var ingredients: [FoodItem] = []
+    @State private var pendingFood: FoodItem?
+    @State private var showScanner: Bool = false
+    @State private var scannedFood: FoodItem?
+
+    private var totalKcal: Int {
+        Int(ingredients.reduce(0) { $0 + $1.actualNutrition.calories })
+    }
+
+    private var canSave: Bool {
+        !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !ingredients.isEmpty
+    }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            CreateMyMealHeader(
+                name: $name,
+                onClose: onCancel
+            )
+
+            SearchField(
+                initialQuery: viewModel.uiState.searchQuery,
+                isSearching: viewModel.uiState.isSearching,
+                onTextChanged: { newText in
+                    viewModel.uiState.searchQuery = newText
+                    viewModel.searchFoods()
+                }
+            )
+            .padding(.horizontal, 16)
+            .padding(.top, 4)
+            .padding(.bottom, 12)
+
+            ScrollView {
+                LazyVStack(spacing: 16) {
+                    HStack(spacing: 10) {
+                        QuickActionButton(icon: "barcode.viewfinder", title: "Escanear") {
+                            showScanner = true
+                        }
+                    }
+
+                    CreateMyMealFoodList(
+                        viewModel: viewModel,
+                        onSelect: { food in pendingFood = food }
+                    )
+                }
+                .padding(.horizontal, 16)
+                .padding(.bottom, 120) // make room for the sticky footer
+            }
+            .scrollDismissesKeyboard(.interactively)
+        }
+        .background(Color(.systemBackground).ignoresSafeArea())
+        .overlay(alignment: .bottom) {
+            if !ingredients.isEmpty {
+                CreateMyMealFooter(
+                    count: ingredients.count,
+                    totalKcal: totalKcal,
+                    canSave: canSave,
+                    ingredients: ingredients,
+                    onRemove: { offsets in ingredients.remove(atOffsets: offsets) },
+                    onSave: { onSave(name, ingredients) }
+                )
+            }
+        }
+        .sheet(item: $pendingFood) { food in
+            QuantityPickerSheet(
+                food: food,
+                onConfirm: { adjusted in
+                    ingredients.append(adjusted)
+                    pendingFood = nil
+                },
+                onCancel: { pendingFood = nil }
+            )
+            .presentationDetents([.medium])
+            .presentationDragIndicator(.visible)
+        }
+        .fullScreenCover(isPresented: $showScanner, onDismiss: {
+            if let food = scannedFood {
+                scannedFood = nil
+                pendingFood = food
+            }
+        }) {
+            NavigationStack {
+                BarcodeScannerBuilder(component: component).build(onScanComplete: { food in
+                    scannedFood = food
+                })
+            }
+        }
+    }
+}
+
+private struct CreateMyMealHeader: View {
+    @Binding var name: String
+    let onClose: () -> Void
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("NUEVA COMIDA")
+                    .font(.caption2)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.secondary)
+                    .tracking(1)
+                TextField("Nombre", text: $name)
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .submitLabel(.done)
+            }
+            Spacer()
+            Button(action: onClose) {
+                Image(systemName: "xmark")
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundColor(.secondary)
+                    .frame(width: 32, height: 32)
+                    .background(Color(.systemGray5))
+                    .clipShape(Circle())
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 16)
+        .padding(.bottom, 12)
+    }
+}
+
+/// Search-aware food list for the CreateMyMeal flow. When the search query has
+/// content, shows search results; otherwise shows favorites first and then
+/// recents (a single combined list — no tabs since there's no "Mis comidas" loop).
+private struct CreateMyMealFoodList: View {
+    @ObservedObject var viewModel: AddMealViewModel
+    let onSelect: (FoodItem) -> Void
+
+    private var trimmedQuery: String {
+        viewModel.uiState.searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    var body: some View {
+        if trimmedQuery.count >= 2 {
+            if viewModel.uiState.isSearching {
+                LazyVStack(spacing: 8) {
+                    ForEach(0..<5, id: \.self) { _ in
+                        SkeletonFoodRow()
+                    }
+                }
+            } else if viewModel.uiState.searchResults.isEmpty {
+                EmptyState(message: "Sin resultados para \"\(trimmedQuery)\"")
+            } else {
+                LazyVStack(spacing: 8) {
+                    ForEach(viewModel.uiState.searchResults) { food in
+                        FoodRow(
+                            food: food,
+                            isAdded: false,
+                            isFavorite: viewModel.isFavorite(food),
+                            onAdd: { onSelect(food) },
+                            onToggleFavorite: { viewModel.toggleFavorite(food) }
+                        )
+                    }
+                }
+            }
+        } else {
+            VStack(alignment: .leading, spacing: 16) {
+                if !viewModel.uiState.favoriteFoods.isEmpty {
+                    Text("Favoritos")
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.secondary)
+                    LazyVStack(spacing: 8) {
+                        ForEach(viewModel.uiState.favoriteFoods) { food in
+                            FoodRow(
+                                food: food,
+                                isAdded: false,
+                                isFavorite: true,
+                                onAdd: { onSelect(food) },
+                                onToggleFavorite: { viewModel.toggleFavorite(food) }
+                            )
+                        }
+                    }
+                }
+
+                if !viewModel.uiState.recentFoods.isEmpty {
+                    Text("Recientes")
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.secondary)
+                    LazyVStack(spacing: 8) {
+                        ForEach(viewModel.uiState.recentFoods) { food in
+                            FoodRow(
+                                food: food,
+                                isAdded: false,
+                                isFavorite: viewModel.isFavorite(food),
+                                onAdd: { onSelect(food) },
+                                onToggleFavorite: { viewModel.toggleFavorite(food) }
+                            )
+                        }
+                    }
+                }
+
+                if viewModel.uiState.favoriteFoods.isEmpty && viewModel.uiState.recentFoods.isEmpty {
+                    EmptyState(message: "Busca un alimento o escanéalo para añadirlo a tu comida")
+                }
+            }
+        }
+    }
+}
+
+private struct CreateMyMealFooter: View {
+    let count: Int
+    let totalKcal: Int
+    let canSave: Bool
+    let ingredients: [FoodItem]
+    let onRemove: (IndexSet) -> Void
+    let onSave: () -> Void
+
+    @State private var showList = false
+
+    var body: some View {
+        VStack(spacing: 0) {
+            if showList {
+                List {
+                    ForEach(ingredients) { item in
+                        HStack {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(item.name).font(.subheadline)
+                                Text("\(item.formattedQuantity) · \(Int(item.actualNutrition.calories)) kcal")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                            Spacer()
+                        }
+                    }
+                    .onDelete(perform: onRemove)
+                }
+                .listStyle(.plain)
+                .frame(maxHeight: 220)
+                .scrollContentBackground(.hidden)
+            }
+
+            HStack(spacing: 12) {
+                Button(action: { withAnimation(.easeInOut(duration: 0.2)) { showList.toggle() } }) {
+                    HStack(spacing: 6) {
+                        Image(systemName: showList ? "chevron.down" : "chevron.up")
+                            .font(.caption.bold())
+                        Text("\(count) ingrediente\(count == 1 ? "" : "s") · \(totalKcal) kcal")
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
+                    }
+                    .foregroundColor(.primary)
+                }
+                .buttonStyle(.plain)
+
+                Spacer()
+
+                Button(action: onSave) {
+                    Text("Guardar")
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 18)
+                        .padding(.vertical, 10)
+                        .background(canSave ? Color.green : Color.gray)
+                        .clipShape(Capsule())
+                }
+                .buttonStyle(.plain)
+                .disabled(!canSave)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+        }
+        .background(
+            Color(.systemBackground)
+                .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: -2)
+                .ignoresSafeArea(edges: .bottom)
+        )
     }
 }
 
@@ -343,7 +799,9 @@ private struct EmptyState: View {
 private struct FoodRow: View {
     let food: FoodItem
     let isAdded: Bool
+    let isFavorite: Bool
     let onAdd: () -> Void
+    let onToggleFavorite: () -> Void
 
     var body: some View {
         HStack(spacing: 12) {
@@ -377,6 +835,15 @@ private struct FoodRow: View {
                     .foregroundColor(.secondary)
             }
 
+            Button(action: onToggleFavorite) {
+                Image(systemName: isFavorite ? "heart.fill" : "heart")
+                    .font(.system(size: 16))
+                    .foregroundColor(isFavorite ? .pink : .secondary)
+                    .frame(width: 28, height: 28)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+
             Button(action: onAdd) {
                 ZStack {
                     Circle()
@@ -386,7 +853,7 @@ private struct FoodRow: View {
                         .font(.system(size: 14, weight: .bold))
                         .foregroundColor(.white)
                         .transition(.scale.combined(with: .opacity))
-                        .id(isAdded) // forces re-render with transition on toggle
+                        .id(isAdded)
                 }
             }
             .buttonStyle(.plain)

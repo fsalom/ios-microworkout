@@ -7,13 +7,13 @@ class LoggedExercisesBuilder {
         self.component = component
     }
 
-    func build(for entryDay: WorkoutEntryByDay) -> LoggedExercisesView {
+    func build(for entryDay: WorkoutEntryByDay, linkedWatch: HealthWorkout? = nil) -> LoggedExercisesView {
         let viewModel = LoggedExercisesViewModel(
             router: LoggedExercisesRouter(navigator: Navigator.shared),
             exerciseUseCase: ExerciseContainer(component: component).makeUseCase(),
             workoutEntryUseCase: WorkoutEntryContainer(component: component).makeUseCase(),
             entryDay: entryDay
         )
-        return LoggedExercisesView(viewModel: viewModel)
+        return LoggedExercisesView(viewModel: viewModel, linkedWatch: linkedWatch)
     }
 }

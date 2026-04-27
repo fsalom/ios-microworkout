@@ -1,0 +1,570 @@
+//
+//  ExerciseTabView.swift
+//  microworkout
+//
+
+import SwiftUI
+
+// MARK: - Builder
+
+class ExerciseTabBuilder {
+    private let component: AppComponentProtocol
+
+    init(component: AppComponentProtocol) {
+        self.component = component
+    }
+
+    func build() -> ExerciseTabView {
+        let viewModel = ExerciseTabViewModel(
+            router: ExerciseTabRouter(navigator: Navigator.shared, component: component),
+            healthUseCase: HealthContainer(component: component).makeUseCase(),
+            workoutEntryUseCase: WorkoutEntryContainer(component: component).makeUseCase()
+        )
+        return ExerciseTabView(viewModel: viewModel)
+    }
+}
+
+// MARK: - Router
+
+class ExerciseTabRouter {
+    private let navigator: NavigatorProtocol
+    private let component: AppComponentProtocol
+
+    init(navigator: NavigatorProtocol, component: AppComponentProtocol) {
+        self.navigator = navigator
+        self.component = component
+    }
+
+    func goTo(this entryDay: WorkoutEntryByDay) {
+        navigator.push(to: LoggedExercisesBuilder(component: component).build(for: entryDay))
+    }
+
+    func goToLinked(entry: WorkoutEntryByDay, watch: HealthWorkout) {
+        navigator.push(to: LoggedExercisesBuilder(component: component).build(for: entry, linkedWatch: watch))
+    }
+
+    func goToHealthWorkoutDetail(_ workout: HealthWorkout) {
+        navigator.push(to: HealthWorkoutDetailBuilder(component: component).build(for: workout))
+    }
+}
+
+// MARK: - ViewModel
+
+struct ExerciseTabUiState {
+    var weeks: [[HealthDay]] = [[]]
+    var workoutItems: [WorkoutItem] = []
+    var selectedDay: HealthDay = HealthDay(date: Date())
+    var error: String?
+}
+
+enum DisplayWorkoutItem: Identifiable {
+    case manual(WorkoutEntryByDay)
+    case appleWatch(HealthWorkout)
+    case linked(entry: WorkoutEntryByDay, watch: HealthWorkout)
+
+    var id: String {
+        switch self {
+        case .manual(let e): return "m-\(e.id)"
+        case .appleWatch(let w): return "aw-\(w.id)"
+        case .linked(let e, let w): return "link-\(e.id)-\(w.id)"
+        }
+    }
+
+    var sortDate: Date {
+        switch self {
+        case .manual(let e): return e.parsedDate ?? .distantPast
+        case .appleWatch(let w): return w.startDate
+        case .linked(_, let w): return w.startDate
+        }
+    }
+}
+
+final class ExerciseTabViewModel: ObservableObject {
+    @Published var uiState: ExerciseTabUiState = .init()
+    private let router: ExerciseTabRouter
+    private let healthUseCase: HealthUseCaseProtocol
+    private let workoutEntryUseCase: WorkoutEntryUseCaseProtocol
+
+    init(router: ExerciseTabRouter,
+         healthUseCase: HealthUseCaseProtocol,
+         workoutEntryUseCase: WorkoutEntryUseCaseProtocol) {
+        self.router = router
+        self.healthUseCase = healthUseCase
+        self.workoutEntryUseCase = workoutEntryUseCase
+    }
+
+    func load() {
+        loadWeeks()
+        loadWorkouts()
+        loadTodayHealth()
+    }
+
+    private func loadWeeks() {
+        Task {
+            do {
+                let weeks = try await healthUseCase.getDaysPerWeeksWithHealthInfo(for: 4)
+                await MainActor.run { self.uiState.weeks = weeks }
+            } catch {
+                await MainActor.run { self.uiState.error = "Error cargando salud" }
+            }
+        }
+    }
+
+    private func loadTodayHealth() {
+        Task {
+            if let today = try? await healthUseCase.getHealthInfoForToday() {
+                await MainActor.run { self.uiState.selectedDay = today }
+            }
+        }
+    }
+
+    func selectDay(_ day: HealthDay) {
+        uiState.selectedDay = day
+    }
+
+    private func loadWorkouts() {
+        Task { @MainActor in
+            let entries = (try? await workoutEntryUseCase.getAllByDay()) ?? []
+            var items: [WorkoutItem] = entries.map { .manual($0) }
+            if let aw = try? await healthUseCase.getRecentWorkouts() {
+                items += aw.map { .appleWatch($0) }
+            }
+            items.sort { $0.sortDate > $1.sortDate }
+            self.uiState.workoutItems = items
+        }
+    }
+
+    /// Display items for the currently selected day. Manual entries and AppleWatch
+    /// workouts that are linked together are merged into a single `.linked` item;
+    /// unlinked ones stay independent.
+    var workoutsForSelectedDay: [DisplayWorkoutItem] {
+        let cal = Calendar.current
+        let dayItems = uiState.workoutItems.filter {
+            cal.isDate($0.sortDate, inSameDayAs: uiState.selectedDay.date)
+        }
+
+        var entries: [WorkoutEntryByDay] = []
+        var watches: [HealthWorkout] = []
+        for item in dayItems {
+            switch item {
+            case .manual(let entry): entries.append(entry)
+            case .appleWatch(let watch): watches.append(watch)
+            }
+        }
+
+        var pairedWatchIds = Set<String>()
+        var result: [DisplayWorkoutItem] = []
+
+        for entry in entries {
+            if let watch = watches.first(where: { $0.linkedEntryDate == entry.date }) {
+                result.append(.linked(entry: entry, watch: watch))
+                pairedWatchIds.insert(watch.id)
+            } else {
+                result.append(.manual(entry))
+            }
+        }
+        for watch in watches where !pairedWatchIds.contains(watch.id) {
+            result.append(.appleWatch(watch))
+        }
+
+        return result.sorted { $0.sortDate > $1.sortDate }
+    }
+
+    func goTo(entryDay: WorkoutEntryByDay) {
+        router.goTo(this: entryDay)
+    }
+
+    func goToLinked(entry: WorkoutEntryByDay, watch: HealthWorkout) {
+        router.goToLinked(entry: entry, watch: watch)
+    }
+
+    func goTo(workout: HealthWorkout) {
+        router.goToHealthWorkoutDetail(workout)
+    }
+
+    var currentMonthLabel: String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "es_ES")
+        formatter.dateFormat = "MMMM yyyy"
+        return formatter.string(from: Date()).capitalized
+    }
+}
+
+// MARK: - View
+
+struct ExerciseTabView: View {
+    @StateObject var viewModel: ExerciseTabViewModel
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var hasAppeared = false
+
+    var body: some View {
+        ScrollView {
+            LazyVStack(alignment: .leading, spacing: 20) {
+                Header(monthLabel: viewModel.currentMonthLabel)
+                    .padding(.horizontal, 16)
+                    .padding(.top, 8)
+
+                CalendarSection(
+                    weeks: $viewModel.uiState.weeks,
+                    onSelectDay: { viewModel.selectDay($0) }
+                )
+                .padding(.horizontal, 16)
+
+                SelectedDayCard(day: viewModel.uiState.selectedDay)
+                    .padding(.horizontal, 16)
+
+                DayWorkoutsSection(
+                    items: viewModel.workoutsForSelectedDay,
+                    onTapEntry: { viewModel.goTo(entryDay: $0) },
+                    onTapWorkout: { viewModel.goTo(workout: $0) },
+                    onTapLinked: { entry, watch in viewModel.goToLinked(entry: entry, watch: watch) }
+                )
+                .padding(.horizontal, 16)
+            }
+            .padding(.bottom, 24)
+        }
+        .background(Color(.systemGroupedBackground))
+        .scrollIndicators(.hidden)
+        .onAppear {
+            if !hasAppeared {
+                viewModel.load()
+                hasAppeared = true
+            }
+        }
+        .onChange(of: scenePhase) { _, newPhase in
+            if newPhase == .active && hasAppeared {
+                viewModel.load()
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .NSCalendarDayChanged)) { _ in
+            viewModel.load()
+        }
+    }
+}
+
+// MARK: - Header
+
+private struct Header: View {
+    let monthLabel: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(monthLabel.uppercased())
+                .font(.caption)
+                .fontWeight(.semibold)
+                .foregroundColor(.secondary)
+                .tracking(1)
+            Text("Ejercicio")
+                .font(.largeTitle)
+                .fontWeight(.bold)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+// MARK: - Calendar Section
+
+private struct CalendarSection: View {
+    @Binding var weeks: [[HealthDay]]
+    let onSelectDay: (HealthDay) -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Progresión")
+                .font(.title2)
+                .fontWeight(.bold)
+            HealthWeeksView(weeks: $weeks) { day in
+                onSelectDay(day)
+            }
+        }
+    }
+}
+
+// MARK: - Selected Day Card
+
+private struct SelectedDayCard: View {
+    let day: HealthDay
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(formattedDate)
+                .font(.subheadline)
+                .fontWeight(.semibold)
+                .foregroundColor(.secondary)
+                .tracking(0.5)
+
+            HStack(spacing: 12) {
+                StatBlock(value: formatNumber(day.steps), label: "Pasos")
+                StatBlock(value: "\(day.minutesOfExercise)", label: "Min. ejercicio")
+                StatBlock(value: "\(day.minutesStanding)", label: "Min. de pie")
+            }
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color(.secondarySystemGroupedBackground))
+                .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 2)
+        )
+    }
+
+    private var formattedDate: String {
+        let cal = Calendar.current
+        if cal.isDateInToday(day.date) { return "HOY" }
+        if cal.isDateInYesterday(day.date) { return "AYER" }
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "es_ES")
+        formatter.dateFormat = "EEEE d MMM"
+        return formatter.string(from: day.date).uppercased()
+    }
+
+    private func formatNumber(_ value: Int) -> String {
+        let f = NumberFormatter()
+        f.numberStyle = .decimal
+        f.groupingSeparator = "."
+        return f.string(from: NSNumber(value: value)) ?? "\(value)"
+    }
+}
+
+private struct StatBlock: View {
+    let value: String
+    let label: String
+
+    var body: some View {
+        VStack(spacing: 2) {
+            Text(value)
+                .font(.system(size: 22, weight: .bold))
+                .foregroundColor(.primary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+            Text(label)
+                .font(.caption2)
+                .foregroundColor(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+    }
+}
+
+// MARK: - Day Workouts Section
+
+private struct DayWorkoutsSection: View {
+    let items: [DisplayWorkoutItem]
+    let onTapEntry: (WorkoutEntryByDay) -> Void
+    let onTapWorkout: (HealthWorkout) -> Void
+    let onTapLinked: (WorkoutEntryByDay, HealthWorkout) -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Entrenamientos del día")
+                .font(.title2)
+                .fontWeight(.bold)
+
+            if items.isEmpty {
+                EmptyDayState()
+            } else {
+                VStack(spacing: 10) {
+                    ForEach(items) { item in
+                        WorkoutItemRow(
+                            item: item,
+                            onTapEntry: onTapEntry,
+                            onTapWorkout: onTapWorkout,
+                            onTapLinked: onTapLinked
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+private struct EmptyDayState: View {
+    var body: some View {
+        Text("Sin entrenamientos este día")
+            .font(.subheadline)
+            .foregroundColor(.secondary)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 24)
+            .background(
+                RoundedRectangle(cornerRadius: 14)
+                    .fill(Color(.secondarySystemGroupedBackground))
+            )
+    }
+}
+
+private struct WorkoutItemRow: View {
+    let item: DisplayWorkoutItem
+    let onTapEntry: (WorkoutEntryByDay) -> Void
+    let onTapWorkout: (HealthWorkout) -> Void
+    let onTapLinked: (WorkoutEntryByDay, HealthWorkout) -> Void
+
+    var body: some View {
+        switch item {
+        case .manual(let entry):
+            ManualEntryCard(entry: entry)
+                .onTapGesture { onTapEntry(entry) }
+        case .appleWatch(let workout):
+            AppleWatchWorkoutCard(workout: workout)
+                .onTapGesture { onTapWorkout(workout) }
+        case .linked(let entry, let watch):
+            LinkedWorkoutCard(
+                entry: entry,
+                watch: watch,
+                onTap: { onTapLinked(entry, watch) }
+            )
+        }
+    }
+}
+
+// MARK: - Linked card
+
+private struct LinkedWorkoutCard: View {
+    let entry: WorkoutEntryByDay
+    let watch: HealthWorkout
+    let onTap: () -> Void
+
+    var body: some View {
+        Button(action: onTap) {
+            HStack(alignment: .top, spacing: 10) {
+                if let parts = watch.dateParts {
+                    DateBadge(day: parts.day, monthName: parts.monthName)
+                }
+
+                VStack(spacing: 0) {
+                    HStack(spacing: 12) {
+                        Image(systemName: "applewatch")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.green)
+                            .frame(width: 32, height: 32)
+                            .background(Color.green.opacity(0.15))
+                            .clipShape(Circle())
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(watch.activityTypeName)
+                                .font(.subheadline)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.primary)
+                            Text("\(watch.timeRangeFormatted) · \(watch.durationFormatted)")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        Spacer(minLength: 0)
+                        HStack(spacing: 6) {
+                            if let cal = watch.caloriesFormatted {
+                                MiniChip(text: cal, icon: "flame.fill", color: .orange)
+                            }
+                            if let hr = watch.heartRateFormatted {
+                                MiniChip(text: hr, icon: "heart.fill", color: .red)
+                            }
+                        }
+                    }
+                    .padding(.vertical, 10)
+
+                    Divider()
+
+                    HStack(spacing: 8) {
+                        Image(systemName: "link")
+                            .font(.system(size: 9, weight: .bold))
+                            .foregroundColor(.green)
+                        Text("Vinculado")
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundColor(.green)
+                            .tracking(0.5)
+                    }
+                    .padding(.vertical, 6)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                    Divider()
+
+                    HStack(spacing: 12) {
+                        Image(systemName: "dumbbell.fill")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(.green)
+                            .frame(width: 32, height: 32)
+                            .background(Color.green.opacity(0.15))
+                            .clipShape(Circle())
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(entry.exercisesFormatted)
+                                .font(.subheadline)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.primary)
+                            Text("\(entry.totalSeriesFormatted) · \(entry.durationFormatted)")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        Spacer(minLength: 0)
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(.vertical, 10)
+                }
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .background(
+                RoundedRectangle(cornerRadius: 14)
+                    .fill(Color(.secondarySystemGroupedBackground))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 14)
+                            .stroke(Color.green.opacity(0.45), lineWidth: 1.5)
+                    )
+                    .shadow(color: Color.black.opacity(0.05), radius: 6, x: 0, y: 2)
+            )
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+private struct MiniChip: View {
+    let text: String
+    let icon: String
+    let color: Color
+
+    var body: some View {
+        HStack(spacing: 3) {
+            Image(systemName: icon)
+                .font(.caption2)
+            Text(text)
+                .font(.caption2)
+        }
+        .foregroundColor(color)
+        .padding(.horizontal, 6)
+        .padding(.vertical, 2)
+        .background(color.opacity(0.1))
+        .cornerRadius(6)
+    }
+}
+
+private struct ManualEntryCard: View {
+    let entry: WorkoutEntryByDay
+
+    var body: some View {
+        HStack(spacing: 10) {
+            if let parts = entry.dateParts {
+                DateBadge(day: parts.day, monthName: parts.monthName)
+            }
+
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 6) {
+                    Image(systemName: "dumbbell.fill")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(.green)
+                    Text(entry.exercisesFormatted)
+                        .font(.subheadline)
+                        .fontWeight(.bold)
+                }
+                Text("\(entry.totalSeriesFormatted) · \(entry.durationFormatted)")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(12)
+        .background(Color(.systemGray6))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.green.opacity(0.25), lineWidth: 1)
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+}
+

@@ -20,6 +20,9 @@ struct AddMealUiState {
     var selectedTime: Date = Date()
     var items: [FoodItem] = []
     var recentFoods: [FoodItem] = []
+    var favoriteFoods: [FoodItem] = []
+    var favoriteKeys: Set<String> = []
+    var myMeals: [MyMeal] = []
     var selectedTab: AddMealListTab = .recent
     var recentlyAddedIds: Set<UUID> = []
     var isLoading: Bool = false
@@ -62,6 +65,80 @@ final class AddMealViewModel: ObservableObject {
         self.router = router
         self.mealUseCase = mealUseCase
         loadRecentFoods()
+        loadFavorites()
+        loadMyMeals()
+    }
+
+    func loadMyMeals() {
+        uiState.myMeals = mealUseCase.getMyMeals()
+    }
+
+    func saveMyMeal(name: String, items: [FoodItem]) {
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty, !items.isEmpty else { return }
+        let meal = MyMeal(name: trimmed, items: items)
+        mealUseCase.saveMyMeal(meal)
+        loadMyMeals()
+    }
+
+    func deleteMyMeal(id: UUID) {
+        mealUseCase.deleteMyMeal(id: id)
+        loadMyMeals()
+    }
+
+    /// Adds all items of a saved "Mi comida" as a single Meal of the current selectedType.
+    func addMyMeal(_ myMeal: MyMeal) {
+        let meal = Meal(
+            type: uiState.selectedType,
+            timestamp: Date(),
+            items: myMeal.items
+        )
+
+        let generator = UIImpactFeedbackGenerator(style: .medium)
+        generator.impactOccurred()
+
+        Task {
+            do {
+                try await mealUseCase.saveMeal(meal)
+                await MainActor.run { self.loadRecentFoods() }
+            } catch {
+                await MainActor.run { self.uiState.error = "Error al guardar" }
+            }
+        }
+    }
+
+    func loadFavorites() {
+        let favs = mealUseCase.getFavorites()
+        uiState.favoriteFoods = favs
+        uiState.favoriteKeys = Set(favs.map { favoriteKey(for: $0) })
+    }
+
+    func toggleFavorite(_ food: FoodItem) {
+        mealUseCase.toggleFavorite(food)
+        loadFavorites()
+    }
+
+    func isFavorite(_ food: FoodItem) -> Bool {
+        uiState.favoriteKeys.contains(favoriteKey(for: food))
+    }
+
+    private func favoriteKey(for food: FoodItem) -> String {
+        if let barcode = food.barcode, !barcode.isEmpty { return "barcode:\(barcode)" }
+        return "name:\(food.name.lowercased())"
+    }
+
+    /// Prepends favorites that match the query to the search results.
+    /// Avoids duplicates by removing the same food from `results` if also in favorites.
+    private func prependMatchingFavorites(to results: [FoodItem], query: String) -> [FoodItem] {
+        let normalized = query.lowercased()
+        let matchingFavorites = uiState.favoriteFoods.filter { fav in
+            fav.name.lowercased().contains(normalized)
+        }
+        guard !matchingFavorites.isEmpty else { return results }
+
+        let favKeys = Set(matchingFavorites.map { favoriteKey(for: $0) })
+        let withoutDuplicates = results.filter { !favKeys.contains(favoriteKey(for: $0)) }
+        return matchingFavorites + withoutDuplicates
     }
 
     func selectMealType(_ type: MealType) {
@@ -131,8 +208,8 @@ final class AddMealViewModel: ObservableObject {
         uiState.isSearching = true
 
         searchTask = Task {
-            // Debounce
-            try? await Task.sleep(nanoseconds: 500_000_000) // 500ms
+            // Small additional coalescing window; the SearchField already debounces 200ms.
+            try? await Task.sleep(nanoseconds: 100_000_000) // 100ms
 
             guard !Task.isCancelled else { return }
 
@@ -140,7 +217,11 @@ final class AddMealViewModel: ObservableObject {
                 let results = try await mealUseCase.searchFoods(query: query)
                 await MainActor.run {
                     guard !Task.isCancelled else { return }
-                    self.uiState.searchResults = results
+                    // Stale guard: if the user has already typed a different query while
+                    // this request was in flight, ignore this response so it doesn't
+                    // overwrite the newer state.
+                    guard self.uiState.searchQuery.trimmingCharacters(in: .whitespacesAndNewlines) == query else { return }
+                    self.uiState.searchResults = self.prependMatchingFavorites(to: results, query: query)
                     self.uiState.isSearching = false
                 }
             } catch is CancellationError {
@@ -151,6 +232,7 @@ final class AddMealViewModel: ObservableObject {
                 print("[AddMeal] searchFoods error: \(error)")
                 await MainActor.run {
                     guard !Task.isCancelled else { return }
+                    guard self.uiState.searchQuery.trimmingCharacters(in: .whitespacesAndNewlines) == query else { return }
                     self.uiState.searchResults = []
                     self.uiState.isSearching = false
                     self.uiState.error = "Error de búsqueda"

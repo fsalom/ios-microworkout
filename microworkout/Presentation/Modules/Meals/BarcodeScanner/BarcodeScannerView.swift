@@ -312,60 +312,91 @@ struct ErrorOverlay: View {
 
 // MARK: - Camera View (UIViewRepresentable)
 
+/// UIView whose backing layer IS an AVCaptureVideoPreviewLayer.
+/// This way the layer auto-resizes with the view via UIKit's normal layout.
+final class CameraPreviewView: UIView {
+    override class var layerClass: AnyClass {
+        AVCaptureVideoPreviewLayer.self
+    }
+
+    var previewLayer: AVCaptureVideoPreviewLayer {
+        // Force-cast is safe because layerClass is overridden above.
+        return layer as! AVCaptureVideoPreviewLayer
+    }
+}
+
 struct BarcodeCameraView: UIViewRepresentable {
     let onBarcodeScanned: (String) -> Void
 
-    func makeUIView(context: Context) -> UIView {
-        let view = UIView(frame: .zero)
+    func makeUIView(context: Context) -> CameraPreviewView {
+        let view = CameraPreviewView()
         view.backgroundColor = .black
+        view.previewLayer.videoGravity = .resizeAspectFill
 
         let captureSession = AVCaptureSession()
+        view.previewLayer.session = captureSession
         context.coordinator.captureSession = captureSession
 
-        guard let videoCaptureDevice = AVCaptureDevice.default(for: .video) else {
-            return view
-        }
+        let coordinator = context.coordinator
+        coordinator.sessionQueue.async {
+            guard let videoCaptureDevice = AVCaptureDevice.default(for: .video) else {
+                print("[BarcodeScanner] No video device available")
+                return
+            }
 
-        let videoInput: AVCaptureDeviceInput
-        do {
-            videoInput = try AVCaptureDeviceInput(device: videoCaptureDevice)
-        } catch {
-            return view
-        }
+            let videoInput: AVCaptureDeviceInput
+            do {
+                videoInput = try AVCaptureDeviceInput(device: videoCaptureDevice)
+            } catch {
+                print("[BarcodeScanner] Failed to create input: \(error)")
+                return
+            }
 
-        if captureSession.canAddInput(videoInput) {
-            captureSession.addInput(videoInput)
-        } else {
-            return view
-        }
+            captureSession.beginConfiguration()
 
-        let metadataOutput = AVCaptureMetadataOutput()
-        if captureSession.canAddOutput(metadataOutput) {
-            captureSession.addOutput(metadataOutput)
-            metadataOutput.setMetadataObjectsDelegate(context.coordinator, queue: DispatchQueue.main)
+            if captureSession.canAddInput(videoInput) {
+                captureSession.addInput(videoInput)
+            } else {
+                print("[BarcodeScanner] Cannot add input")
+                captureSession.commitConfiguration()
+                return
+            }
+
+            let metadataOutput = AVCaptureMetadataOutput()
+            if captureSession.canAddOutput(metadataOutput) {
+                captureSession.addOutput(metadataOutput)
+            } else {
+                print("[BarcodeScanner] Cannot add metadata output")
+                captureSession.commitConfiguration()
+                return
+            }
+
+            captureSession.commitConfiguration()
+
+            // Set delegate AFTER commitConfiguration so the output is fully wired.
+            // Use main queue for metadata callbacks — the work is light and we marshal
+            // to UI immediately anyway.
+            metadataOutput.setMetadataObjectsDelegate(coordinator, queue: DispatchQueue.main)
             metadataOutput.metadataObjectTypes = [.ean8, .ean13, .upce, .code128, .code39, .code93, .qr, .dataMatrix]
-        } else {
-            return view
-        }
 
-        let previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
-        previewLayer.frame = view.layer.bounds
-        previewLayer.videoGravity = .resizeAspectFill
-        view.layer.addSublayer(previewLayer)
-        context.coordinator.previewLayer = previewLayer
-
-        DispatchQueue.global(qos: .userInitiated).async {
             captureSession.startRunning()
+
+            // Set the preview connection orientation on the main thread.
+            DispatchQueue.main.async {
+                if let connection = view.previewLayer.connection {
+                    if connection.isVideoRotationAngleSupported(90) {
+                        connection.videoRotationAngle = 90 // portrait
+                    } else if connection.isVideoOrientationSupported {
+                        connection.videoOrientation = .portrait
+                    }
+                }
+            }
         }
 
         return view
     }
 
-    func updateUIView(_ uiView: UIView, context: Context) {
-        DispatchQueue.main.async {
-            context.coordinator.previewLayer?.frame = uiView.bounds
-        }
-    }
+    func updateUIView(_ uiView: CameraPreviewView, context: Context) {}
 
     func makeCoordinator() -> Coordinator {
         Coordinator(onBarcodeScanned: onBarcodeScanned)
@@ -373,8 +404,8 @@ struct BarcodeCameraView: UIViewRepresentable {
 
     class Coordinator: NSObject, AVCaptureMetadataOutputObjectsDelegate {
         var captureSession: AVCaptureSession?
-        var previewLayer: AVCaptureVideoPreviewLayer?
         let onBarcodeScanned: (String) -> Void
+        let sessionQueue = DispatchQueue(label: "BarcodeScanner.sessionQueue", qos: .userInitiated)
         private var lastScannedCode: String?
 
         init(onBarcodeScanned: @escaping (String) -> Void) {
@@ -392,17 +423,20 @@ struct BarcodeCameraView: UIViewRepresentable {
                 return
             }
 
-            // Avoid duplicate scans
             guard stringValue != lastScannedCode else { return }
             lastScannedCode = stringValue
 
+            print("[BarcodeScanner] Detected: \(stringValue)")
             AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
             onBarcodeScanned(stringValue)
         }
     }
 
-    static func dismantleUIView(_ uiView: UIView, coordinator: Coordinator) {
-        coordinator.captureSession?.stopRunning()
+    static func dismantleUIView(_ uiView: CameraPreviewView, coordinator: Coordinator) {
+        let session = coordinator.captureSession
+        coordinator.sessionQueue.async {
+            session?.stopRunning()
+        }
     }
 }
 
