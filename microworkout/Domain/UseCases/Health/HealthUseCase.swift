@@ -38,7 +38,7 @@ class HealthUseCase: HealthUseCaseProtocol {
             let standingData = try await fetchStandingTime(startDate: startDate, endDate: endOfDay)
             let stepsData = try await fetchStepsCount(startDate: startDate, endDate: endOfDay)
 
-            let weeks = self.getWeeksHealthDays(for: 4)
+            let weeks = self.getWeeksHealthDays(for: numberOfWeeks)
             let healthWeeks = self.getUpdated(weeks: weeks,
                                               exerciseData: exerciseData,
                                               standingData: standingData,
@@ -67,9 +67,11 @@ class HealthUseCase: HealthUseCaseProtocol {
     func getRecentWorkouts() async throws -> [HealthWorkout] {
         _ = try await requestAuthorization()
         var workouts = try await repository.fetchWorkouts()
-        let links = linkingDataSource.getAll()
+        let trainingLinks = linkingDataSource.getAll()
+        let entryLinks = linkingDataSource.getAllEntryLinks()
         for i in workouts.indices {
-            workouts[i].linkedTrainingID = links[workouts[i].id]
+            workouts[i].linkedTrainingID = trainingLinks[workouts[i].id]
+            workouts[i].linkedEntryDate = entryLinks[workouts[i].id]
         }
         return workouts
     }
@@ -80,6 +82,14 @@ class HealthUseCase: HealthUseCaseProtocol {
 
     func unlinkWorkout(_ workoutID: String) {
         linkingDataSource.removeLink(workoutID: workoutID)
+    }
+
+    func linkWorkout(_ workoutID: String, toEntryDate entryDate: String) {
+        linkingDataSource.saveEntryLink(workoutID: workoutID, entryDate: entryDate)
+    }
+
+    func unlinkEntryFromWorkout(_ workoutID: String) {
+        linkingDataSource.removeEntryLink(workoutID: workoutID)
     }
 
     private func fetchExerciseTime(startDate: Date, endDate: Date) async throws -> [Date : Double] {

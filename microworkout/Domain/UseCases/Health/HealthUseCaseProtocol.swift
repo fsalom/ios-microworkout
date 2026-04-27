@@ -15,4 +15,6 @@ protocol HealthUseCaseProtocol {
     func getRecentWorkouts() async throws -> [HealthWorkout]
     func linkWorkout(_ workoutID: String, to trainingID: UUID)
     func unlinkWorkout(_ workoutID: String)
+    func linkWorkout(_ workoutID: String, toEntryDate entryDate: String)
+    func unlinkEntryFromWorkout(_ workoutID: String)
 }
