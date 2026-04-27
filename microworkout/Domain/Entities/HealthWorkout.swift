@@ -10,6 +10,7 @@ struct HealthWorkout: Identifiable, Equatable, Codable {
     let totalDistance: Double?         // metros
     let averageHeartRate: Double?     // bpm
     var linkedTrainingID: UUID?       // link a Training.id
+    var linkedEntryDate: String?      // link a WorkoutEntryByDay.date (ISO-8601 start of day)
 
     var durationFormatted: String {
         let totalMinutes = Int(durationInSeconds) / 60
