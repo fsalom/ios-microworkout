@@ -72,57 +72,221 @@ struct HealthWorkoutDetailView: View {
                 .font(.headline)
 
             if let linked = viewModel.uiState.linkedTraining {
-                HStack {
-                    Image(linked.image)
-                        .resizable()
-                        .scaledToFill()
-                        .frame(width: 50, height: 50)
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                    VStack(alignment: .leading) {
-                        Text(linked.name)
-                            .fontWeight(.bold)
-                        Text("Vinculado")
-                            .font(.caption)
-                            .foregroundColor(.green)
-                    }
-                    Spacer()
-                    Button("Desvincular") {
-                        viewModel.unlinkTraining()
-                    }
-                    .foregroundColor(.red)
+                LinkedTrainingRow(training: linked, onUnlink: { viewModel.unlinkTraining() })
+            } else if let entry = viewModel.uiState.linkedEntry {
+                LinkedEntryRow(
+                    entry: entry,
+                    onTap: { viewModel.openLinkedEntry() },
+                    onUnlink: { viewModel.unlinkEntry() }
+                )
+            } else if viewModel.uiState.availableTrainings.isEmpty && viewModel.uiState.availableEntries.isEmpty {
+                Text("No hay entrenamientos disponibles para este día")
                     .font(.subheadline)
-                }
-                .padding(12)
-                .background(Color(.systemGray6))
-                .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .foregroundColor(.secondary)
             } else {
-                if viewModel.uiState.availableTrainings.isEmpty {
-                    Text("No hay entrenamientos disponibles")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                } else {
-                    ForEach(viewModel.uiState.availableTrainings) { training in
-                        HStack {
-                            Image(training.image)
-                                .resizable()
-                                .scaledToFill()
-                                .frame(width: 40, height: 40)
-                                .clipShape(RoundedRectangle(cornerRadius: 8))
-                            Text(training.name)
-                                .fontWeight(.medium)
-                            Spacer()
-                            Button("Vincular") {
-                                viewModel.linkTo(training: training)
-                            }
-                            .font(.subheadline)
-                        }
-                        .padding(10)
-                        .background(Color(.systemGray6))
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                    }
+                ForEach(viewModel.uiState.availableTrainings) { training in
+                    AvailableTrainingRow(training: training, onLink: { viewModel.linkTo(training: training) })
+                }
+                ForEach(viewModel.uiState.availableEntries) { entry in
+                    AvailableEntryRow(entry: entry, onLink: { viewModel.linkTo(entry: entry) })
                 }
             }
         }
+    }
+}
+
+// MARK: - Linked rows
+
+private struct LinkedTrainingRow: View {
+    let training: Training
+    let onUnlink: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 12) {
+                Image(training.image)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 50, height: 50)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(training.name).font(.headline).fontWeight(.bold)
+                    HStack(spacing: 4) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.caption)
+                            .foregroundColor(.green)
+                        Text("Vinculado")
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.green)
+                    }
+                }
+                Spacer()
+            }
+            UnlinkButton(action: onUnlink)
+        }
+        .padding(14)
+        .background(
+            RoundedRectangle(cornerRadius: 14)
+                .fill(Color.green.opacity(0.08))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14)
+                        .stroke(Color.green.opacity(0.3), lineWidth: 1)
+                )
+        )
+    }
+}
+
+private struct LinkedEntryRow: View {
+    let entry: WorkoutEntryByDay
+    let onTap: () -> Void
+    let onUnlink: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Button(action: onTap) {
+                HStack(spacing: 12) {
+                    Image(systemName: "dumbbell.fill")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(.green)
+                        .frame(width: 50, height: 50)
+                        .background(Color.green.opacity(0.15))
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(entry.exercisesFormatted)
+                            .font(.headline)
+                            .fontWeight(.bold)
+                            .foregroundColor(.primary)
+                        Text("\(entry.totalSeriesFormatted) · \(entry.durationFormatted)")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        HStack(spacing: 4) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.caption)
+                                .foregroundColor(.green)
+                            Text("Vinculado")
+                                .font(.caption)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.green)
+                        }
+                        .padding(.top, 2)
+                    }
+                    Spacer(minLength: 0)
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+
+            UnlinkButton(action: onUnlink)
+        }
+        .padding(14)
+        .background(
+            RoundedRectangle(cornerRadius: 14)
+                .fill(Color.green.opacity(0.08))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14)
+                        .stroke(Color.green.opacity(0.3), lineWidth: 1)
+                )
+        )
+    }
+}
+
+private struct UnlinkButton: View {
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 6) {
+                Image(systemName: "link.badge.minus")
+                    .font(.system(size: 13, weight: .semibold))
+                Text("Desvincular")
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+            }
+            .foregroundColor(.red)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 10)
+            .background(
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(Color.red.opacity(0.6), lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+// MARK: - Available rows
+
+private struct AvailableTrainingRow: View {
+    let training: Training
+    let onLink: () -> Void
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(training.image)
+                .resizable()
+                .scaledToFill()
+                .frame(width: 44, height: 44)
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+            Text(training.name).fontWeight(.medium)
+            Spacer()
+            LinkPillButton(action: onLink)
+        }
+        .padding(12)
+        .background(Color(.systemGray6))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+}
+
+private struct AvailableEntryRow: View {
+    let entry: WorkoutEntryByDay
+    let onLink: () -> Void
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "dumbbell.fill")
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundColor(.green)
+                .frame(width: 44, height: 44)
+                .background(Color.green.opacity(0.15))
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+            VStack(alignment: .leading, spacing: 2) {
+                Text(entry.exercisesFormatted).fontWeight(.medium)
+                Text("\(entry.totalSeriesFormatted) · \(entry.durationFormatted)")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            Spacer()
+            LinkPillButton(action: onLink)
+        }
+        .padding(12)
+        .background(Color(.systemGray6))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+}
+
+private struct LinkPillButton: View {
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 4) {
+                Image(systemName: "link")
+                    .font(.system(size: 12, weight: .bold))
+                Text("Vincular")
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+            }
+            .foregroundColor(.white)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 8)
+            .background(Color.green)
+            .clipShape(Capsule())
+        }
+        .buttonStyle(.plain)
     }
 }
 
