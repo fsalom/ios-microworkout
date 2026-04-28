@@ -20,6 +20,8 @@ struct HomeUiState {
     var hasCycling: Bool = false
     var isLoadingCalories: Bool = true
     var isLoadingHealth: Bool = true
+    var caloriesBurnedToday: Double = 0
+    var workoutsCountToday: Int = 0
 }
 
 final class HomeViewModel: ObservableObject {
@@ -114,12 +116,17 @@ final class HomeViewModel: ObservableObject {
 
             var items: [WorkoutItem] = entries.map { .manual($0) }
 
-            if let awWorkouts = try? await healthUseCase.getRecentWorkouts() {
-                items += awWorkouts.map { .appleWatch($0) }
-            }
+            let awWorkouts = (try? await healthUseCase.getRecentWorkouts()) ?? []
+            items += awWorkouts.map { .appleWatch($0) }
 
             items.sort { $0.sortDate > $1.sortDate }
             self.uiState.lastWorkoutItems = items
+
+            // Today's burned calories from Apple Watch workouts
+            let cal = Calendar.current
+            let todayWorkouts = awWorkouts.filter { cal.isDateInToday($0.startDate) }
+            self.uiState.caloriesBurnedToday = todayWorkouts.reduce(0) { $0 + ($1.totalCalories ?? 0) }
+            self.uiState.workoutsCountToday = todayWorkouts.count
         }
     }
 

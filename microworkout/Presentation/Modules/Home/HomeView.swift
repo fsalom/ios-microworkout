@@ -23,6 +23,12 @@ struct HomeView: View {
                             .padding(.horizontal, 8)
                     }
 
+                    BurnedCaloriesCard(
+                        burned: viewModel.uiState.caloriesBurnedToday,
+                        workoutsCount: viewModel.uiState.workoutsCountToday
+                    )
+                    .padding(.horizontal, 8)
+
                     if viewModel.uiState.isLoadingHealth {
                         SkeletonStatsRow()
                             .padding(.horizontal, 8)
@@ -361,6 +367,64 @@ struct HomeView: View {
             }
             .padding()
         }
+    }
+}
+
+// MARK: - Burned Calories Card
+
+private struct BurnedCaloriesCard: View {
+    let burned: Double
+    let workoutsCount: Int
+
+    private var summaryText: String {
+        if workoutsCount == 0 {
+            return "Sin entrenamientos hoy"
+        }
+        return "\(workoutsCount) \(workoutsCount == 1 ? "entrenamiento" : "entrenamientos")"
+    }
+
+    var body: some View {
+        HStack(spacing: 14) {
+            Image(systemName: "flame.fill")
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundColor(.orange)
+                .frame(width: 44, height: 44)
+                .background(Color.orange.opacity(0.15))
+                .clipShape(Circle())
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Calorías quemadas")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                HStack(alignment: .firstTextBaseline, spacing: 4) {
+                    Text("\(Int(burned))")
+                        .font(.system(size: 22, weight: .bold))
+                        .foregroundColor(.primary)
+                    Text("kcal")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+            }
+
+            Spacer()
+
+            VStack(alignment: .trailing, spacing: 2) {
+                Text("HOY")
+                    .font(.caption2)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.secondary)
+                    .tracking(1)
+                Text(summaryText)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color(.secondarySystemGroupedBackground))
+                .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 2)
+        )
     }
 }
 
