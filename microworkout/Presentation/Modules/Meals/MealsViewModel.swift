@@ -121,11 +121,17 @@ final class MealsViewModel: ObservableObject {
     /// Deletes a single food item from a meal. If the meal had only that item,
     /// the entire meal is removed. Otherwise the meal is updated removing the item.
     func deleteFoodItem(itemId: UUID, mealId: UUID) {
-        guard let meal = uiState.todayMeals.first(where: { $0.id == mealId }) else { return }
+        print("[Meals] deleteFoodItem called itemId=\(itemId) mealId=\(mealId)")
+        guard let meal = uiState.todayMeals.first(where: { $0.id == mealId }) else {
+            print("[Meals] meal not found in todayMeals")
+            return
+        }
+        print("[Meals] meal items count=\(meal.items.count)")
 
         Task {
             do {
                 try await mealUseCase.deleteMeal(mealId)
+                print("[Meals] meal deleted")
                 if meal.items.count > 1 {
                     let remaining = meal.items.filter { $0.id != itemId }
                     let updated = Meal(
@@ -135,11 +141,13 @@ final class MealsViewModel: ObservableObject {
                         items: remaining
                     )
                     try await mealUseCase.saveMeal(updated)
+                    print("[Meals] re-saved meal with \(remaining.count) items")
                 }
                 await MainActor.run {
                     self.loadMeals()
                 }
             } catch {
+                print("[Meals] delete error: \(error)")
                 await MainActor.run {
                     self.uiState.error = "Error al eliminar"
                 }

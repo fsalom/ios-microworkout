@@ -410,18 +410,24 @@ private struct MealSectionCard: View {
 
                 VStack(spacing: 0) {
                     ForEach(Array(entries.enumerated()), id: \.element.item.id) { index, entry in
-                        SwipeableRow(
-                            id: entry.item.id,
-                            openId: $openSwipeRowId,
-                            onDelete: { onDelete(entry.item.id, entry.mealId) },
-                            onTap: { onEdit(entry.item, entry.mealId) }
-                        ) {
-                            FoodItemRowView(item: entry.item)
-                                .padding(.horizontal, 14)
-                                .padding(.vertical, 10)
-                                .background(Color(.secondarySystemGroupedBackground))
-                                .contentShape(Rectangle())
-                        }
+                        FoodItemRowView(item: entry.item)
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 10)
+                            .background(Color(.secondarySystemGroupedBackground))
+                            .contentShape(Rectangle())
+                            .onTapGesture { onEdit(entry.item, entry.mealId) }
+                            .contextMenu {
+                                Button {
+                                    onEdit(entry.item, entry.mealId)
+                                } label: {
+                                    Label("Editar cantidad", systemImage: "pencil")
+                                }
+                                Button(role: .destructive) {
+                                    onDelete(entry.item.id, entry.mealId)
+                                } label: {
+                                    Label("Eliminar", systemImage: "trash")
+                                }
+                            }
 
                         if index < entries.count - 1 {
                             Divider().padding(.leading, 14)
@@ -532,24 +538,24 @@ private struct SwipeableRow<Content: View>: View {
 
     var body: some View {
         ZStack(alignment: .trailing) {
-            Button(action: {
+            VStack(spacing: 4) {
+                Image(systemName: "trash.fill")
+                    .font(.system(size: 14, weight: .semibold))
+                Text("Borrar")
+                    .font(.caption2)
+                    .fontWeight(.semibold)
+            }
+            .foregroundColor(.white)
+            .frame(width: 88)
+            .frame(maxHeight: .infinity)
+            .background(Color.red)
+            .contentShape(Rectangle())
+            .onTapGesture {
                 onDelete()
                 openId = nil
-            }) {
-                VStack(spacing: 4) {
-                    Image(systemName: "trash.fill")
-                        .font(.system(size: 14, weight: .semibold))
-                    Text("Borrar")
-                        .font(.caption2)
-                        .fontWeight(.semibold)
-                }
-                .foregroundColor(.white)
-                .frame(width: 88)
-                .frame(maxHeight: .infinity)
-                .background(Color.red)
             }
-            .buttonStyle(.plain)
             .opacity(totalOffset < -8 ? 1 : 0)
+            .allowsHitTesting(totalOffset < -8)
 
             content()
                 .offset(x: totalOffset)
