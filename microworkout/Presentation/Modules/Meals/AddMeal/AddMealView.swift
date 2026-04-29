@@ -14,6 +14,8 @@ struct AddMealView: View {
     @State private var toastDismissTask: Task<Void, Never>?
     @State private var showScanner: Bool = false
     @State private var scannedFood: FoodItem?
+    @State private var creatingMyMeal: CreateMyMealState?
+    @State private var editingMyMeal: MyMeal?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -53,9 +55,14 @@ struct AddMealView: View {
                         onSelect: { viewModel.selectTab($0) }
                     )
 
-                    FoodListContent(viewModel: viewModel, component: component, onSelect: { food in
-                        pendingFood = food
-                    })
+                    FoodListContent(
+                        viewModel: viewModel,
+                        component: component,
+                        onSelect: { food in pendingFood = food },
+                        onCreateMyMeal: { creatingMyMeal = CreateMyMealState() },
+                        onEditMyMeal: { meal in editingMyMeal = meal },
+                        onMyMealAdded: { meal in showToast("\(meal.name) añadida") }
+                    )
                 }
                 .padding(.horizontal, 16)
                 .padding(.bottom, 24)
@@ -94,6 +101,39 @@ struct AddMealView: View {
                 })
             }
         }
+        .sheet(item: $creatingMyMeal, onDismiss: { resetSharedSearchState() }) { _ in
+            CreateMyMealSheet(
+                viewModel: viewModel,
+                component: component,
+                initialMyMeal: nil,
+                onSave: { meal in
+                    viewModel.saveMyMeal(meal)
+                    creatingMyMeal = nil
+                },
+                onCancel: { creatingMyMeal = nil }
+            )
+        }
+        .sheet(item: $editingMyMeal, onDismiss: { resetSharedSearchState() }) { meal in
+            CreateMyMealSheet(
+                viewModel: viewModel,
+                component: component,
+                initialMyMeal: meal,
+                onSave: { updated in
+                    viewModel.saveMyMeal(updated)
+                    editingMyMeal = nil
+                },
+                onCancel: { editingMyMeal = nil }
+            )
+        }
+    }
+
+    /// Clears the search state shared with the CreateMyMealSheet so the parent's
+    /// tabs (Recientes / Favoritos / Mis comidas) show their actual content
+    /// after closing the create/edit flow.
+    private func resetSharedSearchState() {
+        viewModel.uiState.searchQuery = ""
+        viewModel.uiState.searchResults = []
+        viewModel.uiState.isSearching = false
     }
 
     private func showToast(_ message: String) {
@@ -309,6 +349,9 @@ private struct FoodListContent: View {
     @ObservedObject var viewModel: AddMealViewModel
     let component: AppComponentProtocol
     let onSelect: (FoodItem) -> Void
+    let onCreateMyMeal: () -> Void
+    let onEditMyMeal: (MyMeal) -> Void
+    let onMyMealAdded: (MyMeal) -> Void
 
     private var trimmedQuery: String {
         viewModel.uiState.searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -385,19 +428,25 @@ private struct FoodListContent: View {
                 }
             }
         case .myFoods:
-            MyMealsContent(viewModel: viewModel, component: component)
+            MyMealsContent(
+                viewModel: viewModel,
+                onCreateNew: onCreateMyMeal,
+                onEdit: onEditMyMeal,
+                onMyMealAdded: onMyMealAdded
+            )
         }
     }
 }
 
 private struct MyMealsContent: View {
     @ObservedObject var viewModel: AddMealViewModel
-    let component: AppComponentProtocol
-    @State private var showCreateSheet = false
+    let onCreateNew: () -> Void
+    let onEdit: (MyMeal) -> Void
+    let onMyMealAdded: (MyMeal) -> Void
 
     var body: some View {
         VStack(spacing: 12) {
-            Button(action: { showCreateSheet = true }) {
+            Button(action: onCreateNew) {
                 HStack(spacing: 8) {
                     Image(systemName: "plus.circle.fill")
                     Text("Crear nueva comida")
@@ -418,30 +467,28 @@ private struct MyMealsContent: View {
                     ForEach(viewModel.uiState.myMeals) { meal in
                         MyMealRow(
                             meal: meal,
-                            onAdd: { viewModel.addMyMeal(meal) },
+                            onAdd: {
+                                viewModel.addMyMeal(meal)
+                                onMyMealAdded(meal)
+                            },
+                            onEdit: { onEdit(meal) },
                             onDelete: { viewModel.deleteMyMeal(id: meal.id) }
                         )
                     }
                 }
             }
         }
-        .sheet(isPresented: $showCreateSheet) {
-            CreateMyMealSheet(
-                viewModel: viewModel,
-                component: component,
-                onSave: { name, items in
-                    viewModel.saveMyMeal(name: name, items: items)
-                    showCreateSheet = false
-                },
-                onCancel: { showCreateSheet = false }
-            )
-        }
     }
+}
+
+private struct CreateMyMealState: Identifiable {
+    let id = UUID()
 }
 
 private struct MyMealRow: View {
     let meal: MyMeal
     let onAdd: () -> Void
+    let onEdit: () -> Void
     let onDelete: () -> Void
 
     private var summary: String {
@@ -491,6 +538,9 @@ private struct MyMealRow: View {
                 .stroke(Color(.systemGray5), lineWidth: 1)
         )
         .contextMenu {
+            Button(action: onEdit) {
+                Label("Editar", systemImage: "pencil")
+            }
             Button(role: .destructive, action: onDelete) {
                 Label("Eliminar", systemImage: "trash")
             }
@@ -503,14 +553,18 @@ private struct MyMealRow: View {
 private struct CreateMyMealSheet: View {
     @ObservedObject var viewModel: AddMealViewModel
     let component: AppComponentProtocol
-    let onSave: (String, [FoodItem]) -> Void
+    let initialMyMeal: MyMeal?
+    let onSave: (MyMeal) -> Void
     let onCancel: () -> Void
 
     @State private var name: String = ""
     @State private var ingredients: [FoodItem] = []
-    @State private var pendingFood: FoodItem?
+    @State private var pickingIngredient: FoodItem?
     @State private var showScanner: Bool = false
     @State private var scannedFood: FoodItem?
+    @State private var didInitialize: Bool = false
+
+    private var isEditing: Bool { initialMyMeal != nil }
 
     private var totalKcal: Int {
         Int(ingredients.reduce(0) { $0 + $1.actualNutrition.calories })
@@ -523,6 +577,7 @@ private struct CreateMyMealSheet: View {
     var body: some View {
         VStack(spacing: 0) {
             CreateMyMealHeader(
+                title: isEditing ? "EDITAR COMIDA" : "NUEVA COMIDA",
                 name: $name,
                 onClose: onCancel
             )
@@ -549,7 +604,16 @@ private struct CreateMyMealSheet: View {
 
                     CreateMyMealFoodList(
                         viewModel: viewModel,
-                        onSelect: { food in pendingFood = food }
+                        onSelect: { food in
+                            print("[CreateMyMeal] picking ingredient: \(food.name)")
+                            // Dismiss any keyboard (search) so the picker's "Añadir"
+                            // button isn't covered.
+                            UIApplication.shared.sendAction(
+                                #selector(UIResponder.resignFirstResponder),
+                                to: nil, from: nil, for: nil
+                            )
+                            pickingIngredient = food
+                        }
                     )
                 }
                 .padding(.horizontal, 16)
@@ -558,6 +622,13 @@ private struct CreateMyMealSheet: View {
             .scrollDismissesKeyboard(.interactively)
         }
         .background(Color(.systemBackground).ignoresSafeArea())
+        .onAppear {
+            if !didInitialize, let existing = initialMyMeal {
+                name = existing.name
+                ingredients = existing.items
+            }
+            didInitialize = true
+        }
         .overlay(alignment: .bottom) {
             if !ingredients.isEmpty {
                 CreateMyMealFooter(
@@ -566,26 +637,52 @@ private struct CreateMyMealSheet: View {
                     canSave: canSave,
                     ingredients: ingredients,
                     onRemove: { offsets in ingredients.remove(atOffsets: offsets) },
-                    onSave: { onSave(name, ingredients) }
+                    onSave: {
+                        let result = MyMeal(
+                            id: initialMyMeal?.id ?? UUID(),
+                            name: name,
+                            items: ingredients,
+                            createdAt: initialMyMeal?.createdAt ?? Date()
+                        )
+                        onSave(result)
+                    }
                 )
             }
         }
-        .sheet(item: $pendingFood) { food in
-            QuantityPickerSheet(
-                food: food,
-                onConfirm: { adjusted in
-                    ingredients.append(adjusted)
-                    pendingFood = nil
-                },
-                onCancel: { pendingFood = nil }
-            )
-            .presentationDetents([.medium])
-            .presentationDragIndicator(.visible)
+        .overlay {
+            Group {
+                if let food = pickingIngredient {
+                    ZStack {
+                        Color.black.opacity(0.4)
+                            .ignoresSafeArea()
+                            .onTapGesture { pickingIngredient = nil }
+
+                        QuantityPickerSheet(
+                            food: food,
+                            onConfirm: { adjusted in
+                                print("[CreateMyMeal] confirmed ingredient: \(adjusted.name) qty=\(adjusted.quantity)")
+                                ingredients.append(adjusted)
+                                pickingIngredient = nil
+                            },
+                            onCancel: { pickingIngredient = nil }
+                        )
+                        .frame(maxWidth: .infinity)
+                        .background(Color(.systemBackground))
+                        .clipShape(RoundedRectangle(cornerRadius: 20))
+                        .frame(maxHeight: .infinity, alignment: .bottom)
+                        .padding(.bottom, 0)
+                        .ignoresSafeArea(edges: .bottom)
+                        .transition(.move(edge: .bottom))
+                    }
+                    .transition(.opacity)
+                }
+            }
+            .animation(.easeInOut(duration: 0.22), value: pickingIngredient?.id)
         }
         .fullScreenCover(isPresented: $showScanner, onDismiss: {
             if let food = scannedFood {
                 scannedFood = nil
-                pendingFood = food
+                pickingIngredient = food
             }
         }) {
             NavigationStack {
@@ -598,13 +695,14 @@ private struct CreateMyMealSheet: View {
 }
 
 private struct CreateMyMealHeader: View {
+    let title: String
     @Binding var name: String
     let onClose: () -> Void
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             VStack(alignment: .leading, spacing: 2) {
-                Text("NUEVA COMIDA")
+                Text(title)
                     .font(.caption2)
                     .fontWeight(.semibold)
                     .foregroundColor(.secondary)
@@ -655,13 +753,7 @@ private struct CreateMyMealFoodList: View {
             } else {
                 LazyVStack(spacing: 8) {
                     ForEach(viewModel.uiState.searchResults) { food in
-                        FoodRow(
-                            food: food,
-                            isAdded: false,
-                            isFavorite: viewModel.isFavorite(food),
-                            onAdd: { onSelect(food) },
-                            onToggleFavorite: { viewModel.toggleFavorite(food) }
-                        )
+                        SimpleFoodPickRow(food: food, onPick: { onSelect(food) })
                     }
                 }
             }
@@ -674,13 +766,7 @@ private struct CreateMyMealFoodList: View {
                         .foregroundColor(.secondary)
                     LazyVStack(spacing: 8) {
                         ForEach(viewModel.uiState.favoriteFoods) { food in
-                            FoodRow(
-                                food: food,
-                                isAdded: false,
-                                isFavorite: true,
-                                onAdd: { onSelect(food) },
-                                onToggleFavorite: { viewModel.toggleFavorite(food) }
-                            )
+                            SimpleFoodPickRow(food: food, onPick: { onSelect(food) })
                         }
                     }
                 }
@@ -692,13 +778,7 @@ private struct CreateMyMealFoodList: View {
                         .foregroundColor(.secondary)
                     LazyVStack(spacing: 8) {
                         ForEach(viewModel.uiState.recentFoods) { food in
-                            FoodRow(
-                                food: food,
-                                isAdded: false,
-                                isFavorite: viewModel.isFavorite(food),
-                                onAdd: { onSelect(food) },
-                                onToggleFavorite: { viewModel.toggleFavorite(food) }
-                            )
+                            SimpleFoodPickRow(food: food, onPick: { onSelect(food) })
                         }
                     }
                 }
@@ -708,6 +788,62 @@ private struct CreateMyMealFoodList: View {
                 }
             }
         }
+    }
+}
+
+/// Simplified food row used inside the Create My Meal flow. The whole row is a
+/// single Button so taps land reliably regardless of nested-sheet quirks. No
+/// favorite toggle here — favoritos are managed from the main flow.
+private struct SimpleFoodPickRow: View {
+    let food: FoodItem
+    let onPick: () -> Void
+
+    var body: some View {
+        Button(action: onPick) {
+            HStack(spacing: 12) {
+                Image(systemName: "leaf.fill")
+                    .font(.system(size: 14))
+                    .foregroundColor(.green)
+                    .frame(width: 32, height: 32)
+                    .background(Color.green.opacity(0.15))
+                    .clipShape(Circle())
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(food.name)
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.primary)
+                        .lineLimit(1)
+                    Text(food.formattedQuantity)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+
+                Spacer()
+
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text("\(Int(food.actualNutrition.calories))")
+                        .font(.subheadline)
+                        .fontWeight(.bold)
+                        .foregroundColor(.primary)
+                    Text("kcal")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                }
+
+                Image(systemName: "plus.circle.fill")
+                    .font(.system(size: 22))
+                    .foregroundColor(.green)
+            }
+            .padding(.vertical, 8)
+            .padding(.horizontal, 12)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color(.systemGray5), lineWidth: 1)
+            )
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 }
 
@@ -994,6 +1130,13 @@ struct QuantityPickerSheet: View {
                             .multilineTextAlignment(.center)
                             .font(.system(size: 22, weight: .bold))
                             .frame(minWidth: 60)
+                            .toolbar {
+                                ToolbarItemGroup(placement: .keyboard) {
+                                    Spacer()
+                                    Button("Listo") { isFocused = false }
+                                        .fontWeight(.semibold)
+                                }
+                            }
                         Text("g")
                             .font(.headline)
                             .foregroundColor(.secondary)

@@ -81,6 +81,16 @@ final class AddMealViewModel: ObservableObject {
         loadMyMeals()
     }
 
+    /// Saves or updates a MyMeal using its existing id (upsert behaviour).
+    func saveMyMeal(_ meal: MyMeal) {
+        let trimmed = meal.name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty, !meal.items.isEmpty else { return }
+        var copy = meal
+        copy.name = trimmed
+        mealUseCase.saveMyMeal(copy)
+        loadMyMeals()
+    }
+
     func deleteMyMeal(id: UUID) {
         mealUseCase.deleteMyMeal(id: id)
         loadMyMeals()
