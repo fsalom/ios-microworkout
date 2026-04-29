@@ -37,6 +37,9 @@ struct MealsView: View {
                             onDeleteItem: { itemId, mealId in
                                 viewModel.deleteFoodItem(itemId: itemId, mealId: mealId)
                             },
+                            onDeleteMeal: { mealId in
+                                viewModel.deleteMeal(id: mealId)
+                            },
                             onEditItem: { item, mealId in
                                 editingEntry = EditFoodEntry(food: item, mealId: mealId)
                             }
@@ -347,6 +350,7 @@ private struct MealSectionCard: View {
     let meals: [Meal]
     let onAdd: () -> Void
     let onDelete: (_ itemId: UUID, _ mealId: UUID) -> Void
+    let onDeleteMeal: (_ mealId: UUID) -> Void
     let onEdit: (_ item: FoodItem, _ mealId: UUID) -> Void
 
     @State private var openSwipeRowId: UUID? = nil
@@ -355,11 +359,13 @@ private struct MealSectionCard: View {
          meals: [Meal],
          onAdd: @escaping () -> Void,
          onDeleteItem: @escaping (_ itemId: UUID, _ mealId: UUID) -> Void,
+         onDeleteMeal: @escaping (_ mealId: UUID) -> Void,
          onEditItem: @escaping (_ item: FoodItem, _ mealId: UUID) -> Void) {
         self.type = type
         self.meals = meals
         self.onAdd = onAdd
         self.onDelete = onDeleteItem
+        self.onDeleteMeal = onDeleteMeal
         self.onEdit = onEditItem
     }
 
@@ -367,8 +373,20 @@ private struct MealSectionCard: View {
         meals.reduce(.zero) { $0 + $1.totalNutrition }
     }
 
-    private var entries: [(mealId: UUID, item: FoodItem)] {
-        meals.flatMap { meal in meal.items.map { (meal.id, $0) } }
+    /// Loose items (not part of a saved MyMeal recipe).
+    private var looseEntries: [(mealId: UUID, item: FoodItem)] {
+        meals
+            .filter { $0.myMealName == nil }
+            .flatMap { meal in meal.items.map { (meal.id, $0) } }
+    }
+
+    /// Saved-recipe meals (have myMealName).
+    private var recipeMeals: [Meal] {
+        meals.filter { $0.myMealName != nil }
+    }
+
+    private var hasContent: Bool {
+        !looseEntries.isEmpty || !recipeMeals.isEmpty
     }
 
     var body: some View {
@@ -386,7 +404,7 @@ private struct MealSectionCard: View {
                     Text(type.rawValue)
                         .font(.headline)
                         .fontWeight(.bold)
-                    Text(entries.isEmpty ? "Sin comidas registradas" : macrosSummary)
+                    Text(hasContent ? macrosSummary : "Sin comidas registradas")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
@@ -405,11 +423,24 @@ private struct MealSectionCard: View {
             }
             .padding(14)
 
-            if !entries.isEmpty {
+            if hasContent {
                 Divider().padding(.leading, 14)
 
                 VStack(spacing: 0) {
-                    ForEach(Array(entries.enumerated()), id: \.element.item.id) { index, entry in
+                    // Recipe-grouped MyMeals first
+                    ForEach(recipeMeals, id: \.id) { meal in
+                        MyMealGroupedRow(
+                            meal: meal,
+                            onDelete: { onDeleteMeal(meal.id) }
+                        )
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 10)
+                        .background(Color(.secondarySystemGroupedBackground))
+                        Divider().padding(.leading, 14)
+                    }
+
+                    // Loose individual food items
+                    ForEach(Array(looseEntries.enumerated()), id: \.element.item.id) { index, entry in
                         FoodItemRowView(item: entry.item)
                             .padding(.horizontal, 14)
                             .padding(.vertical, 10)
@@ -429,7 +460,7 @@ private struct MealSectionCard: View {
                                 }
                             }
 
-                        if index < entries.count - 1 {
+                        if index < looseEntries.count - 1 {
                             Divider().padding(.leading, 14)
                         }
                     }
@@ -591,6 +622,88 @@ private struct SwipeableRow<Content: View>: View {
 }
 
 // MARK: - Food Item Row
+
+// MARK: - MyMeal grouped row
+
+private struct MyMealGroupedRow: View {
+    let meal: Meal
+    let onDelete: () -> Void
+
+    @State private var expanded: Bool = false
+
+    private var totalNutrition: NutritionInfo { meal.totalNutrition }
+
+    private var summary: String {
+        let kcal = Int(totalNutrition.calories)
+        let p = Int(totalNutrition.proteins)
+        let c = Int(totalNutrition.carbohydrates)
+        let f = Int(totalNutrition.fats)
+        return "\(kcal) kcal · P\(p) · C\(c) · F\(f)"
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(spacing: 12) {
+                Image(systemName: "fork.knife")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(.green)
+                    .frame(width: 28, height: 28)
+                    .background(Color.green.opacity(0.15))
+                    .clipShape(Circle())
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(meal.myMealName ?? "Mi comida")
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.primary)
+                    Text("\(meal.items.count) ingrediente\(meal.items.count == 1 ? "" : "s") · \(summary)")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .lineLimit(2)
+                }
+
+                Spacer()
+
+                Image(systemName: expanded ? "chevron.down" : "chevron.right")
+                    .font(.caption.weight(.semibold))
+                    .foregroundColor(.secondary)
+            }
+            .contentShape(Rectangle())
+            .onTapGesture {
+                withAnimation(.easeInOut(duration: 0.2)) { expanded.toggle() }
+            }
+
+            if expanded {
+                VStack(spacing: 0) {
+                    ForEach(meal.items) { item in
+                        HStack {
+                            VStack(alignment: .leading, spacing: 1) {
+                                Text(item.name)
+                                    .font(.caption)
+                                    .foregroundColor(.primary)
+                                Text(item.formattedQuantity)
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary)
+                            }
+                            Spacer()
+                            Text("\(Int(item.actualNutrition.calories)) kcal")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                        }
+                        .padding(.vertical, 5)
+                    }
+                }
+                .padding(.top, 8)
+                .padding(.leading, 40)
+            }
+        }
+        .contextMenu {
+            Button(role: .destructive, action: onDelete) {
+                Label("Eliminar comida", systemImage: "trash")
+            }
+        }
+    }
+}
 
 private struct FoodItemRowView: View {
     let item: FoodItem

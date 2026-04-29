@@ -10,17 +10,22 @@ public struct Meal: Identifiable, Hashable, Codable {
     public var type: MealType
     public var timestamp: Date
     public var items: [FoodItem]
+    /// Name of the saved "Mi comida" recipe this meal was added from.
+    /// `nil` for ad-hoc meals built ingredient by ingredient.
+    public var myMealName: String?
 
     public init(
         id: UUID = UUID(),
         type: MealType,
         timestamp: Date = Date(),
-        items: [FoodItem] = []
+        items: [FoodItem] = [],
+        myMealName: String? = nil
     ) {
         self.id = id
         self.type = type
         self.timestamp = timestamp
         self.items = items
+        self.myMealName = myMealName
     }
 
     /// Total nutrition from all food items

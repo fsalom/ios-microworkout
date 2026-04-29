@@ -101,7 +101,8 @@ final class AddMealViewModel: ObservableObject {
         let meal = Meal(
             type: uiState.selectedType,
             timestamp: Date(),
-            items: myMeal.items
+            items: myMeal.items,
+            myMealName: myMeal.name
         )
 
         let generator = UIImpactFeedbackGenerator(style: .medium)
