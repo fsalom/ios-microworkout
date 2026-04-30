@@ -104,6 +104,7 @@ final class AddMealViewModel: ObservableObject {
             items: myMeal.items,
             myMealName: myMeal.name
         )
+        print("[AddMeal] addMyMeal name=\(myMeal.name) items=\(myMeal.items.count) type=\(uiState.selectedType)")
 
         let generator = UIImpactFeedbackGenerator(style: .medium)
         generator.impactOccurred()
@@ -111,8 +112,10 @@ final class AddMealViewModel: ObservableObject {
         Task {
             do {
                 try await mealUseCase.saveMeal(meal)
+                print("[AddMeal] addMyMeal saved meal id=\(meal.id)")
                 await MainActor.run { self.loadRecentFoods() }
             } catch {
+                print("[AddMeal] addMyMeal save error: \(error)")
                 await MainActor.run { self.uiState.error = "Error al guardar" }
             }
         }

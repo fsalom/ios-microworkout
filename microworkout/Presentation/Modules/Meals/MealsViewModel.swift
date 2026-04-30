@@ -52,12 +52,15 @@ final class MealsViewModel: ObservableObject {
             do {
                 let meals = try await mealUseCase.getMeals(for: uiState.selectedDate)
                 let totals = meals.reduce(NutritionInfo.zero) { $0 + $1.totalNutrition }
+                let recipeCount = meals.filter { $0.myMealName != nil }.count
+                print("[Meals] loadMeals fetched \(meals.count) total, \(recipeCount) recipe(s) for \(uiState.selectedDate)")
                 await MainActor.run {
                     self.uiState.todayMeals = meals.sorted { $0.timestamp < $1.timestamp }
                     self.uiState.todayTotals = totals
                     self.uiState.isLoading = false
                 }
             } catch {
+                print("[Meals] loadMeals error: \(error)")
                 await MainActor.run {
                     self.uiState.error = "Error al cargar las comidas"
                     self.uiState.isLoading = false
