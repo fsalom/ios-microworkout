@@ -194,8 +194,8 @@ final class ExerciseTabViewModel: ObservableObject {
 
 struct ExerciseTabView: View {
     @StateObject var viewModel: ExerciseTabViewModel
+    @EnvironmentObject var appState: AppState
     @Environment(\.scenePhase) private var scenePhase
-    @State private var hasAppeared = false
 
     var body: some View {
         ScrollView {
@@ -226,13 +226,18 @@ struct ExerciseTabView: View {
         .background(Color(.systemGroupedBackground))
         .scrollIndicators(.hidden)
         .onAppear {
-            if !hasAppeared {
-                viewModel.load()
-                hasAppeared = true
-            }
+            // Load on every appear (first time, after navigation pop, etc.) so
+            // newly linked workouts or fresh Apple Watch data show up immediately.
+            viewModel.load()
         }
         .onChange(of: scenePhase) { _, newPhase in
-            if newPhase == .active && hasAppeared {
+            if newPhase == .active {
+                viewModel.load()
+            }
+        }
+        .onChange(of: appState.selectedTab) { _, newTab in
+            // ExerciseTab is index 1; refresh when the user comes back to it.
+            if newTab == 1 {
                 viewModel.load()
             }
         }
