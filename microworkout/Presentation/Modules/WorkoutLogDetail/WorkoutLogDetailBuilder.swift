@@ -10,7 +10,8 @@ class WorkoutLogDetailBuilder {
     func build(log: WorkoutLog) -> WorkoutLogDetailView {
         let viewModel = WorkoutLogDetailViewModel(
             log: log,
-            useCase: WorkoutLogContainer(component: component).makeUseCase()
+            useCase: WorkoutLogContainer(component: component).makeUseCase(),
+            healthUseCase: HealthContainer(component: component).makeUseCase()
         )
         return WorkoutLogDetailView(viewModel: viewModel)
     }

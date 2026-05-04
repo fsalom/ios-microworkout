@@ -7,7 +7,14 @@ struct WorkoutLogDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                Header(log: viewModel.uiState.log)
+                Header(
+                    log: viewModel.uiState.log,
+                    linkedWorkout: viewModel.uiState.linkedHealthWorkout
+                )
+
+                if let watch = viewModel.uiState.linkedHealthWorkout {
+                    AppleWatchInfoCard(workout: watch)
+                }
 
                 ForEach(viewModel.uiState.log.exercises) { exerciseLog in
                     ExerciseSummaryCard(
@@ -40,6 +47,7 @@ struct WorkoutLogDetailView: View {
 
 private struct Header: View {
     let log: WorkoutLog
+    let linkedWorkout: HealthWorkout?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -51,7 +59,7 @@ private struct Header: View {
             HStack(spacing: 12) {
                 Stat(value: "\(log.exercises.count)", label: "ejercicios")
                 Stat(value: "\(log.totalSets)", label: "series")
-                Stat(value: log.endedAt != nil ? log.durationFormatted : "—", label: "duración")
+                Stat(value: durationValue, label: durationLabel)
             }
             .padding(14)
             .background(
@@ -59,6 +67,17 @@ private struct Header: View {
                     .fill(Color(.secondarySystemGroupedBackground))
             )
         }
+    }
+
+    private var durationValue: String {
+        if let watch = linkedWorkout {
+            return watch.durationFormatted
+        }
+        return log.endedAt != nil ? log.durationFormatted : "—"
+    }
+
+    private var durationLabel: String {
+        linkedWorkout != nil ? "duración (Watch)" : "duración"
     }
 
     private func formatDate(_ date: Date) -> String {
@@ -69,6 +88,78 @@ private struct Header: View {
         formatter.locale = Locale(identifier: "es_ES")
         formatter.dateFormat = "EEEE d MMM"
         return formatter.string(from: date)
+    }
+}
+
+private struct AppleWatchInfoCard: View {
+    let workout: HealthWorkout
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 8) {
+                Image(systemName: "applewatch")
+                    .foregroundColor(.green)
+                Text(workout.activityTypeName)
+                    .font(.subheadline)
+                    .fontWeight(.bold)
+                Spacer()
+                Text("VINCULADO")
+                    .font(.caption2)
+                    .fontWeight(.bold)
+                    .foregroundColor(.green)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(Color.green.opacity(0.15))
+                    .clipShape(Capsule())
+            }
+
+            Text(workout.timeRangeFormatted)
+                .font(.caption)
+                .foregroundColor(.secondary)
+
+            HStack(spacing: 10) {
+                if let cal = workout.caloriesFormatted {
+                    InfoChip(icon: "flame.fill", text: cal, color: .orange)
+                }
+                if let hr = workout.heartRateFormatted {
+                    InfoChip(icon: "heart.fill", text: hr, color: .red)
+                }
+                if let dist = workout.distanceFormatted {
+                    InfoChip(icon: "figure.run", text: dist, color: .blue)
+                }
+            }
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 14)
+                .fill(Color(.secondarySystemGroupedBackground))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 14)
+                .stroke(Color.green.opacity(0.35), lineWidth: 1)
+        )
+    }
+}
+
+private struct InfoChip: View {
+    let icon: String
+    let text: String
+    let color: Color
+
+    var body: some View {
+        HStack(spacing: 4) {
+            Image(systemName: icon)
+                .font(.caption)
+            Text(text)
+                .font(.caption)
+                .fontWeight(.semibold)
+        }
+        .foregroundColor(color)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 5)
+        .background(color.opacity(0.12))
+        .clipShape(Capsule())
     }
 }
 
