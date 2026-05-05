@@ -1,0 +1,376 @@
+import SwiftUI
+
+struct WorkoutLogEntryView: View {
+    @StateObject var viewModel: WorkoutLogEntryViewModel
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        ScrollView {
+            exercisesList
+                .padding(16)
+                .padding(.bottom, 80)
+        }
+        .background(Color(.systemGroupedBackground))
+        .navigationTitle(viewModel.uiState.log.sessionName)
+        .navigationBarTitleDisplayMode(.inline)
+        .safeAreaInset(edge: .bottom) { finishBar }
+        .onChange(of: viewModel.uiState.isFinished) { _, finished in
+            if finished {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { dismiss() }
+            }
+        }
+        .sheet(item: formBinding) { form in
+            setFormSheet(for: form)
+        }
+        .sheet(isPresented: pickerBinding) {
+            ExercisePickerSheet(
+                search: Binding(
+                    get: { viewModel.uiState.search },
+                    set: { viewModel.searchExercises($0) }
+                ),
+                results: viewModel.uiState.searchResults,
+                onPick: { viewModel.addExerciseToLog($0) },
+                onCreate: { viewModel.createAndAddExercise(named: $0) }
+            )
+        }
+    }
+
+    private var pickerBinding: Binding<Bool> {
+        Binding(
+            get: { viewModel.uiState.isPickingExercise },
+            set: { if !$0 { viewModel.closeExercisePicker() } }
+        )
+    }
+
+    @ViewBuilder
+    private var exercisesList: some View {
+        VStack(spacing: 14) {
+            ForEach(viewModel.uiState.log.exercises) { exerciseLog in
+                LoggedExerciseCard(
+                    exerciseLog: exerciseLog,
+                    isNotesExpanded: viewModel.uiState.expandedNotes.contains(exerciseLog.id),
+                    onToggleNotes: { viewModel.toggleNotes(for: exerciseLog.id) },
+                    onUpdateNotes: { viewModel.updateNotes(exerciseLogId: exerciseLog.id, notes: $0) },
+                    onAddSet: { viewModel.openNewSet(for: exerciseLog.id) },
+                    onTapSet: { setId in viewModel.openEditSet(exerciseLogId: exerciseLog.id, setId: setId) },
+                    onDeleteSet: { setId in viewModel.deleteSet(exerciseLogId: exerciseLog.id, setId: setId) }
+                )
+            }
+
+            Button(action: { viewModel.openExercisePicker() }) {
+                Label("Añadir ejercicio para hoy", systemImage: "plus.circle.fill")
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .background(Color.green.opacity(0.15))
+                    .foregroundColor(.green)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    private var finishBar: some View {
+        FinishBar(
+            isFinished: viewModel.uiState.isFinished,
+            onFinish: { viewModel.finish() }
+        )
+    }
+
+    private var formBinding: Binding<LoggedSetForm?> {
+        Binding(
+            get: { viewModel.uiState.activeForm },
+            set: { if $0 == nil { viewModel.closeForm() } }
+        )
+    }
+
+    @ViewBuilder
+    private func setFormSheet(for form: LoggedSetForm) -> some View {
+        if let exercise = viewModel.exerciseForActiveForm() {
+            switch form {
+            case .new:
+                let last = viewModel.lastSet(for: form.exerciseLogId)
+                LoggedSetInput(
+                    exercise: exercise,
+                    isEditing: false,
+                    initialWeight: last?.weight,
+                    initialReps: last?.reps,
+                    initialRir: last?.rir,
+                    onSave: { w, r, rir in viewModel.saveSet(weight: w, reps: r, rir: rir) }
+                )
+                .padding()
+                .presentationDetents([.height(360)])
+                .presentationDragIndicator(.visible)
+            case .edit:
+                let set = viewModel.setBeingEdited()
+                LoggedSetInput(
+                    exercise: exercise,
+                    isEditing: true,
+                    initialWeight: set?.weight,
+                    initialReps: set?.reps,
+                    initialRir: set?.rir,
+                    onSave: { w, r, rir in viewModel.saveSet(weight: w, reps: r, rir: rir) }
+                )
+                .padding()
+                .presentationDetents([.height(360)])
+                .presentationDragIndicator(.visible)
+            }
+        }
+    }
+}
+
+private struct LoggedExerciseCard: View {
+    let exerciseLog: LoggedExercise
+    let isNotesExpanded: Bool
+    let onToggleNotes: () -> Void
+    let onUpdateNotes: (String) -> Void
+    let onAddSet: () -> Void
+    let onTapSet: (UUID) -> Void
+    let onDeleteSet: (UUID) -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Text(exerciseLog.exercise.name)
+                    .font(.headline)
+                Spacer()
+                Button(action: onAddSet) {
+                    Image(systemName: "plus.circle.fill")
+                        .imageScale(.large)
+                        .foregroundColor(.green)
+                }
+                .buttonStyle(.plain)
+            }
+
+            if exerciseLog.sets.isEmpty {
+                Text("Pulsa + para añadir tu primera serie")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.vertical, 12)
+            } else {
+                VStack(spacing: 6) {
+                    ForEach(Array(exerciseLog.sets.enumerated()), id: \.element.id) { index, set in
+                        Button(action: { onTapSet(set.id) }) {
+                            SetRow(index: index + 1, set: set)
+                        }
+                        .buttonStyle(.plain)
+                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                            Button(role: .destructive) {
+                                onDeleteSet(set.id)
+                            } label: {
+                                Label("Borrar", systemImage: "trash")
+                            }
+                        }
+                    }
+                }
+            }
+
+            if isNotesExpanded {
+                NotesField(text: exerciseLog.notes ?? "", onChange: onUpdateNotes)
+                    .transition(.opacity)
+            }
+
+            NotesToggleButton(
+                hasNotes: exerciseLog.notes?.isEmpty == false,
+                isExpanded: isNotesExpanded,
+                action: onToggleNotes
+            )
+        }
+        .padding(14)
+        .background(
+            RoundedRectangle(cornerRadius: 14)
+                .fill(Color(.secondarySystemGroupedBackground))
+        )
+        .animation(.easeInOut(duration: 0.2), value: isNotesExpanded)
+    }
+}
+
+private struct NotesToggleButton: View {
+    let hasNotes: Bool
+    let isExpanded: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 6) {
+                Image(systemName: iconName)
+                    .font(.caption)
+                Text(label)
+                    .font(.caption)
+                    .fontWeight(.semibold)
+            }
+            .foregroundColor(hasNotes ? .green : .secondary)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 6)
+            .background(
+                Capsule()
+                    .fill(hasNotes ? Color.green.opacity(0.15) : Color(.systemGray6))
+            )
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var iconName: String {
+        if hasNotes { return "note.text" }
+        return isExpanded ? "chevron.up" : "plus"
+    }
+
+    private var label: String {
+        if hasNotes {
+            return isExpanded ? "Ocultar nota" : "Ver nota"
+        }
+        return isExpanded ? "Cerrar" : "Añadir descripción"
+    }
+}
+
+private struct SetRow: View {
+    let index: Int
+    let set: LoggedSet
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Text("\(index)")
+                .font(.subheadline)
+                .fontWeight(.bold)
+                .frame(width: 28, alignment: .leading)
+                .foregroundColor(.secondary)
+
+            Text(summary)
+                .font(.subheadline)
+                .fontWeight(.semibold)
+
+            Spacer()
+
+            Image(systemName: "chevron.right")
+                .font(.caption)
+                .foregroundColor(.secondary)
+        }
+        .padding(.vertical, 10)
+        .padding(.horizontal, 12)
+        .background(
+            RoundedRectangle(cornerRadius: 10)
+                .fill(Color(.systemGray6))
+        )
+    }
+
+    private var summary: String {
+        var parts: [String] = []
+        if let w = set.weight { parts.append("\(format(w)) kg") }
+        if let r = set.reps { parts.append("\(r) reps") }
+        if let rir = set.rir { parts.append("RIR \(format(Double(rir)))") }
+        return parts.isEmpty ? "—" : parts.joined(separator: " · ")
+    }
+
+    private func format(_ v: Double) -> String {
+        v.truncatingRemainder(dividingBy: 1) == 0 ? String(Int(v)) : String(format: "%.1f", v)
+    }
+}
+
+private struct NotesField: View {
+    let text: String
+    let onChange: (String) -> Void
+
+    @State private var local: String = ""
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("Sensaciones")
+                .font(.caption)
+                .foregroundColor(.secondary)
+            TextField("Comentarios del día…", text: $local, axis: .vertical)
+                .lineLimit(2...5)
+                .padding(10)
+                .background(
+                    RoundedRectangle(cornerRadius: 10).fill(Color(.systemGray6))
+                )
+                .onChange(of: local) { _, newValue in onChange(newValue) }
+        }
+        .onAppear { local = text }
+    }
+}
+
+private struct FinishBar: View {
+    let isFinished: Bool
+    let onFinish: () -> Void
+
+    var body: some View {
+        VStack {
+            if isFinished {
+                Label("Entrenamiento guardado", systemImage: "checkmark.circle.fill")
+                    .foregroundColor(.green)
+                    .padding()
+            } else {
+                Button(action: onFinish) {
+                    Label("Finalizar entrenamiento", systemImage: "checkmark")
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(12)
+                        .fontWeight(.semibold)
+                }
+                .padding(.horizontal, 16)
+                .padding(.bottom, 8)
+            }
+        }
+        .background(Color(.systemBackground).ignoresSafeArea(edges: .bottom))
+    }
+}
+
+private struct ExercisePickerSheet: View {
+    @Binding var search: String
+    let results: [Exercise]
+    let onPick: (Exercise) -> Void
+    let onCreate: (String) -> Void
+
+    var body: some View {
+        NavigationView {
+            VStack(spacing: 0) {
+                searchField
+
+                if results.isEmpty && !search.isEmpty {
+                    Button(action: { onCreate(search) }) {
+                        HStack {
+                            Image(systemName: "plus.circle.fill")
+                                .foregroundColor(.green)
+                            Text("Crear \"\(search)\" como nuevo ejercicio")
+                                .fontWeight(.medium)
+                            Spacer()
+                        }
+                        .padding()
+                    }
+                    .buttonStyle(.plain)
+                }
+
+                List(results) { exercise in
+                    Button(action: { onPick(exercise) }) {
+                        HStack {
+                            Text(exercise.name)
+                            Spacer()
+                            Image(systemName: "plus")
+                                .foregroundColor(.green)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                }
+                .listStyle(.plain)
+            }
+            .navigationTitle("Añadir ejercicio")
+            .navigationBarTitleDisplayMode(.inline)
+        }
+    }
+
+    private var searchField: some View {
+        HStack {
+            Image(systemName: "magnifyingglass")
+                .foregroundColor(.secondary)
+            TextField("Buscar ejercicio", text: $search)
+        }
+        .padding(10)
+        .background(
+            RoundedRectangle(cornerRadius: 10)
+                .fill(Color(.systemGray6))
+        )
+        .padding()
+    }
+}
