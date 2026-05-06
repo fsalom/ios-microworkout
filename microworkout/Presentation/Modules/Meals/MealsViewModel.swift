@@ -14,6 +14,8 @@ struct MealsUiState {
     var macroTargets: NutritionInfo? = nil
     var isLoading: Bool = false
     var error: String?
+    var coachInsight: CoachInsight? = nil
+    var isLoadingCoach: Bool = false
 
     var mealsByType: [MealType: [Meal]] {
         Dictionary(grouping: todayMeals, by: { $0.type })
@@ -35,15 +37,27 @@ final class MealsViewModel: ObservableObject {
     private var router: MealsRouter
     private var mealUseCase: MealUseCaseProtocol
     private var userProfileUseCase: UserProfileUseCaseProtocol
+    private var coachUseCase: CoachUseCaseProtocol
 
     init(router: MealsRouter,
          mealUseCase: MealUseCaseProtocol,
-         userProfileUseCase: UserProfileUseCaseProtocol) {
+         userProfileUseCase: UserProfileUseCaseProtocol,
+         coachUseCase: CoachUseCaseProtocol) {
         self.router = router
         self.mealUseCase = mealUseCase
         self.userProfileUseCase = userProfileUseCase
+        self.coachUseCase = coachUseCase
         loadProfileTargets()
         loadMeals()
+        loadCoach()
+    }
+
+    private func loadCoach() {
+        uiState.isLoadingCoach = true
+        Task { @MainActor in
+            self.uiState.coachInsight = await coachUseCase.nutritionInsight()
+            self.uiState.isLoadingCoach = false
+        }
     }
 
     func loadMeals() {
@@ -189,5 +203,9 @@ final class MealsViewModel: ObservableObject {
 
     func goToBarcodeScanner() {
         router.goToBarcodeScanner()
+    }
+
+    func goToChat(prompt: String) {
+        router.goToChat(prompt: prompt)
     }
 }

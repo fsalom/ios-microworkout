@@ -29,6 +29,13 @@ struct MealsView: View {
                     SummaryCard(state: viewModel.uiState)
                         .padding(.horizontal)
 
+                    CoachInsightCard(
+                        insight: viewModel.uiState.coachInsight,
+                        isLoading: viewModel.uiState.isLoadingCoach,
+                        onOpenChat: { prompt in viewModel.goToChat(prompt: prompt) }
+                    )
+                    .padding(.horizontal)
+
                     ForEach(MealType.allCases) { type in
                         MealSectionCard(
                             type: type,
