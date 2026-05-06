@@ -12,4 +12,8 @@ class HealthWorkoutDetailRouter {
     func goTo(entry: WorkoutEntryByDay) {
         navigator.push(to: LoggedExercisesBuilder(component: component).build(for: entry))
     }
+
+    func goTo(log: WorkoutLog) {
+        navigator.push(to: WorkoutLogDetailBuilder(component: component).build(log: log))
+    }
 }

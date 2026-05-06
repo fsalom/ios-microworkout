@@ -11,7 +11,8 @@ class HealthWorkoutDetailBuilder {
             router: HealthWorkoutDetailRouter(navigator: Navigator.shared, component: component),
             healthUseCase: HealthContainer(component: component).makeUseCase(),
             trainingUseCase: TrainingContainer(component: component).makeUseCase(),
-            workoutEntryUseCase: WorkoutEntryContainer(component: component).makeUseCase()
+            workoutEntryUseCase: WorkoutEntryContainer(component: component).makeUseCase(),
+            workoutLogUseCase: WorkoutLogContainer(component: component).makeUseCase()
         )
         return HealthWorkoutDetailView(viewModel: viewModel)
     }

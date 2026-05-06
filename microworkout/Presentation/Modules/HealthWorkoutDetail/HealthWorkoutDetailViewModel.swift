@@ -4,8 +4,10 @@ struct HealthWorkoutDetailUiState {
     var workout: HealthWorkout
     var availableTrainings: [Training] = []
     var availableEntries: [WorkoutEntryByDay] = []
+    var availableLogs: [WorkoutLog] = []
     var linkedTraining: Training? = nil
     var linkedEntry: WorkoutEntryByDay? = nil
+    var linkedLog: WorkoutLog? = nil
 }
 
 final class HealthWorkoutDetailViewModel: ObservableObject {
@@ -15,16 +17,19 @@ final class HealthWorkoutDetailViewModel: ObservableObject {
     private var healthUseCase: HealthUseCaseProtocol
     private var trainingUseCase: TrainingUseCaseProtocol
     private var workoutEntryUseCase: WorkoutEntryUseCaseProtocol
+    private var workoutLogUseCase: WorkoutLogUseCaseProtocol
 
     init(workout: HealthWorkout,
          router: HealthWorkoutDetailRouter,
          healthUseCase: HealthUseCaseProtocol,
          trainingUseCase: TrainingUseCaseProtocol,
-         workoutEntryUseCase: WorkoutEntryUseCaseProtocol) {
+         workoutEntryUseCase: WorkoutEntryUseCaseProtocol,
+         workoutLogUseCase: WorkoutLogUseCaseProtocol) {
         self.router = router
         self.healthUseCase = healthUseCase
         self.trainingUseCase = trainingUseCase
         self.workoutEntryUseCase = workoutEntryUseCase
+        self.workoutLogUseCase = workoutLogUseCase
         self.uiState = HealthWorkoutDetailUiState(workout: workout)
         loadLinkOptions()
     }
@@ -92,6 +97,21 @@ final class HealthWorkoutDetailViewModel: ObservableObject {
             } else {
                 self.uiState.linkedEntry = nil
             }
+
+            // WorkoutLogs: those linking to THIS workout, plus logs from same day not linked elsewhere.
+            let allLogs = self.workoutLogUseCase.getAllLogs()
+            let workoutUUID = UUID(uuidString: self.uiState.workout.id)
+
+            self.uiState.linkedLog = allLogs.first { $0.linkedHealthWorkoutId == workoutUUID }
+
+            self.uiState.availableLogs = allLogs.filter { log in
+                guard cal.isDate(log.startedAt, inSameDayAs: workoutDay) else { return false }
+                if let linked = log.linkedHealthWorkoutId {
+                    // Only show if not linked or linked to THIS workout (then it's the linked one)
+                    return linked == workoutUUID
+                }
+                return true
+            }.filter { $0.linkedHealthWorkoutId == nil }
         }
     }
 
@@ -117,5 +137,28 @@ final class HealthWorkoutDetailViewModel: ObservableObject {
         healthUseCase.unlinkEntryFromWorkout(uiState.workout.id)
         uiState.workout.linkedEntryDate = nil
         uiState.linkedEntry = nil
+    }
+
+    func linkTo(log: WorkoutLog) {
+        guard let uuid = UUID(uuidString: uiState.workout.id) else { return }
+        var updated = log
+        updated.linkedHealthWorkoutId = uuid
+        workoutLogUseCase.saveLog(updated)
+        uiState.linkedLog = updated
+        uiState.availableLogs.removeAll { $0.id == updated.id }
+    }
+
+    func unlinkLog() {
+        guard var current = uiState.linkedLog else { return }
+        current.linkedHealthWorkoutId = nil
+        workoutLogUseCase.saveLog(current)
+        uiState.linkedLog = nil
+        uiState.availableLogs.append(current)
+        uiState.availableLogs.sort { $0.startedAt > $1.startedAt }
+    }
+
+    func openLinkedLog() {
+        guard let log = uiState.linkedLog else { return }
+        router.goTo(log: log)
     }
 }

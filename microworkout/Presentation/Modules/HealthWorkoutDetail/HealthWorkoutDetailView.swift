@@ -79,19 +79,120 @@ struct HealthWorkoutDetailView: View {
                     onTap: { viewModel.openLinkedEntry() },
                     onUnlink: { viewModel.unlinkEntry() }
                 )
-            } else if viewModel.uiState.availableTrainings.isEmpty && viewModel.uiState.availableEntries.isEmpty {
+            } else if let log = viewModel.uiState.linkedLog {
+                LinkedLogRow(
+                    log: log,
+                    onTap: { viewModel.openLinkedLog() },
+                    onUnlink: { viewModel.unlinkLog() }
+                )
+            } else if hasNoOptions {
                 Text("No hay entrenamientos disponibles para este día")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
             } else {
-                ForEach(viewModel.uiState.availableTrainings) { training in
-                    AvailableTrainingRow(training: training, onLink: { viewModel.linkTo(training: training) })
+                ForEach(viewModel.uiState.availableLogs) { log in
+                    AvailableLogRow(log: log, onLink: { viewModel.linkTo(log: log) })
                 }
                 ForEach(viewModel.uiState.availableEntries) { entry in
                     AvailableEntryRow(entry: entry, onLink: { viewModel.linkTo(entry: entry) })
                 }
+                ForEach(viewModel.uiState.availableTrainings) { training in
+                    AvailableTrainingRow(training: training, onLink: { viewModel.linkTo(training: training) })
+                }
             }
         }
+    }
+
+    private var hasNoOptions: Bool {
+        viewModel.uiState.availableTrainings.isEmpty
+            && viewModel.uiState.availableEntries.isEmpty
+            && viewModel.uiState.availableLogs.isEmpty
+    }
+}
+
+// MARK: - Log rows
+
+private struct LinkedLogRow: View {
+    let log: WorkoutLog
+    let onTap: () -> Void
+    let onUnlink: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Button(action: onTap) {
+                HStack(spacing: 12) {
+                    Image(systemName: "figure.strengthtraining.traditional")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(.green)
+                        .frame(width: 50, height: 50)
+                        .background(Color.green.opacity(0.15))
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(log.sessionName)
+                            .font(.headline)
+                            .fontWeight(.bold)
+                            .foregroundColor(.primary)
+                        Text("\(log.exercises.count) ej. · \(log.totalSets) series" + (log.endedAt != nil ? " · \(log.durationFormatted)" : ""))
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        HStack(spacing: 4) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.caption)
+                                .foregroundColor(.green)
+                            Text("Vinculado")
+                                .font(.caption)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.green)
+                        }
+                        .padding(.top, 2)
+                    }
+                    Spacer(minLength: 0)
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+
+            UnlinkButton(action: onUnlink)
+        }
+        .padding(14)
+        .background(
+            RoundedRectangle(cornerRadius: 14)
+                .fill(Color.green.opacity(0.08))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14)
+                        .stroke(Color.green.opacity(0.3), lineWidth: 1)
+                )
+        )
+    }
+}
+
+private struct AvailableLogRow: View {
+    let log: WorkoutLog
+    let onLink: () -> Void
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "figure.strengthtraining.traditional")
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundColor(.blue)
+                .frame(width: 44, height: 44)
+                .background(Color.blue.opacity(0.15))
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+            VStack(alignment: .leading, spacing: 2) {
+                Text(log.sessionName).fontWeight(.medium)
+                Text("\(log.exercises.count) ej. · \(log.totalSets) series")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            Spacer()
+            LinkPillButton(action: onLink)
+        }
+        .padding(12)
+        .background(Color(.systemGray6))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 }
 
