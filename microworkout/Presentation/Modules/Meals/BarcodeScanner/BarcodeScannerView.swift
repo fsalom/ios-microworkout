@@ -10,13 +10,64 @@ struct BarcodeScannerView: View {
     @ObservedObject var viewModel: BarcodeScannerViewModel
     @Environment(\.dismiss) private var dismiss
 
+    private var isCameraActive: Bool {
+        if viewModel.isCreatingCustom { return false }
+        switch viewModel.state {
+        case .scanning: return true
+        default: return false
+        }
+    }
+
     var body: some View {
-        ZStack {
-            // Camera View
-            BarcodeCameraView { barcode in
-                viewModel.onBarcodeScanned(barcode)
+        Group {
+            if viewModel.isCreatingCustom {
+                CreateCustomFoodSheet(
+                    barcode: viewModel.scannedBarcode,
+                    onSave: { name, kcal, p, c, f in
+                        viewModel.saveCustomFood(
+                            name: name,
+                            kcalPer100g: kcal,
+                            proteinsPer100g: p,
+                            carbsPer100g: c,
+                            fatsPer100g: f
+                        )
+                    },
+                    onCancel: { viewModel.closeCreateCustom() }
+                )
+            } else {
+                scannerContent
             }
-            .ignoresSafeArea()
+        }
+        .navigationTitle("Escanear código")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            if !viewModel.isCreatingCustom {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancelar") {
+                        dismiss()
+                    }
+                    .foregroundColor(.white)
+                }
+            }
+        }
+        .onChange(of: viewModel.shouldDismiss) { _, value in
+            if value { dismiss() }
+        }
+    }
+
+    private var scannerContent: some View {
+        ZStack {
+            // Camera View — desmontamos completamente cuando ya no estamos
+            // buscando para evitar que un nuevo escaneo dispare cambios de estado.
+            if isCameraActive {
+                BarcodeCameraView(isActive: true) { barcode in
+                    viewModel.onBarcodeScanned(barcode)
+                }
+                .ignoresSafeArea()
+            } else {
+                Color.black
+                    .ignoresSafeArea()
+            }
 
             // Overlay based on state
             VStack {
@@ -41,7 +92,8 @@ struct BarcodeScannerView: View {
                 case .notFound:
                     ProductNotFoundOverlay(
                         barcode: viewModel.scannedBarcode,
-                        onScanAgain: { viewModel.scanAgain() }
+                        onScanAgain: { viewModel.scanAgain() },
+                        onCreate: { viewModel.openCreateCustom() }
                     )
 
                 case .error(let message):
@@ -51,19 +103,6 @@ struct BarcodeScannerView: View {
                     )
                 }
             }
-        }
-        .navigationTitle("Escanear código")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                Button("Cancelar") {
-                    dismiss()
-                }
-                .foregroundColor(.white)
-            }
-        }
-        .onChange(of: viewModel.shouldDismiss) { _, value in
-            if value { dismiss() }
         }
     }
 }
@@ -247,6 +286,7 @@ struct NutrientBadge: View {
 struct ProductNotFoundOverlay: View {
     let barcode: String
     let onScanAgain: () -> Void
+    let onCreate: () -> Void
 
     var body: some View {
         VStack(spacing: 16) {
@@ -262,12 +302,20 @@ struct ProductNotFoundOverlay: View {
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
 
+            Button(action: onCreate) {
+                Label("Crear alimento", systemImage: "plus.circle.fill")
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.green)
+                    .foregroundColor(.white)
+                    .cornerRadius(12)
+            }
+
             Button(action: onScanAgain) {
                 Text("Escanear otro")
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
+                    .background(Color.gray.opacity(0.2))
                     .cornerRadius(12)
             }
         }
@@ -275,6 +323,93 @@ struct ProductNotFoundOverlay: View {
         .background(Color(.systemBackground))
         .cornerRadius(20)
         .padding()
+    }
+}
+
+// MARK: - Create custom food sheet
+
+struct CreateCustomFoodSheet: View {
+    let barcode: String
+    let onSave: (String, Double, Double, Double, Double) -> Void
+    let onCancel: () -> Void
+
+    @State private var name: String = ""
+    @State private var kcal: String = ""
+    @State private var protein: String = ""
+    @State private var carbs: String = ""
+    @State private var fats: String = ""
+
+    private var canSave: Bool {
+        !name.trimmingCharacters(in: .whitespaces).isEmpty
+            && parsed(kcal) != nil
+    }
+
+    var body: some View {
+        NavigationView {
+            Form {
+                Section("Identificación") {
+                    HStack {
+                        Image(systemName: "barcode")
+                            .foregroundColor(.secondary)
+                        Text(barcode)
+                            .font(.system(.subheadline, design: .monospaced))
+                    }
+                    TextField("Nombre del alimento", text: $name)
+                }
+
+                Section("Nutrición por 100 g") {
+                    NumericRow(label: "Calorías (kcal)", value: $kcal)
+                    NumericRow(label: "Proteína (g)", value: $protein)
+                    NumericRow(label: "Carbohidratos (g)", value: $carbs)
+                    NumericRow(label: "Grasas (g)", value: $fats)
+                }
+
+                Section {
+                    Text("Se guardará localmente. La próxima vez que escanees este código, lo encontraremos directamente.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+            .navigationTitle("Crear alimento")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancelar", action: onCancel)
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Guardar") {
+                        onSave(
+                            name.trimmingCharacters(in: .whitespaces),
+                            parsed(kcal) ?? 0,
+                            parsed(protein) ?? 0,
+                            parsed(carbs) ?? 0,
+                            parsed(fats) ?? 0
+                        )
+                    }
+                    .disabled(!canSave)
+                }
+            }
+        }
+    }
+
+    private func parsed(_ value: String) -> Double? {
+        Double(value.replacingOccurrences(of: ",", with: "."))
+    }
+}
+
+private struct NumericRow: View {
+    let label: String
+    @Binding var value: String
+
+    var body: some View {
+        HStack {
+            Text(label)
+            Spacer()
+            TextField("0", text: $value)
+                .keyboardType(.decimalPad)
+                .multilineTextAlignment(.trailing)
+                .frame(maxWidth: 80)
+        }
     }
 }
 
@@ -326,6 +461,7 @@ final class CameraPreviewView: UIView {
 }
 
 struct BarcodeCameraView: UIViewRepresentable {
+    let isActive: Bool
     let onBarcodeScanned: (String) -> Void
 
     func makeUIView(context: Context) -> CameraPreviewView {
@@ -396,7 +532,20 @@ struct BarcodeCameraView: UIViewRepresentable {
         return view
     }
 
-    func updateUIView(_ uiView: CameraPreviewView, context: Context) {}
+    func updateUIView(_ uiView: CameraPreviewView, context: Context) {
+        let coordinator = context.coordinator
+        let active = isActive
+        coordinator.sessionQueue.async {
+            guard let session = coordinator.captureSession else { return }
+            if active {
+                if !session.isRunning { session.startRunning() }
+            } else {
+                if session.isRunning { session.stopRunning() }
+                // Reset last seen so the user can rescan the same code after pausing.
+                DispatchQueue.main.async { coordinator.resetLastScanned() }
+            }
+        }
+    }
 
     func makeCoordinator() -> Coordinator {
         Coordinator(onBarcodeScanned: onBarcodeScanned)
@@ -410,6 +559,10 @@ struct BarcodeCameraView: UIViewRepresentable {
 
         init(onBarcodeScanned: @escaping (String) -> Void) {
             self.onBarcodeScanned = onBarcodeScanned
+        }
+
+        func resetLastScanned() {
+            lastScannedCode = nil
         }
 
         func metadataOutput(
