@@ -28,4 +28,8 @@ class HomeRouter {
     func goToAddMeal() {
         navigator.push(to: AddMealBuilder(component: component).build())
     }
+
+    func goToChat(prompt: String) {
+        navigator.push(to: AIChatBuilder(component: component).build(initialPrompt: prompt))
+    }
 }

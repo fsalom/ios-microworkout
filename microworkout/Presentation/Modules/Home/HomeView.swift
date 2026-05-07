@@ -29,6 +29,13 @@ struct HomeView: View {
                     )
                     .padding(.horizontal, 8)
 
+                    CoachInsightCard(
+                        insight: viewModel.uiState.coachInsight,
+                        isLoading: viewModel.uiState.isLoadingCoach,
+                        onOpenChat: { prompt in viewModel.goToChat(prompt: prompt) }
+                    )
+                    .padding(.horizontal, 8)
+
                     if viewModel.uiState.isLoadingHealth {
                         SkeletonStatsRow()
                             .padding(.horizontal, 8)

@@ -13,6 +13,7 @@ class HomeBuilder {
             workoutEntryUseCase: WorkoutEntryContainer(component: component).makeUseCase(),
             mealUseCase: MealContainer(component: component).makeUseCase(),
             userProfileUseCase: UserProfileContainer(component: component).makeUseCase(),
+            coachUseCase: CoachContainer(component: component).makeUseCase(),
             appState: appState)
         return HomeView(viewModel: viewModel)
     }

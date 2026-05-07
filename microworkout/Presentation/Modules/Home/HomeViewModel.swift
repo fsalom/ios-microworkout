@@ -22,6 +22,8 @@ struct HomeUiState {
     var isLoadingHealth: Bool = true
     var caloriesBurnedToday: Double = 0
     var workoutsCountToday: Int = 0
+    var coachInsight: CoachInsight? = nil
+    var isLoadingCoach: Bool = false
 }
 
 final class HomeViewModel: ObservableObject {
@@ -33,6 +35,7 @@ final class HomeViewModel: ObservableObject {
     private var workoutEntryUseCase: WorkoutEntryUseCaseProtocol
     private var mealUseCase: MealUseCaseProtocol
     private var userProfileUseCase: UserProfileUseCaseProtocol
+    private var coachUseCase: CoachUseCaseProtocol
     private var appState: AppState
 
     init(router: HomeRouter,
@@ -41,6 +44,7 @@ final class HomeViewModel: ObservableObject {
          workoutEntryUseCase: WorkoutEntryUseCaseProtocol,
          mealUseCase: MealUseCaseProtocol,
          userProfileUseCase: UserProfileUseCaseProtocol,
+         coachUseCase: CoachUseCaseProtocol,
          appState: AppState) {
         self.router = router
         self.trainingUseCase = trainingUseCase
@@ -48,6 +52,7 @@ final class HomeViewModel: ObservableObject {
         self.workoutEntryUseCase = workoutEntryUseCase
         self.mealUseCase = mealUseCase
         self.userProfileUseCase = userProfileUseCase
+        self.coachUseCase = coachUseCase
         self.appState = appState
         self.load()
         self.askForPermissions()
@@ -61,6 +66,16 @@ final class HomeViewModel: ObservableObject {
         self.loadLastTrainings()
         self.loadAllWorkouts()
         self.loadCalorieData()
+        self.loadCoachInsight()
+    }
+
+    private func loadCoachInsight() {
+        uiState.isLoadingCoach = true
+        Task { @MainActor in
+            let insight = await coachUseCase.homeInsight()
+            self.uiState.coachInsight = insight
+            self.uiState.isLoadingCoach = false
+        }
     }
 
     func save(this training: Training) {
@@ -171,5 +186,9 @@ final class HomeViewModel: ObservableObject {
 
     func goToAddMeal() {
         router.goToAddMeal()
+    }
+
+    func goToChat(prompt: String) {
+        router.goToChat(prompt: prompt)
     }
 }
