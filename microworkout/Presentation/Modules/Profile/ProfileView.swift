@@ -4,9 +4,15 @@ struct ProfileView: View {
     @StateObject var viewModel: ProfileViewModel
     @Environment(\.scenePhase) private var scenePhase
     @AppStorage("appearance_preference") private var appearanceRaw: String = AppearancePreference.system.rawValue
+    let component: AppComponentProtocol
 
     var body: some View {
-        NavigationView {
+        VStack(spacing: 0) {
+            Header()
+                .padding(.horizontal, 16)
+                .padding(.top, 8)
+                .padding(.bottom, 12)
+                .background(Color(.systemGroupedBackground))
             Group {
                 if viewModel.uiState.hasProfile && !viewModel.uiState.isEditing {
                     profileDetailView
@@ -14,11 +20,11 @@ struct ProfileView: View {
                     profileFormView
                 }
             }
-            .navigationTitle("Perfil")
-            .onChange(of: scenePhase) { _, newPhase in
-                if newPhase == .active {
-                    viewModel.loadHealthKitStatus()
-                }
+        }
+        .background(Color(.systemGroupedBackground))
+        .onChange(of: scenePhase) { _, newPhase in
+            if newPhase == .active {
+                viewModel.loadHealthKitStatus()
             }
         }
     }
@@ -31,7 +37,7 @@ struct ProfileView: View {
                 HStack {
                     Image(systemName: "person.circle.fill")
                         .font(.system(size: 60))
-                        .foregroundColor(.blue)
+                        .foregroundColor(.green)
                     VStack(alignment: .leading, spacing: 4) {
                         Text(viewModel.uiState.name)
                             .font(.title2)
@@ -114,6 +120,22 @@ struct ProfileView: View {
                 }
             }
 
+            Section("Asistente IA") {
+                NavigationLink(destination: AIChatBuilder(component: component).build()) {
+                    HStack {
+                        Image(systemName: "sparkles")
+                            .foregroundColor(.purple)
+                            .frame(width: 24)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Chat con asistente")
+                            Text("Análisis y orientación con tus datos")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+            }
+
             Section("Apariencia") {
                 Picker(selection: $appearanceRaw) {
                     ForEach(AppearancePreference.allCases) { option in
@@ -122,7 +144,7 @@ struct ProfileView: View {
                 } label: {
                     HStack {
                         Image(systemName: "moon.circle")
-                            .foregroundColor(.blue)
+                            .foregroundColor(.green)
                             .frame(width: 24)
                         Text("Modo")
                     }
@@ -255,6 +277,29 @@ struct ProfileView: View {
     }
 }
 
+private struct Header: View {
+    private var monthLabel: String {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "es_ES")
+        f.dateFormat = "MMMM yyyy"
+        return f.string(from: Date()).uppercased()
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(monthLabel)
+                .font(.caption)
+                .fontWeight(.semibold)
+                .foregroundColor(.secondary)
+                .tracking(1)
+            Text("Perfil")
+                .font(.largeTitle)
+                .fontWeight(.bold)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
 private let cyclingDayLabels: [(weekday: Int, label: String)] = [
     (2, "L"), (3, "M"), (4, "X"), (5, "J"), (6, "V"), (7, "S"), (1, "D")
 ]
@@ -267,7 +312,7 @@ private struct ProfileRow: View {
     var body: some View {
         HStack {
             Image(systemName: icon)
-                .foregroundColor(.blue)
+                .foregroundColor(.green)
                 .frame(width: 24)
             Text(label)
             Spacer()

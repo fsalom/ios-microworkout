@@ -10,6 +10,6 @@ class ProfileBuilder {
             userProfileUseCase: UserProfileContainer(component: component).makeUseCase(),
             healthUseCase: HealthContainer(component: component).makeUseCase()
         )
-        return ProfileView(viewModel: viewModel)
+        return ProfileView(viewModel: viewModel, component: component)
     }
 }
