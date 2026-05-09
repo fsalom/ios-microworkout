@@ -85,6 +85,12 @@ struct HomeView: View {
                 viewModel.loadWeeksWithHealthInfo()
                 viewModel.load()
             }
+            .onReceive(NotificationCenter.default.publisher(for: .mealsChanged)) { _ in
+                viewModel.load()
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .workoutLogsChanged)) { _ in
+                viewModel.load()
+            }
             .background(Color(.systemGroupedBackground))
             .scrollContentBackground(.hidden)
             .scrollIndicators(.hidden)

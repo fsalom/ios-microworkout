@@ -1,8 +1,11 @@
 import SwiftUI
+import AuthenticationServices
 
 struct ProfileView: View {
     @StateObject var viewModel: ProfileViewModel
+    @EnvironmentObject var authSession: AuthSession
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.colorScheme) private var colorScheme
     @AppStorage("appearance_preference") private var appearanceRaw: String = AppearancePreference.system.rawValue
     let component: AppComponentProtocol
 
@@ -27,6 +30,15 @@ struct ProfileView: View {
                 viewModel.loadHealthKitStatus()
             }
         }
+        .alert(
+            "Error",
+            isPresented: Binding(
+                get: { viewModel.uiState.authError != nil },
+                set: { if !$0 { viewModel.dismissAuthError() } }
+            ),
+            actions: { Button("OK", role: .cancel) { viewModel.dismissAuthError() } },
+            message: { Text(viewModel.uiState.authError ?? "") }
+        )
     }
 
     // MARK: - Detail View
@@ -50,6 +62,8 @@ struct ProfileView: View {
                 }
                 .padding(.vertical, 8)
             }
+
+            accountSection
 
             Section("Datos fisicos") {
                 ProfileRow(icon: "figure.stand", label: "Sexo", value: viewModel.uiState.gender.rawValue)
@@ -157,6 +171,58 @@ struct ProfileView: View {
                         Spacer()
                         Text("Editar perfil")
                         Spacer()
+                    }
+                }
+            }
+        }
+    }
+
+    // MARK: - Account Section
+
+    @ViewBuilder
+    private var accountSection: some View {
+        switch authSession.state {
+        case .unknown:
+            EmptyView()
+        case .guest:
+            Section("Cuenta") {
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Inicia sesión para sincronizar tus comidas en la nube y desbloquear el escáner de códigos y el coach IA.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+
+                    SignInWithAppleButton(.signIn) { request in
+                        request.requestedScopes = [.fullName, .email]
+                    } onCompletion: { result in
+                        viewModel.handleAppleSignIn(result)
+                    }
+                    .signInWithAppleButtonStyle(colorScheme == .dark ? .white : .black)
+                    .frame(height: 44)
+                    .disabled(viewModel.uiState.isSigningIn)
+                    .opacity(viewModel.uiState.isSigningIn ? 0.5 : 1)
+                }
+                .padding(.vertical, 4)
+            }
+        case .authenticated(let user):
+            Section("Cuenta") {
+                HStack {
+                    Image(systemName: "checkmark.seal.fill")
+                        .foregroundColor(.green)
+                        .frame(width: 24)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(user.fullname.isEmpty ? "Cuenta vinculada" : user.fullname)
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
+                        Text(user.email)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+                Button(role: .destructive, action: { viewModel.signOut() }) {
+                    HStack {
+                        Image(systemName: "rectangle.portrait.and.arrow.right")
+                            .frame(width: 24)
+                        Text("Cerrar sesión")
                     }
                 }
             }

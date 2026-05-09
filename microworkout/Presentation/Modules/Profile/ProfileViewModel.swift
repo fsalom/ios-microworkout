@@ -1,7 +1,10 @@
 import SwiftUI
 import Combine
+import AuthenticationServices
 
 struct ProfileUiState {
+    var authError: String?
+    var isSigningIn: Bool = false
     var name: String = ""
     var weight: Double = 70
     var height: Double = 170
@@ -28,11 +31,14 @@ class ProfileViewModel: ObservableObject {
 
     private var userProfileUseCase: UserProfileUseCaseProtocol
     private var healthUseCase: HealthUseCaseProtocol
+    private let authService: AuthServiceProtocol
 
     init(userProfileUseCase: UserProfileUseCaseProtocol,
-         healthUseCase: HealthUseCaseProtocol) {
+         healthUseCase: HealthUseCaseProtocol,
+         authService: AuthServiceProtocol = AuthService()) {
         self.userProfileUseCase = userProfileUseCase
         self.healthUseCase = healthUseCase
+        self.authService = authService
         loadProfile()
         loadHealthKitStatus()
     }
@@ -107,5 +113,43 @@ class ProfileViewModel: ObservableObject {
     func openHealthApp() {
         guard let url = URL(string: "x-apple-health://") else { return }
         UIApplication.shared.open(url)
+    }
+
+    // MARK: - Authentication
+
+    func handleAppleSignIn(_ result: Result<ASAuthorization, Error>) {
+        switch result {
+        case .failure(let error):
+            if (error as? ASAuthorizationError)?.code == .canceled { return }
+            uiState.authError = error.localizedDescription
+        case .success(let auth):
+            guard
+                let credential = auth.credential as? ASAuthorizationAppleIDCredential,
+                let codeData = credential.authorizationCode,
+                let code = String(data: codeData, encoding: .utf8)
+            else {
+                uiState.authError = "No se obtuvo código de autorización de Apple"
+                return
+            }
+            Task { @MainActor in
+                uiState.isSigningIn = true
+                defer { uiState.isSigningIn = false }
+                do {
+                    try await authService.signInWithApple(authCode: code)
+                } catch {
+                    uiState.authError = error.localizedDescription
+                }
+            }
+        }
+    }
+
+    func signOut() {
+        Task { @MainActor in
+            await authService.logout()
+        }
+    }
+
+    func dismissAuthError() {
+        uiState.authError = nil
     }
 }
