@@ -11,6 +11,7 @@ class MealUseCase: MealUseCaseProtocol {
     private let userDefaults: UserDefaultsManagerProtocol
     private let favoritesKey = "favoriteFoods"
     private let myMealsKey = "myMeals"
+    private let customFoodsKey = "customFoodsByBarcode"
 
     init(repository: MealRepositoryProtocol, userDefaults: UserDefaultsManagerProtocol) {
         self.repository = repository
@@ -19,6 +20,9 @@ class MealUseCase: MealUseCaseProtocol {
 
     func saveMeal(_ meal: Meal) async throws {
         try await repository.saveMeal(meal)
+        await MainActor.run {
+            NotificationCenter.default.post(name: .mealsChanged, object: nil)
+        }
     }
 
     func getMealsForToday() async throws -> [Meal] {
@@ -32,10 +36,22 @@ class MealUseCase: MealUseCaseProtocol {
 
     func deleteMeal(_ mealId: UUID) async throws {
         try await repository.deleteMeal(mealId)
+        await MainActor.run {
+            NotificationCenter.default.post(name: .mealsChanged, object: nil)
+        }
     }
 
     func fetchFoodByBarcode(_ barcode: String) async throws -> FoodItem? {
-        try await repository.fetchFoodInfo(barcode: barcode)
+        // Primero intentamos la API remota; si no devuelve nada (o falla), miramos en
+        // los alimentos personalizados que el usuario haya guardado offline.
+        do {
+            if let remote = try await repository.fetchFoodInfo(barcode: barcode) {
+                return remote
+            }
+        } catch {
+            print("[MealUseCase] remote barcode lookup failed: \(error)")
+        }
+        return getCustomFood(barcode: barcode)
     }
 
     func searchFoods(query: String) async throws -> [FoodItem] {
@@ -131,5 +147,21 @@ class MealUseCase: MealUseCaseProtocol {
         var meals = getMyMeals()
         meals.removeAll { $0.id == id }
         userDefaults.save(meals, forKey: myMealsKey)
+    }
+
+    // MARK: - Custom foods (offline fallback)
+
+    func saveCustomFood(_ food: FoodItem) {
+        guard let barcode = food.barcode, !barcode.isEmpty else { return }
+        var dict: [String: FoodItem] = userDefaults.get(forKey: customFoodsKey) ?? [:]
+        var copy = food
+        copy.quantity = 100
+        dict[barcode] = copy
+        userDefaults.save(dict, forKey: customFoodsKey)
+    }
+
+    func getCustomFood(barcode: String) -> FoodItem? {
+        let dict: [String: FoodItem] = userDefaults.get(forKey: customFoodsKey) ?? [:]
+        return dict[barcode]
     }
 }

@@ -52,4 +52,12 @@ protocol MealUseCaseProtocol {
 
     /// Elimina una receta por id.
     func deleteMyMeal(id: UUID)
+
+    // MARK: Custom foods (offline fallback for unknown barcodes)
+
+    /// Guarda un FoodItem creado por el usuario, identificable por su `barcode`.
+    func saveCustomFood(_ food: FoodItem)
+
+    /// Recupera un FoodItem creado por el usuario por su `barcode`.
+    func getCustomFood(barcode: String) -> FoodItem?
 }

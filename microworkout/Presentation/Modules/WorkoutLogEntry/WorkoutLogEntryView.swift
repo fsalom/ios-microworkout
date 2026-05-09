@@ -100,7 +100,7 @@ struct WorkoutLogEntryView: View {
                 .padding()
                 .presentationDetents([.height(360)])
                 .presentationDragIndicator(.visible)
-            case .edit:
+            case .edit(let exerciseLogId, let setId):
                 let set = viewModel.setBeingEdited()
                 LoggedSetInput(
                     exercise: exercise,
@@ -108,10 +108,11 @@ struct WorkoutLogEntryView: View {
                     initialWeight: set?.weight,
                     initialReps: set?.reps,
                     initialRir: set?.rir,
-                    onSave: { w, r, rir in viewModel.saveSet(weight: w, reps: r, rir: rir) }
+                    onSave: { w, r, rir in viewModel.saveSet(weight: w, reps: r, rir: rir) },
+                    onDelete: { viewModel.deleteSet(exerciseLogId: exerciseLogId, setId: setId) }
                 )
                 .padding()
-                .presentationDetents([.height(360)])
+                .presentationDetents([.height(420)])
                 .presentationDragIndicator(.visible)
             }
         }
@@ -154,11 +155,11 @@ private struct LoggedExerciseCard: View {
                             SetRow(index: index + 1, set: set)
                         }
                         .buttonStyle(.plain)
-                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                        .contextMenu {
                             Button(role: .destructive) {
                                 onDeleteSet(set.id)
                             } label: {
-                                Label("Borrar", systemImage: "trash")
+                                Label("Eliminar serie", systemImage: "trash")
                             }
                         }
                     }
