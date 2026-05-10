@@ -1,3 +1,5 @@
+import Foundation
+
 class WorkoutLogUseCase: WorkoutLogUseCaseProtocol {
     private let repository: WorkoutLogRepositoryProtocol
 
@@ -10,6 +12,12 @@ class WorkoutLogUseCase: WorkoutLogUseCaseProtocol {
     func deleteSession(id: String) { repository.deleteSession(id: id) }
 
     func getAllLogs() -> [WorkoutLog] { repository.getAllLogs() }
-    func saveLog(_ log: WorkoutLog) { repository.saveLog(log) }
-    func deleteLog(id: String) { repository.deleteLog(id: id) }
+    func saveLog(_ log: WorkoutLog) {
+        repository.saveLog(log)
+        NotificationCenter.default.post(name: .workoutLogsChanged, object: nil)
+    }
+    func deleteLog(id: String) {
+        repository.deleteLog(id: id)
+        NotificationCenter.default.post(name: .workoutLogsChanged, object: nil)
+    }
 }
