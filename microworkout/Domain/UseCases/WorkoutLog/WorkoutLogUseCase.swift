@@ -20,4 +20,22 @@ class WorkoutLogUseCase: WorkoutLogUseCaseProtocol {
         repository.deleteLog(id: id)
         NotificationCenter.default.post(name: .workoutLogsChanged, object: nil)
     }
+
+    func getPreviousLoggedExercise(
+        sessionId: UUID?,
+        exerciseId: UUID,
+        beforeLogId: UUID?
+    ) -> (exercise: LoggedExercise, date: Date)? {
+        guard let sessionId else { return nil }
+        let candidates = repository.getAllLogs()
+            .filter { $0.sessionId == sessionId && $0.id != beforeLogId }
+            .sorted { $0.startedAt > $1.startedAt }
+        for log in candidates {
+            if let match = log.exercises.first(where: { $0.exercise.id == exerciseId }),
+               !match.sets.isEmpty {
+                return (match, log.startedAt)
+            }
+        }
+        return nil
+    }
 }
