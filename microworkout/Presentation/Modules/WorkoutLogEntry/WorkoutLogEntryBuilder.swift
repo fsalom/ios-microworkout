@@ -26,6 +26,7 @@ class WorkoutLogEntryBuilder {
             useCase: WorkoutLogContainer(component: component).makeUseCase(),
             exerciseUseCase: ExerciseContainer(component: component).makeUseCase()
         )
-        return WorkoutLogEntryView(viewModel: viewModel)
+        let mediaUseCase = SetMediaContainer(component: component).makeUseCase()
+        return WorkoutLogEntryView(viewModel: viewModel, mediaUseCase: mediaUseCase)
     }
 }

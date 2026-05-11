@@ -2,6 +2,7 @@ import SwiftUI
 
 struct WorkoutLogEntryView: View {
     @StateObject var viewModel: WorkoutLogEntryViewModel
+    let mediaUseCase: SetMediaUseCase
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -48,6 +49,7 @@ struct WorkoutLogEntryView: View {
             ForEach(viewModel.uiState.log.exercises) { exerciseLog in
                 LoggedExerciseCard(
                     exerciseLog: exerciseLog,
+                    mediaUseCase: mediaUseCase,
                     isNotesExpanded: viewModel.uiState.expandedNotes.contains(exerciseLog.id),
                     onToggleNotes: { viewModel.toggleNotes(for: exerciseLog.id) },
                     onUpdateNotes: { viewModel.updateNotes(exerciseLogId: exerciseLog.id, notes: $0) },
@@ -108,11 +110,13 @@ struct WorkoutLogEntryView: View {
                     initialWeight: set?.weight,
                     initialReps: set?.reps,
                     initialRir: set?.rir,
+                    mediaSetId: setId,
+                    mediaUseCase: mediaUseCase,
                     onSave: { w, r, rir in viewModel.saveSet(weight: w, reps: r, rir: rir) },
                     onDelete: { viewModel.deleteSet(exerciseLogId: exerciseLogId, setId: setId) }
                 )
                 .padding()
-                .presentationDetents([.height(420)])
+                .presentationDetents([.large])
                 .presentationDragIndicator(.visible)
             }
         }
@@ -121,6 +125,7 @@ struct WorkoutLogEntryView: View {
 
 private struct LoggedExerciseCard: View {
     let exerciseLog: LoggedExercise
+    let mediaUseCase: SetMediaUseCase
     let isNotesExpanded: Bool
     let onToggleNotes: () -> Void
     let onUpdateNotes: (String) -> Void
@@ -152,7 +157,7 @@ private struct LoggedExerciseCard: View {
                 VStack(spacing: 6) {
                     ForEach(Array(exerciseLog.sets.enumerated()), id: \.element.id) { index, set in
                         Button(action: { onTapSet(set.id) }) {
-                            SetRow(index: index + 1, set: set)
+                            SetRow(index: index + 1, set: set, mediaUseCase: mediaUseCase)
                         }
                         .buttonStyle(.plain)
                         .contextMenu {
@@ -227,6 +232,9 @@ private struct NotesToggleButton: View {
 private struct SetRow: View {
     let index: Int
     let set: LoggedSet
+    let mediaUseCase: SetMediaUseCase
+
+    @State private var mediaCount: Int = 0
 
     var body: some View {
         HStack(spacing: 8) {
@@ -242,6 +250,20 @@ private struct SetRow: View {
 
             Spacer()
 
+            if mediaCount > 0 {
+                HStack(spacing: 3) {
+                    Image(systemName: "photo.on.rectangle")
+                        .font(.caption2)
+                    Text("\(mediaCount)")
+                        .font(.caption2)
+                        .fontWeight(.semibold)
+                }
+                .foregroundColor(.blue)
+                .padding(.horizontal, 6)
+                .padding(.vertical, 3)
+                .background(Capsule().fill(Color.blue.opacity(0.12)))
+            }
+
             Image(systemName: "chevron.right")
                 .font(.caption)
                 .foregroundColor(.secondary)
@@ -252,6 +274,18 @@ private struct SetRow: View {
             RoundedRectangle(cornerRadius: 10)
                 .fill(Color(.systemGray6))
         )
+        .task(id: set.id) {
+            await loadMediaCount()
+        }
+    }
+
+    private func loadMediaCount() async {
+        do {
+            let media = try await mediaUseCase.getMedia(forSetId: set.id)
+            mediaCount = media.count
+        } catch {
+            mediaCount = 0
+        }
     }
 
     private var summary: String {

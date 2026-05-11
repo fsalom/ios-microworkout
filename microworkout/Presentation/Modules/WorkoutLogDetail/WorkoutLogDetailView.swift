@@ -7,6 +7,18 @@ struct WorkoutLogDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
+                if viewModel.uiState.hasSiblings {
+                    SessionDateSelector(
+                        date: viewModel.uiState.log.startedAt,
+                        canGoBack: viewModel.uiState.canGoBack,
+                        canGoForward: viewModel.uiState.canGoForward,
+                        position: viewModel.uiState.currentSiblingIndex + 1,
+                        total: viewModel.uiState.siblingLogs.count,
+                        onBack: { viewModel.goToPreviousSibling() },
+                        onForward: { viewModel.goToNextSibling() }
+                    )
+                }
+
                 Header(
                     log: viewModel.uiState.log,
                     linkedWorkout: viewModel.uiState.linkedHealthWorkout
@@ -19,8 +31,11 @@ struct WorkoutLogDetailView: View {
                 ForEach(viewModel.uiState.log.exercises) { exerciseLog in
                     ExerciseSummaryCard(
                         exerciseLog: exerciseLog,
+                        previousReference: viewModel.uiState.previousByExerciseId[exerciseLog.exercise.id],
                         isNotesExpanded: viewModel.uiState.expandedNotes.contains(exerciseLog.id),
-                        onToggleNotes: { viewModel.toggleNotes(for: exerciseLog.id) }
+                        mediaUseCase: viewModel.mediaUseCase,
+                        onToggleNotes: { viewModel.toggleNotes(for: exerciseLog.id) },
+                        onTapSet: { viewModel.openMediaGallery(setId: $0) }
                     )
                 }
             }
@@ -30,6 +45,9 @@ struct WorkoutLogDetailView: View {
         .navigationTitle(viewModel.uiState.log.sessionName)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button("Editar") { viewModel.goToEdit() }
+            }
             ToolbarItem(placement: .navigationBarTrailing) {
                 Menu {
                     Button(role: .destructive, action: {
@@ -42,7 +60,36 @@ struct WorkoutLogDetailView: View {
                 }
             }
         }
+        .onAppear { viewModel.reloadFromStorage() }
+        .onReceive(NotificationCenter.default.publisher(for: .workoutLogsChanged)) { _ in
+            viewModel.reloadFromStorage()
+        }
+        .sheet(item: mediaSheetBinding) { setId in
+            NavigationStack {
+                SetMediaGalleryView(setId: setId.id, useCase: viewModel.mediaUseCase)
+                    .padding()
+                    .navigationTitle("Multimedia")
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .navigationBarTrailing) {
+                            Button("Cerrar") { viewModel.closeMediaGallery() }
+                        }
+                    }
+            }
+            .presentationDetents([.medium, .large])
+        }
     }
+
+    private var mediaSheetBinding: Binding<IdentifiableUUID?> {
+        Binding(
+            get: { viewModel.uiState.mediaSheetSetId.map { IdentifiableUUID(id: $0) } },
+            set: { if $0 == nil { viewModel.closeMediaGallery() } }
+        )
+    }
+}
+
+private struct IdentifiableUUID: Identifiable, Hashable {
+    let id: UUID
 }
 
 private struct Header: View {
@@ -182,8 +229,11 @@ private struct Stat: View {
 
 private struct ExerciseSummaryCard: View {
     let exerciseLog: LoggedExercise
+    let previousReference: PreviousExerciseReference?
     let isNotesExpanded: Bool
+    let mediaUseCase: SetMediaUseCase
     let onToggleNotes: () -> Void
+    let onTapSet: (UUID) -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -200,6 +250,14 @@ private struct ExerciseSummaryCard: View {
                 }
             }
 
+            if let previousReference {
+                PreviousTopSetCard(
+                    current: exerciseLog,
+                    previous: previousReference.exercise,
+                    previousDate: previousReference.date
+                )
+            }
+
             if exerciseLog.sets.isEmpty {
                 Text("Sin series registradas")
                     .font(.caption)
@@ -210,6 +268,8 @@ private struct ExerciseSummaryCard: View {
                     Text("KG").frame(maxWidth: .infinity)
                     Text("REPS").frame(maxWidth: .infinity)
                     Text("RIR").frame(maxWidth: .infinity)
+                    Image(systemName: "photo")
+                        .frame(width: 36)
                 }
                 .font(.caption2)
                 .fontWeight(.semibold)
@@ -217,18 +277,27 @@ private struct ExerciseSummaryCard: View {
                 .tracking(0.5)
 
                 ForEach(Array(exerciseLog.sets.enumerated()), id: \.element.id) { index, set in
-                    HStack(spacing: 8) {
-                        Text("\(index + 1)")
-                            .font(.system(size: 15, weight: .bold))
-                            .frame(width: 24, alignment: .leading)
-                        Text(set.weight.map { format($0) } ?? "—")
-                            .frame(maxWidth: .infinity)
-                        Text(set.reps.map { String($0) } ?? "—")
-                            .frame(maxWidth: .infinity)
-                        Text(set.rir.map { format(Double($0)) } ?? "—")
-                            .frame(maxWidth: .infinity)
+                    Button {
+                        onTapSet(set.id)
+                    } label: {
+                        HStack(spacing: 8) {
+                            Text("\(index + 1)")
+                                .font(.system(size: 15, weight: .bold))
+                                .frame(width: 24, alignment: .leading)
+                            Text(set.weight.map { format($0) } ?? "—")
+                                .frame(maxWidth: .infinity)
+                            Text(set.reps.map { String($0) } ?? "—")
+                                .frame(maxWidth: .infinity)
+                            Text(set.rir.map { format(Double($0)) } ?? "—")
+                                .frame(maxWidth: .infinity)
+                            DetailMediaIndicator(setId: set.id, useCase: mediaUseCase)
+                                .frame(width: 36)
+                        }
+                        .font(.system(size: 15, weight: .semibold, design: .rounded))
+                        .foregroundColor(.primary)
+                        .contentShape(Rectangle())
                     }
-                    .font(.system(size: 15, weight: .semibold, design: .rounded))
+                    .buttonStyle(.plain)
                 }
             }
 
@@ -257,5 +326,104 @@ private struct ExerciseSummaryCard: View {
     private func format(_ value: Double) -> String {
         if value.truncatingRemainder(dividingBy: 1) == 0 { return String(Int(value)) }
         return String(format: "%.1f", value)
+    }
+}
+
+private struct SessionDateSelector: View {
+    let date: Date
+    let canGoBack: Bool
+    let canGoForward: Bool
+    let position: Int
+    let total: Int
+    let onBack: () -> Void
+    let onForward: () -> Void
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Button(action: onBack) {
+                Image(systemName: "chevron.left")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(canGoBack ? .accentColor : .secondary.opacity(0.4))
+                    .frame(width: 36, height: 36)
+                    .background(Circle().fill(Color(.tertiarySystemGroupedBackground)))
+            }
+            .buttonStyle(.plain)
+            .disabled(!canGoBack)
+
+            VStack(spacing: 2) {
+                Text(formatDate(date))
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                Text("\(position) de \(total)")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+            }
+            .frame(maxWidth: .infinity)
+
+            Button(action: onForward) {
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(canGoForward ? .accentColor : .secondary.opacity(0.4))
+                    .frame(width: 36, height: 36)
+                    .background(Circle().fill(Color(.tertiarySystemGroupedBackground)))
+            }
+            .buttonStyle(.plain)
+            .disabled(!canGoForward)
+        }
+        .padding(.vertical, 8)
+        .padding(.horizontal, 10)
+        .background(
+            RoundedRectangle(cornerRadius: 14)
+                .fill(Color(.secondarySystemGroupedBackground))
+        )
+    }
+
+    private func formatDate(_ date: Date) -> String {
+        let cal = Calendar.current
+        if cal.isDateInToday(date) { return "Hoy" }
+        if cal.isDateInYesterday(date) { return "Ayer" }
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "es_ES")
+        formatter.dateFormat = "EEE d MMM"
+        return formatter.string(from: date).capitalized
+    }
+}
+
+private struct DetailMediaIndicator: View {
+    let setId: UUID
+    let useCase: SetMediaUseCase
+    @State private var count: Int = 0
+
+    var body: some View {
+        Group {
+            if count > 0 {
+                HStack(spacing: 3) {
+                    Image(systemName: "photo.on.rectangle.angled")
+                        .font(.caption2)
+                    Text("\(count)")
+                        .font(.caption2)
+                        .fontWeight(.bold)
+                }
+                .foregroundColor(.white)
+                .padding(.horizontal, 6)
+                .padding(.vertical, 4)
+                .background(Capsule().fill(Color.accentColor))
+            } else {
+                Image(systemName: "plus.circle.fill")
+                    .font(.subheadline)
+                    .foregroundColor(.accentColor.opacity(0.55))
+            }
+        }
+        .task(id: setId) {
+            await reload()
+        }
+    }
+
+    private func reload() async {
+        do {
+            count = try await useCase.getMedia(forSetId: setId).count
+        } catch {
+            count = 0
+        }
     }
 }
