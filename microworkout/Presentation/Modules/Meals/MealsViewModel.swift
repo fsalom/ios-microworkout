@@ -188,10 +188,7 @@ final class MealsViewModel: ObservableObject {
         changeDate(to: next)
     }
 
-    var canGoToNextDay: Bool {
-        let cal = Calendar.current
-        return !cal.isDateInToday(uiState.selectedDate) && uiState.selectedDate < Date()
-    }
+    var canGoToNextDay: Bool { true }
 
     func goToAddMeal() {
         router.goToAddMeal(prefilledType: nil)

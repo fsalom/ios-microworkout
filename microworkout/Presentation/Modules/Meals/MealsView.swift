@@ -59,6 +59,7 @@ struct MealsView: View {
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(.hidden, for: .navigationBar)
+        .pinnedTabHeader(subtitle: "DIARIO", title: "Alimentación")
         .onAppear {
             viewModel.loadMeals()
         }
@@ -105,44 +106,37 @@ private struct DateHeader: View {
     let onNext: () -> Void
 
     var body: some View {
-        VStack(spacing: 6) {
-            HStack {
-                Button(action: onPrevious) {
-                    Image(systemName: "chevron.left")
-                        .font(.headline)
-                        .foregroundColor(.primary)
-                        .frame(width: 32, height: 32)
-                        .background(Color(.secondarySystemGroupedBackground))
-                        .clipShape(Circle())
-                }
-                .buttonStyle(.plain)
-
-                Spacer()
-
-                Text(formattedDate)
-                    .font(.caption)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.secondary)
-                    .tracking(1)
-
-                Spacer()
-
-                Button(action: onNext) {
-                    Image(systemName: "chevron.right")
-                        .font(.headline)
-                        .foregroundColor(canGoNext ? .primary : .secondary.opacity(0.5))
-                        .frame(width: 32, height: 32)
-                        .background(Color(.secondarySystemGroupedBackground))
-                        .clipShape(Circle())
-                }
-                .buttonStyle(.plain)
-                .disabled(!canGoNext)
+        HStack {
+            Button(action: onPrevious) {
+                Image(systemName: "chevron.left")
+                    .font(.headline)
+                    .foregroundColor(.primary)
+                    .frame(width: 32, height: 32)
+                    .background(Color(.secondarySystemGroupedBackground))
+                    .clipShape(Circle())
             }
+            .buttonStyle(.plain)
 
-            Text("Alimentación")
-                .font(.title)
-                .fontWeight(.bold)
-                .frame(maxWidth: .infinity, alignment: .leading)
+            Spacer()
+
+            Text(formattedDate)
+                .font(.caption)
+                .fontWeight(.semibold)
+                .foregroundColor(.secondary)
+                .tracking(1)
+
+            Spacer()
+
+            Button(action: onNext) {
+                Image(systemName: "chevron.right")
+                    .font(.headline)
+                    .foregroundColor(canGoNext ? .primary : .secondary.opacity(0.5))
+                    .frame(width: 32, height: 32)
+                    .background(Color(.secondarySystemGroupedBackground))
+                    .clipShape(Circle())
+            }
+            .buttonStyle(.plain)
+            .disabled(!canGoNext)
         }
     }
 

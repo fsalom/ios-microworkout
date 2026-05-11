@@ -12,115 +12,98 @@ struct HomeView: View {
 
 
     var body: some View {
-        ZStack(alignment: .top) {
-            ScrollView {
-                LazyVStack(alignment: .leading, spacing: 20) {
-                    if viewModel.uiState.isLoadingCalories {
-                        SkeletonCard(height: 130)
-                            .padding(.horizontal, 8)
-                    } else {
-                        CalorieProgressCard()
-                            .padding(.horizontal, 8)
-                    }
-
-                    BurnedCaloriesCard(
-                        burned: viewModel.uiState.caloriesBurnedToday,
-                        workoutsCount: viewModel.uiState.workoutsCountToday
-                    )
-                    .padding(.horizontal, 8)
-
-                    CoachInsightCard(
-                        insight: viewModel.uiState.coachInsight,
-                        isLoading: viewModel.uiState.isLoadingCoach,
-                        onOpenChat: { prompt in viewModel.goToChat(prompt: prompt) }
-                    )
-                    .padding(.horizontal, 8)
-
-                    if viewModel.uiState.isLoadingHealth {
-                        SkeletonStatsRow()
-                            .padding(.horizontal, 8)
-                    } else {
-                        TodayStatsSection()
-                            .padding(.horizontal, 8)
-                    }
-
-                    if viewModel.uiState.isLoadingHealth {
-                        SkeletonHeatmap()
-                            .padding(.horizontal, 8)
-                    } else {
-                        HealthGrid()
-                            .padding(.horizontal, 8)
-                    }
-
-                    if !viewModel.uiState.lastTrainings.isEmpty {
-                        Text("Micro entrenamientos")
-                            .font(.title2)
-                            .fontWeight(.bold)
-                            .padding(.horizontal, 8)
-
-                        ListMicroTrainings()
-                    }
-
-                }
+        ScrollView {
+            content
                 .padding(.vertical, 16)
-            }
-            .onAppear {
-                if !hasAppeared {
-                    viewModel.loadWeeksWithHealthInfo()
-                    hasAppeared = true
-                }
-                viewModel.load()
-            }
-            .onChange(of: scenePhase) { oldPhase, newPhase in
-                if newPhase == .active && hasAppeared {
-                    viewModel.loadWeeksWithHealthInfo()
-                }
-            }
-            .onChange(of: appState.selectedTab) { _, newTab in
-                if newTab == 0 {
-                    viewModel.load()
-                }
-            }
-            .onReceive(NotificationCenter.default.publisher(for: .NSCalendarDayChanged)) { _ in
+        }
+        .background(Color(.systemGroupedBackground))
+        .scrollIndicators(.hidden)
+        .pinnedTabHeader(subtitle: "BIENVENIDO", title: welcomeTitle)
+        .onAppear {
+            if !hasAppeared {
                 viewModel.loadWeeksWithHealthInfo()
+                hasAppeared = true
+            }
+            viewModel.load()
+        }
+        .onChange(of: scenePhase) { _, newPhase in
+            if newPhase == .active && hasAppeared {
+                viewModel.loadWeeksWithHealthInfo()
+            }
+        }
+        .onChange(of: appState.selectedTab) { _, newTab in
+            if newTab == 0 {
                 viewModel.load()
             }
-            .onReceive(NotificationCenter.default.publisher(for: .mealsChanged)) { _ in
-                viewModel.load()
-            }
-            .onReceive(NotificationCenter.default.publisher(for: .workoutLogsChanged)) { _ in
-                viewModel.load()
-            }
-            .background(Color(.systemGroupedBackground))
-            .scrollContentBackground(.hidden)
-            .scrollIndicators(.hidden)
-            .navigationTitle("hola")
-            .navigationBarTitleDisplayMode(.large)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .NSCalendarDayChanged)) { _ in
+            viewModel.loadWeeksWithHealthInfo()
+            viewModel.load()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .mealsChanged)) { _ in
+            viewModel.load()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .workoutLogsChanged)) { _ in
+            viewModel.load()
+        }
+    }
 
-        }
-        .statusBarHidden(true)
-        .safeAreaInset(edge: .top) {
-            VStack {
-                HStack {
-                    Image(systemName: "person.fill")
-                        .foregroundColor(.white)
-                        .padding(10)
-                        .background(.gray)
-                        .clipShape(Circle())
-                    VStack(alignment: .leading) {
-                        Text("Bienvenido")
-                        Text(viewModel.uiState.userName ?? "Fernando")
-                            .fontWeight(.bold)
-                    }
-                    Spacer()
-                }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
-                Divider()
+    @ViewBuilder
+    private var content: some View {
+        LazyVStack(alignment: .leading, spacing: 20) {
+            if viewModel.uiState.isLoadingCalories {
+                SkeletonCard(height: 130)
+                    .padding(.horizontal, 8)
+            } else {
+                CalorieProgressCard()
+                    .padding(.horizontal, 8)
             }
-            .frame(maxWidth: .infinity, alignment: .top)
-            .background(Color(.systemBackground))
+
+            BurnedCaloriesCard(
+                burned: viewModel.uiState.caloriesBurnedToday,
+                workoutsCount: viewModel.uiState.workoutsCountToday
+            )
+            .padding(.horizontal, 8)
+
+            CoachInsightCard(
+                insight: viewModel.uiState.coachInsight,
+                isLoading: viewModel.uiState.isLoadingCoach,
+                onOpenChat: { prompt in viewModel.goToChat(prompt: prompt) }
+            )
+            .padding(.horizontal, 8)
+
+            if viewModel.uiState.isLoadingHealth {
+                SkeletonStatsRow()
+                    .padding(.horizontal, 8)
+            } else {
+                TodayStatsSection()
+                    .padding(.horizontal, 8)
+            }
+
+            if viewModel.uiState.isLoadingHealth {
+                SkeletonHeatmap()
+                    .padding(.horizontal, 8)
+            } else {
+                HealthGrid()
+                    .padding(.horizontal, 8)
+            }
+
+            if !viewModel.uiState.lastTrainings.isEmpty {
+                Text("Micro entrenamientos")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .padding(.horizontal, 8)
+
+                ListMicroTrainings()
+            }
         }
+    }
+
+    private var welcomeTitle: String {
+        if let name = viewModel.uiState.userName, !name.isEmpty {
+            return name
+        }
+        return "Hola"
     }
 
     @ViewBuilder
