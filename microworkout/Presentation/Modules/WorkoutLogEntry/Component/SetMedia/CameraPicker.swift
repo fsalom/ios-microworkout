@@ -5,6 +5,8 @@ struct CameraPicker: UIViewControllerRepresentable {
     enum CaptureMode {
         case photo
         case video
+        /// Permite tanto foto como vídeo en la misma cámara (selector arriba en iOS).
+        case both
     }
 
     let mode: CaptureMode
@@ -20,6 +22,7 @@ struct CameraPicker: UIViewControllerRepresentable {
         let picker = UIImagePickerController()
         picker.delegate = context.coordinator
         picker.sourceType = .camera
+        picker.modalPresentationStyle = .fullScreen
         switch mode {
         case .photo:
             picker.mediaTypes = ["public.image"]
@@ -27,6 +30,9 @@ struct CameraPicker: UIViewControllerRepresentable {
         case .video:
             picker.mediaTypes = ["public.movie"]
             picker.cameraCaptureMode = .video
+            picker.videoQuality = .typeHigh
+        case .both:
+            picker.mediaTypes = ["public.image", "public.movie"]
             picker.videoQuality = .typeHigh
         }
         return picker

@@ -64,19 +64,8 @@ struct WorkoutLogDetailView: View {
         .onReceive(NotificationCenter.default.publisher(for: .workoutLogsChanged)) { _ in
             viewModel.reloadFromStorage()
         }
-        .sheet(item: mediaSheetBinding) { setId in
-            NavigationStack {
-                SetMediaGalleryView(setId: setId.id, useCase: viewModel.mediaUseCase)
-                    .padding()
-                    .navigationTitle("Multimedia")
-                    .navigationBarTitleDisplayMode(.inline)
-                    .toolbar {
-                        ToolbarItem(placement: .navigationBarTrailing) {
-                            Button("Cerrar") { viewModel.closeMediaGallery() }
-                        }
-                    }
-            }
-            .presentationDetents([.medium, .large])
+        .fullScreenCover(item: mediaSheetBinding) { setId in
+            DirectMediaViewer(setId: setId.id, useCase: viewModel.mediaUseCase)
         }
     }
 
@@ -90,6 +79,70 @@ struct WorkoutLogDetailView: View {
 
 private struct IdentifiableUUID: Identifiable, Hashable {
     let id: UUID
+}
+
+private struct DirectMediaViewer: View {
+    let setId: UUID
+    let useCase: SetMediaUseCase
+
+    @Environment(\.dismiss) private var dismiss
+    @State private var media: [SetMedia]?
+
+    var body: some View {
+        ZStack {
+            Color.black.ignoresSafeArea()
+
+            if let media {
+                if media.isEmpty {
+                    VStack(spacing: 16) {
+                        Text("Sin multimedia")
+                            .foregroundColor(.white)
+                        Button("Cerrar") { dismiss() }
+                            .foregroundColor(.white)
+                    }
+                } else {
+                    SetMediaViewer(
+                        media: media,
+                        initialIndex: 0,
+                        useCase: useCase,
+                        onDelete: { item in
+                            Task {
+                                try? await useCase.delete(item.id)
+                                self.media = (try? await useCase.getMedia(forSetId: setId)) ?? []
+                            }
+                        }
+                    )
+                }
+            } else {
+                VStack(spacing: 10) {
+                    ProgressView()
+                        .progressViewStyle(.circular)
+                        .controlSize(.large)
+                        .tint(.white)
+                    Text("Abriendo…")
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.white)
+                }
+            }
+        }
+        .task {
+            do {
+                let loaded = try await useCase.getMedia(forSetId: setId)
+                media = loaded
+                // Kick off preload of the first video as soon as we know what it is,
+                // in parallel with the cover's presentation animation (~400ms head start).
+                if let firstVideo = loaded.first(where: { $0.type == .video }) {
+                    let url = useCase.fileURL(for: firstVideo)
+                    Task.detached(priority: .userInitiated) {
+                        _ = await VideoPreloader.shared.preload(url)
+                    }
+                }
+            } catch {
+                media = []
+            }
+        }
+    }
 }
 
 private struct Header: View {
@@ -235,6 +288,15 @@ private struct ExerciseSummaryCard: View {
     let onToggleNotes: () -> Void
     let onTapSet: (UUID) -> Void
 
+    @State private var mediaBySetId: [UUID: [SetMedia]] = [:]
+
+    /// Sky-blue tone that contrasts with the app's green accent and the orange/red badges.
+    static let highlightColor = Color(red: 0.30, green: 0.65, blue: 0.95)
+
+    private func mediaFor(_ setId: UUID) -> [SetMedia] {
+        mediaBySetId[setId] ?? []
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
@@ -264,40 +326,75 @@ private struct ExerciseSummaryCard: View {
                     .foregroundColor(.secondary)
             } else {
                 HStack(spacing: 8) {
-                    Text("#").frame(width: 24, alignment: .leading)
+                    Text("#").frame(width: 44, alignment: .leading)
                     Text("KG").frame(maxWidth: .infinity)
                     Text("REPS").frame(maxWidth: .infinity)
                     Text("RIR").frame(maxWidth: .infinity)
-                    Image(systemName: "photo")
-                        .frame(width: 36)
                 }
-                .font(.caption2)
-                .fontWeight(.semibold)
+                .font(.system(size: 11, weight: .semibold))
                 .foregroundColor(.secondary)
-                .tracking(0.5)
+                .tracking(0.8)
+                .padding(.bottom, 2)
 
-                ForEach(Array(exerciseLog.sets.enumerated()), id: \.element.id) { index, set in
-                    Button {
-                        onTapSet(set.id)
-                    } label: {
-                        HStack(spacing: 8) {
-                            Text("\(index + 1)")
-                                .font(.system(size: 15, weight: .bold))
-                                .frame(width: 24, alignment: .leading)
+                VStack(spacing: 4) {
+                    ForEach(Array(exerciseLog.sets.enumerated()), id: \.element.id) { index, set in
+                        let setMedia = mediaFor(set.id)
+                        let hasMedia = !setMedia.isEmpty
+
+                        let row = HStack(spacing: 8) {
+                            HStack(spacing: 6) {
+                                Text("\(index + 1)")
+                                    .font(.system(size: 15, weight: .semibold, design: .rounded))
+                                    .foregroundColor(.primary)
+                                    .monospacedDigit()
+                                DetailMediaIndicator(media: setMedia)
+                            }
+                            .frame(width: 44, alignment: .leading)
                             Text(set.weight.map { format($0) } ?? "—")
                                 .frame(maxWidth: .infinity)
                             Text(set.reps.map { String($0) } ?? "—")
                                 .frame(maxWidth: .infinity)
                             Text(set.rir.map { format(Double($0)) } ?? "—")
                                 .frame(maxWidth: .infinity)
-                            DetailMediaIndicator(setId: set.id, useCase: mediaUseCase)
-                                .frame(width: 36)
                         }
-                        .font(.system(size: 15, weight: .semibold, design: .rounded))
+                        .font(.system(size: 15, weight: .medium, design: .rounded))
                         .foregroundColor(.primary)
+                        .monospacedDigit()
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 10)
+                        .background(
+                            ZStack(alignment: .leading) {
+                                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                    .fill(hasMedia ? Self.highlightColor.opacity(0.30) : Color.clear)
+                                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                    .strokeBorder(hasMedia ? Self.highlightColor.opacity(0.85) : Color.clear, lineWidth: 1.5)
+                                if hasMedia {
+                                    UnevenRoundedRectangle(
+                                        cornerRadii: .init(topLeading: 10, bottomLeading: 10),
+                                        style: .continuous
+                                    )
+                                    .fill(Self.highlightColor)
+                                    .frame(width: 6)
+                                }
+                            }
+                        )
+                        .shadow(color: hasMedia ? Self.highlightColor.opacity(0.25) : .clear, radius: 4, x: 0, y: 1)
                         .contentShape(Rectangle())
+
+                        if hasMedia {
+                            Button { onTapSet(set.id) } label: { row }
+                                .buttonStyle(.plain)
+                        } else {
+                            row
+                        }
                     }
-                    .buttonStyle(.plain)
+                }
+                .task { await loadAllMedia() }
+                .onReceive(NotificationCenter.default.publisher(for: .setMediaChanged)) { note in
+                    guard let setId = note.object as? UUID else { return }
+                    if exerciseLog.sets.contains(where: { $0.id == setId }) {
+                        Task { await reload(setId: setId) }
+                    }
                 }
             }
 
@@ -326,6 +423,41 @@ private struct ExerciseSummaryCard: View {
     private func format(_ value: Double) -> String {
         if value.truncatingRemainder(dividingBy: 1) == 0 { return String(Int(value)) }
         return String(format: "%.1f", value)
+    }
+
+    private func loadAllMedia() async {
+        var result: [UUID: [SetMedia]] = [:]
+        for set in exerciseLog.sets {
+            let items = (try? await mediaUseCase.getMedia(forSetId: set.id)) ?? []
+            if !items.isEmpty { result[set.id] = items }
+        }
+        mediaBySetId = result
+        warmVideoCache(for: result)
+    }
+
+    private func reload(setId: UUID) async {
+        let items = (try? await mediaUseCase.getMedia(forSetId: setId)) ?? []
+        if items.isEmpty {
+            mediaBySetId[setId] = nil
+        } else {
+            mediaBySetId[setId] = items
+        }
+    }
+
+    /// Pre-warms the AVPlayerItem cache for the first video of each set,
+    /// so opening the viewer feels instantaneous.
+    private func warmVideoCache(for map: [UUID: [SetMedia]]) {
+        let firstVideos: [URL] = map.values.compactMap { items in
+            items.first(where: { $0.type == .video }).map { mediaUseCase.fileURL(for: $0) }
+        }
+        guard !firstVideos.isEmpty else { return }
+        Task.detached(priority: .userInitiated) {
+            await withTaskGroup(of: Void.self) { group in
+                for url in firstVideos {
+                    group.addTask { _ = await VideoPreloader.shared.preload(url) }
+                }
+            }
+        }
     }
 }
 
@@ -389,41 +521,31 @@ private struct SessionDateSelector: View {
     }
 }
 
-private struct DetailMediaIndicator: View {
-    let setId: UUID
-    let useCase: SetMediaUseCase
-    @State private var count: Int = 0
+struct DetailMediaIndicator: View {
+    let media: [SetMedia]
 
     var body: some View {
-        Group {
-            if count > 0 {
-                HStack(spacing: 3) {
-                    Image(systemName: "photo.on.rectangle.angled")
-                        .font(.caption2)
-                    Text("\(count)")
-                        .font(.caption2)
-                        .fontWeight(.bold)
+        if media.isEmpty {
+            Color.clear.frame(height: 18)
+        } else {
+            HStack(spacing: 3) {
+                let hasVideo = media.contains { $0.type == .video }
+                ZStack {
+                    RoundedRectangle(cornerRadius: 4, style: .continuous)
+                        .fill(ExerciseSummaryCard.highlightColor)
+                        .frame(width: 16, height: 16)
+                    Image(systemName: hasVideo ? "play.fill" : "photo.fill")
+                        .font(.system(size: 8, weight: .black))
+                        .foregroundColor(.white)
                 }
-                .foregroundColor(.white)
-                .padding(.horizontal, 6)
-                .padding(.vertical, 4)
-                .background(Capsule().fill(Color.accentColor))
-            } else {
-                Image(systemName: "plus.circle.fill")
-                    .font(.subheadline)
-                    .foregroundColor(.accentColor.opacity(0.55))
+                if media.count > 1 {
+                    Text("\(media.count)")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundColor(ExerciseSummaryCard.highlightColor)
+                        .monospacedDigit()
+                }
             }
-        }
-        .task(id: setId) {
-            await reload()
-        }
-    }
-
-    private func reload() async {
-        do {
-            count = try await useCase.getMedia(forSetId: setId).count
-        } catch {
-            count = 0
+            .frame(height: 18)
         }
     }
 }

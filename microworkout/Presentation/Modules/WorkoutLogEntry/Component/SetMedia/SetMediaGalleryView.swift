@@ -6,165 +6,165 @@ struct SetMediaGalleryView: View {
     let useCase: SetMediaUseCase
 
     @State private var media: [SetMedia] = []
-    @State private var cameraMode: CameraSheet? = nil
-    @State private var showLibraryPicker: Bool = false
-    @State private var libraryItem: PhotosPickerItem? = nil
-    @State private var viewerIndex: ViewerPresentation? = nil
-    @State private var mediaToDelete: SetMedia? = nil
+    @State private var pickerSelection: [PhotosPickerItem] = []
+    @State private var viewerOpen: Bool = false
+    @State private var isProcessing: Bool = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text("Multimedia")
-                    .font(.headline)
-                Spacer()
-                if !media.isEmpty {
-                    Text("\(media.count)")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-            }
-
+        Group {
             if media.isEmpty {
-                emptyState
-            } else {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 8) {
-                        addButton
-
-                        ForEach(Array(media.enumerated()), id: \.element.id) { index, item in
-                            Button {
-                                viewerIndex = ViewerPresentation(index: index)
-                            } label: {
-                                SetMediaThumbnail(
-                                    media: item,
-                                    imageURL: useCase.thumbnailURL(for: item) ?? useCase.fileURL(for: item)
-                                )
-                            }
-                            .buttonStyle(.plain)
-                            .contextMenu {
-                                Button(role: .destructive) {
-                                    mediaToDelete = item
-                                } label: {
-                                    Label("Eliminar", systemImage: "trash")
-                                }
-                            }
-                        }
-                    }
+                if isProcessing {
+                    processingPlaceholder
+                } else {
+                    emptyState
                 }
-                .frame(height: 88)
+            } else {
+                compactRow
             }
         }
         .task { await load() }
-        .sheet(item: $cameraMode) { sheet in
-            CameraPicker(
-                mode: sheet.mode,
-                onPicked: { result in
-                    cameraMode = nil
-                    Task { await handleCameraResult(result) }
-                },
-                onCancel: { cameraMode = nil }
-            )
-            .ignoresSafeArea()
+        .onChange(of: pickerSelection) { _, newValue in
+            guard !newValue.isEmpty else { return }
+            handlePickerSelection(newValue)
         }
-        .photosPicker(
-            isPresented: $showLibraryPicker,
-            selection: $libraryItem,
-            matching: .any(of: [.images, .videos])
-        )
-        .onChange(of: libraryItem) { _, newValue in
-            guard let newValue else { return }
-            Task { await handleLibraryItem(newValue) }
-        }
-        .fullScreenCover(item: $viewerIndex) { presentation in
+        .fullScreenCover(isPresented: $viewerOpen) {
             SetMediaViewer(
                 media: media,
-                initialIndex: presentation.index,
-                useCase: useCase
+                initialIndex: 0,
+                useCase: useCase,
+                onDelete: { item in
+                    Task { await deleteSilently(item) }
+                }
             )
         }
-        .alert(
-            "¿Eliminar este archivo?",
-            isPresented: Binding(
-                get: { mediaToDelete != nil },
-                set: { if !$0 { mediaToDelete = nil } }
-            ),
-            presenting: mediaToDelete
-        ) { item in
-            Button("Eliminar", role: .destructive) {
-                Task { await delete(item) }
-            }
-            Button("Cancelar", role: .cancel) {}
-        }
     }
 
-    private var addMenu: some View {
-        Group {
+    private var compactRow: some View {
+        HStack(spacing: 8) {
             Button {
-                cameraMode = CameraSheet(mode: .photo)
+                viewerOpen = true
             } label: {
-                Label("Hacer foto", systemImage: "camera")
+                HStack(spacing: 10) {
+                    chip
+                    Text(mediaSummary)
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundColor(.primary)
+                    if isProcessing {
+                        ProgressView()
+                            .controlSize(.mini)
+                            .tint(.accentColor)
+                    }
+                    Spacer(minLength: 4)
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(.secondary)
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 10)
+                .background(Color(.secondarySystemFill))
+                .clipShape(RoundedRectangle(cornerRadius: 10))
             }
-            Button {
-                cameraMode = CameraSheet(mode: .video)
-            } label: {
-                Label("Grabar vídeo", systemImage: "video")
-            }
-            Button {
-                showLibraryPicker = true
-            } label: {
-                Label("Elegir de la galería", systemImage: "photo.on.rectangle")
-            }
-        }
-    }
+            .buttonStyle(.plain)
+            .disabled(media.isEmpty)
 
-    /// Compact "+" button shown next to existing thumbnails.
-    private var addButton: some View {
-        Menu {
-            addMenu
-        } label: {
-            VStack(spacing: 4) {
-                Image(systemName: "plus")
+            PhotosPicker(
+                selection: $pickerSelection,
+                maxSelectionCount: 10,
+                matching: .any(of: [.images, .videos])
+            ) {
+                Image(systemName: "plus.circle.fill")
                     .font(.title2)
-                Text("Añadir")
-                    .font(.caption2)
-                    .fontWeight(.semibold)
+                    .foregroundColor(.accentColor)
+                    .padding(.vertical, 6)
             }
-            .frame(width: 80, height: 80)
-            .background(Color.accentColor.opacity(0.15))
-            .overlay(
-                RoundedRectangle(cornerRadius: 10)
-                    .strokeBorder(Color.accentColor.opacity(0.35), style: StrokeStyle(lineWidth: 1.5, dash: [4]))
-            )
-            .clipShape(RoundedRectangle(cornerRadius: 10))
-            .foregroundColor(.accentColor)
         }
     }
 
-    /// Large CTA shown when there are no media items yet.
+    @ViewBuilder
+    private var chip: some View {
+        let hasVideo = media.contains { $0.type == .video }
+        ZStack {
+            RoundedRectangle(cornerRadius: 5, style: .continuous)
+                .fill(Color.accentColor)
+                .frame(width: 22, height: 22)
+            Image(systemName: hasVideo ? "play.fill" : "photo.fill")
+                .font(.system(size: 11, weight: .black))
+                .foregroundColor(.white)
+        }
+    }
+
+    private var mediaIconName: String {
+        let hasVideo = media.contains { $0.type == .video }
+        let hasPhoto = media.contains { $0.type == .photo }
+        switch (hasPhoto, hasVideo) {
+        case (true, true): return "photo.on.rectangle.angled"
+        case (false, true): return "video.fill"
+        default: return "photo.fill"
+        }
+    }
+
+    private var mediaSummary: String {
+        let photos = media.filter { $0.type == .photo }.count
+        let videos = media.filter { $0.type == .video }.count
+        var parts: [String] = []
+        if photos > 0 { parts.append("\(photos) foto\(photos == 1 ? "" : "s")") }
+        if videos > 0 { parts.append("\(videos) vídeo\(videos == 1 ? "" : "s")") }
+        return parts.joined(separator: " · ")
+    }
+
+    private var processingPlaceholder: some View {
+        HStack(spacing: 10) {
+            ProgressView()
+                .controlSize(.small)
+                .tint(.accentColor)
+            Text("Procesando archivo…")
+                .font(.subheadline)
+                .fontWeight(.medium)
+                .foregroundColor(.primary)
+            Spacer()
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 14)
+        .frame(maxWidth: .infinity)
+        .background(Color(.secondarySystemFill))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+
     private var emptyState: some View {
-        Menu {
-            addMenu
-        } label: {
-            VStack(spacing: 10) {
-                Image(systemName: "camera.fill")
-                    .font(.title)
-                Text("Añadir foto o vídeo")
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
-                Text("Graba la técnica de la serie")
-                    .font(.caption2)
+        PhotosPicker(
+            selection: $pickerSelection,
+            maxSelectionCount: 10,
+            matching: .any(of: [.images, .videos])
+        ) {
+            HStack(spacing: 12) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 7, style: .continuous)
+                        .fill(Color.accentColor)
+                        .frame(width: 32, height: 32)
+                    Image(systemName: "photo.on.rectangle.angled")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(.white)
+                }
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Añadir foto o vídeo")
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.primary)
+                    Text("Elige de la galería")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 13, weight: .semibold))
                     .foregroundColor(.secondary)
             }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 12)
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 20)
-            .background(Color.accentColor.opacity(0.12))
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .strokeBorder(Color.accentColor.opacity(0.35), style: StrokeStyle(lineWidth: 1.5, dash: [5]))
-            )
+            .background(Color(.secondarySystemFill))
             .clipShape(RoundedRectangle(cornerRadius: 12))
-            .foregroundColor(.accentColor)
         }
     }
 
@@ -176,53 +176,33 @@ struct SetMediaGalleryView: View {
         }
     }
 
-    private func handleCameraResult(_ result: CameraPicker.Result) async {
-        do {
-            switch result {
-            case .photo(let image):
-                _ = try await useCase.addPhoto(setId: setId, image: image)
-            case .video(let url):
-                _ = try await useCase.addVideo(setId: setId, sourceURL: url)
+    private func handlePickerSelection(_ items: [PhotosPickerItem]) {
+        Task {
+            isProcessing = true
+            defer {
+                isProcessing = false
+                pickerSelection = []
+            }
+            for item in items {
+                do {
+                    if let movie = try await item.loadTransferable(type: VideoTransferable.self) {
+                        _ = try await useCase.addVideo(setId: setId, sourceURL: movie.url)
+                    } else if let data = try await item.loadTransferable(type: Data.self),
+                              let image = UIImage(data: data) {
+                        _ = try await useCase.addPhoto(setId: setId, image: image)
+                    }
+                } catch {}
             }
             await load()
-        } catch {}
+        }
     }
 
-    private func handleLibraryItem(_ item: PhotosPickerItem) async {
-        defer { libraryItem = nil }
-        do {
-            if let movie = try await item.loadTransferable(type: VideoTransferable.self) {
-                _ = try await useCase.addVideo(setId: setId, sourceURL: movie.url)
-            } else if let data = try await item.loadTransferable(type: Data.self),
-                      let image = UIImage(data: data) {
-                _ = try await useCase.addPhoto(setId: setId, image: image)
-            }
-            await load()
-        } catch {}
-    }
-
-    private func delete(_ item: SetMedia) async {
-        mediaToDelete = nil
+    private func deleteSilently(_ item: SetMedia) async {
         do {
             try await useCase.delete(item.id)
             await load()
         } catch {}
     }
-}
-
-private struct CameraSheet: Identifiable {
-    let mode: CameraPicker.CaptureMode
-    var id: String {
-        switch mode {
-        case .photo: return "photo"
-        case .video: return "video"
-        }
-    }
-}
-
-private struct ViewerPresentation: Identifiable {
-    let index: Int
-    var id: Int { index }
 }
 
 struct VideoTransferable: Transferable {

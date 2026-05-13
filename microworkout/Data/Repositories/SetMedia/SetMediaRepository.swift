@@ -20,7 +20,8 @@ class SetMediaRepository: SetMediaRepositoryProtocol {
         try await localDataSource.getMedia(forSetId: setId)
     }
 
-    func delete(_ mediaId: UUID) async throws {
+    @discardableResult
+    func delete(_ mediaId: UUID) async throws -> SetMedia? {
         try await localDataSource.delete(mediaId)
     }
 
