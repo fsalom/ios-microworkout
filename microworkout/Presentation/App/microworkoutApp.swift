@@ -28,6 +28,7 @@ enum AppearancePreference: String, CaseIterable, Identifiable {
 struct MicroWorkoutApp: App {
     @StateObject var appState: AppState
     @StateObject var mirrorManager = WorkoutMirrorManager.shared
+    @StateObject var authSession = AuthSession.shared
     @AppStorage("appearance_preference") private var appearanceRaw: String = AppearancePreference.system.rawValue
     private let component: AppComponentProtocol
 
@@ -49,7 +50,11 @@ struct MicroWorkoutApp: App {
             RootView(root: SwitcherView(component: component), component: component)
                 .environmentObject(appState)
                 .environmentObject(mirrorManager)
+                .environmentObject(authSession)
                 .preferredColorScheme(AppearancePreference(rawValue: appearanceRaw)?.colorScheme)
+                .task {
+                    await authSession.bootstrap()
+                }
                 .onAppear {
                     _ = PhoneConnectivityManager.shared
                     let trainings = TrainingContainer(component: component).makeUseCase().getTrainings()
