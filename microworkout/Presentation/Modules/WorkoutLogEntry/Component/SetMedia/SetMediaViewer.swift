@@ -354,7 +354,7 @@ private struct FullScreenVideoPlayer: View {
         guard let item = player.currentItem else { return }
         statusObserver = item
             .publisher(for: \.status)
-            .receive(on: RunLoop.main)ce
+            .receive(on: RunLoop.main)
             .sink { status in
                 guard status == .readyToPlay else { return }
                 // Preroll the decode pipeline before play so the first frame is ready.
