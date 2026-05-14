@@ -1,20 +1,15 @@
-//
-//  Configuration.swift
-//  Gula
-//
-//  Created by Jorge Planells Zamora on 16/7/24.
-//
-
 import Foundation
 
 class Config: ConfigTripleA {
     static var shared = Config()
 
-    static let baseURL = "https://gula.rudo.es/"
-    static let clientID = ""
-    static let clientSecret = ""
-    static let scheme = "gula"
-    static let appName = "Gula"
-    static let chatApiAccessToken = "VY2XjB6euy4wRW2hdvlok7PFWg1BlLVb"
-    static let chatApiSignatureMatch = "12155909626"
+    static let baseURL = "http://localhost:8002/"
+    static let scheme = "microworkout"
+    static let appName = "microworkout"
+
+    // MARK: API paths
+    static let appleLoginPath = "v1/users/apple-login"
+    static let refreshPath = "v1/users/refresh"
+    static let logoutPath = "v1/users/logout"
+    static let mePath = "v1/users/me"
 }
