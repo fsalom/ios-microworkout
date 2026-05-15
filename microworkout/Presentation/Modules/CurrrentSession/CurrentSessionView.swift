@@ -143,7 +143,7 @@ struct CurrentSessionView: View {
                     }
                 }
                 .padding(16)
-                .searchable(text: $viewModel.searchText) // , isPresented: $isSearchFocused
+                .searchable(text: $viewModel.searchText, placement: .navigationBarDrawer(displayMode: .always))
                 .focused($isSearchFocused)
                 .onReceive(timer) { date in
                     viewModel.updateNow(to: date)
