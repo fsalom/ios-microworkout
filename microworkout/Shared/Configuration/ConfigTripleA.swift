@@ -1,51 +1,50 @@
-//
-//  Configuration.swift
-//  Gula
-//
-//  Created by Jorge Planells Zamora on 11/7/24.
-//
-
 import Foundation
 import TripleA
 
 class ConfigTripleA: TripleAForSwiftUIProtocol {
-    private enum OAuthAPI {
-        case login
+    enum AuthAPI {
+        case appleLogin
         case refresh
+
         var endpoint: Endpoint {
             switch self {
-            case .login:
-                let parameters: [String: String] = [:]
-                let headers: [String: String] = ["Accept-Language": Locale.current.identifier]
-                return Endpoint(path: "\(Config.baseURL)api/users/login",
-                                httpMethod: .post,
-                                parameters: parameters,
-                                headers: headers)
+            case .appleLogin:
+                return Endpoint(
+                    path: Config.appleLoginPath,
+                    httpMethod: .post,
+                    headers: ["Accept-Language": Locale.current.identifier]
+                )
             case .refresh:
-                let parameters = ["grant_type": "refresh_token",
-                                  "client_id": Config.clientID,
-                                  "client_secret": Config.clientSecret]
-                return Endpoint(path: "\(Config.baseURL)api/users/refresh",
-                                httpMethod: .post,
-                                parameters: parameters)
+                return Endpoint(
+                    path: Config.refreshPath,
+                    httpMethod: .post
+                )
             }
         }
     }
 
-    var storage: TokenStorageProtocol = AuthTokenStoreDefault(format: .short)
+    var storage: TokenStorageProtocol = AuthTokenStoreKeychain()
+
     var card: AuthenticationCardProtocol = OAuthGrantTypePasswordManager(
-        refreshTokenEndpoint: OAuthAPI.refresh.endpoint,
-        tokensEndpoint: OAuthAPI.login.endpoint)
+        refreshTokenEndpoint: AuthAPI.refresh.endpoint,
+        tokensEndpoint: AuthAPI.appleLogin.endpoint
+    )
 
     lazy var appAuthenticator = AppAuthenticator(
         storage: storage,
-        card: card)
+        card: card
+    )
 
     lazy var authenticator: AuthenticatorSUI = .init(authenticator: appAuthenticator)
 
-    lazy var network = Network(baseURL: Config.baseURL,
-                               authenticator: Config.shared.authenticator,
-                               format: .full)
+    lazy var network = Network(
+        baseURL: Config.baseURL,
+        authenticator: appAuthenticator,
+        format: .full
+    )
 
-    var authenticatedTestingEndpoint: TripleA.Endpoint? = Endpoint(path: "", httpMethod: .get)
+    var authenticatedTestingEndpoint: TripleA.Endpoint? = Endpoint(
+        path: Config.mePath,
+        httpMethod: .get
+    )
 }
