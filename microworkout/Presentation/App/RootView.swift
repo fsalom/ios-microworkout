@@ -34,6 +34,7 @@ struct RootView: View {
                 CurrentTrainingBuilder(component: component).build(appState: appState)
             }
         }
+        .overlay(MediaProcessingBanner())
     }
 }
 

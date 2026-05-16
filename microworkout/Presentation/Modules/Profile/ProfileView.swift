@@ -10,20 +10,14 @@ struct ProfileView: View {
     let component: AppComponentProtocol
 
     var body: some View {
-        VStack(spacing: 0) {
-            Header()
-                .padding(.horizontal, 16)
-                .padding(.top, 8)
-                .padding(.bottom, 12)
-                .background(Color(.systemGroupedBackground))
-            Group {
-                if viewModel.uiState.hasProfile && !viewModel.uiState.isEditing {
-                    profileDetailView
-                } else {
-                    profileFormView
-                }
+        Group {
+            if viewModel.uiState.hasProfile && !viewModel.uiState.isEditing {
+                profileDetailView
+            } else {
+                profileFormView
             }
         }
+        .pinnedTabHeader(subtitle: "AJUSTES", title: "Perfil")
         .background(Color(.systemGroupedBackground))
         .onChange(of: scenePhase) { _, newPhase in
             if newPhase == .active {
@@ -340,29 +334,6 @@ struct ProfileView: View {
                 }
             }
         }
-    }
-}
-
-private struct Header: View {
-    private var monthLabel: String {
-        let f = DateFormatter()
-        f.locale = Locale(identifier: "es_ES")
-        f.dateFormat = "MMMM yyyy"
-        return f.string(from: Date()).uppercased()
-    }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(monthLabel)
-                .font(.caption)
-                .fontWeight(.semibold)
-                .foregroundColor(.secondary)
-                .tracking(1)
-            Text("Perfil")
-                .font(.largeTitle)
-                .fontWeight(.bold)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 

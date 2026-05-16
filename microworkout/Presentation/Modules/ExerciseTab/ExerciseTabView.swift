@@ -18,7 +18,9 @@ class ExerciseTabBuilder {
         let viewModel = ExerciseTabViewModel(
             router: ExerciseTabRouter(navigator: Navigator.shared, component: component),
             healthUseCase: HealthContainer(component: component).makeUseCase(),
-            workoutEntryUseCase: WorkoutEntryContainer(component: component).makeUseCase()
+            workoutEntryUseCase: WorkoutEntryContainer(component: component).makeUseCase(),
+            workoutLogUseCase: WorkoutLogContainer(component: component).makeUseCase(),
+            coachUseCase: CoachContainer(component: component).makeUseCase()
         )
         return ExerciseTabView(viewModel: viewModel)
     }
@@ -46,6 +48,14 @@ class ExerciseTabRouter {
     func goToHealthWorkoutDetail(_ workout: HealthWorkout) {
         navigator.push(to: HealthWorkoutDetailBuilder(component: component).build(for: workout))
     }
+
+    func goToLogDetail(_ log: WorkoutLog) {
+        navigator.push(to: WorkoutLogDetailBuilder(component: component).build(log: log))
+    }
+
+    func goToChat(prompt: String) {
+        navigator.push(to: AIChatBuilder(component: component).build(initialPrompt: prompt))
+    }
 }
 
 // MARK: - ViewModel
@@ -53,20 +63,27 @@ class ExerciseTabRouter {
 struct ExerciseTabUiState {
     var weeks: [[HealthDay]] = [[]]
     var workoutItems: [WorkoutItem] = []
+    var workoutLogs: [WorkoutLog] = []
     var selectedDay: HealthDay = HealthDay(date: Date())
     var error: String?
+    var coachInsight: CoachInsight? = nil
+    var isLoadingCoach: Bool = false
 }
 
 enum DisplayWorkoutItem: Identifiable {
     case manual(WorkoutEntryByDay)
     case appleWatch(HealthWorkout)
     case linked(entry: WorkoutEntryByDay, watch: HealthWorkout)
+    case log(WorkoutLog)
+    case linkedLog(log: WorkoutLog, watch: HealthWorkout)
 
     var id: String {
         switch self {
         case .manual(let e): return "m-\(e.id)"
         case .appleWatch(let w): return "aw-\(w.id)"
         case .linked(let e, let w): return "link-\(e.id)-\(w.id)"
+        case .log(let l): return "log-\(l.id.uuidString)"
+        case .linkedLog(let l, let w): return "linklog-\(l.id.uuidString)-\(w.id)"
         }
     }
 
@@ -75,6 +92,8 @@ enum DisplayWorkoutItem: Identifiable {
         case .manual(let e): return e.parsedDate ?? .distantPast
         case .appleWatch(let w): return w.startDate
         case .linked(_, let w): return w.startDate
+        case .log(let l): return l.startedAt
+        case .linkedLog(_, let w): return w.startDate
         }
     }
 }
@@ -84,19 +103,34 @@ final class ExerciseTabViewModel: ObservableObject {
     private let router: ExerciseTabRouter
     private let healthUseCase: HealthUseCaseProtocol
     private let workoutEntryUseCase: WorkoutEntryUseCaseProtocol
+    private let workoutLogUseCase: WorkoutLogUseCaseProtocol
+    private let coachUseCase: CoachUseCaseProtocol
 
     init(router: ExerciseTabRouter,
          healthUseCase: HealthUseCaseProtocol,
-         workoutEntryUseCase: WorkoutEntryUseCaseProtocol) {
+         workoutEntryUseCase: WorkoutEntryUseCaseProtocol,
+         workoutLogUseCase: WorkoutLogUseCaseProtocol,
+         coachUseCase: CoachUseCaseProtocol) {
         self.router = router
         self.healthUseCase = healthUseCase
         self.workoutEntryUseCase = workoutEntryUseCase
+        self.workoutLogUseCase = workoutLogUseCase
+        self.coachUseCase = coachUseCase
     }
 
     func load() {
         loadWeeks()
         loadWorkouts()
         loadTodayHealth()
+        loadCoach()
+    }
+
+    private func loadCoach() {
+        uiState.isLoadingCoach = true
+        Task { @MainActor in
+            self.uiState.coachInsight = await coachUseCase.workoutInsight()
+            self.uiState.isLoadingCoach = false
+        }
     }
 
     private func loadWeeks() {
@@ -131,6 +165,7 @@ final class ExerciseTabViewModel: ObservableObject {
             }
             items.sort { $0.sortDate > $1.sortDate }
             self.uiState.workoutItems = items
+            self.uiState.workoutLogs = workoutLogUseCase.getAllLogs()
         }
     }
 
@@ -141,6 +176,9 @@ final class ExerciseTabViewModel: ObservableObject {
         let cal = Calendar.current
         let dayItems = uiState.workoutItems.filter {
             cal.isDate($0.sortDate, inSameDayAs: uiState.selectedDay.date)
+        }
+        let logsToday = uiState.workoutLogs.filter {
+            cal.isDate($0.startedAt, inSameDayAs: uiState.selectedDay.date)
         }
 
         var entries: [WorkoutEntryByDay] = []
@@ -155,8 +193,19 @@ final class ExerciseTabViewModel: ObservableObject {
         var pairedWatchIds = Set<String>()
         var result: [DisplayWorkoutItem] = []
 
+        for log in logsToday {
+            if let linkedId = log.linkedHealthWorkoutId?.uuidString,
+               let watch = watches.first(where: { $0.id == linkedId }) {
+                result.append(.linkedLog(log: log, watch: watch))
+                pairedWatchIds.insert(watch.id)
+            } else {
+                result.append(.log(log))
+            }
+        }
+
         for entry in entries {
-            if let watch = watches.first(where: { $0.linkedEntryDate == entry.date }) {
+            if let watch = watches.first(where: { $0.linkedEntryDate == entry.date }),
+               !pairedWatchIds.contains(watch.id) {
                 result.append(.linked(entry: entry, watch: watch))
                 pairedWatchIds.insert(watch.id)
             } else {
@@ -182,6 +231,14 @@ final class ExerciseTabViewModel: ObservableObject {
         router.goToHealthWorkoutDetail(workout)
     }
 
+    func goTo(log: WorkoutLog) {
+        router.goToLogDetail(log)
+    }
+
+    func goToChat(prompt: String) {
+        router.goToChat(prompt: prompt)
+    }
+
     var currentMonthLabel: String {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "es_ES")
@@ -198,12 +255,13 @@ struct ExerciseTabView: View {
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
+        scrollContent
+            .pinnedTabHeader(subtitle: "AGENDA", title: "Ejercicio")
+    }
+
+    private var scrollContent: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 20) {
-                Header(monthLabel: viewModel.currentMonthLabel)
-                    .padding(.horizontal, 16)
-                    .padding(.top, 8)
-
                 CalendarSection(
                     weeks: $viewModel.uiState.weeks,
                     onSelectDay: { viewModel.selectDay($0) }
@@ -213,11 +271,20 @@ struct ExerciseTabView: View {
                 SelectedDayCard(day: viewModel.uiState.selectedDay)
                     .padding(.horizontal, 16)
 
+                CoachInsightCard(
+                    insight: viewModel.uiState.coachInsight,
+                    isLoading: viewModel.uiState.isLoadingCoach,
+                    onOpenChat: { prompt in viewModel.goToChat(prompt: prompt) }
+                )
+                .padding(.horizontal, 16)
+
                 DayWorkoutsSection(
                     items: viewModel.workoutsForSelectedDay,
                     onTapEntry: { viewModel.goTo(entryDay: $0) },
                     onTapWorkout: { viewModel.goTo(workout: $0) },
-                    onTapLinked: { entry, watch in viewModel.goToLinked(entry: entry, watch: watch) }
+                    onTapLinked: { entry, watch in viewModel.goToLinked(entry: entry, watch: watch) },
+                    onTapLog: { viewModel.goTo(log: $0) },
+                    onTapLinkedLog: { log, _ in viewModel.goTo(log: log) }
                 )
                 .padding(.horizontal, 16)
             }
@@ -248,24 +315,6 @@ struct ExerciseTabView: View {
 }
 
 // MARK: - Header
-
-private struct Header: View {
-    let monthLabel: String
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(monthLabel.uppercased())
-                .font(.caption)
-                .fontWeight(.semibold)
-                .foregroundColor(.secondary)
-                .tracking(1)
-            Text("Ejercicio")
-                .font(.largeTitle)
-                .fontWeight(.bold)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-    }
-}
 
 // MARK: - Calendar Section
 
@@ -356,6 +405,8 @@ private struct DayWorkoutsSection: View {
     let onTapEntry: (WorkoutEntryByDay) -> Void
     let onTapWorkout: (HealthWorkout) -> Void
     let onTapLinked: (WorkoutEntryByDay, HealthWorkout) -> Void
+    let onTapLog: (WorkoutLog) -> Void
+    let onTapLinkedLog: (WorkoutLog, HealthWorkout) -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -372,7 +423,9 @@ private struct DayWorkoutsSection: View {
                             item: item,
                             onTapEntry: onTapEntry,
                             onTapWorkout: onTapWorkout,
-                            onTapLinked: onTapLinked
+                            onTapLinked: onTapLinked,
+                            onTapLog: onTapLog,
+                            onTapLinkedLog: onTapLinkedLog
                         )
                     }
                 }
@@ -400,6 +453,8 @@ private struct WorkoutItemRow: View {
     let onTapEntry: (WorkoutEntryByDay) -> Void
     let onTapWorkout: (HealthWorkout) -> Void
     let onTapLinked: (WorkoutEntryByDay, HealthWorkout) -> Void
+    let onTapLog: (WorkoutLog) -> Void
+    let onTapLinkedLog: (WorkoutLog, HealthWorkout) -> Void
 
     var body: some View {
         switch item {
@@ -415,7 +470,151 @@ private struct WorkoutItemRow: View {
                 watch: watch,
                 onTap: { onTapLinked(entry, watch) }
             )
+        case .log(let log):
+            WorkoutLogCard(log: log)
+                .onTapGesture { onTapLog(log) }
+        case .linkedLog(let log, let watch):
+            LinkedLogCard(
+                log: log,
+                watch: watch,
+                onTap: { onTapLinkedLog(log, watch) }
+            )
         }
+    }
+}
+
+// MARK: - WorkoutLog cards
+
+private struct WorkoutLogCard: View {
+    let log: WorkoutLog
+
+    var body: some View {
+        HStack(spacing: 10) {
+            if let parts = dateParts {
+                DateBadge(day: parts.day, monthName: parts.monthName)
+            }
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 6) {
+                    Image(systemName: "figure.strengthtraining.traditional")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(.blue)
+                    Text(log.sessionName)
+                        .font(.subheadline)
+                        .fontWeight(.bold)
+                        .lineLimit(1)
+                }
+                Text("\(log.exercises.count) ej. · \(log.totalSets) series" + (log.endedAt != nil ? " · \(log.durationFormatted)" : ""))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            Spacer(minLength: 0)
+            Image(systemName: "chevron.right")
+                .font(.caption)
+                .foregroundColor(.secondary)
+        }
+        .padding(12)
+        .background(Color(.systemGray6))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.blue.opacity(0.25), lineWidth: 1)
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+
+    private var dateParts: DateParts? {
+        let cal = Calendar(identifier: .gregorian)
+        let day = cal.component(.day, from: log.startedAt)
+        let month = cal.component(.month, from: log.startedAt)
+        let year = cal.component(.year, from: log.startedAt)
+        let formatter = DateFormatter()
+        formatter.locale = Locale.current
+        let monthName = formatter.monthSymbols[month - 1]
+        return DateParts(day: day, month: month, year: year, monthName: monthName)
+    }
+}
+
+private struct LinkedLogCard: View {
+    let log: WorkoutLog
+    let watch: HealthWorkout
+    let onTap: () -> Void
+
+    var body: some View {
+        Button(action: onTap) {
+            HStack(alignment: .top, spacing: 10) {
+                if let parts = watch.dateParts {
+                    DateBadge(day: parts.day, monthName: parts.monthName)
+                }
+
+                VStack(spacing: 0) {
+                    HStack(spacing: 12) {
+                        Image(systemName: "applewatch")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(.green)
+                            .frame(width: 28, height: 28)
+                            .background(Color.green.opacity(0.15))
+                            .clipShape(Circle())
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(watch.activityTypeName)
+                                .font(.subheadline)
+                                .fontWeight(.semibold)
+                            Text("\(watch.timeRangeFormatted) · \(watch.durationFormatted)")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        Spacer(minLength: 0)
+                    }
+                    .padding(.vertical, 8)
+
+                    Divider()
+
+                    HStack(spacing: 8) {
+                        Image(systemName: "link")
+                            .font(.system(size: 9, weight: .bold))
+                            .foregroundColor(.green)
+                        Text("Vinculado")
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundColor(.green)
+                            .tracking(0.5)
+                    }
+                    .padding(.vertical, 6)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                    Divider()
+
+                    HStack(spacing: 12) {
+                        Image(systemName: "figure.strengthtraining.traditional")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(.blue)
+                            .frame(width: 28, height: 28)
+                            .background(Color.blue.opacity(0.15))
+                            .clipShape(Circle())
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(log.sessionName)
+                                .font(.subheadline)
+                                .fontWeight(.semibold)
+                                .lineLimit(1)
+                            Text("\(log.exercises.count) ej. · \(log.totalSets) series")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        Spacer(minLength: 0)
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(.vertical, 8)
+                }
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 4)
+            .background(Color(.systemGray6))
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color.green.opacity(0.45), lineWidth: 1.5)
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+        }
+        .buttonStyle(.plain)
     }
 }
 

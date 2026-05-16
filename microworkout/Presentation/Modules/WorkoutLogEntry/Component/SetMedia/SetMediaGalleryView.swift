@@ -27,6 +27,11 @@ struct SetMediaGalleryView: View {
             guard !newValue.isEmpty else { return }
             handlePickerSelection(newValue)
         }
+        .onReceive(NotificationCenter.default.publisher(for: .setMediaChanged)) { note in
+            if let changed = note.object as? UUID, changed == setId {
+                Task { await load() }
+            }
+        }
         .fullScreenCover(isPresented: $viewerOpen) {
             SetMediaViewer(
                 media: media,
@@ -177,24 +182,28 @@ struct SetMediaGalleryView: View {
     }
 
     private func handlePickerSelection(_ items: [PhotosPickerItem]) {
-        Task {
-            isProcessing = true
-            defer {
-                isProcessing = false
-                pickerSelection = []
-            }
+        let setId = self.setId
+        let useCase = self.useCase
+        // Detach so the work survives if the parent screen dismisses before it finishes.
+        Task.detached(priority: .userInitiated) {
             for item in items {
                 do {
                     if let movie = try await item.loadTransferable(type: VideoTransferable.self) {
+                        let jobId = MediaProcessingTracker.shared.begin(.video)
+                        defer { MediaProcessingTracker.shared.end(jobId) }
                         _ = try await useCase.addVideo(setId: setId, sourceURL: movie.url)
                     } else if let data = try await item.loadTransferable(type: Data.self),
-                              let image = UIImage(data: data) {
+                              let image = await UIImage(data: data) {
+                        let jobId = MediaProcessingTracker.shared.begin(.photo)
+                        defer { MediaProcessingTracker.shared.end(jobId) }
                         _ = try await useCase.addPhoto(setId: setId, image: image)
                     }
                 } catch {}
             }
-            await load()
         }
+        // Clear local selection state immediately so the picker is ready for next use.
+        pickerSelection = []
+        isProcessing = false
     }
 
     private func deleteSilently(_ item: SetMedia) async {
