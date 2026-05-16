@@ -73,14 +73,14 @@ final class WorkoutLogEntryViewModel: ObservableObject {
         uiState.activeForm = nil
     }
 
-    func saveSet(weight: Double?, reps: Int?, rir: Float?) {
+    func saveSet(weight: Double?, reps: Int?, rir: Float?, tags: [SetTag]) {
         guard let form = uiState.activeForm,
               let exIdx = uiState.log.exercises.firstIndex(where: { $0.id == form.exerciseLogId }) else { return }
 
         switch form {
         case .new:
             uiState.log.exercises[exIdx].sets.append(
-                LoggedSet(weight: weight, reps: reps, rir: rir)
+                LoggedSet(weight: weight, reps: reps, rir: rir, tags: tags)
             )
         case .edit(_, let setId):
             if let setIdx = uiState.log.exercises[exIdx].sets.firstIndex(where: { $0.id == setId }) {
@@ -88,6 +88,7 @@ final class WorkoutLogEntryViewModel: ObservableObject {
                 set.weight = weight
                 set.reps = reps
                 set.rir = rir
+                set.tags = tags
                 uiState.log.exercises[exIdx].sets[setIdx] = set
             }
         }

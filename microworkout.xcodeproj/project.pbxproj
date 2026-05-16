@@ -35,6 +35,7 @@
 		3C6AAAB643E58E5FB34C30BB /* WorkoutHistoryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6B70B42DBE059AD8FFADE65 /* WorkoutHistoryViewModel.swift */; };
 		3F4BD07D4D597DEF7EB8B88B /* DeeplinkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52738A594470CDE4FEEBFA72 /* DeeplinkManager.swift */; };
 		407836DE52813531642A202A /* CoachUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C48607FBCF75D188C8BC87AD /* CoachUseCase.swift */; };
+		451C754F3962FFC017A07720 /* MediaProcessingBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = E689256E0B3E081277712D4B /* MediaProcessingBanner.swift */; };
 		4794BE6909D758BCDC035497 /* ChangeEmailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3DD3AFA74777E6676549DA8 /* ChangeEmailViewModel.swift */; };
 		47FA2B3097E0217142217C68 /* WorkoutSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55B8857D14FCA6C2D23C1658 /* WorkoutSession.swift */; };
 		48B8594E069AE1509F354FEE /* PreviousComparison.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8715BD3457F3C540F2408674 /* PreviousComparison.swift */; };
@@ -409,6 +410,7 @@
 		D81664034146289679B803C5 /* DeeplinkManagerDatasourceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = A38959BF91D5B79B84AFE689 /* DeeplinkManagerDatasourceProtocol.swift */; };
 		D8B5A4C4EA75619921A594D0 /* DeeplinkResendViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA06416D8B1D0CD3561318D9 /* DeeplinkResendViewModel.swift */; };
 		D9120068FFDA348033F9B58F /* SetMediaUseCaseProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A3A5F670D64D8BDA255BBC0 /* SetMediaUseCaseProtocol.swift */; };
+		D928D68B2A56BAED861003CA /* SetTag.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CADD66700DACDC3BD9D0EAE /* SetTag.swift */; };
 		D96424D64468B2A74EE9BC05 /* VerifyPasswordViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DD0D25D00BF63A3E0F72807 /* VerifyPasswordViewModel.swift */; };
 		D9EEFBBA5339C1FF4406BBAC /* CameraPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF5E2FD898B79CDEF65B7189 /* CameraPicker.swift */; };
 		DA11000002BB000000000001 /* HealthStoreProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA11000001AA000000000001 /* HealthStoreProtocol.swift */; };
@@ -587,6 +589,7 @@
 		92B426F523DD7321E2ADFFEF /* AuthService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
 		9543E6DA3768F2689E931C5F /* DeeplinkManagerRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeeplinkManagerRepository.swift; sourceTree = "<group>"; };
 		956892EA48F90861B855D890 /* TrainingUseCaseProtocol.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TrainingUseCaseProtocol.swift; sourceTree = "<group>"; };
+		9CADD66700DACDC3BD9D0EAE /* SetTag.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SetTag.swift; sourceTree = "<group>"; };
 		9E2AB94B00D62DED9FF47B8F /* UserRemoteDatasource.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UserRemoteDatasource.swift; sourceTree = "<group>"; };
 		A0C9D23E4D7E95B250435590 /* LiveWorkoutData.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LiveWorkoutData.swift; sourceTree = "<group>"; };
 		A1EC294607249CEB42EFD6F4 /* ConfigTripleA.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ConfigTripleA.swift; sourceTree = "<group>"; };
@@ -855,6 +858,7 @@
 		DF5A5E867986D4FB0E9CAC47 /* TabHeader.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TabHeader.swift; sourceTree = "<group>"; };
 		E45C9CD76D7E44408DAEA442 /* WorkoutLogEntryViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WorkoutLogEntryViewModel.swift; sourceTree = "<group>"; };
 		E604A0FC9AB0FE02B2BA8AED /* AIContextUseCase.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AIContextUseCase.swift; sourceTree = "<group>"; };
+		E689256E0B3E081277712D4B /* MediaProcessingBanner.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MediaProcessingBanner.swift; sourceTree = "<group>"; };
 		E7330595E23B00892B5BAD6D /* WorkoutHistoryBuilder.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WorkoutHistoryBuilder.swift; sourceTree = "<group>"; };
 		E8046A8D4CA0EA0B7258D709 /* AIContextContainer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AIContextContainer.swift; sourceTree = "<group>"; };
 		E89037AAEDB2C9126FD32993 /* HealthKitManagerProtocol.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HealthKitManagerProtocol.swift; path = "gymwatch Watch App/Domain/Protocols/HealthKitManagerProtocol.swift"; sourceTree = "<group>"; };
@@ -1200,6 +1204,7 @@
 				F02C721D3C8A377ADB5C2524 /* WorkoutLog.swift */,
 				F51C7769F745A8FCAB7E45F1 /* LoggedExercise.swift */,
 				0EFD232B20A7DA4F18F14719 /* LoggedSet.swift */,
+				9CADD66700DACDC3BD9D0EAE /* SetTag.swift */,
 			);
 			name = WorkoutLog;
 			path = WorkoutLog;
@@ -2417,6 +2422,7 @@
 				C1B670EC2D627B12005E9173 /* HealthWeeks.swift */,
 				8715BD3457F3C540F2408674 /* PreviousComparison.swift */,
 				DF5A5E867986D4FB0E9CAC47 /* TabHeader.swift */,
+				E689256E0B3E081277712D4B /* MediaProcessingBanner.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -3469,6 +3475,8 @@
 				061BF2DB20BEAF645637BEF8 /* SetMediaGalleryView.swift in Sources */,
 				48B8594E069AE1509F354FEE /* PreviousComparison.swift in Sources */,
 				52F96DBD66E0764160BB1FB6 /* TabHeader.swift in Sources */,
+				D928D68B2A56BAED861003CA /* SetTag.swift in Sources */,
+				451C754F3962FFC017A07720 /* MediaProcessingBanner.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

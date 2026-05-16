@@ -97,10 +97,11 @@ struct WorkoutLogEntryView: View {
                     initialWeight: last?.weight,
                     initialReps: last?.reps,
                     initialRir: last?.rir,
-                    onSave: { w, r, rir in viewModel.saveSet(weight: w, reps: r, rir: rir) }
+                    initialTags: [],
+                    onSave: { w, r, rir, tags in viewModel.saveSet(weight: w, reps: r, rir: rir, tags: tags) }
                 )
                 .padding()
-                .presentationDetents([.height(360)])
+                .presentationDetents([.height(420)])
                 .presentationDragIndicator(.visible)
             case .edit(let exerciseLogId, let setId):
                 let set = viewModel.setBeingEdited()
@@ -110,9 +111,10 @@ struct WorkoutLogEntryView: View {
                     initialWeight: set?.weight,
                     initialReps: set?.reps,
                     initialRir: set?.rir,
+                    initialTags: set?.tags ?? [],
                     mediaSetId: setId,
                     mediaUseCase: mediaUseCase,
-                    onSave: { w, r, rir in viewModel.saveSet(weight: w, reps: r, rir: rir) },
+                    onSave: { w, r, rir, tags in viewModel.saveSet(weight: w, reps: r, rir: rir, tags: tags) },
                     onDelete: { viewModel.deleteSet(exerciseLogId: exerciseLogId, setId: setId) }
                 )
                 .padding()

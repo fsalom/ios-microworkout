@@ -341,25 +341,37 @@ private struct ExerciseSummaryCard: View {
                         let setMedia = mediaFor(set.id)
                         let hasMedia = !setMedia.isEmpty
 
-                        let row = HStack(spacing: 8) {
-                            HStack(spacing: 6) {
-                                Text("\(index + 1)")
-                                    .font(.system(size: 15, weight: .semibold, design: .rounded))
-                                    .foregroundColor(.primary)
-                                    .monospacedDigit()
-                                DetailMediaIndicator(media: setMedia)
+                        let row = VStack(alignment: .leading, spacing: 4) {
+                            HStack(spacing: 8) {
+                                HStack(spacing: 6) {
+                                    Text("\(index + 1)")
+                                        .font(.system(size: 15, weight: .semibold, design: .rounded))
+                                        .foregroundColor(.primary)
+                                        .monospacedDigit()
+                                    DetailMediaIndicator(media: setMedia)
+                                }
+                                .frame(width: 44, alignment: .leading)
+                                Text(set.weight.map { format($0) } ?? "—")
+                                    .frame(maxWidth: .infinity)
+                                Text(set.reps.map { String($0) } ?? "—")
+                                    .frame(maxWidth: .infinity)
+                                Text(set.rir.map { format(Double($0)) } ?? "—")
+                                    .frame(maxWidth: .infinity)
                             }
-                            .frame(width: 44, alignment: .leading)
-                            Text(set.weight.map { format($0) } ?? "—")
-                                .frame(maxWidth: .infinity)
-                            Text(set.reps.map { String($0) } ?? "—")
-                                .frame(maxWidth: .infinity)
-                            Text(set.rir.map { format(Double($0)) } ?? "—")
-                                .frame(maxWidth: .infinity)
+                            .font(.system(size: 15, weight: .medium, design: .rounded))
+                            .foregroundColor(.primary)
+                            .monospacedDigit()
+
+                            if !set.tags.isEmpty {
+                                HStack(spacing: 6) {
+                                    ForEach(set.tags, id: \.self) { tag in
+                                        SetTagBadge(tag: tag)
+                                    }
+                                    Spacer()
+                                }
+                                .padding(.leading, 44)
+                            }
                         }
-                        .font(.system(size: 15, weight: .medium, design: .rounded))
-                        .foregroundColor(.primary)
-                        .monospacedDigit()
                         .padding(.horizontal, 10)
                         .padding(.vertical, 10)
                         .background(
@@ -518,6 +530,24 @@ private struct SessionDateSelector: View {
         formatter.locale = Locale(identifier: "es_ES")
         formatter.dateFormat = "EEE d MMM"
         return formatter.string(from: date).capitalized
+    }
+}
+
+struct SetTagBadge: View {
+    let tag: SetTag
+
+    var body: some View {
+        HStack(spacing: 3) {
+            Image(systemName: tag.symbol)
+                .font(.system(size: 9, weight: .bold))
+            Text(tag.shortLabel)
+                .font(.system(size: 11, weight: .semibold))
+        }
+        .foregroundColor(tag.color)
+        .padding(.horizontal, 7)
+        .padding(.vertical, 3)
+        .background(Capsule().fill(tag.color.opacity(0.18)))
+        .overlay(Capsule().strokeBorder(tag.color.opacity(0.5), lineWidth: 0.8))
     }
 }
 

@@ -6,15 +6,17 @@ struct LoggedSetInput: View {
     let initialWeight: Double?
     let initialReps: Int?
     let initialRir: Float?
+    var initialTags: [SetTag] = []
     var mediaSetId: UUID? = nil
     var mediaUseCase: SetMediaUseCase? = nil
 
-    var onSave: (Double?, Int?, Float?) -> Void
+    var onSave: (Double?, Int?, Float?, [SetTag]) -> Void
     var onDelete: (() -> Void)? = nil
 
     @State private var weight: Double? = nil
     @State private var reps: Double? = nil
     @State private var rir: Double? = nil
+    @State private var selectedTags: Set<SetTag> = []
     @State private var showDeleteConfirm: Bool = false
     @Environment(\.dismiss) private var dismiss
 
@@ -33,6 +35,8 @@ struct LoggedSetInput: View {
                     set: { reps = $0 }
                 ))
                 StepperInputView(label: "RIR", value: $rir)
+
+                tagsSection
 
                 if let setId = mediaSetId, let useCase = mediaUseCase {
                     Divider()
@@ -67,6 +71,7 @@ struct LoggedSetInput: View {
             weight = initialWeight
             reps = initialReps.map { Double($0) }
             rir = initialRir.map { Double($0) }
+            selectedTags = Set(initialTags)
         }
         .confirmationDialog(
             "¿Eliminar esta serie?",
@@ -81,10 +86,49 @@ struct LoggedSetInput: View {
         }
     }
 
+    private var tagsSection: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("Etiquetas")
+                .font(.caption)
+                .foregroundColor(.secondary)
+                .padding(.top, 8)
+            HStack(spacing: 8) {
+                ForEach(SetTag.allCases, id: \.self) { tag in
+                    tagChip(tag)
+                }
+            }
+        }
+    }
+
+    private func tagChip(_ tag: SetTag) -> some View {
+        let active = selectedTags.contains(tag)
+        return Button {
+            if active { selectedTags.remove(tag) } else { selectedTags.insert(tag) }
+        } label: {
+            HStack(spacing: 4) {
+                Image(systemName: tag.symbol)
+                    .font(.system(size: 11, weight: .semibold))
+                Text(tag.shortLabel)
+                    .font(.system(size: 13, weight: .semibold))
+            }
+            .foregroundColor(active ? .white : tag.color)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 6)
+            .background(
+                Capsule().fill(active ? tag.color : tag.color.opacity(0.18))
+            )
+            .overlay(
+                Capsule().strokeBorder(tag.color.opacity(active ? 0 : 0.6), lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
+    }
+
     private func save() {
         let intReps = reps.flatMap { Int($0) }
         let floatRir = rir.map { Float($0) }
-        onSave(weight, intReps, floatRir)
+        let orderedTags = SetTag.allCases.filter { selectedTags.contains($0) }
+        onSave(weight, intReps, floatRir, orderedTags)
         dismiss()
     }
 }
