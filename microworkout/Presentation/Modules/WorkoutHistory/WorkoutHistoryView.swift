@@ -8,10 +8,6 @@ struct WorkoutHistoryView: View {
     var body: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 20) {
-                Header(onCreate: { viewModel.goToNewSession() })
-                    .padding(.horizontal, 16)
-                    .padding(.top, 8)
-
                 content
                     .padding(.horizontal, 16)
             }
@@ -19,6 +15,13 @@ struct WorkoutHistoryView: View {
         }
         .background(Color(.systemGroupedBackground))
         .scrollIndicators(.hidden)
+        .pinnedTabHeader(
+            subtitle: "PROGRESO",
+            title: "Entrenamientos",
+            action: .init(icon: "plus.circle.fill", color: .green) {
+                viewModel.goToNewSession()
+            }
+        )
         .onAppear { viewModel.load() }
         .onChange(of: scenePhase) { _, newPhase in
             if newPhase == .active { viewModel.load() }
@@ -66,39 +69,6 @@ struct WorkoutHistoryView: View {
         }
     }
 
-}
-
-private struct Header: View {
-    let onCreate: () -> Void
-
-    private var monthLabel: String {
-        let f = DateFormatter()
-        f.locale = Locale(identifier: "es_ES")
-        f.dateFormat = "MMMM yyyy"
-        return f.string(from: Date()).uppercased()
-    }
-
-    var body: some View {
-        HStack(alignment: .firstTextBaseline) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(monthLabel)
-                    .font(.caption)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.secondary)
-                    .tracking(1)
-                Text("Entrenamientos")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-            }
-            Spacer()
-            Button(action: onCreate) {
-                Image(systemName: "plus.circle.fill")
-                    .font(.title)
-                    .foregroundColor(.green)
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-    }
 }
 
 private struct CurrentSessionAccessCard: View {
