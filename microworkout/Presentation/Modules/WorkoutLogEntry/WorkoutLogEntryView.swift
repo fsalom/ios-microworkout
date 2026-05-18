@@ -49,13 +49,15 @@ struct WorkoutLogEntryView: View {
             ForEach(viewModel.uiState.log.exercises) { exerciseLog in
                 LoggedExerciseCard(
                     exerciseLog: exerciseLog,
+                    previousReference: viewModel.uiState.previousByExerciseId[exerciseLog.exercise.id],
                     mediaUseCase: mediaUseCase,
                     isNotesExpanded: viewModel.uiState.expandedNotes.contains(exerciseLog.id),
                     onToggleNotes: { viewModel.toggleNotes(for: exerciseLog.id) },
                     onUpdateNotes: { viewModel.updateNotes(exerciseLogId: exerciseLog.id, notes: $0) },
                     onAddSet: { viewModel.openNewSet(for: exerciseLog.id) },
                     onTapSet: { setId in viewModel.openEditSet(exerciseLogId: exerciseLog.id, setId: setId) },
-                    onDeleteSet: { setId in viewModel.deleteSet(exerciseLogId: exerciseLog.id, setId: setId) }
+                    onDeleteSet: { setId in viewModel.deleteSet(exerciseLogId: exerciseLog.id, setId: setId) },
+                    onCopyPrevious: { viewModel.copyPreviousSets(for: exerciseLog.id) }
                 )
             }
 
@@ -127,6 +129,7 @@ struct WorkoutLogEntryView: View {
 
 private struct LoggedExerciseCard: View {
     let exerciseLog: LoggedExercise
+    let previousReference: PreviousExerciseReference?
     let mediaUseCase: SetMediaUseCase
     let isNotesExpanded: Bool
     let onToggleNotes: () -> Void
@@ -134,6 +137,9 @@ private struct LoggedExerciseCard: View {
     let onAddSet: () -> Void
     let onTapSet: (UUID) -> Void
     let onDeleteSet: (UUID) -> Void
+    let onCopyPrevious: () -> Void
+
+    @State private var isPreviousExpanded: Bool = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -147,6 +153,39 @@ private struct LoggedExerciseCard: View {
                         .foregroundColor(.green)
                 }
                 .buttonStyle(.plain)
+            }
+
+            if let previousReference {
+                PreviousTopSetCard(
+                    current: exerciseLog,
+                    previous: previousReference.exercise,
+                    previousDate: previousReference.date
+                )
+
+                PreviousSetsList(
+                    sets: previousReference.exercise.sets,
+                    isExpanded: isPreviousExpanded,
+                    onToggle: { isPreviousExpanded.toggle() }
+                )
+
+                if exerciseLog.sets.isEmpty && !previousReference.exercise.sets.isEmpty {
+                    Button(action: onCopyPrevious) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "arrow.down.doc.fill")
+                                .font(.system(size: 12, weight: .semibold))
+                            Text("Copiar series anteriores")
+                                .font(.system(size: 13, weight: .semibold))
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                        .background(
+                            RoundedRectangle(cornerRadius: 10)
+                                .fill(Color.blue.opacity(0.12))
+                        )
+                        .foregroundColor(.blue)
+                    }
+                    .buttonStyle(.plain)
+                }
             }
 
             if exerciseLog.sets.isEmpty {
@@ -323,6 +362,74 @@ private struct NotesField: View {
                 .onChange(of: local) { _, newValue in onChange(newValue) }
         }
         .onAppear { local = text }
+    }
+}
+
+private struct PreviousSetsList: View {
+    let sets: [LoggedSet]
+    let isExpanded: Bool
+    let onToggle: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Button(action: onToggle) {
+                HStack(spacing: 6) {
+                    Image(systemName: isExpanded ? "chevron.down" : "chevron.right")
+                        .font(.caption2)
+                    Text(isExpanded ? "Ocultar series anteriores" : "Ver series anteriores (\(sets.count))")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                    Spacer()
+                }
+                .foregroundColor(.secondary)
+            }
+            .buttonStyle(.plain)
+
+            if isExpanded {
+                VStack(spacing: 4) {
+                    ForEach(Array(sets.enumerated()), id: \.element.id) { index, set in
+                        HStack(spacing: 8) {
+                            Text("\(index + 1)")
+                                .font(.system(size: 13, weight: .semibold, design: .rounded))
+                                .foregroundColor(.secondary)
+                                .frame(width: 20, alignment: .leading)
+                                .monospacedDigit()
+                            Text(summary(for: set))
+                                .font(.system(size: 13, weight: .medium, design: .rounded))
+                                .foregroundColor(.primary)
+                            Spacer()
+                            if !set.tags.isEmpty {
+                                HStack(spacing: 3) {
+                                    ForEach(set.tags, id: \.self) { tag in
+                                        Image(systemName: tag.symbol)
+                                            .font(.system(size: 10, weight: .semibold))
+                                            .foregroundColor(tag.color)
+                                    }
+                                }
+                            }
+                        }
+                        .padding(.vertical, 5)
+                        .padding(.horizontal, 8)
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(Color(.tertiarySystemGroupedBackground))
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    private func summary(for set: LoggedSet) -> String {
+        var parts: [String] = []
+        if let w = set.weight { parts.append("\(format(w)) kg") }
+        if let r = set.reps { parts.append("\(r) reps") }
+        if let rir = set.rir { parts.append("RIR \(format(Double(rir)))") }
+        return parts.isEmpty ? "—" : parts.joined(separator: " · ")
+    }
+
+    private func format(_ v: Double) -> String {
+        v.truncatingRemainder(dividingBy: 1) == 0 ? String(Int(v)) : String(format: "%.1f", v)
     }
 }
 

@@ -28,6 +28,8 @@ struct WorkoutLogEntryUiState {
     var isPickingExercise: Bool = false
     var search: String = ""
     var searchResults: [Exercise] = []
+    /// Most recent LoggedExercise of the same session for each Exercise.id in this log, with its log date.
+    var previousByExerciseId: [UUID: PreviousExerciseReference] = [:]
 }
 
 final class WorkoutLogEntryViewModel: ObservableObject {
@@ -46,6 +48,24 @@ final class WorkoutLogEntryViewModel: ObservableObject {
         self.isNew = isNew
         self.useCase = useCase
         self.exerciseUseCase = exerciseUseCase
+        loadPreviousReferences()
+    }
+
+    private func loadPreviousReferences() {
+        var map: [UUID: PreviousExerciseReference] = [:]
+        for exerciseLog in uiState.log.exercises {
+            if let result = useCase.getPreviousLoggedExercise(
+                sessionId: uiState.log.sessionId,
+                exerciseId: exerciseLog.exercise.id,
+                beforeLogId: uiState.log.id
+            ) {
+                map[exerciseLog.exercise.id] = PreviousExerciseReference(
+                    exercise: result.exercise,
+                    date: result.date
+                )
+            }
+        }
+        uiState.previousByExerciseId = map
     }
 
     func toggleNotes(for exerciseLogId: UUID) {
@@ -98,6 +118,18 @@ final class WorkoutLogEntryViewModel: ObservableObject {
     func deleteSet(exerciseLogId: UUID, setId: UUID) {
         guard let exIdx = uiState.log.exercises.firstIndex(where: { $0.id == exerciseLogId }) else { return }
         uiState.log.exercises[exIdx].sets.removeAll { $0.id == setId }
+    }
+
+    /// Copies all sets from the previous session's logged exercise into the current one,
+    /// generating new UUIDs so each copy is an independent set the user can edit/delete.
+    func copyPreviousSets(for exerciseLogId: UUID) {
+        guard let exIdx = uiState.log.exercises.firstIndex(where: { $0.id == exerciseLogId }) else { return }
+        let exerciseId = uiState.log.exercises[exIdx].exercise.id
+        guard let previous = uiState.previousByExerciseId[exerciseId] else { return }
+        let copied = previous.exercise.sets.map { source in
+            LoggedSet(weight: source.weight, reps: source.reps, rir: source.rir, tags: source.tags)
+        }
+        uiState.log.exercises[exIdx].sets.append(contentsOf: copied)
     }
 
     /// Returns the last set values to pre-fill the form for a new set on a given exercise.
@@ -162,6 +194,16 @@ final class WorkoutLogEntryViewModel: ObservableObject {
             return
         }
         uiState.log.exercises.append(LoggedExercise(exercise: exercise))
+        if let result = useCase.getPreviousLoggedExercise(
+            sessionId: uiState.log.sessionId,
+            exerciseId: exercise.id,
+            beforeLogId: uiState.log.id
+        ) {
+            uiState.previousByExerciseId[exercise.id] = PreviousExerciseReference(
+                exercise: result.exercise,
+                date: result.date
+            )
+        }
         closeExercisePicker()
     }
 
