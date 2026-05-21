@@ -28,6 +28,12 @@ struct AddMealUiState {
     var isLoading: Bool = false
     var error: String?
 
+    /// Meals from yesterday matching the currently selected `selectedType`. Used to
+    /// surface "repetir comida de ayer" suggestions. Refreshed when `selectedType` changes.
+    var previousDayMeals: [Meal] = []
+    /// Ids of meals from yesterday that were just re-saved today, for transient UI feedback.
+    var repeatedMealIds: Set<UUID> = []
+
     // Search state
     var searchQuery: String = ""
     var searchResults: [FoodItem] = []
@@ -67,6 +73,28 @@ final class AddMealViewModel: ObservableObject {
         loadRecentFoods()
         loadFavorites()
         loadMyMeals()
+        loadPreviousDayMeals()
+    }
+
+    /// Fetches yesterday's meals that match the currently selected meal type.
+    /// Filtering by `selectedType` is what makes the suggestion contextual ("en cada caso"):
+    /// when adding breakfast, only yesterday's breakfast is shown.
+    func loadPreviousDayMeals() {
+        let type = uiState.selectedType
+        let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: Date()) ?? Date()
+        Task {
+            do {
+                let meals = try await mealUseCase.getMeals(for: yesterday)
+                let filtered = meals
+                    .filter { $0.type == type && !$0.items.isEmpty }
+                    .sorted { $0.timestamp < $1.timestamp }
+                await MainActor.run {
+                    self.uiState.previousDayMeals = filtered
+                }
+            } catch {
+                await MainActor.run { self.uiState.previousDayMeals = [] }
+            }
+        }
     }
 
     func loadMyMeals() {
@@ -94,6 +122,37 @@ final class AddMealViewModel: ObservableObject {
     func deleteMyMeal(id: UUID) {
         mealUseCase.deleteMyMeal(id: id)
         loadMyMeals()
+    }
+
+    /// Re-saves yesterday's meal as a fresh Meal today: same items, same meal type,
+    /// new id and `timestamp = Date()`. One tap = "volver a poner lo mismo".
+    func repeatMeal(_ source: Meal) {
+        guard !uiState.repeatedMealIds.contains(source.id) else { return }
+        uiState.repeatedMealIds.insert(source.id)
+
+        let meal = Meal(
+            type: uiState.selectedType,
+            timestamp: Date(),
+            items: source.items,
+            myMealName: source.myMealName
+        )
+
+        let generator = UIImpactFeedbackGenerator(style: .medium)
+        generator.impactOccurred()
+
+        Task {
+            do {
+                try await mealUseCase.saveMeal(meal)
+                await MainActor.run { self.loadRecentFoods() }
+                try? await Task.sleep(nanoseconds: 1_500_000_000)
+                await MainActor.run { self.uiState.repeatedMealIds.remove(source.id) }
+            } catch {
+                await MainActor.run {
+                    self.uiState.error = "Error al guardar"
+                    self.uiState.repeatedMealIds.remove(source.id)
+                }
+            }
+        }
     }
 
     /// Adds all items of a saved "Mi comida" as a single Meal of the current selectedType.
@@ -156,7 +215,9 @@ final class AddMealViewModel: ObservableObject {
     }
 
     func selectMealType(_ type: MealType) {
+        guard uiState.selectedType != type else { return }
         uiState.selectedType = type
+        loadPreviousDayMeals()
     }
 
     func selectTab(_ tab: AddMealListTab) {

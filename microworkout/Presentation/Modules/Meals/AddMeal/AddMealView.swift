@@ -50,6 +50,17 @@ struct AddMealView: View {
                             .transition(.opacity)
                     }
 
+                    if !viewModel.uiState.previousDayMeals.isEmpty {
+                        PreviousDayMealsSection(
+                            meals: viewModel.uiState.previousDayMeals,
+                            repeatedIds: viewModel.uiState.repeatedMealIds,
+                            onRepeat: { meal in
+                                viewModel.repeatMeal(meal)
+                                showToast("Añadido de ayer")
+                            }
+                        )
+                    }
+
                     TabsBar(
                         selected: viewModel.uiState.selectedTab,
                         onSelect: { viewModel.selectTab($0) }
@@ -312,6 +323,110 @@ private struct QuickActionButton: View {
             )
         }
         .buttonStyle(.plain)
+    }
+}
+
+// MARK: - Previous Day Meals
+
+private struct PreviousDayMealsSection: View {
+    let meals: [Meal]
+    let repeatedIds: Set<UUID>
+    let onRepeat: (Meal) -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 6) {
+                Image(systemName: "clock.arrow.circlepath")
+                    .font(.caption2)
+                    .foregroundColor(.blue)
+                Text("DE AYER")
+                    .font(.caption2)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.secondary)
+                    .tracking(1)
+            }
+
+            VStack(spacing: 8) {
+                ForEach(meals) { meal in
+                    PreviousDayMealCard(
+                        meal: meal,
+                        isJustRepeated: repeatedIds.contains(meal.id),
+                        onRepeat: { onRepeat(meal) }
+                    )
+                }
+            }
+        }
+    }
+}
+
+private struct PreviousDayMealCard: View {
+    let meal: Meal
+    let isJustRepeated: Bool
+    let onRepeat: () -> Void
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 10) {
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 6) {
+                    if let name = meal.myMealName, !name.isEmpty {
+                        Text(name)
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(.primary)
+                    } else {
+                        Text(meal.formattedTime)
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundColor(.secondary)
+                            .monospacedDigit()
+                    }
+                    Text("·")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                    Text("\(Int(meal.totalNutrition.calories.rounded())) kcal")
+                        .font(.system(size: 13, weight: .semibold, design: .rounded))
+                        .foregroundColor(.primary)
+                        .monospacedDigit()
+                }
+
+                Text(itemsSummary)
+                    .font(.system(size: 13))
+                    .foregroundColor(.secondary)
+                    .lineLimit(2)
+            }
+
+            Spacer(minLength: 8)
+
+            Button(action: onRepeat) {
+                HStack(spacing: 4) {
+                    Image(systemName: isJustRepeated ? "checkmark" : "arrow.clockwise")
+                        .font(.system(size: 11, weight: .bold))
+                    Text(isJustRepeated ? "Añadido" : "Repetir")
+                        .font(.system(size: 12, weight: .semibold))
+                }
+                .foregroundColor(.white)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
+                .background(
+                    Capsule().fill(isJustRepeated ? Color.green : Color.blue)
+                )
+            }
+            .buttonStyle(.plain)
+            .disabled(isJustRepeated)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(.secondarySystemBackground))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.blue.opacity(0.18), lineWidth: 1)
+        )
+    }
+
+    private var itemsSummary: String {
+        let names = meal.items.map { $0.name }
+        return names.joined(separator: ", ")
     }
 }
 
