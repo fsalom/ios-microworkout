@@ -50,7 +50,7 @@ struct AddMealView: View {
                             .transition(.opacity)
                     }
 
-                    if !viewModel.uiState.previousDayMeals.isEmpty {
+                    if !isSearchActive && !viewModel.uiState.previousDayMeals.isEmpty {
                         PreviousDayMealsSection(
                             meals: viewModel.uiState.previousDayMeals,
                             repeatedIds: viewModel.uiState.repeatedMealIds,
@@ -136,6 +136,12 @@ struct AddMealView: View {
                 onCancel: { editingMyMeal = nil }
             )
         }
+    }
+
+    private var isSearchActive: Bool {
+        viewModel.uiState.searchQuery
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .count >= 2
     }
 
     /// Clears the search state shared with the CreateMyMealSheet so the parent's
