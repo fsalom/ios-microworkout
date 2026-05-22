@@ -2,6 +2,7 @@ import SwiftUI
 
 struct HealthWeeksView: View {
     @Binding var weeks: [[HealthDay]]
+    var selectedDate: Date? = nil
     let daysOfWeek = ["L", "M", "X", "J", "V", "S", "D"]
     var onDayTap: ((HealthDay) -> Void)? = nil
 
@@ -9,7 +10,7 @@ struct HealthWeeksView: View {
         weeks.flatMap { $0.map { $0.minutesOfExercise } }.max() ?? 1
     }
 
-    let dateFormatter: DateFormatter = {
+    static let dayFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "dd"
         return formatter
@@ -19,7 +20,7 @@ struct HealthWeeksView: View {
         VStack(spacing: 10) {
             LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 7), spacing: 5) {
                 ForEach(daysOfWeek, id: \.self) { day in
-                    Text("\(day)")
+                    Text(day)
                         .font(.caption)
                         .fontWeight(.bold)
                         .frame(width: 40, height: 40)
@@ -32,29 +33,65 @@ struct HealthWeeksView: View {
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 7), spacing: 5) {
                     ForEach(weeks[weekIndex].indices, id: \.self) { dayIndex in
                         let healthDay = weeks[weekIndex][dayIndex]
-                        let opacity = maxMinutes > 0 ? Double(healthDay.minutesOfExercise) / Double(maxMinutes) : 0.2
-
-                        let isToday = Calendar.current.isDate(healthDay.date, inSameDayAs: Date())
-                        Text("\(healthDay.date, formatter: dateFormatter)")
-                            .font(.caption)
-                            .fontWeight(isToday ? .bold : .thin)
-                            .frame(width: 40, height: 40)
-                            .background(Color.green.opacity(opacity))
-                            .clipShape(RoundedRectangle(cornerRadius: 6))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 6)
-                                    .stroke(Color.primary, lineWidth: isToday ? 2 : 0)
-                            )
-                            .onTapGesture {
-                                onDayTap?(healthDay)
-                            }
+                        DayCell(
+                            healthDay: healthDay,
+                            maxMinutes: maxMinutes,
+                            isSelected: isSelected(healthDay.date),
+                            isToday: Calendar.current.isDate(healthDay.date, inSameDayAs: Date())
+                        )
+                        .onTapGesture { onDayTap?(healthDay) }
                     }
                 }
             }
         }
     }
+
+    private func isSelected(_ date: Date) -> Bool {
+        guard let selectedDate else { return false }
+        return Calendar.current.isDate(date, inSameDayAs: selectedDate)
+    }
 }
 
-#Preview {
-    HealthWeeksView(weeks: .constant([[]]))
+private struct DayCell: View {
+    let healthDay: HealthDay
+    let maxMinutes: Int
+    let isSelected: Bool
+    let isToday: Bool
+
+    private var heatmapOpacity: Double {
+        maxMinutes > 0 ? Double(healthDay.minutesOfExercise) / Double(maxMinutes) : 0.2
+    }
+
+    var body: some View {
+        Text("\(healthDay.date, formatter: HealthWeeksView.dayFormatter)")
+            .font(.caption)
+            .fontWeight(isSelected ? .bold : (isToday ? .bold : .thin))
+            .foregroundColor(isSelected ? .white : .primary)
+            .frame(width: 40, height: 40)
+            .background(
+                ZStack {
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .fill(Color.green.opacity(heatmapOpacity))
+                    if isSelected {
+                        RoundedRectangle(cornerRadius: 8, style: .continuous)
+                            .fill(Color.accentColor)
+                    }
+                }
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .stroke(
+                        isSelected
+                            ? Color.accentColor
+                            : (isToday ? Color.primary : .clear),
+                        lineWidth: isSelected ? 2.5 : (isToday ? 2 : 0)
+                    )
+            )
+            .scaleEffect(isSelected ? 1.08 : 1)
+            .shadow(
+                color: isSelected ? Color.accentColor.opacity(0.45) : .clear,
+                radius: 6, x: 0, y: 2
+            )
+            .animation(.spring(response: 0.3, dampingFraction: 0.75), value: isSelected)
+    }
 }
