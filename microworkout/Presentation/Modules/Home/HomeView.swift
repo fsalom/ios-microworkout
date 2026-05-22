@@ -309,7 +309,10 @@ struct HomeView: View {
             Text("Progresión ejercicio")
                 .font(.title2)
                 .fontWeight(.bold)
-            HealthWeeksView(weeks: self.$viewModel.uiState.weeks) { day in
+            HealthWeeksView(
+                weeks: self.$viewModel.uiState.weeks,
+                selectedDate: viewModel.uiState.healthInfoForToday.date
+            ) { day in
                 self.viewModel.showHealthInfo(for: day)
             }
         }

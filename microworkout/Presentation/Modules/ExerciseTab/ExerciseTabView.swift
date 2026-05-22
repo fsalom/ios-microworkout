@@ -264,6 +264,7 @@ struct ExerciseTabView: View {
             LazyVStack(alignment: .leading, spacing: 20) {
                 CalendarSection(
                     weeks: $viewModel.uiState.weeks,
+                    selectedDate: viewModel.uiState.selectedDay.date,
                     onSelectDay: { viewModel.selectDay($0) }
                 )
                 .padding(.horizontal, 16)
@@ -320,6 +321,7 @@ struct ExerciseTabView: View {
 
 private struct CalendarSection: View {
     @Binding var weeks: [[HealthDay]]
+    var selectedDate: Date? = nil
     let onSelectDay: (HealthDay) -> Void
 
     var body: some View {
@@ -327,7 +329,10 @@ private struct CalendarSection: View {
             Text("Progresión")
                 .font(.title2)
                 .fontWeight(.bold)
-            HealthWeeksView(weeks: $weeks) { day in
+            HealthWeeksView(
+                weeks: $weeks,
+                selectedDate: selectedDate
+            ) { day in
                 onSelectDay(day)
             }
         }
