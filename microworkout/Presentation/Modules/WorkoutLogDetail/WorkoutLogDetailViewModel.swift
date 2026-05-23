@@ -55,6 +55,10 @@ final class WorkoutLogDetailViewModel: ObservableObject {
         router.goToEdit(log: uiState.log)
     }
 
+    func goToProgression(sourceSetId: UUID) {
+        router.goToProgression(sourceSetId: sourceSetId)
+    }
+
     func openMediaGallery(setId: UUID) {
         uiState.mediaSheetSetId = setId
     }

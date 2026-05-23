@@ -34,4 +34,8 @@ final class WorkoutLogDetailRouter {
     func goToEdit(log: WorkoutLog) {
         navigator.push(to: WorkoutLogEntryBuilder(component: component).build(log: log, isNew: false))
     }
+
+    func goToProgression(sourceSetId: UUID) {
+        navigator.push(to: ExerciseProgressionBuilder(component: component).build(sourceSetId: sourceSetId))
+    }
 }

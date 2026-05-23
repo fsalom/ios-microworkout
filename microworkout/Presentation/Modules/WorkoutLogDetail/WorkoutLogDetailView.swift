@@ -65,7 +65,14 @@ struct WorkoutLogDetailView: View {
             viewModel.reloadFromStorage()
         }
         .fullScreenCover(item: mediaSheetBinding) { setId in
-            DirectMediaViewer(setId: setId.id, useCase: viewModel.mediaUseCase)
+            DirectMediaViewer(
+                setId: setId.id,
+                useCase: viewModel.mediaUseCase,
+                onCompare: { sourceSetId in
+                    viewModel.closeMediaGallery()
+                    viewModel.goToProgression(sourceSetId: sourceSetId)
+                }
+            )
         }
     }
 
@@ -84,6 +91,7 @@ private struct IdentifiableUUID: Identifiable, Hashable {
 private struct DirectMediaViewer: View {
     let setId: UUID
     let useCase: SetMediaUseCase
+    var onCompare: ((UUID) -> Void)? = nil
 
     @Environment(\.dismiss) private var dismiss
     @State private var media: [SetMedia]?
@@ -110,7 +118,8 @@ private struct DirectMediaViewer: View {
                                 try? await useCase.delete(item.id)
                                 self.media = (try? await useCase.getMedia(forSetId: setId)) ?? []
                             }
-                        }
+                        },
+                        onCompare: onCompare
                     )
                 }
             } else {
