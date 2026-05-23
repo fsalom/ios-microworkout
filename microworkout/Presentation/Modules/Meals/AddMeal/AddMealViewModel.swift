@@ -66,6 +66,10 @@ final class AddMealViewModel: ObservableObject {
     private var router: AddMealRouter
     private var mealUseCase: MealUseCaseProtocol
     private var searchTask: Task<Void, Never>?
+    /// Bumped on every search invocation; the in-flight task only resets `isSearching`
+    /// if its captured generation matches the current one. Prevents stuck spinners
+    /// when a task is cancelled by a follow-up search.
+    private var searchGeneration: Int = 0
 
     init(router: AddMealRouter, mealUseCase: MealUseCaseProtocol) {
         self.router = router
@@ -272,32 +276,44 @@ final class AddMealViewModel: ObservableObject {
     func searchFoods() {
         let query = uiState.searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
         guard query.count >= 2 else {
+            searchTask?.cancel()
+            searchTask = nil
+            searchGeneration += 1
             uiState.searchResults = []
             uiState.isSearching = false
             return
         }
 
-        // Cancel previous search
         searchTask?.cancel()
+        searchGeneration += 1
+        let generation = searchGeneration
 
         uiState.isSearching = true
 
-        searchTask = Task {
+        searchTask = Task { [weak self] in
             // Small additional coalescing window; the SearchField already debounces 200ms.
-            try? await Task.sleep(nanoseconds: 100_000_000) // 100ms
+            try? await Task.sleep(nanoseconds: 100_000_000)
+
+            // Whatever happens below (success, error, cancellation), guarantee the
+            // spinner is reset if this task is still the latest one. Without this,
+            // a cancelled task leaves `isSearching = true` forever.
+            defer {
+                Task { @MainActor [weak self] in
+                    guard let self else { return }
+                    guard self.searchGeneration == generation else { return }
+                    self.uiState.isSearching = false
+                }
+            }
 
             guard !Task.isCancelled else { return }
+            guard let self else { return }
 
             do {
-                let results = try await mealUseCase.searchFoods(query: query)
+                let results = try await self.mealUseCase.searchFoods(query: query)
+                try Task.checkCancellation()
                 await MainActor.run {
-                    guard !Task.isCancelled else { return }
-                    // Stale guard: if the user has already typed a different query while
-                    // this request was in flight, ignore this response so it doesn't
-                    // overwrite the newer state.
-                    guard self.uiState.searchQuery.trimmingCharacters(in: .whitespacesAndNewlines) == query else { return }
+                    guard self.searchGeneration == generation else { return }
                     self.uiState.searchResults = self.prependMatchingFavorites(to: results, query: query)
-                    self.uiState.isSearching = false
                 }
             } catch is CancellationError {
                 return
@@ -306,10 +322,8 @@ final class AddMealViewModel: ObservableObject {
             } catch {
                 print("[AddMeal] searchFoods error: \(error)")
                 await MainActor.run {
-                    guard !Task.isCancelled else { return }
-                    guard self.uiState.searchQuery.trimmingCharacters(in: .whitespacesAndNewlines) == query else { return }
+                    guard self.searchGeneration == generation else { return }
                     self.uiState.searchResults = []
-                    self.uiState.isSearching = false
                     self.uiState.error = "Error de búsqueda"
                 }
             }
@@ -317,9 +331,12 @@ final class AddMealViewModel: ObservableObject {
     }
 
     func clearSearch() {
+        searchTask?.cancel()
+        searchTask = nil
+        searchGeneration += 1
         uiState.searchQuery = ""
         uiState.searchResults = []
-        searchTask?.cancel()
+        uiState.isSearching = false
     }
 
     func selectSearchResult(_ item: FoodItem) {

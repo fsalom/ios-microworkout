@@ -279,6 +279,15 @@ private struct SearchField: View {
                 didInitialize = true
             }
         }
+        .onChange(of: initialQuery) { _, newValue in
+            // Sync from the parent when it programmatically resets the query
+            // (e.g. after closing CreateMyMealSheet). Avoid feedback loops by
+            // only syncing when the local text differs.
+            if newValue != localText {
+                debounceTask?.cancel()
+                localText = newValue
+            }
+        }
     }
 
     private func scheduleDebouncedPropagation() {
