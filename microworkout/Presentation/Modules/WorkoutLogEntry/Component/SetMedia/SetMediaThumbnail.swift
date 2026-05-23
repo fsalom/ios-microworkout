@@ -3,42 +3,40 @@ import ImageIO
 import SwiftUI
 import UIKit
 
-/// In-memory cache of ready-to-play AVPlayerItems keyed by URL.
-/// Lets us pay the cost of `asset.load(...)` ahead of time so the viewer
-/// can start playing immediately when the user taps a video.
+/// In-memory cache of pre-loaded AVURLAssets keyed by URL.
+///
+/// We cache the asset (not an AVPlayerItem) because AVPlayerItem can only belong
+/// to a single AVPlayer at a time — sharing one between viewers/pages crashes with
+/// "An AVPlayerItem cannot be associated with more than one instance of AVPlayer".
+/// AVURLAsset, on the other hand, is freely shareable.
+///
+/// The asset is what's expensive to load (tracks, duration). By preloading it
+/// ahead of time, opening the viewer just builds a cheap AVPlayerItem on top
+/// and the first frame appears much sooner.
 actor VideoPreloader {
     static let shared = VideoPreloader()
 
-    private var cache: [URL: AVPlayerItem] = [:]
-    private var inFlight: [URL: Task<AVPlayerItem, Never>] = [:]
+    private var cache: [URL: AVURLAsset] = [:]
+    private var inFlight: [URL: Task<AVURLAsset, Never>] = [:]
 
-    /// Ensure an item is loaded for `url`. Idempotent. Safe to await multiple times concurrently.
+    /// Ensures an asset is loaded for `url`. Idempotent and concurrency-safe.
     @discardableResult
-    func preload(_ url: URL) async -> AVPlayerItem {
+    func preload(_ url: URL) async -> AVURLAsset {
         if let cached = cache[url] { return cached }
         if let task = inFlight[url] { return await task.value }
 
-        let task = Task<AVPlayerItem, Never> {
+        let task = Task<AVURLAsset, Never> {
             let asset = AVURLAsset(url: url, options: [
                 AVURLAssetPreferPreciseDurationAndTimingKey: false,
             ])
-            _ = try? await asset.load(.isPlayable, .tracks, .duration)
-            let item = AVPlayerItem(asset: asset)
-            item.preferredForwardBufferDuration = 1.5
-            return item
+            _ = try? await asset.load(.tracks, .duration)
+            return asset
         }
         inFlight[url] = task
-        let item = await task.value
-        cache[url] = item
+        let asset = await task.value
+        cache[url] = asset
         inFlight[url] = nil
-        return item
-    }
-
-    /// Take ownership of the preloaded item (removed from cache). Returns nil if not preloaded.
-    func consume(_ url: URL) -> AVPlayerItem? {
-        let item = cache[url]
-        cache[url] = nil
-        return item
+        return asset
     }
 
     func clear() {

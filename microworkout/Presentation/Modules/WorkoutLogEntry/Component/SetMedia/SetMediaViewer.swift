@@ -7,6 +7,9 @@ struct SetMediaViewer: View {
     let initialIndex: Int
     let useCase: SetMediaUseCase
     var onDelete: ((SetMedia) -> Void)? = nil
+    /// Called with the currently displayed media's `setId` when the user taps "compare".
+    /// If nil, the compare button is hidden.
+    var onCompare: ((UUID) -> Void)? = nil
 
     @Environment(\.dismiss) private var dismiss
     @State private var items: [SetMedia]
@@ -19,12 +22,14 @@ struct SetMediaViewer: View {
         media: [SetMedia],
         initialIndex: Int,
         useCase: SetMediaUseCase,
-        onDelete: ((SetMedia) -> Void)? = nil
+        onDelete: ((SetMedia) -> Void)? = nil,
+        onCompare: ((UUID) -> Void)? = nil
     ) {
         self.media = media
         self.initialIndex = initialIndex
         self.useCase = useCase
         self.onDelete = onDelete
+        self.onCompare = onCompare
         _items = State(initialValue: media)
         _currentIndex = State(initialValue: initialIndex)
     }
@@ -95,6 +100,18 @@ struct SetMediaViewer: View {
                         .padding(.leading, 16)
                 }
                 Spacer()
+                if let onCompare, let current = currentItem, current.type == .video {
+                    Button {
+                        onCompare(current.setId)
+                    } label: {
+                        Image(systemName: "rectangle.split.2x1.fill")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundColor(.white)
+                            .padding(10)
+                            .background(Circle().fill(Color.black.opacity(0.55)))
+                    }
+                    .padding(.trailing, 8)
+                }
                 if onDelete != nil {
                     Button {
                         showDeleteConfirm = true
@@ -121,6 +138,11 @@ struct SetMediaViewer: View {
             .padding(.top, 8)
             Spacer()
         }
+    }
+
+    private var currentItem: SetMedia? {
+        guard currentIndex >= 0, currentIndex < items.count else { return nil }
+        return items[currentIndex]
     }
 
     private var scrollPositionBinding: Binding<Int?> {
@@ -283,7 +305,7 @@ private struct FullScreenVideoPlayer: View {
             }
 
             if let player, isActive {
-                VideoPlayer(player: player)
+                AVPlayerLayerView(player: player)
                     .ignoresSafeArea()
                     .opacity(isReadyToShow ? 1 : 0)
             }
@@ -333,14 +355,14 @@ private struct FullScreenVideoPlayer: View {
         }
         let url = self.url
 
-        let item: AVPlayerItem
-        if let cached = await VideoPreloader.shared.consume(url) {
-            item = cached
-        } else {
-            item = await VideoPreloader.shared.preload(url)
-        }
+        // Reuse the preloaded asset (cheap); build a fresh AVPlayerItem (an item
+        // cannot be shared across players, but an asset can).
+        let asset = await VideoPreloader.shared.preload(url)
 
         guard isActive else { return }
+
+        let item = AVPlayerItem(asset: asset)
+        item.preferredForwardBufferDuration = 1.5
 
         let p = AVPlayer(playerItem: item)
         p.actionAtItemEnd = .pause
@@ -348,6 +370,10 @@ private struct FullScreenVideoPlayer: View {
 
         self.player = p
         observeReadiness(for: p)
+
+        // Start playback immediately; AVPlayer will render the first frame as soon
+        // as it has one. The thumbnail keeps showing until isReadyToShow flips.
+        p.play()
     }
 
     private func observeReadiness(for player: AVPlayer) {
@@ -357,15 +383,8 @@ private struct FullScreenVideoPlayer: View {
             .receive(on: RunLoop.main)
             .sink { status in
                 guard status == .readyToPlay else { return }
-                // Preroll the decode pipeline before play so the first frame is ready.
-                player.preroll(atRate: 1) { _ in
-                    DispatchQueue.main.async {
-                        player.seek(to: .zero)
-                        player.play()
-                        withAnimation(.easeOut(duration: 0.18)) {
-                            isReadyToShow = true
-                        }
-                    }
+                withAnimation(.easeOut(duration: 0.18)) {
+                    isReadyToShow = true
                 }
             }
     }
@@ -378,4 +397,31 @@ private struct FullScreenVideoPlayer: View {
         player = nil
         isReadyToShow = false
     }
+}
+
+// MARK: - AVPlayerLayer wrapper
+//
+// Lower-overhead alternative to SwiftUI's `VideoPlayer`. Mounts an `AVPlayerLayer`
+// directly so the first frame can land without going through VideoPlayer's
+// AVPlayerViewController plumbing.
+private struct AVPlayerLayerView: UIViewRepresentable {
+    let player: AVPlayer
+
+    func makeUIView(context: Context) -> PlayerHostView {
+        let view = PlayerHostView()
+        view.playerLayer.player = player
+        view.playerLayer.videoGravity = .resizeAspect
+        return view
+    }
+
+    func updateUIView(_ uiView: PlayerHostView, context: Context) {
+        if uiView.playerLayer.player !== player {
+            uiView.playerLayer.player = player
+        }
+    }
+}
+
+private final class PlayerHostView: UIView {
+    override class var layerClass: AnyClass { AVPlayerLayer.self }
+    var playerLayer: AVPlayerLayer { layer as! AVPlayerLayer }
 }
