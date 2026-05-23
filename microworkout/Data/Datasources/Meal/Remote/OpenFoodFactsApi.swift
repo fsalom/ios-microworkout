@@ -68,6 +68,9 @@ class OpenFoodFactsApi: OpenFoodFactsApiProtocol {
         var request = URLRequest(url: url)
         request.setValue("Microworkout - iOS - 1.0 - https://github.com/fersalom/microworkout", forHTTPHeaderField: "User-Agent")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
+        // Skip URLCache so a transient empty/failed response can't make subsequent
+        // identical queries return stale empty results.
+        request.cachePolicy = .reloadIgnoringLocalCacheData
 
         print("[OpenFoodFacts] GET \(url.absoluteString)")
 
