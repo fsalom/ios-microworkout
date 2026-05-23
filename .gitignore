@@ -89,3 +89,17 @@ fastlane/test_output
 
 iOSInjectionProject/
 /microworkout.xcodeproj/project.xcworkspace/xcshareddata
+
+## OS / editor noise
+.DS_Store
+*.swp
+.vscode/
+.idea/
+
+## Local secrets and env
+.env
+.env.*
+
+## Binarios y logs sueltos en la raíz
+*.deb
+*.log
