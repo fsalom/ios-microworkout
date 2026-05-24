@@ -1,5 +1,4 @@
 import Foundation
-import UIKit
 
 class SetMediaRepository: SetMediaRepositoryProtocol {
     private let localDataSource: SetMediaDataSourceProtocol
@@ -8,8 +7,8 @@ class SetMediaRepository: SetMediaRepositoryProtocol {
         self.localDataSource = localDataSource
     }
 
-    func savePhoto(setId: UUID, image: UIImage) async throws -> SetMedia {
-        try await localDataSource.savePhoto(setId: setId, image: image)
+    func savePhoto(setId: UUID, imageData: Data) async throws -> SetMedia {
+        try await localDataSource.savePhoto(setId: setId, imageData: imageData)
     }
 
     func saveVideo(setId: UUID, sourceURL: URL) async throws -> SetMedia {

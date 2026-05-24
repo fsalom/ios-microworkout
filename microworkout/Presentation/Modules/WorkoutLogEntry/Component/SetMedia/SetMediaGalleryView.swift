@@ -193,10 +193,10 @@ struct SetMediaGalleryView: View {
                         defer { MediaProcessingTracker.shared.end(jobId) }
                         _ = try await useCase.addVideo(setId: setId, sourceURL: movie.url)
                     } else if let data = try await item.loadTransferable(type: Data.self),
-                              let image = await UIImage(data: data) {
+                              UIImage(data: data) != nil {
                         let jobId = MediaProcessingTracker.shared.begin(.photo)
                         defer { MediaProcessingTracker.shared.end(jobId) }
-                        _ = try await useCase.addPhoto(setId: setId, image: image)
+                        _ = try await useCase.addPhoto(setId: setId, imageData: data)
                     }
                 } catch {}
             }

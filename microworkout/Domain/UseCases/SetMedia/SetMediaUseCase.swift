@@ -1,5 +1,4 @@
 import Foundation
-import UIKit
 
 class SetMediaUseCase: SetMediaUseCaseProtocol {
     private let repository: SetMediaRepositoryProtocol
@@ -8,8 +7,8 @@ class SetMediaUseCase: SetMediaUseCaseProtocol {
         self.repository = repository
     }
 
-    func addPhoto(setId: UUID, image: UIImage) async throws -> SetMedia {
-        let media = try await repository.savePhoto(setId: setId, image: image)
+    func addPhoto(setId: UUID, imageData: Data) async throws -> SetMedia {
+        let media = try await repository.savePhoto(setId: setId, imageData: imageData)
         NotificationCenter.default.post(name: .setMediaChanged, object: setId)
         return media
     }

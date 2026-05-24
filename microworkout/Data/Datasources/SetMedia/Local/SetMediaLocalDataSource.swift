@@ -18,14 +18,14 @@ class SetMediaLocalDataSource: SetMediaDataSourceProtocol {
         self.fileManager = fileManager
     }
 
-    func savePhoto(setId: UUID, image: UIImage) async throws -> SetMedia {
+    func savePhoto(setId: UUID, imageData: Data) async throws -> SetMedia {
         let mediaId = UUID()
         let filename = "\(mediaId.uuidString).jpg"
         let folder = try ensureFolder(for: setId)
         let destination = folder.appendingPathComponent(filename)
 
         try await Task.detached(priority: .userInitiated) {
-            try Self.writeCompressedJPEG(image: image, to: destination)
+            try Self.writeCompressedJPEG(imageData: imageData, to: destination)
         }.value
 
         let media = SetMedia(
@@ -163,11 +163,11 @@ class SetMediaLocalDataSource: SetMediaDataSourceProtocol {
         storage.save(all, forKey: Keys.manifest.rawValue)
     }
 
-    fileprivate static func writeCompressedJPEG(image: UIImage, to destination: URL) throws {
+    fileprivate static func writeCompressedJPEG(imageData: Data, to destination: URL) throws {
         let maxPixel: CGFloat = 2048
         let quality: CGFloat = 0.8
 
-        guard let cgImage = image.cgImage else {
+        guard let image = UIImage(data: imageData), let cgImage = image.cgImage else {
             throw NSError(domain: "SetMedia", code: -1, userInfo: [NSLocalizedDescriptionKey: "Imagen inválida"])
         }
         let width = CGFloat(cgImage.width)
