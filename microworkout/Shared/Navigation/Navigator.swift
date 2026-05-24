@@ -33,7 +33,7 @@ class Navigator: NavigatorProtocol {
     }
 
     // MARK: - Init
-    static var shared = Navigator()
+    static let shared = Navigator()
     private init() {}
 
     // MARK: - Methods

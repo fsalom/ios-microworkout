@@ -13,4 +13,16 @@ protocol MealRepositoryProtocol {
     func deleteMeal(_ mealId: UUID) async throws
     func fetchFoodInfo(barcode: String) async throws -> FoodItem?
     func searchFoods(query: String) async throws -> [FoodItem]
+
+    // MARK: Favorites
+    func getFavorites() -> [FoodItem]
+    func saveFavorites(_ favorites: [FoodItem])
+
+    // MARK: My meals (recipes)
+    func getMyMeals() -> [MyMeal]
+    func saveMyMeals(_ meals: [MyMeal])
+
+    // MARK: Custom foods (offline fallback for unknown barcodes)
+    func getCustomFoods() -> [String: FoodItem]
+    func saveCustomFoods(_ foods: [String: FoodItem])
 }

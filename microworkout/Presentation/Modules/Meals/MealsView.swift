@@ -788,7 +788,7 @@ private struct NutrientItem: View {
 struct MealsView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationStack {
-            MealsBuilder(component: DefaultAppComponent()).build()
+            MealsBuilder(component: DefaultAppComponent.preview).build()
         }
     }
 }

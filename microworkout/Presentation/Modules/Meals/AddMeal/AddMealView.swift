@@ -1411,6 +1411,6 @@ private struct ManualEntrySection: View {
 
 #Preview {
     NavigationStack {
-        AddMealBuilder(component: DefaultAppComponent()).build()
+        AddMealBuilder(component: DefaultAppComponent.preview).build()
     }
 }

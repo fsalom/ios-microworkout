@@ -7,12 +7,12 @@ enum ErrorHealth: Error {
 
 class HealthUseCase: HealthUseCaseProtocol {
     private var repository: HealthRepositoryProtocol
-    private var linkingDataSource: WorkoutLinkDataSourceProtocol
+    private var linkRepository: WorkoutLinkRepositoryProtocol
 
     init(repository: HealthRepositoryProtocol,
-         linkingDataSource: WorkoutLinkDataSourceProtocol) {
+         linkRepository: WorkoutLinkRepositoryProtocol) {
         self.repository = repository
-        self.linkingDataSource = linkingDataSource
+        self.linkRepository = linkRepository
     }
 
     var isHealthDataAvailable: Bool {
@@ -67,8 +67,8 @@ class HealthUseCase: HealthUseCaseProtocol {
     func getRecentWorkouts() async throws -> [HealthWorkout] {
         _ = try await requestAuthorization()
         var workouts = try await repository.fetchWorkouts()
-        let trainingLinks = linkingDataSource.getAll()
-        let entryLinks = linkingDataSource.getAllEntryLinks()
+        let trainingLinks = linkRepository.getAllTrainingLinks()
+        let entryLinks = linkRepository.getAllEntryLinks()
         for i in workouts.indices {
             workouts[i].linkedTrainingID = trainingLinks[workouts[i].id]
             workouts[i].linkedEntryDate = entryLinks[workouts[i].id]
@@ -77,19 +77,19 @@ class HealthUseCase: HealthUseCaseProtocol {
     }
 
     func linkWorkout(_ workoutID: String, to trainingID: UUID) {
-        linkingDataSource.saveLink(workoutID: workoutID, trainingID: trainingID)
+        linkRepository.saveTrainingLink(workoutID: workoutID, trainingID: trainingID)
     }
 
     func unlinkWorkout(_ workoutID: String) {
-        linkingDataSource.removeLink(workoutID: workoutID)
+        linkRepository.removeTrainingLink(workoutID: workoutID)
     }
 
     func linkWorkout(_ workoutID: String, toEntryDate entryDate: String) {
-        linkingDataSource.saveEntryLink(workoutID: workoutID, entryDate: entryDate)
+        linkRepository.saveEntryLink(workoutID: workoutID, entryDate: entryDate)
     }
 
     func unlinkEntryFromWorkout(_ workoutID: String) {
-        linkingDataSource.removeEntryLink(workoutID: workoutID)
+        linkRepository.removeEntryLink(workoutID: workoutID)
     }
 
     private func fetchExerciseTime(startDate: Date, endDate: Date) async throws -> [Date : Double] {

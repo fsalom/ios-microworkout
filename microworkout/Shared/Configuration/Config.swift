@@ -1,7 +1,7 @@
 import Foundation
 
 class Config: ConfigTripleA {
-    static var shared = Config()
+    static let shared = Config()
 
     static let baseURL = "http://localhost:8002/"
     static let scheme = "microworkout"

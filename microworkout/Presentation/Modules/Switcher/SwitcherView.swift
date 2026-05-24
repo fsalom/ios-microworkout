@@ -47,5 +47,5 @@ struct SwitcherView: View {
 }
 
 #Preview {
-    SwitcherView(component: DefaultAppComponent())
+    SwitcherView(component: DefaultAppComponent.preview)
 }

@@ -8,14 +8,9 @@ import Foundation
 /// Implementación de los casos de uso para gestionar comidas.
 class MealUseCase: MealUseCaseProtocol {
     private let repository: MealRepositoryProtocol
-    private let userDefaults: UserDefaultsManagerProtocol
-    private let favoritesKey = "favoriteFoods"
-    private let myMealsKey = "myMeals"
-    private let customFoodsKey = "customFoodsByBarcode"
 
-    init(repository: MealRepositoryProtocol, userDefaults: UserDefaultsManagerProtocol) {
+    init(repository: MealRepositoryProtocol) {
         self.repository = repository
-        self.userDefaults = userDefaults
     }
 
     func saveMeal(_ meal: Meal) async throws {
@@ -103,7 +98,7 @@ class MealUseCase: MealUseCaseProtocol {
     }
 
     func getFavorites() -> [FoodItem] {
-        userDefaults.get(forKey: favoritesKey) ?? []
+        repository.getFavorites()
     }
 
     func isFavorite(_ food: FoodItem) -> Bool {
@@ -112,7 +107,7 @@ class MealUseCase: MealUseCaseProtocol {
     }
 
     func toggleFavorite(_ food: FoodItem) {
-        var favorites = getFavorites()
+        var favorites = repository.getFavorites()
         let key = favoriteKey(for: food)
         if let index = favorites.firstIndex(where: { favoriteKey(for: $0) == key }) {
             favorites.remove(at: index)
@@ -123,45 +118,43 @@ class MealUseCase: MealUseCaseProtocol {
             copy.quantity = 100
             favorites.insert(copy, at: 0)
         }
-        userDefaults.save(favorites, forKey: favoritesKey)
+        repository.saveFavorites(favorites)
     }
 
     // MARK: - My meals
 
     func getMyMeals() -> [MyMeal] {
-        let meals: [MyMeal] = userDefaults.get(forKey: myMealsKey) ?? []
-        return meals.sorted { $0.createdAt > $1.createdAt }
+        repository.getMyMeals().sorted { $0.createdAt > $1.createdAt }
     }
 
     func saveMyMeal(_ myMeal: MyMeal) {
-        var meals = getMyMeals()
+        var meals = repository.getMyMeals()
         if let index = meals.firstIndex(where: { $0.id == myMeal.id }) {
             meals[index] = myMeal
         } else {
             meals.insert(myMeal, at: 0)
         }
-        userDefaults.save(meals, forKey: myMealsKey)
+        repository.saveMyMeals(meals)
     }
 
     func deleteMyMeal(id: UUID) {
-        var meals = getMyMeals()
+        var meals = repository.getMyMeals()
         meals.removeAll { $0.id == id }
-        userDefaults.save(meals, forKey: myMealsKey)
+        repository.saveMyMeals(meals)
     }
 
     // MARK: - Custom foods (offline fallback)
 
     func saveCustomFood(_ food: FoodItem) {
         guard let barcode = food.barcode, !barcode.isEmpty else { return }
-        var dict: [String: FoodItem] = userDefaults.get(forKey: customFoodsKey) ?? [:]
+        var dict = repository.getCustomFoods()
         var copy = food
         copy.quantity = 100
         dict[barcode] = copy
-        userDefaults.save(dict, forKey: customFoodsKey)
+        repository.saveCustomFoods(dict)
     }
 
     func getCustomFood(barcode: String) -> FoodItem? {
-        let dict: [String: FoodItem] = userDefaults.get(forKey: customFoodsKey) ?? [:]
-        return dict[barcode]
+        repository.getCustomFoods()[barcode]
     }
 }

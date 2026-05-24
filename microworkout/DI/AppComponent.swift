@@ -14,3 +14,7 @@ struct DefaultAppComponent: AppComponentProtocol {
         return HealthKitManager()
     }
 }
+
+extension DefaultAppComponent {
+    static let preview = DefaultAppComponent()
+}

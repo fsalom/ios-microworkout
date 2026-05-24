@@ -12,8 +12,8 @@ class HealthContainer {
         let healthManager = component.makeHealthKitManager()
         let healthDataSource = HealthKitDataSource(healthKitManager: healthManager)
         let healthRepository = HealthRepository(dataSource: healthDataSource)
-        // Pasamos el UserDefaultsManager desde el componente al data source.
-        let linkingDataSource = WorkoutLinkLocalDataSource(userDefaults: component.makeUserDefaultsManager())
-        return HealthUseCase(repository: healthRepository, linkingDataSource: linkingDataSource)
+        let linkDataSource = WorkoutLinkLocalDataSource(userDefaults: component.makeUserDefaultsManager())
+        let linkRepository = WorkoutLinkRepository(dataSource: linkDataSource)
+        return HealthUseCase(repository: healthRepository, linkRepository: linkRepository)
     }
 }

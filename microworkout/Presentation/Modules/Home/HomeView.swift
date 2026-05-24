@@ -338,35 +338,6 @@ struct HomeView: View {
             .padding(0)
         }
     }
-
-    @ViewBuilder
-    func ListLastTrainings() -> some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            LazyHStack(spacing: 16) {
-                Text("+")
-                    .font(.largeTitle)
-                    .frame(width: 100, height: 100)
-                    .background(Color.gray.opacity(0.2))
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                    .onTapGesture {
-                        viewModel.goToTrainings()
-                    }
-                ForEach(viewModel.uiState.trainings, id: \.id) { training in
-                    Image(training.image)
-                        .resizable()
-                        .scaledToFill()
-                        .frame(width: 100, height: 100)
-                        .clipped()
-                        .matchedGeometryEffect(id: training.image, in: animation, isSource: !showDetail)
-                        .mask(RoundedRectangle(cornerRadius: 20.0))
-                        .onTapGesture {
-                            viewModel.goToStart(this: training)
-                        }
-                }
-            }
-            .padding()
-        }
-    }
 }
 
 // MARK: - Burned Calories Card
@@ -494,6 +465,6 @@ private struct MacrosHeightKey: PreferenceKey {
 
 struct HomeView_Previews: PreviewProvider {
     static var previews: some View {
-        HomeBuilder(component: DefaultAppComponent()).build(appState: AppState())
+        HomeBuilder(component: DefaultAppComponent.preview).build(appState: AppState())
     }
 }

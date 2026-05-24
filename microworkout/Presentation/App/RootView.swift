@@ -40,5 +40,5 @@ struct RootView: View {
 
 
 #Preview {
-    RootView(root: EmptyView(), component: DefaultAppComponent())
+    RootView(root: EmptyView(), component: DefaultAppComponent.preview)
 }

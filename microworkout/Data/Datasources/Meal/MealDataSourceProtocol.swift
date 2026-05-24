@@ -21,4 +21,16 @@ public protocol MealDataSourceProtocol {
 
     /// Elimina una comida por su identificador.
     func deleteMeal(_ mealId: UUID) async throws
+
+    // MARK: Favorites
+    func getFavorites() -> [FoodItem]
+    func saveFavorites(_ favorites: [FoodItem])
+
+    // MARK: My meals (recipes)
+    func getMyMeals() -> [MyMeal]
+    func saveMyMeals(_ meals: [MyMeal])
+
+    // MARK: Custom foods (offline fallback for unknown barcodes)
+    func getCustomFoods() -> [String: FoodItem]
+    func saveCustomFoods(_ foods: [String: FoodItem])
 }

@@ -42,6 +42,36 @@ class MealRepository: MealRepositoryProtocol {
         let products = try await remoteApi.searchProducts(query: query, page: 1, pageSize: 25)
         return products.map { $0.toDomain() }
     }
+
+    // MARK: Favorites
+
+    func getFavorites() -> [FoodItem] {
+        localDataSource.getFavorites()
+    }
+
+    func saveFavorites(_ favorites: [FoodItem]) {
+        localDataSource.saveFavorites(favorites)
+    }
+
+    // MARK: My meals
+
+    func getMyMeals() -> [MyMeal] {
+        localDataSource.getMyMeals()
+    }
+
+    func saveMyMeals(_ meals: [MyMeal]) {
+        localDataSource.saveMyMeals(meals)
+    }
+
+    // MARK: Custom foods
+
+    func getCustomFoods() -> [String: FoodItem] {
+        localDataSource.getCustomFoods()
+    }
+
+    func saveCustomFoods(_ foods: [String: FoodItem]) {
+        localDataSource.saveCustomFoods(foods)
+    }
 }
 
 fileprivate extension OpenFoodFactsProductDTO {

@@ -192,5 +192,5 @@ private struct ExerciseEntryRow: View {
 }
 
 #Preview {
-    LoggedExercisesBuilder(component: DefaultAppComponent()).build(for: WorkoutEntryByDay(date: "", entries: [], durationInSeconds: 0))
+    LoggedExercisesBuilder(component: DefaultAppComponent.preview).build(for: WorkoutEntryByDay(date: "", entries: [], durationInSeconds: 0))
 }

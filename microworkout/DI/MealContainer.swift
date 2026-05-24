@@ -16,13 +16,12 @@ class MealContainer {
     }
 
     func makeUseCase() -> MealUseCase {
-        let storage = component.makeUserDefaultsManager()
-        let localDataSource = MealLocalDataSource(storage: storage)
+        let localDataSource = MealLocalDataSource(storage: component.makeUserDefaultsManager())
         let remoteApi = OpenFoodFactsApi()
         let repository = MealRepository(
             localDataSource: localDataSource,
             remoteApi: remoteApi
         )
-        return MealUseCase(repository: repository, userDefaults: storage)
+        return MealUseCase(repository: repository)
     }
 }

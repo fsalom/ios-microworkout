@@ -286,5 +286,5 @@ extension CurrentSessionView {
 }
 
 #Preview {
-    CurrentSessionBuilder(component: DefaultAppComponent()).build()
+    CurrentSessionBuilder(component: DefaultAppComponent.preview).build()
 }
