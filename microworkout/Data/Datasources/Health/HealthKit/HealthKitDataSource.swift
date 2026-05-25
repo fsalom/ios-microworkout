@@ -6,7 +6,6 @@ enum HealthKitError: Error {
 }
 
 class HealthKitDataSource: HealthKitDataSourceProtocol {
-    
     var healthKitManager: HealthKitManagerProtocol
 
     init(healthKitManager: HealthKitManagerProtocol) {
@@ -26,112 +25,41 @@ class HealthKitDataSource: HealthKitDataSourceProtocol {
     }
 
     func requestAuthorization() async throws -> Bool {
-        return try await withCheckedThrowingContinuation { continuation in
-            self.healthKitManager.requestAuthorization { success, error in
-                if let error = error {
-                    continuation.resume(throwing: error)
-                } else {
-                    continuation.resume(returning: success)
-                }
-            }
-        }
+        try await healthKitManager.requestAuthorization()
     }
 
     func fetchStepsCountToday() async throws -> Double? {
-        return try await withCheckedThrowingContinuation { continuation in
-            self.healthKitManager.fetchStepCount { steps, error in
-                if let error = error {
-                    continuation.resume(throwing: error)
-                } else {
-                    continuation.resume(returning: steps)
-                }
-            }
-        }
+        try await healthKitManager.fetchStepCount()
     }
 
-    func fetchStepsCount(startDate: Date, endDate: Date) async throws -> [Date : Double]? {
-        return try await withCheckedThrowingContinuation { continuation in
-            self.healthKitManager.fetchStepCount(startDate: startDate, endDate: endDate) { steps, error in
-                if let error = error {
-                    continuation.resume(throwing: error)
-                } else {
-                    continuation.resume(returning: steps)
-                }
-            }
-        }
+    func fetchStepsCount(startDate: Date, endDate: Date) async throws -> [Date: Double]? {
+        try await healthKitManager.fetchStepCount(startDate: startDate, endDate: endDate)
     }
 
     func fetchStandingTime() async throws -> Double? {
-        return try await withCheckedThrowingContinuation { continuation in
-            self.healthKitManager.fetchStandingTime { minutes, error in
-                if let error = error {
-                    continuation.resume(throwing: error)
-                } else {
-                    continuation.resume(returning: minutes)
-                }
-            }
-        }
+        try await healthKitManager.fetchStandingTime()
     }
 
-    func fetchStandingTime(startDate: Date, endDate: Date) async throws -> [Date : Double]? {
-        return try await withCheckedThrowingContinuation { continuation in
-            self.healthKitManager.fetchStandingTime(startDate: startDate, endDate: endDate) { result, error in
-                if let error = error {
-                    continuation.resume(throwing: error)
-                } else {
-                    continuation.resume(returning: result)
-                }
-            }
-        }
+    func fetchStandingTime(startDate: Date, endDate: Date) async throws -> [Date: Double]? {
+        try await healthKitManager.fetchStandingTime(startDate: startDate, endDate: endDate)
     }
 
     func fetchExerciseTimeToday() async throws -> Double? {
-        return try await withCheckedThrowingContinuation { continuation in
-            self.healthKitManager.fetchExerciseTimeToday { steps, error in
-                if let error = error {
-                    continuation.resume(throwing: error)
-                } else {
-                    continuation.resume(returning: steps)
-                }
-            }
-        }
+        try await healthKitManager.fetchExerciseTimeToday()
     }
 
-    func fetchExerciseTime(startDate: Date, endDate: Date) async throws -> [Date : Double]? {
-        return try await withCheckedThrowingContinuation { continuation in
-            self.healthKitManager.fetchExerciseTime(startDate: startDate, endDate: endDate) { result, error in
-                if let error = error {
-                    continuation.resume(throwing: error)
-                } else {
-                    continuation.resume(returning: result)
-                }
-            }
-        }
+    func fetchExerciseTime(startDate: Date, endDate: Date) async throws -> [Date: Double]? {
+        try await healthKitManager.fetchExerciseTime(startDate: startDate, endDate: endDate)
     }
 
     func fetchWorkouts() async throws -> [HealthWorkout] {
-        let hkWorkouts: [HKWorkout] = try await withCheckedThrowingContinuation { continuation in
-            self.healthKitManager.fetchWorkouts { workouts, error in
-                if let error = error {
-                    continuation.resume(throwing: error)
-                } else {
-                    continuation.resume(returning: workouts ?? [])
-                }
-            }
-        }
-
+        let hkWorkouts = try await healthKitManager.fetchWorkouts()
         var results: [HealthWorkout] = []
         for hkWorkout in hkWorkouts {
-            let avgHR: Double? = await withCheckedContinuation { continuation in
-                self.healthKitManager.fetchAverageHeartRate(for: hkWorkout) { hr in
-                    continuation.resume(returning: hr)
-                }
-            }
-
+            let avgHR = await healthKitManager.fetchAverageHeartRate(for: hkWorkout)
             let calories = hkWorkout.totalEnergyBurned?.doubleValue(for: .kilocalorie())
             let distance = hkWorkout.totalDistance?.doubleValue(for: .meter())
-
-            let workout = HealthWorkout(
+            results.append(HealthWorkout(
                 id: hkWorkout.uuid.uuidString,
                 activityTypeName: Self.activityName(for: hkWorkout.workoutActivityType),
                 startDate: hkWorkout.startDate,
@@ -140,8 +68,7 @@ class HealthKitDataSource: HealthKitDataSourceProtocol {
                 totalCalories: calories,
                 totalDistance: distance,
                 averageHeartRate: avgHR
-            )
-            results.append(workout)
+            ))
         }
         return results
     }

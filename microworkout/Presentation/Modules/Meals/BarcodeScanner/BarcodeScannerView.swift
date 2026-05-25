@@ -7,7 +7,7 @@ import SwiftUI
 import AVFoundation
 
 struct BarcodeScannerView: View {
-    @ObservedObject var viewModel: BarcodeScannerViewModel
+    @StateObject var viewModel: BarcodeScannerViewModel
     @Environment(\.dismiss) private var dismiss
 
     private var isCameraActive: Bool {

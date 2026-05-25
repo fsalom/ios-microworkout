@@ -2,7 +2,7 @@ import SwiftUI
 
 
 struct TrainingDetailView: View {
-    @ObservedObject var viewModel: TrainingDetailViewModel
+    @StateObject var viewModel: TrainingDetailViewModel
 
     var body: some View {
         VStack {

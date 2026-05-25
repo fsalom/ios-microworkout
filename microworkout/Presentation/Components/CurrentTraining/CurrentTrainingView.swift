@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct CurrentTrainingView: View {
-    @ObservedObject var viewModel: CurrentTrainingViewModel
+    @StateObject var viewModel: CurrentTrainingViewModel
     @State private var isPressed = false
 
     var body: some View {

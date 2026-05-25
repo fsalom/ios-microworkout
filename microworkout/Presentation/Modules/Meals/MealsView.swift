@@ -6,7 +6,7 @@
 import SwiftUI
 
 struct MealsView: View {
-    @ObservedObject var viewModel: MealsViewModel
+    @StateObject var viewModel: MealsViewModel
     let component: AppComponentProtocol
     @Environment(\.scenePhase) private var scenePhase
     @State private var addMealSheet: AddMealSheetData?

@@ -2,7 +2,7 @@ import SwiftUI
 
 
 struct TrainingListV2View: View {
-    @ObservedObject var viewModel: TrainingListV2ViewModel
+    @StateObject var viewModel: TrainingListV2ViewModel
     @Namespace var animation
     @State var selectedTraining: Training?
     @State var showDetail: Bool = false

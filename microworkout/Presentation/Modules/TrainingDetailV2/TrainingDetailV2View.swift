@@ -5,7 +5,7 @@ struct TrainingDetailV2View: View {
     @State private var numberOfSetsForSlider: Double = 1
     @State private var numberOfRepsForSlider: Double = 1
     @State private var numberOfMinutesPerSetForSlider: Double = 10
-    @ObservedObject var viewModel: TrainingDetailV2ViewModel
+    @StateObject var viewModel: TrainingDetailV2ViewModel
 
     var body: some View {
         VStack{

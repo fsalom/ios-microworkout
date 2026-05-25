@@ -6,7 +6,7 @@
 import SwiftUI
 
 struct AddMealView: View {
-    @ObservedObject var viewModel: AddMealViewModel
+    @StateObject var viewModel: AddMealViewModel
     let component: AppComponentProtocol
     @Environment(\.dismiss) private var dismiss
     @State private var pendingFood: FoodItem?

@@ -2,7 +2,7 @@ import SwiftUI
 
 
 struct TrackingDayView: View {
-    @ObservedObject var viewModel: TrackingDayViewModel
+    @StateObject var viewModel: TrackingDayViewModel
 
     var body: some View {
         ScrollView {

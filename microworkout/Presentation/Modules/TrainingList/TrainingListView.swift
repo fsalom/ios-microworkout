@@ -2,7 +2,7 @@ import SwiftUI
 
 
 struct TrainingListView: View {
-    @ObservedObject var viewModel: TrainingListViewModel
+    @StateObject var viewModel: TrainingListViewModel
     @Namespace var animation
     @State var selectedTraining = Training.mock()
     @State var showDetail: Bool = false

@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct HealthWorkoutDetailView: View {
-    @ObservedObject var viewModel: HealthWorkoutDetailViewModel
+    @StateObject var viewModel: HealthWorkoutDetailViewModel
 
     var body: some View {
         ScrollView {

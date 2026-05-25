@@ -1,12 +1,12 @@
 import SwiftUI
 
 struct LoggedExercisesView: View {
-    @ObservedObject var viewModel: LoggedExercisesViewModel
+    @StateObject var viewModel: LoggedExercisesViewModel
     let linkedWatch: HealthWorkout?
     @Environment(\.scenePhase) private var scenePhase
 
     init(viewModel: LoggedExercisesViewModel, linkedWatch: HealthWorkout? = nil) {
-        self.viewModel = viewModel
+        _viewModel = StateObject(wrappedValue: viewModel)
         self.linkedWatch = linkedWatch
     }
 
