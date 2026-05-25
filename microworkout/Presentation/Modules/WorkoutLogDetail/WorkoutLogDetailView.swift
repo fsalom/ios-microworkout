@@ -65,7 +65,7 @@ struct WorkoutLogDetailView: View {
             viewModel.reloadFromStorage()
         }
         .fullScreenCover(item: mediaSheetBinding) { setId in
-            DirectMediaViewer(
+            AsyncSetMediaViewer(
                 setId: setId.id,
                 useCase: viewModel.mediaUseCase,
                 onCompare: { sourceSetId in
@@ -86,72 +86,6 @@ struct WorkoutLogDetailView: View {
 
 private struct IdentifiableUUID: Identifiable, Hashable {
     let id: UUID
-}
-
-private struct DirectMediaViewer: View {
-    let setId: UUID
-    let useCase: SetMediaUseCase
-    var onCompare: ((UUID) -> Void)? = nil
-
-    @Environment(\.dismiss) private var dismiss
-    @State private var media: [SetMedia]?
-
-    var body: some View {
-        ZStack {
-            Color.black.ignoresSafeArea()
-
-            if let media {
-                if media.isEmpty {
-                    VStack(spacing: 16) {
-                        Text("Sin multimedia")
-                            .foregroundColor(.white)
-                        Button("Cerrar") { dismiss() }
-                            .foregroundColor(.white)
-                    }
-                } else {
-                    SetMediaViewer(
-                        media: media,
-                        initialIndex: 0,
-                        useCase: useCase,
-                        onDelete: { item in
-                            Task {
-                                try? await useCase.delete(item.id)
-                                self.media = (try? await useCase.getMedia(forSetId: setId)) ?? []
-                            }
-                        },
-                        onCompare: onCompare
-                    )
-                }
-            } else {
-                VStack(spacing: 10) {
-                    ProgressView()
-                        .progressViewStyle(.circular)
-                        .controlSize(.large)
-                        .tint(.white)
-                    Text("Abriendo…")
-                        .font(.subheadline)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.white)
-                }
-            }
-        }
-        .task {
-            do {
-                let loaded = try await useCase.getMedia(forSetId: setId)
-                media = loaded
-                // Kick off preload of the first video as soon as we know what it is,
-                // in parallel with the cover's presentation animation (~400ms head start).
-                if let firstVideo = loaded.first(where: { $0.type == .video }) {
-                    let url = useCase.fileURL(for: firstVideo)
-                    Task.detached(priority: .userInitiated) {
-                        _ = await VideoPreloader.shared.preload(url)
-                    }
-                }
-            } catch {
-                media = []
-            }
-        }
-    }
 }
 
 private struct Header: View {

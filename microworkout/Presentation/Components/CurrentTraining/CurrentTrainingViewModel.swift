@@ -48,7 +48,7 @@ class CurrentTrainingViewModel: ObservableObject {
     }
 
     func saveAndClose() {
-        DispatchQueue.main.async {
+        Task { @MainActor in
             self.useCase.finish(self.uiState.training)
             self.appState.changeScreen(to: .home)
         }

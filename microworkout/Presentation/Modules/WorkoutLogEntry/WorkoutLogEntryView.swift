@@ -17,7 +17,10 @@ struct WorkoutLogEntryView: View {
         .safeAreaInset(edge: .bottom) { finishBar }
         .onChange(of: viewModel.uiState.isFinished) { _, finished in
             if finished {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { dismiss() }
+                Task { @MainActor in
+                    try? await Task.sleep(for: .milliseconds(600))
+                    dismiss()
+                }
             }
         }
         .sheet(item: formBinding) { form in

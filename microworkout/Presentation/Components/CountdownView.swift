@@ -93,7 +93,8 @@ struct CountdownButtonView: View {
         withAnimation(.easeInOut(duration: 0.1)) {
             isPressed = true
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(200))
             withAnimation(.easeInOut(duration: 0.1)) {
                 isPressed = false
             }

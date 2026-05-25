@@ -24,7 +24,7 @@ final class TrainingDetailV2ViewModel: ObservableObject {
     }
 
     func startTraining() {
-        DispatchQueue.main.async {
+        Task { @MainActor in
             self.training.startedAt = Date()
             self.training.sets.append(Date())
             self.trainingUseCase.saveCurrent(self.training)

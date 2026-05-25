@@ -61,7 +61,7 @@ struct TrainingListView: View {
                         Color.clear
                             .onAppear {
                                 if let position = scrollPosition {
-                                    DispatchQueue.main.async {
+                                    Task { @MainActor in
                                         scrollView.scrollTo(position, anchor: .top) // Restaura la posición
                                     }
                                 }
@@ -170,7 +170,7 @@ struct TrainingListView: View {
                             .clipShape(RoundedRectangle(cornerRadius: 36))
                             .onAppear {
                                 if let position = scrollPosition {
-                                    DispatchQueue.main.async {
+                                    Task { @MainActor in
                                         scrollView.scrollTo(position, anchor: .center) // Restaurar la posición
                                     }
                                 }

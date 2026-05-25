@@ -19,14 +19,14 @@ final class MediaProcessingTracker: ObservableObject {
     @discardableResult
     func begin(_ kind: Kind) -> UUID {
         let id = UUID()
-        DispatchQueue.main.async { [weak self] in
+        Task { @MainActor [weak self] in
             self?.jobs.append(Job(id: id, kind: kind))
         }
         return id
     }
 
     func end(_ id: UUID) {
-        DispatchQueue.main.async { [weak self] in
+        Task { @MainActor [weak self] in
             self?.jobs.removeAll { $0.id == id }
         }
     }

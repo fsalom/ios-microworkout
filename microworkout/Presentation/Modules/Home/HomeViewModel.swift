@@ -83,7 +83,7 @@ final class HomeViewModel: ObservableObject {
     }
 
     func showHealthInfo(for day: HealthDay) {
-        DispatchQueue.main.async {
+        Task { @MainActor in
             self.uiState.healthInfoForToday = day
         }
     }

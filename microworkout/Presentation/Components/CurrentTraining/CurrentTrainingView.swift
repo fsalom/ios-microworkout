@@ -93,7 +93,8 @@ struct CurrentTrainingView: View {
         withAnimation(.easeOut(duration: 0.1)) {
             isPressed = true
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(100))
             withAnimation(.easeIn(duration: 0.2)) {
                 isPressed = false
             }

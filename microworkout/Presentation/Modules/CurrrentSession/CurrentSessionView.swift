@@ -44,7 +44,8 @@ struct CurrentSessionView: View {
                         }
                         .transition(.scale)
                         .onAppear {
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                            Task { @MainActor in
+                                try? await Task.sleep(for: .seconds(3))
                                 withAnimation(.easeInOut) {
                                     self.viewModel.isSaved = false
                                 }

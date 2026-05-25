@@ -23,7 +23,8 @@ struct SplashView: View {
                     .scaledToFill()
                     .edgesIgnoringSafeArea(.all)
             }.onAppear {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                Task { @MainActor in
+                    try? await Task.sleep(for: .milliseconds(500))
                     withAnimation {
                         self.isActive = true
                     }
