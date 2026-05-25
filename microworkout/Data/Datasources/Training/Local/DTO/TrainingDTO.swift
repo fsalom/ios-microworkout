@@ -4,7 +4,7 @@ struct TrainingDTO: Codable {
     var id: UUID = UUID()
     var name: String
     var image: String
-    var type: TrainingType
+    var type: String
     var startedAt: Date?
     var completedAt: Date?
     var sets: [Date] = []

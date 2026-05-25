@@ -325,6 +325,7 @@
 		DD8E479E5599E9CF372090D5 /* TrainingTypeMapping.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD17D91B373B226020FA794F /* TrainingTypeMapping.swift */; };
 		E0357EA401CA61E00E4E4D1A /* WorkoutLogDetailBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A330410BCF0B2F088BFFA656 /* WorkoutLogDetailBuilder.swift */; };
 		E474F0C826966D1B94E8549B /* SetMediaDataSourceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB58121B3B29EB8004CE2B72 /* SetMediaDataSourceProtocol.swift */; };
+		E52F84C1D3F16BE0F4FF4132 /* DomainError.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2FB1F83BE513D73EB667426 /* DomainError.swift */; };
 		E5D9FD9B4AB63F8EA0B0FE69 /* UserProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEBF521051C4F9BDB94D0722 /* UserProfile.swift */; };
 		E632A233CCE9C76F093D9A96 /* ExerciseProgressionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 789CC95AA76FCC7AAA9C24D5 /* ExerciseProgressionViewModel.swift */; };
 		E97A1ABFB82850A30E68EDE4 /* WorkoutLogEntryBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47BCA2CD54BA47E4C7AC211C /* WorkoutLogEntryBuilder.swift */; };
@@ -671,6 +672,7 @@
 		DB154B366C429047D8B30048 /* CoachUseCaseProtocol.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CoachUseCaseProtocol.swift; sourceTree = "<group>"; };
 		DD663E1AE589CE3351861FDF /* WorkoutSessionEditorViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WorkoutSessionEditorViewModel.swift; sourceTree = "<group>"; };
 		DF5A5E867986D4FB0E9CAC47 /* TabHeader.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TabHeader.swift; sourceTree = "<group>"; };
+		E2FB1F83BE513D73EB667426 /* DomainError.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DomainError.swift; sourceTree = "<group>"; };
 		E3E30BE1EBDF16DCA18C2A9E /* ExerciseProgressionView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ExerciseProgressionView.swift; sourceTree = "<group>"; };
 		E45C9CD76D7E44408DAEA442 /* WorkoutLogEntryViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WorkoutLogEntryViewModel.swift; sourceTree = "<group>"; };
 		E499C32FAEEB13FE93B99CEF /* ExerciseTabRouter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ExerciseTabRouter.swift; sourceTree = "<group>"; };
@@ -933,6 +935,15 @@
 				D1F49521E15A540E81A53E92 /* UserProfileUseCase.swift */,
 			);
 			path = User;
+			sourceTree = "<group>";
+		};
+		57E023BFC18BDB93D04C50AC /* Errors */ = {
+			isa = PBXGroup;
+			children = (
+				E2FB1F83BE513D73EB667426 /* DomainError.swift */,
+			);
+			name = Errors;
+			path = Errors;
 			sourceTree = "<group>";
 		};
 		5998B6165C8E6B6B56DB16D1 /* ExerciseProgression */ = {
@@ -1414,6 +1425,7 @@
 				C16D03EC2B18ADD10014F906 /* Repositories */,
 				C1742E432A2F31A50020354D /* UseCases */,
 				C1742E442A2F31B70020354D /* Entities */,
+				57E023BFC18BDB93D04C50AC /* Errors */,
 			);
 			path = Domain;
 			sourceTree = "<group>";
@@ -2673,6 +2685,7 @@
 				0484D8FB900F1B72C4BD2033 /* ExerciseTabBuilder.swift in Sources */,
 				209013287940125FF8E1E89E /* ExerciseTabRouter.swift in Sources */,
 				84CE518481BEC684B2CE0219 /* ExerciseTabViewModel.swift in Sources */,
+				E52F84C1D3F16BE0F4FF4132 /* DomainError.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

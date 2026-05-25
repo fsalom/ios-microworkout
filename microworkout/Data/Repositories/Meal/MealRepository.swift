@@ -32,15 +32,23 @@ class MealRepository: MealRepositoryProtocol {
     }
 
     func fetchFoodInfo(barcode: String) async throws -> FoodItem? {
-        guard let productDTO = try await remoteApi.fetchProduct(barcode: barcode) else {
-            return nil
+        do {
+            guard let productDTO = try await remoteApi.fetchProduct(barcode: barcode) else {
+                return nil
+            }
+            return productDTO.toDomain(barcode: barcode)
+        } catch {
+            throw DomainError.map(error)
         }
-        return productDTO.toDomain(barcode: barcode)
     }
 
     func searchFoods(query: String) async throws -> [FoodItem] {
-        let products = try await remoteApi.searchProducts(query: query, page: 1, pageSize: 25)
-        return products.map { $0.toDomain() }
+        do {
+            let products = try await remoteApi.searchProducts(query: query, page: 1, pageSize: 25)
+            return products.map { $0.toDomain() }
+        } catch {
+            throw DomainError.map(error)
+        }
     }
 
     // MARK: Favorites

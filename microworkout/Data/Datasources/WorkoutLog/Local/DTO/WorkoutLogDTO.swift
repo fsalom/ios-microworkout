@@ -14,7 +14,7 @@ struct LoggedExerciseDTO: Codable {
     var id: UUID
     var exerciseId: UUID
     var exerciseName: String
-    var exerciseType: ExerciseType
+    var exerciseType: String
     var sets: [LoggedSetDTO]
     var notes: String?
 }

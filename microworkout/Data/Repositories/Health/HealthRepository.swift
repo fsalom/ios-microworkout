@@ -16,34 +16,49 @@ class HealthRepository: HealthRepositoryProtocol {
     }
 
     func requestAuthorization() async throws -> Bool {
-        try await dataSource.requestAuthorization()
+        do { return try await dataSource.requestAuthorization() }
+        catch { throw mapHealthError(error) }
     }
 
     func fetchExerciseTimeToday() async throws -> Double? {
-        try await dataSource.fetchExerciseTimeToday()
+        do { return try await dataSource.fetchExerciseTimeToday() }
+        catch { throw mapHealthError(error) }
     }
 
     func fetchExerciseTime(startDate: Date, endDate: Date) async throws -> [Date : Double]? {
-        try await dataSource.fetchExerciseTime(startDate: startDate, endDate: endDate)
+        do { return try await dataSource.fetchExerciseTime(startDate: startDate, endDate: endDate) }
+        catch { throw mapHealthError(error) }
     }
-    
+
     func fetchStepsCountToday() async throws -> Double? {
-        try await dataSource.fetchStepsCountToday()
+        do { return try await dataSource.fetchStepsCountToday() }
+        catch { throw mapHealthError(error) }
     }
 
     func fetchStepsCount(startDate: Date, endDate: Date) async throws -> [Date : Double]? {
-        try await dataSource.fetchStepsCount(startDate: startDate, endDate: endDate)
+        do { return try await dataSource.fetchStepsCount(startDate: startDate, endDate: endDate) }
+        catch { throw mapHealthError(error) }
     }
 
     func fetchStandingTime() async throws -> Double? {
-        try await dataSource.fetchStandingTime()
+        do { return try await dataSource.fetchStandingTime() }
+        catch { throw mapHealthError(error) }
     }
 
     func fetchStandingTime(startDate: Date, endDate: Date) async throws -> [Date : Double]? {
-        try await dataSource.fetchStandingTime(startDate: startDate, endDate: endDate)
+        do { return try await dataSource.fetchStandingTime(startDate: startDate, endDate: endDate) }
+        catch { throw mapHealthError(error) }
     }
 
     func fetchWorkouts() async throws -> [HealthWorkout] {
-        try await dataSource.fetchWorkouts()
+        do { return try await dataSource.fetchWorkouts() }
+        catch { throw mapHealthError(error) }
+    }
+
+    private func mapHealthError(_ error: Error) -> DomainError {
+        if let hk = error as? HealthKitError, hk == .notAuthorized {
+            return .notAuthorized
+        }
+        return DomainError.map(error)
     }
 }

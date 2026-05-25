@@ -36,7 +36,7 @@ fileprivate extension WorkoutSessionDTO {
     func toDomain() -> WorkoutSession {
         let count = min(min(exerciseIds.count, exerciseNames.count), exerciseTypes.count)
         let exercises: [Exercise] = (0..<count).map { i in
-            Exercise(id: exerciseIds[i], name: exerciseNames[i], type: exerciseTypes[i])
+            Exercise(id: exerciseIds[i], name: exerciseNames[i], type: ExerciseType(rawValue: exerciseTypes[i]) ?? .none)
         }
         return WorkoutSession(
             id: id,
@@ -55,7 +55,7 @@ fileprivate extension WorkoutSession {
             name: name,
             exerciseIds: exercises.map { $0.id },
             exerciseNames: exercises.map { $0.name },
-            exerciseTypes: exercises.map { $0.type },
+            exerciseTypes: exercises.map { $0.type.rawValue },
             createdAt: createdAt,
             updatedAt: updatedAt
         )
@@ -94,7 +94,7 @@ fileprivate extension LoggedExerciseDTO {
     func toDomain() -> LoggedExercise {
         LoggedExercise(
             id: id,
-            exercise: Exercise(id: exerciseId, name: exerciseName, type: exerciseType),
+            exercise: Exercise(id: exerciseId, name: exerciseName, type: ExerciseType(rawValue: exerciseType) ?? .none),
             sets: sets.map { $0.toDomain() },
             notes: notes
         )
@@ -107,7 +107,7 @@ fileprivate extension LoggedExercise {
             id: id,
             exerciseId: exercise.id,
             exerciseName: exercise.name,
-            exerciseType: exercise.type,
+            exerciseType: exercise.type.rawValue,
             sets: sets.map { $0.toDTO() },
             notes: notes
         )

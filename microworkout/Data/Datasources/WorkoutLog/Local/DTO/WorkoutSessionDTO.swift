@@ -5,7 +5,7 @@ struct WorkoutSessionDTO: Codable {
     var name: String
     var exerciseIds: [UUID]
     var exerciseNames: [String]
-    var exerciseTypes: [ExerciseType]
+    var exerciseTypes: [String]
     var createdAt: Date
     var updatedAt: Date
 }
