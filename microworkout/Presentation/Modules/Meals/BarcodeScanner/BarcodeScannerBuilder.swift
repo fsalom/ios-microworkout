@@ -14,7 +14,7 @@ class BarcodeScannerBuilder {
 
     func build(onScanComplete: @escaping (FoodItem) -> Void) -> BarcodeScannerView {
         let viewModel = BarcodeScannerViewModel(
-            mealUseCase: MealContainer(component: component).makeUseCase(),
+            mealUseCase: component.mealUseCase,
             navigator: Navigator.shared,
             onScanComplete: onScanComplete
         )

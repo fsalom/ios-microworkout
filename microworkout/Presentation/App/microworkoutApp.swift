@@ -37,8 +37,7 @@ struct MicroWorkoutApp: App {
         let component = DefaultAppComponent()
         self.component = component
 
-        let initialScreen: AppState.Screen = UserProfileContainer(component: component)
-            .makeUseCase()
+        let initialScreen: AppState.Screen = component.userProfileUseCase
             .hasCompletedOnboarding() ? .home : .onboarding
         _appState = StateObject(wrappedValue: AppState(initialScreen: initialScreen))
         // Register mirroring handler early
@@ -57,7 +56,7 @@ struct MicroWorkoutApp: App {
                 }
                 .onAppear {
                     _ = PhoneConnectivityManager.shared
-                    let trainings = TrainingContainer(component: component).makeUseCase().getTrainings()
+                    let trainings = component.trainingUseCase.getTrainings()
                     PhoneConnectivityManager.shared.sendTrainings(trainings)
                     KeyboardPreWarm.warm()
                 }

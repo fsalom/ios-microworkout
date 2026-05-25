@@ -11,8 +11,8 @@ class WorkoutSessionEditorBuilder {
         let viewModel = WorkoutSessionEditorViewModel(
             session: session,
             isNew: isNew,
-            useCase: WorkoutLogContainer(component: component).makeUseCase(),
-            exerciseUseCase: ExerciseContainer(component: component).makeUseCase()
+            useCase: component.workoutLogUseCase,
+            exerciseUseCase: component.exerciseUseCase
         )
         return WorkoutSessionEditorView(viewModel: viewModel)
     }

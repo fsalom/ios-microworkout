@@ -8,12 +8,12 @@ class HomeBuilder {
     func build(appState: AppState) -> HomeView {
         let viewModel = HomeViewModel(
             router: HomeRouter(navigator: Navigator.shared, component: component),
-            trainingUseCase: TrainingContainer(component: component).makeUseCase(),
-            healthUseCase: HealthContainer(component: component).makeUseCase(),
-            workoutEntryUseCase: WorkoutEntryContainer(component: component).makeUseCase(),
-            mealUseCase: MealContainer(component: component).makeUseCase(),
-            userProfileUseCase: UserProfileContainer(component: component).makeUseCase(),
-            coachUseCase: CoachContainer(component: component).makeUseCase(),
+            trainingUseCase: component.trainingUseCase,
+            healthUseCase: component.healthUseCase,
+            workoutEntryUseCase: component.workoutEntryUseCase,
+            mealUseCase: component.mealUseCase,
+            userProfileUseCase: component.userProfileUseCase,
+            coachUseCase: component.coachUseCase,
             appState: appState)
         return HomeView(viewModel: viewModel)
     }

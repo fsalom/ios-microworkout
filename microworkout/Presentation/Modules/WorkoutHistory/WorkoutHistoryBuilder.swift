@@ -10,7 +10,7 @@ class WorkoutHistoryBuilder {
     func build() -> WorkoutHistoryView {
         let viewModel = WorkoutHistoryViewModel(
             router: WorkoutHistoryRouter(navigator: Navigator.shared, component: component),
-            useCase: WorkoutLogContainer(component: component).makeUseCase()
+            useCase: component.workoutLogUseCase
         )
         return WorkoutHistoryView(viewModel: viewModel)
     }

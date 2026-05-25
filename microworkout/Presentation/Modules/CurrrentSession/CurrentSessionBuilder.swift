@@ -7,10 +7,10 @@ class CurrentSessionBuilder {
 
     func build() -> CurrentSessionView {
         let viewModel = CurrentSessionViewModel(
-            exerciseUseCase: ExerciseContainer(component: component).makeUseCase(),
-            workoutEntryUseCase: WorkoutEntryContainer(component: component).makeUseCase(),
-            healthUseCase: HealthContainer(component: component).makeUseCase(),
-            trainingUseCase: TrainingContainer(component: component).makeUseCase()
+            exerciseUseCase: component.exerciseUseCase,
+            workoutEntryUseCase: component.workoutEntryUseCase,
+            healthUseCase: component.healthUseCase,
+            trainingUseCase: component.trainingUseCase
         )
         return CurrentSessionView(viewModel: viewModel)
     }

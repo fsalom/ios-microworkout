@@ -10,7 +10,7 @@ class WorkoutSessionListBuilder {
     func build() -> WorkoutSessionListView {
         let viewModel = WorkoutSessionListViewModel(
             router: WorkoutSessionListRouter(navigator: Navigator.shared, component: component),
-            useCase: WorkoutLogContainer(component: component).makeUseCase()
+            useCase: component.workoutLogUseCase
         )
         return WorkoutSessionListView(viewModel: viewModel)
     }

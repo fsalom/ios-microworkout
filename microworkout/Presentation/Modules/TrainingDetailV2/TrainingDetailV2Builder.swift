@@ -10,7 +10,7 @@ class TrainingDetailV2Builder {
     func build(this training: Training, and appState: AppState) -> TrainingDetailV2View {
         let router = TrainingDetailV2Router(navigator: Navigator.shared)
         let viewModel = TrainingDetailV2ViewModel(
-            trainingUseCase: TrainingContainer(component: component).makeUseCase(),
+            trainingUseCase: component.trainingUseCase,
             router: router,
             training: training,
             appState: appState)

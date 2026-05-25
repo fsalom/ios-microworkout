@@ -9,7 +9,7 @@ class AIChatBuilder {
 
     func build(initialPrompt: String? = nil) -> AIChatView {
         let viewModel = AIChatViewModel(
-            useCase: AIContextContainer(component: component).makeUseCase(),
+            useCase: component.aiContextUseCase,
             initialPrompt: initialPrompt
         )
         return AIChatView(viewModel: viewModel)

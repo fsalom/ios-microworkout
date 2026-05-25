@@ -10,10 +10,10 @@ class ExerciseTabBuilder {
     func build() -> ExerciseTabView {
         let viewModel = ExerciseTabViewModel(
             router: ExerciseTabRouter(navigator: Navigator.shared, component: component),
-            healthUseCase: HealthContainer(component: component).makeUseCase(),
-            workoutEntryUseCase: WorkoutEntryContainer(component: component).makeUseCase(),
-            workoutLogUseCase: WorkoutLogContainer(component: component).makeUseCase(),
-            coachUseCase: CoachContainer(component: component).makeUseCase()
+            healthUseCase: component.healthUseCase,
+            workoutEntryUseCase: component.workoutEntryUseCase,
+            workoutLogUseCase: component.workoutLogUseCase,
+            coachUseCase: component.coachUseCase
         )
         return ExerciseTabView(viewModel: viewModel)
     }

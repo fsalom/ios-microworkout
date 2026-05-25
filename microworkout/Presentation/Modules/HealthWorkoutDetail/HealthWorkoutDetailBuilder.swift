@@ -9,10 +9,10 @@ class HealthWorkoutDetailBuilder {
         let viewModel = HealthWorkoutDetailViewModel(
             workout: workout,
             router: HealthWorkoutDetailRouter(navigator: Navigator.shared, component: component),
-            healthUseCase: HealthContainer(component: component).makeUseCase(),
-            trainingUseCase: TrainingContainer(component: component).makeUseCase(),
-            workoutEntryUseCase: WorkoutEntryContainer(component: component).makeUseCase(),
-            workoutLogUseCase: WorkoutLogContainer(component: component).makeUseCase()
+            healthUseCase: component.healthUseCase,
+            trainingUseCase: component.trainingUseCase,
+            workoutEntryUseCase: component.workoutEntryUseCase,
+            workoutLogUseCase: component.workoutLogUseCase
         )
         return HealthWorkoutDetailView(viewModel: viewModel)
     }

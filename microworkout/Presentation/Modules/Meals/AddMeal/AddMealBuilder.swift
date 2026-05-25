@@ -15,7 +15,7 @@ class AddMealBuilder {
     func build(prefilledType: MealType? = nil) -> AddMealView {
         let viewModel = AddMealViewModel(
             router: AddMealRouter(navigator: Navigator.shared, component: component),
-            mealUseCase: MealContainer(component: component).makeUseCase()
+            mealUseCase: component.mealUseCase
         )
         if let prefilledType = prefilledType {
             viewModel.selectMealType(prefilledType)

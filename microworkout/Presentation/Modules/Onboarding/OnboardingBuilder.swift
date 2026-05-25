@@ -14,7 +14,7 @@ class OnboardingBuilder {
 
     func build(appState: AppState) -> OnboardingView {
         let viewModel = OnboardingViewModel(
-            userProfileUseCase: UserProfileContainer(component: component).makeUseCase(),
+            userProfileUseCase: component.userProfileUseCase,
             appState: appState
         )
         return OnboardingView(viewModel: viewModel)

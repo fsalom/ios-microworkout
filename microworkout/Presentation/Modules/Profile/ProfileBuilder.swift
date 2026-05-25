@@ -7,8 +7,8 @@ class ProfileBuilder {
 
     func build() -> ProfileView {
         let viewModel = ProfileViewModel(
-            userProfileUseCase: UserProfileContainer(component: component).makeUseCase(),
-            healthUseCase: HealthContainer(component: component).makeUseCase()
+            userProfileUseCase: component.userProfileUseCase,
+            healthUseCase: component.healthUseCase
         )
         return ProfileView(viewModel: viewModel, component: component)
     }
