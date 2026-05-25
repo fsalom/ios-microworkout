@@ -9,12 +9,12 @@ struct CurrentSessionView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                (viewModel.startTime != nil ? Color.blue : Color(.systemGroupedBackground))
+                (viewModel.uiState.startTime != nil ? Color.blue : Color(.systemGroupedBackground))
                     .ignoresSafeArea()
 
                 VStack {
-                    if let start = viewModel.startTime {
-                        let totalSeconds = Int(viewModel.now.timeIntervalSince(start))
+                    if let start = viewModel.uiState.startTime {
+                        let totalSeconds = Int(viewModel.uiState.now.timeIntervalSince(start))
                         let hours = totalSeconds / 3600
                         let minutes = (totalSeconds % 3600) / 60
                         let seconds = totalSeconds % 60
@@ -29,7 +29,7 @@ struct CurrentSessionView: View {
                         liveWorkoutBanner
                     }
 
-                    if viewModel.isSaved {
+                    if viewModel.uiState.isSaved {
                         Spacer()
                         CenteredSquareOverlay(size: 180) {
                             VStack {
@@ -47,7 +47,7 @@ struct CurrentSessionView: View {
                             Task { @MainActor in
                                 try? await Task.sleep(for: .seconds(3))
                                 withAnimation(.easeInOut) {
-                                    self.viewModel.isSaved = false
+                                    self.viewModel.uiState.isSaved = false
                                 }
                             }
                         }
@@ -57,14 +57,14 @@ struct CurrentSessionView: View {
                         let grouped = viewModel.groupedByExercise()
                         let ordered = viewModel.orderedExercises()
 
-                        if !viewModel.workoutEntries.isEmpty {
+                        if !viewModel.uiState.workoutEntries.isEmpty {
                             List {
                                 ForEach(ordered, id: \.self) { exercise in
                                     Section(header:
                                                 HStack {
                                         Text(exercise.name)
                                             .font(.headline)
-                                            .foregroundColor(viewModel.startTime != nil ? .white : .primary)
+                                            .foregroundColor(viewModel.uiState.startTime != nil ? .white : .primary)
                                         Spacer()
                                         Button(action: {
                                             viewModel.action(for: grouped, and: exercise)
@@ -72,9 +72,9 @@ struct CurrentSessionView: View {
                                             Image(systemName: "plus.circle.fill")
                                                 .resizable()
                                                 .frame(width: 24, height: 24)
-                                                .foregroundColor(viewModel.startTime != nil ? .blue : Color(.gray))
+                                                .foregroundColor(viewModel.uiState.startTime != nil ? .blue : Color(.gray))
                                                 .padding(5)
-                                                .background(Circle().fill(viewModel.startTime != nil ? Color(.systemGray5) : .white))
+                                                .background(Circle().fill(viewModel.uiState.startTime != nil ? Color(.systemGray5) : .white))
                                         }
                                         .buttonStyle(.plain)
                                     }
@@ -99,7 +99,7 @@ struct CurrentSessionView: View {
                                                 .buttonStyle(.plain)
                                             }
                                             .onTapGesture {
-                                                viewModel.activeForm = .edit(e)
+                                                viewModel.uiState.activeForm = .edit(e)
                                             }
                                         }
                                         .onDelete { indexSet in
@@ -114,10 +114,10 @@ struct CurrentSessionView: View {
                             VStack {
                                 Image(systemName: "arrow.up")
                                     .font(.largeTitle)
-                                    .foregroundColor(viewModel.startTime != nil ? .white : .primary)
+                                    .foregroundColor(viewModel.uiState.startTime != nil ? .white : .primary)
                                 Text("Busca ejecicios para tu rutina...")
                                     .font(.caption)
-                                    .foregroundColor(viewModel.startTime != nil ? .white : .primary)
+                                    .foregroundColor(viewModel.uiState.startTime != nil ? .white : .primary)
                             }
                             .padding(16)
                         }
@@ -125,7 +125,7 @@ struct CurrentSessionView: View {
 
                     Spacer()
 
-                    if viewModel.isRunning {
+                    if viewModel.uiState.isRunning {
                         SliderView(
                             message: "Desliza para finalizar",
                             backgroundColor: .white,
@@ -144,31 +144,31 @@ struct CurrentSessionView: View {
                     }
                 }
                 .padding(16)
-                .searchable(text: $viewModel.searchText, placement: .navigationBarDrawer(displayMode: .always))
+                .searchable(text: $viewModel.uiState.searchText, placement: .navigationBarDrawer(displayMode: .always))
                 .focused($isSearchFocused)
                 .onReceive(timer) { date in
                     viewModel.updateNow(to: date)
                 }
 
-                if !viewModel.searchText.isEmpty && viewModel.activeForm == nil {
+                if !viewModel.uiState.searchText.isEmpty && viewModel.uiState.activeForm == nil {
                     Color(.systemBackground).ignoresSafeArea()
-                    if viewModel.exercises.count == 0 {
+                    if viewModel.uiState.exercises.count == 0 {
                         List {
                             Button {
-                                viewModel.addExercise(with: viewModel.searchText)
+                                viewModel.addExercise(with: viewModel.uiState.searchText)
                             } label: {
                                 HStack {
                                     Image(systemName: "plus.circle.fill")
-                                    Text("Añadir \"\(viewModel.searchText)\" como nuevo ejercicio")
+                                    Text("Añadir \"\(viewModel.uiState.searchText)\" como nuevo ejercicio")
                                         .fontWeight(.medium)
                                 }
                             }
                         }
                     } else {
-                        List(viewModel.exercises) { exercise in
+                        List(viewModel.uiState.exercises) { exercise in
                             Button {
-                                viewModel.activeForm = .new(exercise)
-                                viewModel.searchText = ""
+                                viewModel.uiState.activeForm = .new(exercise)
+                                viewModel.uiState.searchText = ""
                                 isSearchFocused = false
                             } label: {
                                 Text(exercise.name)
@@ -178,7 +178,7 @@ struct CurrentSessionView: View {
                     }
                 }
             }
-            .sheet(item: $viewModel.activeForm) { form in
+            .sheet(item: $viewModel.uiState.activeForm) { form in
                 switch form {
                 case .new(let exercise):
                     let defaultEntry = viewModel.getWorkoutEntry(for: exercise)
@@ -204,7 +204,7 @@ struct CurrentSessionView: View {
                     .presentationDragIndicator(.visible)
                 }
             }
-            .sheet(item: $viewModel.suggestedAWWorkout) { workout in
+            .sheet(item: $viewModel.uiState.suggestedAWWorkout) { workout in
                 LinkSuggestionSheet(
                     workout: workout,
                     trainings: viewModel.getAvailableTrainings(),

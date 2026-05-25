@@ -1,20 +1,19 @@
-//
-//  OnboardingViewModel.swift
-//  microworkout
-//
-
 import Foundation
-import SwiftUI
+import Combine
+
+struct OnboardingUiState {
+    var currentStep: Int = 0
+    var name: String = ""
+    var weight: Double = 70
+    var height: Double = 170
+    var age: Int = 30
+    var gender: UserProfile.Gender = .male
+    var activityLevel: UserProfile.ActivityLevel = .moderate
+    var fitnessGoal: UserProfile.FitnessGoal = .maintain
+}
 
 final class OnboardingViewModel: ObservableObject {
-    @Published var currentStep: Int = 0
-    @Published var name: String = ""
-    @Published var weight: Double = 70
-    @Published var height: Double = 170
-    @Published var age: Int = 30
-    @Published var gender: UserProfile.Gender = .male
-    @Published var activityLevel: UserProfile.ActivityLevel = .moderate
-    @Published var fitnessGoal: UserProfile.FitnessGoal = .maintain
+    @Published var uiState = OnboardingUiState()
 
     private let userProfileUseCase: UserProfileUseCaseProtocol
     private let appState: AppState
@@ -27,30 +26,26 @@ final class OnboardingViewModel: ObservableObject {
     }
 
     func nextStep() {
-        if currentStep < totalSteps - 1 {
-            withAnimation {
-                currentStep += 1
-            }
+        if uiState.currentStep < totalSteps - 1 {
+            uiState.currentStep += 1
         }
     }
 
     func previousStep() {
-        if currentStep > 0 {
-            withAnimation {
-                currentStep -= 1
-            }
+        if uiState.currentStep > 0 {
+            uiState.currentStep -= 1
         }
     }
 
     func finish() {
         let profile = UserProfile(
-            name: name.isEmpty ? "Usuario" : name,
-            height: height,
-            weight: weight,
-            age: age,
-            gender: gender,
-            activityLevel: activityLevel,
-            fitnessGoal: fitnessGoal
+            name: uiState.name.isEmpty ? "Usuario" : uiState.name,
+            height: uiState.height,
+            weight: uiState.weight,
+            age: uiState.age,
+            gender: uiState.gender,
+            activityLevel: uiState.activityLevel,
+            fitnessGoal: uiState.fitnessGoal
         )
         userProfileUseCase.saveProfile(profile)
         userProfileUseCase.setOnboardingCompleted(true)

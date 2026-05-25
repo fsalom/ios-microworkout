@@ -6,7 +6,7 @@
 import SwiftUI
 
 struct OnboardingView: View {
-    @ObservedObject var viewModel: OnboardingViewModel
+    @StateObject var viewModel: OnboardingViewModel
 
     var body: some View {
         VStack(spacing: 0) {
@@ -14,7 +14,7 @@ struct OnboardingView: View {
             HStack(spacing: 8) {
                 ForEach(0..<viewModel.totalSteps, id: \.self) { step in
                     Capsule()
-                        .fill(step <= viewModel.currentStep ? Color.blue : Color.gray.opacity(0.3))
+                        .fill(step <= viewModel.uiState.currentStep ? Color.blue : Color.gray.opacity(0.3))
                         .frame(height: 4)
                 }
             }
@@ -33,7 +33,7 @@ struct OnboardingView: View {
             }
 
             // Content
-            TabView(selection: $viewModel.currentStep) {
+            TabView(selection: $viewModel.uiState.currentStep.animation()) {
                 WelcomeStep(viewModel: viewModel)
                     .tag(0)
                 PhysicalDataStep(viewModel: viewModel)
@@ -44,12 +44,12 @@ struct OnboardingView: View {
                     .tag(3)
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
-            .animation(.easeInOut, value: viewModel.currentStep)
+            .animation(.easeInOut, value: viewModel.uiState.currentStep)
 
             // Navigation buttons
             HStack(spacing: 16) {
-                if viewModel.currentStep > 0 {
-                    Button(action: { viewModel.previousStep() }) {
+                if viewModel.uiState.currentStep > 0 {
+                    Button(action: { withAnimation { viewModel.previousStep() } }) {
                         Text("Anterior")
                             .frame(maxWidth: .infinity)
                             .padding()
@@ -60,13 +60,13 @@ struct OnboardingView: View {
                 }
 
                 Button(action: {
-                    if viewModel.currentStep == viewModel.totalSteps - 1 {
+                    if viewModel.uiState.currentStep == viewModel.totalSteps - 1 {
                         viewModel.finish()
                     } else {
-                        viewModel.nextStep()
+                        withAnimation { viewModel.nextStep() }
                     }
                 }) {
-                    Text(viewModel.currentStep == viewModel.totalSteps - 1 ? "Finalizar" : "Siguiente")
+                    Text(viewModel.uiState.currentStep == viewModel.totalSteps - 1 ? "Finalizar" : "Siguiente")
                         .frame(maxWidth: .infinity)
                         .padding()
                         .background(Color.blue)
@@ -84,7 +84,7 @@ struct OnboardingView: View {
 // MARK: - Step 1: Welcome + Name
 
 private struct WelcomeStep: View {
-    @ObservedObject var viewModel: OnboardingViewModel
+    @StateObject var viewModel: OnboardingViewModel
 
     var body: some View {
         VStack(spacing: 24) {
@@ -104,7 +104,7 @@ private struct WelcomeStep: View {
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 32)
 
-            TextField("Tu nombre", text: $viewModel.name)
+            TextField("Tu nombre", text: $viewModel.uiState.name)
                 .textFieldStyle(.roundedBorder)
                 .padding(.horizontal, 32)
 
@@ -116,7 +116,7 @@ private struct WelcomeStep: View {
 // MARK: - Step 2: Physical Data
 
 private struct PhysicalDataStep: View {
-    @ObservedObject var viewModel: OnboardingViewModel
+    @StateObject var viewModel: OnboardingViewModel
 
     var body: some View {
         ScrollView {
@@ -130,7 +130,7 @@ private struct PhysicalDataStep: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Sexo")
                         .font(.headline)
-                    Picker("Sexo", selection: $viewModel.gender) {
+                    Picker("Sexo", selection: $viewModel.uiState.gender) {
                         ForEach(UserProfile.Gender.allCases, id: \.self) { gender in
                             Text(gender.rawValue).tag(gender)
                         }
@@ -141,26 +141,26 @@ private struct PhysicalDataStep: View {
 
                 // Age
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Edad: \(viewModel.age) anos")
+                    Text("Edad: \(viewModel.uiState.age) anos")
                         .font(.headline)
-                    Stepper("", value: $viewModel.age, in: 10...100)
+                    Stepper("", value: $viewModel.uiState.age, in: 10...100)
                         .labelsHidden()
                 }
                 .padding(.horizontal, 32)
 
                 // Weight
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Peso: \(String(format: "%.1f", viewModel.weight)) kg")
+                    Text("Peso: \(String(format: "%.1f", viewModel.uiState.weight)) kg")
                         .font(.headline)
-                    Slider(value: $viewModel.weight, in: 30...200, step: 0.5)
+                    Slider(value: $viewModel.uiState.weight, in: 30...200, step: 0.5)
                 }
                 .padding(.horizontal, 32)
 
                 // Height
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Altura: \(String(format: "%.0f", viewModel.height)) cm")
+                    Text("Altura: \(String(format: "%.0f", viewModel.uiState.height)) cm")
                         .font(.headline)
-                    Slider(value: $viewModel.height, in: 100...220, step: 1)
+                    Slider(value: $viewModel.uiState.height, in: 100...220, step: 1)
                 }
                 .padding(.horizontal, 32)
             }
@@ -171,7 +171,7 @@ private struct PhysicalDataStep: View {
 // MARK: - Step 3: Fitness Goal
 
 private struct FitnessGoalStep: View {
-    @ObservedObject var viewModel: OnboardingViewModel
+    @StateObject var viewModel: OnboardingViewModel
 
     var body: some View {
         ScrollView {
@@ -191,9 +191,9 @@ private struct FitnessGoalStep: View {
                     ForEach(UserProfile.FitnessGoal.allCases, id: \.self) { goal in
                         FitnessGoalCard(
                             goal: goal,
-                            isSelected: viewModel.fitnessGoal == goal
+                            isSelected: viewModel.uiState.fitnessGoal == goal
                         ) {
-                            viewModel.fitnessGoal = goal
+                            viewModel.uiState.fitnessGoal = goal
                         }
                     }
                 }
@@ -259,7 +259,7 @@ private struct FitnessGoalCard: View {
 // MARK: - Step 4: Activity Level
 
 private struct ActivityLevelStep: View {
-    @ObservedObject var viewModel: OnboardingViewModel
+    @StateObject var viewModel: OnboardingViewModel
 
     var body: some View {
         ScrollView {
@@ -279,9 +279,9 @@ private struct ActivityLevelStep: View {
                     ForEach(UserProfile.ActivityLevel.allCases, id: \.self) { level in
                         ActivityLevelCard(
                             level: level,
-                            isSelected: viewModel.activityLevel == level
+                            isSelected: viewModel.uiState.activityLevel == level
                         ) {
-                            viewModel.activityLevel = level
+                            viewModel.uiState.activityLevel = level
                         }
                     }
                 }

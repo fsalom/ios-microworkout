@@ -8,13 +8,15 @@ class ExerciseProgressionBuilder {
         self.component = component
     }
 
-    func build(sourceSetId: UUID) -> ExerciseProgressionView {
+    func build(sourceSetId: UUID, navigator: NavigatorProtocol = Navigator.shared) -> ExerciseProgressionView {
         let progressionUseCase = ExerciseProgressionContainer(component: component).makeUseCase()
         let mediaUseCase = SetMediaContainer(component: component).makeUseCase()
+        let router = ExerciseProgressionRouter(navigator: navigator)
         let viewModel = ExerciseProgressionViewModel(
             sourceSetId: sourceSetId,
             progressionUseCase: progressionUseCase,
-            mediaUseCase: mediaUseCase
+            mediaUseCase: mediaUseCase,
+            router: router
         )
         return ExerciseProgressionView(viewModel: viewModel)
     }

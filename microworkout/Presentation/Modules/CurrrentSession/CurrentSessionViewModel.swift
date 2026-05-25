@@ -1,20 +1,20 @@
 import SwiftUI
 import Combine
 
+struct CurrentSessionUiState {
+    var searchText: String = ""
+    var workoutEntries: [WorkoutEntry] = []
+    var exercises: [Exercise] = []
+    var isRunning: Bool = false
+    var isSaved: Bool = false
+    var startTime: Date? = nil
+    var now: Date = Date()
+    var activeForm: CurrentSessionViewModel.ActiveExerciseForm?
+    var suggestedAWWorkout: HealthWorkout?
+}
+
 class CurrentSessionViewModel: ObservableObject {
-    @Published var searchText: String = "" {
-        didSet {
-            search(with: self.searchText)
-        }
-    }
-    @Published var workoutEntries: [WorkoutEntry] = []
-    @Published var exercises: [Exercise] = []
-    @Published var isRunning: Bool = false
-    @Published var isSaved: Bool = false
-    @Published var startTime: Date? = nil
-    @Published var now: Date = Date()
-    @Published var activeForm: ActiveExerciseForm?
-    @Published var suggestedAWWorkout: HealthWorkout?
+    @Published var uiState = CurrentSessionUiState()
 
     let mirrorManager = WorkoutMirrorManager.shared
 
@@ -22,7 +22,7 @@ class CurrentSessionViewModel: ObservableObject {
     private var workoutEntryUseCase: WorkoutEntryUseCaseProtocol
     private var healthUseCase: HealthUseCaseProtocol
     private var trainingUseCase: TrainingUseCaseProtocol
-    private var mirrorCancellable: AnyCancellable?
+    private var cancellables = Set<AnyCancellable>()
 
     init(exerciseUseCase: ExerciseUseCaseProtocol,
          workoutEntryUseCase: WorkoutEntryUseCaseProtocol,
@@ -32,9 +32,20 @@ class CurrentSessionViewModel: ObservableObject {
         self.workoutEntryUseCase = workoutEntryUseCase
         self.healthUseCase = healthUseCase
         self.trainingUseCase = trainingUseCase
-        mirrorCancellable = mirrorManager.objectWillChange
+
+        mirrorManager.objectWillChange
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in self?.objectWillChange.send() }
+            .store(in: &cancellables)
+
+        // searchText cambia → buscar ejercicios. Antes vivía como didSet del @Published;
+        // se mueve aquí para mantener el patrón uiState.
+        $uiState
+            .map(\.searchText)
+            .removeDuplicates()
+            .dropFirst()
+            .sink { [weak self] text in self?.search(with: text) }
+            .store(in: &cancellables)
     }
 
     enum ActiveExerciseForm: Identifiable {
@@ -52,17 +63,17 @@ class CurrentSessionViewModel: ObservableObject {
     func search(with text: String) {
         Task { @MainActor in
             do {
-                self.exercises = try await self.exerciseUseCase.getAll(contains: self.searchText)
+                self.uiState.exercises = try await self.exerciseUseCase.getAll(contains: text)
             } catch {
                 print("Failed to fetch exercises: \(error)")
-                self.exercises = []
+                self.uiState.exercises = []
             }
         }
     }
 
     func startSession() {
-        startTime = Date()
-        isRunning = true
+        uiState.startTime = Date()
+        uiState.isRunning = true
     }
 
     func secondsBetween(_ start: Date, _ end: Date) -> Int {
@@ -70,7 +81,7 @@ class CurrentSessionViewModel: ObservableObject {
     }
 
     func stopSession() {
-        let sessionStart = startTime
+        let sessionStart = uiState.startTime
         Task { @MainActor in
             if let sessionStart = sessionStart {
                 let sessionEnd = Date()
@@ -80,44 +91,44 @@ class CurrentSessionViewModel: ObservableObject {
                         workout.startDate < sessionEnd &&
                         workout.endDate > sessionStart
                     }
-                    suggestedAWWorkout = overlapping
+                    uiState.suggestedAWWorkout = overlapping
                 }
             }
-            startTime = nil
-            workoutEntries.removeAll()
-            isSaved = true
-            isRunning = false
+            uiState.startTime = nil
+            uiState.workoutEntries.removeAll()
+            uiState.isSaved = true
+            uiState.isRunning = false
         }
     }
 
     func updateNow(to date: Date) {
-        now = date
+        uiState.now = date
     }
 
     func addExercise(with name: String) {
         Task { @MainActor in
             let exercise = try await self.exerciseUseCase.create(with: name)
-            searchText = ""
-            activeForm = .new(exercise)
+            uiState.searchText = ""
+            uiState.activeForm = .new(exercise)
         }
     }
 
     func addWorkoutEntry(_ new: WorkoutEntry) {
         Task { @MainActor in
             try await workoutEntryUseCase.add(new)
-            workoutEntries = reorder(workoutEntries + [new])
-            activeForm = nil
+            uiState.workoutEntries = reorder(uiState.workoutEntries + [new])
+            uiState.activeForm = nil
         }
     }
 
     func updateWorkoutEntry(_ updated: WorkoutEntry) {
         Task { @MainActor in
             try await workoutEntryUseCase.update(updated)
-            if let idx = workoutEntries.firstIndex(where: { $0.id == updated.id }) {
-                workoutEntries[idx] = updated
+            if let idx = uiState.workoutEntries.firstIndex(where: { $0.id == updated.id }) {
+                uiState.workoutEntries[idx] = updated
             }
-            workoutEntries = reorder(workoutEntries)
-            activeForm = nil
+            uiState.workoutEntries = reorder(uiState.workoutEntries)
+            uiState.activeForm = nil
         }
     }
 
@@ -125,7 +136,7 @@ class CurrentSessionViewModel: ObservableObject {
         Task { @MainActor in
             for id in ids {
                 try await workoutEntryUseCase.delete(entryID: id)
-                workoutEntries.removeAll { $0.id == id }
+                uiState.workoutEntries.removeAll { $0.id == id }
             }
         }
     }
@@ -135,34 +146,33 @@ class CurrentSessionViewModel: ObservableObject {
     }
 
     func getWorkoutEntry(for exercise: Exercise) -> WorkoutEntry {
-        guard let last = workoutEntries.last(where: { $0.exercise == exercise }) else {
+        guard let last = uiState.workoutEntries.last(where: { $0.exercise == exercise }) else {
             return createWorkoutEntry(from: .init(exercise: exercise, reps: nil, weight: nil))
         }
         return createWorkoutEntry(from: last)
     }
 
     func toggleCompletion(for entryId: UUID) {
-        if let index = workoutEntries.firstIndex(where: { $0.id == entryId }) {
-            workoutEntries[index].isCompleted.toggle()
+        if let index = uiState.workoutEntries.firstIndex(where: { $0.id == entryId }) {
+            uiState.workoutEntries[index].isCompleted.toggle()
         }
     }
 
     func groupedByExercise() -> [Exercise: [WorkoutEntry]] {
-        workoutEntryUseCase.groupByExercise(these: workoutEntries)
+        workoutEntryUseCase.groupByExercise(these: uiState.workoutEntries)
     }
 
     func orderedExercises() -> [Exercise] {
-        workoutEntryUseCase.order(these: workoutEntries)
+        workoutEntryUseCase.order(these: uiState.workoutEntries)
     }
-
 
     func action(for grouped: [Exercise: [WorkoutEntry]], and exercise: Exercise) {
         if let last = grouped[exercise]?.last {
             let new = createWorkoutEntry(from: last)
-            activeForm = .new(new.exercise)
+            uiState.activeForm = .new(new.exercise)
         } else {
             let new = WorkoutEntry(exercise: exercise, reps: 0, weight: 0)
-            activeForm = .edit(new)
+            uiState.activeForm = .edit(new)
         }
     }
 
@@ -176,10 +186,10 @@ class CurrentSessionViewModel: ObservableObject {
 
     func linkAWWorkout(_ workout: HealthWorkout, to training: Training) {
         healthUseCase.linkWorkout(workout.id, to: training.id)
-        suggestedAWWorkout = nil
+        uiState.suggestedAWWorkout = nil
     }
 
     func dismissAWSuggestion() {
-        suggestedAWWorkout = nil
+        uiState.suggestedAWWorkout = nil
     }
 }

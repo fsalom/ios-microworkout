@@ -27,15 +27,22 @@ final class ExerciseProgressionViewModel: ObservableObject {
     let mediaUseCase: SetMediaUseCase
     private let progressionUseCase: ExerciseProgressionUseCaseProtocol
     private let sourceSetId: UUID
+    private let router: ExerciseProgressionRouter
 
     init(
         sourceSetId: UUID,
         progressionUseCase: ExerciseProgressionUseCaseProtocol,
-        mediaUseCase: SetMediaUseCase
+        mediaUseCase: SetMediaUseCase,
+        router: ExerciseProgressionRouter
     ) {
         self.sourceSetId = sourceSetId
         self.progressionUseCase = progressionUseCase
         self.mediaUseCase = mediaUseCase
+        self.router = router
+    }
+
+    func close() {
+        router.goBack()
     }
 
     func load() async {
