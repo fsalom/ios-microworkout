@@ -1,36 +1,27 @@
-//
-//  MealDataSourceProtocol.swift
-//  microworkout
-//
-
 import Foundation
 
-/// Protocolo para acceder a la fuente de datos local de comidas.
-public protocol MealDataSourceProtocol {
-    /// Guarda una comida.
-    func saveMeal(_ meal: Meal) async throws
-
-    /// Recupera todas las comidas.
-    func getAllMeals() async throws -> [Meal]
-
-    /// Recupera las comidas de una fecha específica.
-    func getMeals(for date: Date) async throws -> [Meal]
-
-    /// Recupera las comidas en un rango de fechas.
-    func getMeals(from startDate: Date, to endDate: Date) async throws -> [Meal]
-
-    /// Elimina una comida por su identificador.
+/// Protocolo de la fuente de datos local de comidas.
+///
+/// Opera con DTOs (`MealDTO`, `FoodItemDTO`, `MyMealDTO`) en lugar de entidades
+/// de Domain. Esto desacopla el formato on-disk de cualquier rename o cambio
+/// estructural en las entidades — la conversión Entity↔DTO la hace el repo.
+protocol MealDataSourceProtocol {
+    // MARK: Meals
+    func saveMeal(_ meal: MealDTO) async throws
+    func getAllMeals() async throws -> [MealDTO]
+    func getMeals(for date: Date) async throws -> [MealDTO]
+    func getMeals(from startDate: Date, to endDate: Date) async throws -> [MealDTO]
     func deleteMeal(_ mealId: UUID) async throws
 
     // MARK: Favorites
-    func getFavorites() -> [FoodItem]
-    func saveFavorites(_ favorites: [FoodItem])
+    func getFavorites() -> [FoodItemDTO]
+    func saveFavorites(_ favorites: [FoodItemDTO])
 
     // MARK: My meals (recipes)
-    func getMyMeals() -> [MyMeal]
-    func saveMyMeals(_ meals: [MyMeal])
+    func getMyMeals() -> [MyMealDTO]
+    func saveMyMeals(_ meals: [MyMealDTO])
 
     // MARK: Custom foods (offline fallback for unknown barcodes)
-    func getCustomFoods() -> [String: FoodItem]
-    func saveCustomFoods(_ foods: [String: FoodItem])
+    func getCustomFoods() -> [String: FoodItemDTO]
+    func saveCustomFoods(_ foods: [String: FoodItemDTO])
 }

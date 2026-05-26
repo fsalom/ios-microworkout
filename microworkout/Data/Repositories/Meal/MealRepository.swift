@@ -1,11 +1,8 @@
-//
-//  MealRepository.swift
-//  microworkout
-//
-
 import Foundation
 
-/// Implementación del repositorio de comidas.
+/// Convierte Domain ↔ DTO en la frontera con el datasource local. La capa
+/// Domain nunca ve el formato on-disk; cualquier cambio de naming en las
+/// entidades es absorbido aquí sin tocar datos persistidos.
 class MealRepository: MealRepositoryProtocol {
     private let localDataSource: MealDataSourceProtocol
     private let remoteApi: OpenFoodFactsApiProtocol
@@ -15,21 +12,25 @@ class MealRepository: MealRepositoryProtocol {
         self.remoteApi = remoteApi
     }
 
+    // MARK: Meals
+
     func saveMeal(_ meal: Meal) async throws {
-        try await localDataSource.saveMeal(meal)
+        try await localDataSource.saveMeal(meal.toDTO())
     }
 
     func getMeals(for date: Date) async throws -> [Meal] {
-        try await localDataSource.getMeals(for: date)
+        try await localDataSource.getMeals(for: date).map { $0.toDomain() }
     }
 
     func getMeals(from startDate: Date, to endDate: Date) async throws -> [Meal] {
-        try await localDataSource.getMeals(from: startDate, to: endDate)
+        try await localDataSource.getMeals(from: startDate, to: endDate).map { $0.toDomain() }
     }
 
     func deleteMeal(_ mealId: UUID) async throws {
         try await localDataSource.deleteMeal(mealId)
     }
+
+    // MARK: Remote (OpenFoodFacts)
 
     func fetchFoodInfo(barcode: String) async throws -> FoodItem? {
         do {
@@ -54,36 +55,35 @@ class MealRepository: MealRepositoryProtocol {
     // MARK: Favorites
 
     func getFavorites() -> [FoodItem] {
-        localDataSource.getFavorites()
+        localDataSource.getFavorites().map { $0.toDomain() }
     }
 
     func saveFavorites(_ favorites: [FoodItem]) {
-        localDataSource.saveFavorites(favorites)
+        localDataSource.saveFavorites(favorites.map { $0.toDTO() })
     }
 
     // MARK: My meals
 
     func getMyMeals() -> [MyMeal] {
-        localDataSource.getMyMeals()
+        localDataSource.getMyMeals().map { $0.toDomain() }
     }
 
     func saveMyMeals(_ meals: [MyMeal]) {
-        localDataSource.saveMyMeals(meals)
+        localDataSource.saveMyMeals(meals.map { $0.toDTO() })
     }
 
     // MARK: Custom foods
 
     func getCustomFoods() -> [String: FoodItem] {
-        localDataSource.getCustomFoods()
+        localDataSource.getCustomFoods().mapValues { $0.toDomain() }
     }
 
     func saveCustomFoods(_ foods: [String: FoodItem]) {
-        localDataSource.saveCustomFoods(foods)
+        localDataSource.saveCustomFoods(foods.mapValues { $0.toDTO() })
     }
 }
 
 fileprivate extension OpenFoodFactsProductDTO {
-    /// Convierte el DTO a entidad de dominio FoodItem.
     func toDomain(barcode: String? = nil) -> FoodItem {
         FoodItem(
             id: UUID(),
