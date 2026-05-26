@@ -35,7 +35,7 @@ class ProfileViewModel: ObservableObject {
 
     init(userProfileUseCase: UserProfileUseCaseProtocol,
          healthUseCase: HealthUseCaseProtocol,
-         authService: AuthServiceProtocol = AuthService()) {
+         authService: AuthServiceProtocol) {
         self.userProfileUseCase = userProfileUseCase
         self.healthUseCase = healthUseCase
         self.authService = authService
