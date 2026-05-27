@@ -4,6 +4,9 @@ import ImageIO
 import UIKit
 import UniformTypeIdentifiers
 
+/// Persistencia de SetMedia en disco + manifest en UserDefaults. Opera con DTOs
+/// (`SetMediaDTO`) en lugar de la entidad de Domain — el `SetMediaRepository`
+/// convierte en su frontera.
 class SetMediaLocalDataSource: SetMediaDataSourceProtocol {
     private let storage: UserDefaultsManagerProtocol
     private let fileManager: FileManager
@@ -18,7 +21,7 @@ class SetMediaLocalDataSource: SetMediaDataSourceProtocol {
         self.fileManager = fileManager
     }
 
-    func savePhoto(setId: UUID, imageData: Data) async throws -> SetMedia {
+    func savePhoto(setId: UUID, imageData: Data) async throws -> SetMediaDTO {
         let mediaId = UUID()
         let filename = "\(mediaId.uuidString).jpg"
         let folder = try ensureFolder(for: setId)
@@ -28,18 +31,20 @@ class SetMediaLocalDataSource: SetMediaDataSourceProtocol {
             try Self.writeCompressedJPEG(imageData: imageData, to: destination)
         }.value
 
-        let media = SetMedia(
+        let media = SetMediaDTO(
             id: mediaId,
             setId: setId,
-            type: .photo,
+            type: SetMediaType.photo.rawValue,
             filename: filename,
-            createdAt: Date()
+            createdAt: Date(),
+            durationSeconds: nil,
+            thumbnailFilename: nil
         )
         appendToManifest(media)
         return media
     }
 
-    func saveVideo(setId: UUID, sourceURL: URL) async throws -> SetMedia {
+    func saveVideo(setId: UUID, sourceURL: URL) async throws -> SetMediaDTO {
         let mediaId = UUID()
         let filename = "\(mediaId.uuidString).mp4"
         let folder = try ensureFolder(for: setId)
@@ -65,10 +70,10 @@ class SetMediaLocalDataSource: SetMediaDataSourceProtocol {
             return (seconds?.isFinite == true ? seconds : nil, hasThumb)
         }.value
 
-        let media = SetMedia(
+        let media = SetMediaDTO(
             id: mediaId,
             setId: setId,
-            type: .video,
+            type: SetMediaType.video.rawValue,
             filename: filename,
             createdAt: Date(),
             durationSeconds: result.duration,
@@ -106,16 +111,16 @@ class SetMediaLocalDataSource: SetMediaDataSourceProtocol {
         }
     }
 
-    func getMedia(forSetId setId: UUID) async throws -> [SetMedia] {
-        let all: [SetMedia] = storage.get(forKey: Keys.manifest.rawValue) ?? []
+    func getMedia(forSetId setId: UUID) async throws -> [SetMediaDTO] {
+        let all: [SetMediaDTO] = storage.get(forKey: Keys.manifest.rawValue) ?? []
         return all
             .filter { $0.setId == setId }
             .sorted { $0.createdAt < $1.createdAt }
     }
 
     @discardableResult
-    func delete(_ mediaId: UUID) async throws -> SetMedia? {
-        var all: [SetMedia] = storage.get(forKey: Keys.manifest.rawValue) ?? []
+    func delete(_ mediaId: UUID) async throws -> SetMediaDTO? {
+        var all: [SetMediaDTO] = storage.get(forKey: Keys.manifest.rawValue) ?? []
         guard let media = all.first(where: { $0.id == mediaId }) else { return nil }
         let folder = folderURL(for: media.setId)
         let fileURL = folder.appendingPathComponent(media.filename)
@@ -128,11 +133,11 @@ class SetMediaLocalDataSource: SetMediaDataSourceProtocol {
         return media
     }
 
-    func fileURL(for media: SetMedia) -> URL {
+    func fileURL(for media: SetMediaDTO) -> URL {
         folderURL(for: media.setId).appendingPathComponent(media.filename)
     }
 
-    func thumbnailURL(for media: SetMedia) -> URL? {
+    func thumbnailURL(for media: SetMediaDTO) -> URL? {
         guard let thumbnail = media.thumbnailFilename else { return nil }
         return folderURL(for: media.setId).appendingPathComponent(thumbnail)
     }
@@ -157,8 +162,8 @@ class SetMediaLocalDataSource: SetMediaDataSourceProtocol {
         return folder
     }
 
-    private func appendToManifest(_ media: SetMedia) {
-        var all: [SetMedia] = storage.get(forKey: Keys.manifest.rawValue) ?? []
+    private func appendToManifest(_ media: SetMediaDTO) {
+        var all: [SetMediaDTO] = storage.get(forKey: Keys.manifest.rawValue) ?? []
         all.append(media)
         storage.save(all, forKey: Keys.manifest.rawValue)
     }
