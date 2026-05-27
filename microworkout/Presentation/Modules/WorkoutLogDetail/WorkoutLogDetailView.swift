@@ -291,7 +291,7 @@ private struct ExerciseSummaryCard: View {
                                         .font(.system(size: 15, weight: .semibold, design: .rounded))
                                         .foregroundColor(.primary)
                                         .monospacedDigit()
-                                    DetailMediaIndicator(media: setMedia)
+                                    DetailMediaIndicator(media: setMedia, accentColor: ExerciseSummaryCard.highlightColor)
                                 }
                                 .frame(width: 44, alignment: .leading)
                                 Text(set.weight.map { format($0) } ?? "—")
@@ -476,49 +476,3 @@ private struct SessionDateSelector: View {
     }
 }
 
-struct SetTagBadge: View {
-    let tag: SetTag
-
-    var body: some View {
-        HStack(spacing: 3) {
-            Image(systemName: tag.symbol)
-                .font(.system(size: 9, weight: .bold))
-            Text(tag.shortLabel)
-                .font(.system(size: 11, weight: .semibold))
-        }
-        .foregroundColor(tag.color)
-        .padding(.horizontal, 7)
-        .padding(.vertical, 3)
-        .background(Capsule().fill(tag.color.opacity(0.18)))
-        .overlay(Capsule().strokeBorder(tag.color.opacity(0.5), lineWidth: 0.8))
-    }
-}
-
-struct DetailMediaIndicator: View {
-    let media: [SetMedia]
-
-    var body: some View {
-        if media.isEmpty {
-            Color.clear.frame(height: 18)
-        } else {
-            HStack(spacing: 3) {
-                let hasVideo = media.contains { $0.type == .video }
-                ZStack {
-                    RoundedRectangle(cornerRadius: 4, style: .continuous)
-                        .fill(ExerciseSummaryCard.highlightColor)
-                        .frame(width: 16, height: 16)
-                    Image(systemName: hasVideo ? "play.fill" : "photo.fill")
-                        .font(.system(size: 8, weight: .black))
-                        .foregroundColor(.white)
-                }
-                if media.count > 1 {
-                    Text("\(media.count)")
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundColor(ExerciseSummaryCard.highlightColor)
-                        .monospacedDigit()
-                }
-            }
-            .frame(height: 18)
-        }
-    }
-}
