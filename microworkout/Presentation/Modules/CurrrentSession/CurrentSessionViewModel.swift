@@ -5,6 +5,7 @@ struct CurrentSessionUiState {
     var searchText: String = ""
     var workoutEntries: [WorkoutEntry] = []
     var exercises: [Exercise] = []
+    var availableTrainings: [Training] = []
     var isRunning: Bool = false
     var isSaved: Bool = false
     var startTime: Date? = nil
@@ -46,6 +47,11 @@ class CurrentSessionViewModel: ObservableObject {
             .dropFirst()
             .sink { [weak self] text in self?.search(with: text) }
             .store(in: &cancellables)
+
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            self.uiState.availableTrainings = (try? await self.trainingUseCase.getTrainings()) ?? []
+        }
     }
 
     enum ActiveExerciseForm: Identifiable {
@@ -181,7 +187,7 @@ class CurrentSessionViewModel: ObservableObject {
     }
 
     func getAvailableTrainings() -> [Training] {
-        trainingUseCase.getTrainings()
+        uiState.availableTrainings
     }
 
     func linkAWWorkout(_ workout: HealthWorkout, to training: Training) {

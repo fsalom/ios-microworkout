@@ -28,7 +28,7 @@ enum AppearancePreference: String, CaseIterable, Identifiable {
 struct MicroWorkoutApp: App {
     @StateObject var appState: AppState
     @StateObject var mirrorManager = WorkoutMirrorManager.shared
-    @StateObject var authSession = AuthSession.shared
+    @StateObject var authSession: AuthSession
     @AppStorage("appearance_preference") private var appearanceRaw: String = AppearancePreference.system.rawValue
     private let component: AppComponentProtocol
 
@@ -40,6 +40,7 @@ struct MicroWorkoutApp: App {
         let initialScreen: AppState.Screen = component.userProfileUseCase
             .hasCompletedOnboarding() ? .home : .onboarding
         _appState = StateObject(wrappedValue: AppState(initialScreen: initialScreen))
+        _authSession = StateObject(wrappedValue: component.authSession)
         // Register mirroring handler early
         _ = WorkoutMirrorManager.shared
     }
@@ -56,8 +57,11 @@ struct MicroWorkoutApp: App {
                 }
                 .onAppear {
                     _ = PhoneConnectivityManager.shared
-                    let trainings = component.trainingUseCase.getTrainings()
-                    PhoneConnectivityManager.shared.sendTrainings(trainings)
+                    Task {
+                        if let trainings = try? await component.trainingUseCase.getTrainings() {
+                            PhoneConnectivityManager.shared.sendTrainings(trainings)
+                        }
+                    }
                     KeyboardPreWarm.warm()
                 }
         }

@@ -13,20 +13,25 @@ class CurrentTrainingViewModel: ObservableObject {
     init(appState: AppState, useCase: TrainingUseCaseProtocol) {
         self.appState = appState
         self.useCase = useCase
-        if let training = self.useCase.getCurrent() {
-            self.uiState.training = training
-        } else {
-            assertionFailure("No current training available")
-            self.uiState.training = Training.mock()
-        }
+        self.uiState.training = Training.mock()
         self.uiState.training.startedAt = Date()
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            if let training = try? await self.useCase.getCurrent() {
+                self.uiState.training = training
+                self.uiState.training.startedAt = Date()
+            } else {
+                assertionFailure("No current training available")
+            }
+        }
     }
 
     func incrementSet() {
         self.uiState.training.sets.append(Date())
         self.uiState.hasToResetTimer = true
         self.uiState.training.calculateNumberOfSeconds()
-        self.useCase.saveCurrent(self.uiState.training)
+        let snapshot = self.uiState.training
+        Task { try? await self.useCase.saveCurrent(snapshot) }
     }
 
     func getTotalReps() -> Int {
@@ -49,7 +54,7 @@ class CurrentTrainingViewModel: ObservableObject {
 
     func saveAndClose() {
         Task { @MainActor in
-            self.useCase.finish(self.uiState.training)
+            try? await self.useCase.finish(self.uiState.training)
             self.appState.changeScreen(to: .home)
         }
     }

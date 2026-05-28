@@ -105,7 +105,7 @@ final class ExerciseTabViewModel: ObservableObject {
             }
             items.sort { $0.sortDate > $1.sortDate }
             self.uiState.workoutItems = items
-            self.uiState.workoutLogs = workoutLogUseCase.getAllLogs()
+            self.uiState.workoutLogs = (try? await workoutLogUseCase.getAllLogs()) ?? []
         }
     }
 

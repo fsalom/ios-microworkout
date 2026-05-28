@@ -40,9 +40,8 @@ final class HealthWorkoutDetailViewModel: ObservableObject {
     }
 
     private func loadLinkOptions() {
-        let allTrainings = trainingUseCase.getTrainings()
-
         Task { @MainActor in
+            let allTrainings = (try? await trainingUseCase.getTrainings()) ?? []
             let recentWorkouts = (try? await healthUseCase.getRecentWorkouts()) ?? []
 
             // Refresh the link state of OUR workout from the latest data source values,
@@ -99,7 +98,7 @@ final class HealthWorkoutDetailViewModel: ObservableObject {
             }
 
             // WorkoutLogs: those linking to THIS workout, plus logs from same day not linked elsewhere.
-            let allLogs = self.workoutLogUseCase.getAllLogs()
+            let allLogs = (try? await self.workoutLogUseCase.getAllLogs()) ?? []
             let workoutUUID = UUID(uuidString: self.uiState.workout.id)
 
             self.uiState.linkedLog = allLogs.first { $0.linkedHealthWorkoutId == workoutUUID }
@@ -143,7 +142,7 @@ final class HealthWorkoutDetailViewModel: ObservableObject {
         guard let uuid = UUID(uuidString: uiState.workout.id) else { return }
         var updated = log
         updated.linkedHealthWorkoutId = uuid
-        workoutLogUseCase.saveLog(updated)
+        Task { try? await workoutLogUseCase.saveLog(updated) }
         uiState.linkedLog = updated
         uiState.availableLogs.removeAll { $0.id == updated.id }
     }
@@ -151,7 +150,8 @@ final class HealthWorkoutDetailViewModel: ObservableObject {
     func unlinkLog() {
         guard var current = uiState.linkedLog else { return }
         current.linkedHealthWorkoutId = nil
-        workoutLogUseCase.saveLog(current)
+        let snapshot = current
+        Task { try? await workoutLogUseCase.saveLog(snapshot) }
         uiState.linkedLog = nil
         uiState.availableLogs.append(current)
         uiState.availableLogs.sort { $0.startedAt > $1.startedAt }
