@@ -27,7 +27,7 @@ final class TrainingDetailV2ViewModel: ObservableObject {
         Task { @MainActor in
             self.training.startedAt = Date()
             self.training.sets.append(Date())
-            self.trainingUseCase.saveCurrent(self.training)
+            try? await self.trainingUseCase.saveCurrent(self.training)
             self.router.goBack()
             self.appState.changeScreen(to: .workout(training: self.training))
         }

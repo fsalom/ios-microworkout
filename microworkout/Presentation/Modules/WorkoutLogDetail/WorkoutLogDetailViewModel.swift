@@ -69,16 +69,19 @@ final class WorkoutLogDetailViewModel: ObservableObject {
 
     /// Re-fetches the current log from storage. Useful after returning from edit.
     func reloadFromStorage() {
-        let logs = useCase.getAllLogs()
-        guard let updated = logs.first(where: { $0.id == uiState.log.id }) else { return }
-        uiState.log = updated
-        if uiState.currentSiblingIndex >= 0 {
-            uiState.siblingLogs = logs
-                .filter { $0.sessionId == updated.sessionId }
-                .sorted { $0.startedAt < $1.startedAt }
-            uiState.currentSiblingIndex = uiState.siblingLogs.firstIndex(where: { $0.id == updated.id }) ?? -1
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            let logs = (try? await self.useCase.getAllLogs()) ?? []
+            guard let updated = logs.first(where: { $0.id == self.uiState.log.id }) else { return }
+            self.uiState.log = updated
+            if self.uiState.currentSiblingIndex >= 0 {
+                self.uiState.siblingLogs = logs
+                    .filter { $0.sessionId == updated.sessionId }
+                    .sorted { $0.startedAt < $1.startedAt }
+                self.uiState.currentSiblingIndex = self.uiState.siblingLogs.firstIndex(where: { $0.id == updated.id }) ?? -1
+            }
+            self.loadDerivedState()
         }
-        loadDerivedState()
     }
 
     private func loadSiblings() {
@@ -87,11 +90,15 @@ final class WorkoutLogDetailViewModel: ObservableObject {
             uiState.currentSiblingIndex = -1
             return
         }
-        let siblings = useCase.getAllLogs()
-            .filter { $0.sessionId == sessionId }
-            .sorted { $0.startedAt < $1.startedAt }
-        uiState.siblingLogs = siblings
-        uiState.currentSiblingIndex = siblings.firstIndex(where: { $0.id == uiState.log.id }) ?? -1
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            let logs = (try? await self.useCase.getAllLogs()) ?? []
+            let siblings = logs
+                .filter { $0.sessionId == sessionId }
+                .sorted { $0.startedAt < $1.startedAt }
+            self.uiState.siblingLogs = siblings
+            self.uiState.currentSiblingIndex = siblings.firstIndex(where: { $0.id == self.uiState.log.id }) ?? -1
+        }
     }
 
     private func loadDerivedState() {
@@ -106,20 +113,23 @@ final class WorkoutLogDetailViewModel: ObservableObject {
     }
 
     private func loadPreviousReferences() {
-        var map: [UUID: PreviousExerciseReference] = [:]
-        for exerciseLog in uiState.log.exercises {
-            if let result = useCase.getPreviousLoggedExercise(
-                sessionId: uiState.log.sessionId,
-                exerciseId: exerciseLog.exercise.id,
-                beforeLogId: uiState.log.id
-            ) {
-                map[exerciseLog.exercise.id] = PreviousExerciseReference(
-                    exercise: result.exercise,
-                    date: result.date
-                )
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            var map: [UUID: PreviousExerciseReference] = [:]
+            for exerciseLog in self.uiState.log.exercises {
+                if let result = try? await self.useCase.getPreviousLoggedExercise(
+                    sessionId: self.uiState.log.sessionId,
+                    exerciseId: exerciseLog.exercise.id,
+                    beforeLogId: self.uiState.log.id
+                ) {
+                    map[exerciseLog.exercise.id] = PreviousExerciseReference(
+                        exercise: result.exercise,
+                        date: result.date
+                    )
+                }
             }
+            self.uiState.previousByExerciseId = map
         }
-        uiState.previousByExerciseId = map
     }
 
     func goToPreviousSibling() {
@@ -140,7 +150,8 @@ final class WorkoutLogDetailViewModel: ObservableObject {
     }
 
     func delete() -> Bool {
-        useCase.deleteLog(id: uiState.log.id.uuidString)
+        let id = uiState.log.id.uuidString
+        Task { try? await useCase.deleteLog(id: id) }
         return true
     }
 

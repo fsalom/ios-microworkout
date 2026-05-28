@@ -19,8 +19,12 @@ final class WorkoutHistoryViewModel: ObservableObject {
 
     func load() {
         uiState.isLoading = true
-        uiState.sessions = useCase.getAllSessions().sorted { $0.updatedAt > $1.updatedAt }
-        uiState.isLoading = false
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            let sessions = (try? await self.useCase.getAllSessions()) ?? []
+            self.uiState.sessions = sessions.sorted { $0.updatedAt > $1.updatedAt }
+            self.uiState.isLoading = false
+        }
     }
 
     func startNewLog(from session: WorkoutSession) {
@@ -40,7 +44,10 @@ final class WorkoutHistoryViewModel: ObservableObject {
     }
 
     func deleteSession(_ session: WorkoutSession) {
-        useCase.deleteSession(id: session.id.uuidString)
-        load()
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            try? await self.useCase.deleteSession(id: session.id.uuidString)
+            self.load()
+        }
     }
 }

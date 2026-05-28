@@ -44,23 +44,26 @@ class ProfileViewModel: ObservableObject {
     }
 
     func loadProfile() {
-        guard let profile = userProfileUseCase.getProfile() else { return }
-        uiState.name = profile.name
-        uiState.weight = profile.weight
-        uiState.height = profile.height
-        uiState.age = profile.age
-        uiState.gender = profile.gender
-        uiState.activityLevel = profile.activityLevel
-        uiState.fitnessGoal = profile.resolvedGoal
-        uiState.macroProfile = profile.resolvedMacroProfile
-        uiState.hasProfile = true
-        uiState.dailyCalorieTarget = profile.dailyCalorieTarget
-        uiState.macroTargets = profile.macroTargets
-        uiState.freeDays = profile.resolvedFreeDays
-        uiState.freeDayExtraCalories = profile.resolvedFreeDayExtra
-        uiState.hasCycling = profile.hasCycling
-        uiState.strictDayCalorieTarget = profile.strictDayCalorieTarget
-        uiState.freeDayCalorieTarget = profile.freeDayCalorieTarget
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            guard let profile = try? await self.userProfileUseCase.getProfile() else { return }
+            self.uiState.name = profile.name
+            self.uiState.weight = profile.weight
+            self.uiState.height = profile.height
+            self.uiState.age = profile.age
+            self.uiState.gender = profile.gender
+            self.uiState.activityLevel = profile.activityLevel
+            self.uiState.fitnessGoal = profile.resolvedGoal
+            self.uiState.macroProfile = profile.resolvedMacroProfile
+            self.uiState.hasProfile = true
+            self.uiState.dailyCalorieTarget = profile.dailyCalorieTarget
+            self.uiState.macroTargets = profile.macroTargets
+            self.uiState.freeDays = profile.resolvedFreeDays
+            self.uiState.freeDayExtraCalories = profile.resolvedFreeDayExtra
+            self.uiState.hasCycling = profile.hasCycling
+            self.uiState.strictDayCalorieTarget = profile.strictDayCalorieTarget
+            self.uiState.freeDayCalorieTarget = profile.freeDayCalorieTarget
+        }
     }
 
     func startEditing() {
@@ -85,7 +88,6 @@ class ProfileViewModel: ObservableObject {
             freeDays: uiState.freeDays.isEmpty ? nil : Array(uiState.freeDays),
             freeDayExtraCalories: uiState.freeDays.isEmpty ? nil : uiState.freeDayExtraCalories
         )
-        userProfileUseCase.saveProfile(profile)
         userProfileUseCase.setOnboardingCompleted(true)
         uiState.hasProfile = true
         uiState.dailyCalorieTarget = profile.dailyCalorieTarget
@@ -94,6 +96,7 @@ class ProfileViewModel: ObservableObject {
         uiState.strictDayCalorieTarget = profile.strictDayCalorieTarget
         uiState.freeDayCalorieTarget = profile.freeDayCalorieTarget
         uiState.isEditing = false
+        Task { try? await userProfileUseCase.saveProfile(profile) }
     }
 
     // MARK: - HealthKit

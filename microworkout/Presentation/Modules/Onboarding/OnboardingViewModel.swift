@@ -47,9 +47,9 @@ final class OnboardingViewModel: ObservableObject {
             activityLevel: uiState.activityLevel,
             fitnessGoal: uiState.fitnessGoal
         )
-        userProfileUseCase.saveProfile(profile)
         userProfileUseCase.setOnboardingCompleted(true)
         appState.changeScreen(to: .home)
+        Task { try? await userProfileUseCase.saveProfile(profile) }
     }
 
     func skip() {

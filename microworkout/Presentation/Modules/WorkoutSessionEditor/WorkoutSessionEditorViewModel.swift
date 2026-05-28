@@ -98,7 +98,8 @@ final class WorkoutSessionEditorViewModel: ObservableObject {
         guard uiState.canSave else { return }
         var updated = uiState.session
         updated.updatedAt = Date()
-        useCase.saveSession(updated)
+        let snapshot = updated
+        Task { try? await useCase.saveSession(snapshot) }
         uiState.session = updated
         uiState.didSave = true
     }

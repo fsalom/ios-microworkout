@@ -52,20 +52,23 @@ final class WorkoutLogEntryViewModel: ObservableObject {
     }
 
     private func loadPreviousReferences() {
-        var map: [UUID: PreviousExerciseReference] = [:]
-        for exerciseLog in uiState.log.exercises {
-            if let result = useCase.getPreviousLoggedExercise(
-                sessionId: uiState.log.sessionId,
-                exerciseId: exerciseLog.exercise.id,
-                beforeLogId: uiState.log.id
-            ) {
-                map[exerciseLog.exercise.id] = PreviousExerciseReference(
-                    exercise: result.exercise,
-                    date: result.date
-                )
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            var map: [UUID: PreviousExerciseReference] = [:]
+            for exerciseLog in self.uiState.log.exercises {
+                if let result = try? await self.useCase.getPreviousLoggedExercise(
+                    sessionId: self.uiState.log.sessionId,
+                    exerciseId: exerciseLog.exercise.id,
+                    beforeLogId: self.uiState.log.id
+                ) {
+                    map[exerciseLog.exercise.id] = PreviousExerciseReference(
+                        exercise: result.exercise,
+                        date: result.date
+                    )
+                }
             }
+            self.uiState.previousByExerciseId = map
         }
-        uiState.previousByExerciseId = map
     }
 
     func toggleNotes(for exerciseLogId: UUID) {
@@ -155,7 +158,8 @@ final class WorkoutLogEntryViewModel: ObservableObject {
 
     func finish() {
         uiState.log.endedAt = Date()
-        useCase.saveLog(uiState.log)
+        let snapshot = uiState.log
+        Task { try? await useCase.saveLog(snapshot) }
         uiState.isFinished = true
     }
 
@@ -194,17 +198,20 @@ final class WorkoutLogEntryViewModel: ObservableObject {
             return
         }
         uiState.log.exercises.append(LoggedExercise(exercise: exercise))
-        if let result = useCase.getPreviousLoggedExercise(
-            sessionId: uiState.log.sessionId,
-            exerciseId: exercise.id,
-            beforeLogId: uiState.log.id
-        ) {
-            uiState.previousByExerciseId[exercise.id] = PreviousExerciseReference(
-                exercise: result.exercise,
-                date: result.date
-            )
-        }
         closeExercisePicker()
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            if let result = try? await self.useCase.getPreviousLoggedExercise(
+                sessionId: self.uiState.log.sessionId,
+                exerciseId: exercise.id,
+                beforeLogId: self.uiState.log.id
+            ) {
+                self.uiState.previousByExerciseId[exercise.id] = PreviousExerciseReference(
+                    exercise: result.exercise,
+                    date: result.date
+                )
+            }
+        }
     }
 
     func createAndAddExercise(named name: String) {

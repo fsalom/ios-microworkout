@@ -17,7 +17,11 @@ final class WorkoutSessionListViewModel: ObservableObject {
     }
 
     func load() {
-        uiState.sessions = useCase.getAllSessions().sorted { $0.updatedAt > $1.updatedAt }
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            let sessions = (try? await self.useCase.getAllSessions()) ?? []
+            self.uiState.sessions = sessions.sorted { $0.updatedAt > $1.updatedAt }
+        }
     }
 
     func createNew() {
@@ -30,7 +34,10 @@ final class WorkoutSessionListViewModel: ObservableObject {
     }
 
     func delete(_ session: WorkoutSession) {
-        useCase.deleteSession(id: session.id.uuidString)
-        load()
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            try? await self.useCase.deleteSession(id: session.id.uuidString)
+            self.load()
+        }
     }
 }
