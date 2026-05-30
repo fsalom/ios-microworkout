@@ -6,23 +6,23 @@ class TrainingUseCase: TrainingUseCaseProtocol {
         self.repository = repository
     }
 
-    func getTrainings() -> [Training] {
-        self.repository.getTrainings()
+    func getTrainings() async throws -> [Training] {
+        try await self.repository.getTrainings()
     }
 
-    func getCurrent() -> Training? {
-        self.repository.getCurrent()
+    func getCurrent() async throws -> Training? {
+        try await self.repository.getCurrent()
     }
 
-    func saveCurrent(_ training: Training) {
-        self.repository.saveCurrent(training)
+    func saveCurrent(_ training: Training) async throws {
+        try await self.repository.saveCurrent(training)
     }
 
-    func finish(_ training: Training) {
-        self.repository.finish(training)
+    func finish(_ training: Training) async throws {
+        try await self.repository.finish(training)
     }
 
-    func getFinished() -> [Training] {
-        self.repository.getFinished()
+    func getFinished() async throws -> [Training] {
+        try await self.repository.getFinished()
     }
 }

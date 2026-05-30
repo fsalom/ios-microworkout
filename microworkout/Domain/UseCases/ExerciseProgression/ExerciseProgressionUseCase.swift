@@ -10,7 +10,7 @@ final class ExerciseProgressionUseCase: ExerciseProgressionUseCaseProtocol {
     }
 
     func videoMatches(forSetId setId: UUID) async -> [ExerciseProgressionMatch] {
-        let logs = logUseCase.getAllLogs()
+        let logs = (try? await logUseCase.getAllLogs()) ?? []
 
         // 1) Find the source set to anchor the search criteria.
         guard let source = findSource(setId: setId, in: logs),

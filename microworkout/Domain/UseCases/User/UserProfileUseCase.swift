@@ -1,11 +1,5 @@
-//
-//  UserProfileUseCase.swift
-//  microworkout
-//
-
 import Foundation
 
-/// Implementación de los casos de uso para gestionar el perfil de usuario.
 class UserProfileUseCase: UserProfileUseCaseProtocol {
     private let repository: UserProfileRepositoryProtocol
 
@@ -13,12 +7,12 @@ class UserProfileUseCase: UserProfileUseCaseProtocol {
         self.repository = repository
     }
 
-    func saveProfile(_ profile: UserProfile) {
-        repository.saveProfile(profile)
+    func saveProfile(_ profile: UserProfile) async throws {
+        try await repository.saveProfile(profile)
     }
 
-    func getProfile() -> UserProfile? {
-        repository.getProfile()
+    func getProfile() async throws -> UserProfile? {
+        try await repository.getProfile()
     }
 
     func setOnboardingCompleted(_ completed: Bool) {

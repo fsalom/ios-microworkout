@@ -55,7 +55,7 @@ class AIContextUseCase: AIContextUseCaseProtocol {
     // MARK: - Builders
 
     private func buildProfileSnapshot() async -> AIProfileSnapshot? {
-        guard let profile = userProfileUseCase.getProfile() else { return nil }
+        guard let profile = try? await userProfileUseCase.getProfile() else { return nil }
         return AIProfileSnapshot(
             name: profile.name,
             age: profile.age,
@@ -74,7 +74,8 @@ class AIContextUseCase: AIContextUseCaseProtocol {
     }
 
     private func buildWorkoutSessions() async -> [AIWorkoutSessionSnapshot] {
-        workoutLogUseCase.getAllSessions().map {
+        let sessions = (try? await workoutLogUseCase.getAllSessions()) ?? []
+        return sessions.map {
             AIWorkoutSessionSnapshot(
                 id: $0.id.uuidString,
                 name: $0.name,
@@ -86,7 +87,8 @@ class AIContextUseCase: AIContextUseCaseProtocol {
     }
 
     private func buildWorkoutLogs() async -> [AIWorkoutLogSnapshot] {
-        workoutLogUseCase.getAllLogs().map { log in
+        let logs = (try? await workoutLogUseCase.getAllLogs()) ?? []
+        return logs.map { log in
             AIWorkoutLogSnapshot(
                 id: log.id.uuidString,
                 sessionId: log.sessionId?.uuidString,

@@ -7,17 +7,29 @@ class WorkoutLogUseCase: WorkoutLogUseCaseProtocol {
         self.repository = repository
     }
 
-    func getAllSessions() -> [WorkoutSession] { repository.getAllSessions() }
-    func saveSession(_ session: WorkoutSession) { repository.saveSession(session) }
-    func deleteSession(id: String) { repository.deleteSession(id: id) }
+    func getAllSessions() async throws -> [WorkoutSession] {
+        try await repository.getAllSessions()
+    }
 
-    func getAllLogs() -> [WorkoutLog] { repository.getAllLogs() }
-    func saveLog(_ log: WorkoutLog) {
-        repository.saveLog(log)
+    func saveSession(_ session: WorkoutSession) async throws {
+        try await repository.saveSession(session)
+    }
+
+    func deleteSession(id: String) async throws {
+        try await repository.deleteSession(id: id)
+    }
+
+    func getAllLogs() async throws -> [WorkoutLog] {
+        try await repository.getAllLogs()
+    }
+
+    func saveLog(_ log: WorkoutLog) async throws {
+        try await repository.saveLog(log)
         NotificationCenter.default.post(name: .workoutLogsChanged, object: nil)
     }
-    func deleteLog(id: String) {
-        repository.deleteLog(id: id)
+
+    func deleteLog(id: String) async throws {
+        try await repository.deleteLog(id: id)
         NotificationCenter.default.post(name: .workoutLogsChanged, object: nil)
     }
 
@@ -25,9 +37,9 @@ class WorkoutLogUseCase: WorkoutLogUseCaseProtocol {
         sessionId: UUID?,
         exerciseId: UUID,
         beforeLogId: UUID?
-    ) -> (exercise: LoggedExercise, date: Date)? {
+    ) async throws -> (exercise: LoggedExercise, date: Date)? {
         guard let sessionId else { return nil }
-        let candidates = repository.getAllLogs()
+        let candidates = try await repository.getAllLogs()
             .filter { $0.sessionId == sessionId && $0.id != beforeLogId }
             .sorted { $0.startedAt > $1.startedAt }
         for log in candidates {
