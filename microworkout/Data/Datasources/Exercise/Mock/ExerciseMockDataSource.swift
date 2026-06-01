@@ -1,11 +1,3 @@
-//
-//  ExerciseLocalDataSource.swift
-//  microworkout
-//
-//  Created by Fernando Salom Carratala on 20/7/25.
-//
-
-
 class ExerciseMockDataSource: ExerciseDataSourceProtocol {
     let exercises: [ExerciseDTO] = [
         ExerciseDTO(id: "press-de-banca", name: "Press de banca", type: "empuje"),
@@ -24,4 +16,10 @@ class ExerciseMockDataSource: ExerciseDataSourceProtocol {
     func getExercises() async throws -> [ExerciseDTO] {
         return exercises
     }
+
+    func create(_ exercise: ExerciseDTO) async throws -> ExerciseDTO {
+        return exercise
+    }
+
+    func delete(_ id: String) async throws {}
 }
