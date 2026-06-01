@@ -1,33 +1,73 @@
 import Foundation
 
-class WorkoutLogRepository: WorkoutLogRepositoryProtocol {
+/// Auth-aware repository: guest → UserDefaults; authenticated → `/v1/sessions` + `/v1/logs`.
+final class WorkoutLogRepository: WorkoutLogRepositoryProtocol {
     private let local: WorkoutLogLocalDataSourceProtocol
+    private let remote: WorkoutLogRemoteDataSourceProtocol
 
-    init(local: WorkoutLogLocalDataSourceProtocol) {
+    init(
+        local: WorkoutLogLocalDataSourceProtocol,
+        remote: WorkoutLogRemoteDataSourceProtocol
+    ) {
         self.local = local
+        self.remote = remote
     }
 
-    func getAllSessions() -> [WorkoutSession] {
-        local.getAllSessions().map { $0.toDomain() }
+    private func isAuthenticated() async -> Bool {
+        await MainActor.run { AuthSession.shared.state.isAuthenticated }
     }
 
-    func saveSession(_ session: WorkoutSession) {
+    // MARK: Sessions
+
+    func getAllSessions() async throws -> [WorkoutSession] {
+        if await isAuthenticated() {
+            return try await remote.listSessions().map { $0.toDomain() }
+        }
+        return local.getAllSessions().map { $0.toDomain() }
+    }
+
+    func saveSession(_ session: WorkoutSession) async throws {
+        if await isAuthenticated() {
+            _ = try await remote.upsertSession(session)
+            return
+        }
         local.saveSession(session.toDTO())
     }
 
-    func deleteSession(id: String) {
+    func deleteSession(id: String) async throws {
+        if await isAuthenticated() {
+            if let uuid = UUID(uuidString: id) {
+                try await remote.deleteSession(id: uuid)
+            }
+            return
+        }
         local.deleteSession(id: id)
     }
 
-    func getAllLogs() -> [WorkoutLog] {
-        local.getAllLogs().map { $0.toDomain() }
+    // MARK: Logs
+
+    func getAllLogs() async throws -> [WorkoutLog] {
+        if await isAuthenticated() {
+            return try await remote.listLogs().map { $0.toDomain() }
+        }
+        return local.getAllLogs().map { $0.toDomain() }
     }
 
-    func saveLog(_ log: WorkoutLog) {
+    func saveLog(_ log: WorkoutLog) async throws {
+        if await isAuthenticated() {
+            _ = try await remote.upsertLog(log)
+            return
+        }
         local.saveLog(log.toDTO())
     }
 
-    func deleteLog(id: String) {
+    func deleteLog(id: String) async throws {
+        if await isAuthenticated() {
+            if let uuid = UUID(uuidString: id) {
+                try await remote.deleteLog(id: uuid)
+            }
+            return
+        }
         local.deleteLog(id: id)
     }
 }
