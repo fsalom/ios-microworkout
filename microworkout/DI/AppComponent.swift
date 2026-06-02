@@ -24,7 +24,12 @@ final class DefaultAppComponent: AppComponentProtocol {
     lazy var mealUseCase: MealUseCase = {
         let localDataSource = MealLocalDataSource(storage: makeUserDefaultsManager())
         let remoteApi = OpenFoodFactsApi()
-        let repository = MealRepository(localDataSource: localDataSource, remoteApi: remoteApi)
+        let remote: MealRemoteDataSourceProtocol = MealRemoteDataSource()
+        let repository = MealRepository(
+            localDataSource: localDataSource,
+            remoteApi: remoteApi,
+            remote: remote
+        )
         return MealUseCase(repository: repository)
     }()
 
@@ -39,7 +44,8 @@ final class DefaultAppComponent: AppComponentProtocol {
 
     lazy var workoutLogUseCase: WorkoutLogUseCaseProtocol = {
         let local = WorkoutLogLocalDataSource(localStorage: makeUserDefaultsManager())
-        let repository = WorkoutLogRepository(local: local)
+        let remote: WorkoutLogRemoteDataSourceProtocol = WorkoutLogRemoteDataSource()
+        let repository = WorkoutLogRepository(local: local, remote: remote)
         return WorkoutLogUseCase(repository: repository)
     }()
 
@@ -51,21 +57,22 @@ final class DefaultAppComponent: AppComponentProtocol {
 
     lazy var userProfileUseCase: UserProfileUseCase = {
         let local = UserLocalDataSource(storage: makeUserDefaultsManager())
-        let repository = UserProfileRepository(localDataSource: local)
+        let remote: UserProfileRemoteDataSourceProtocol = UserProfileRemoteDataSource()
+        let repository = UserProfileRepository(local: local, remote: remote)
         return UserProfileUseCase(repository: repository)
     }()
 
     lazy var trainingUseCase: TrainingUseCaseProtocol = {
         let local = TrainingLocalDataSource(localStorage: makeUserDefaultsManager())
-        let repository = TrainingRepository(local: local)
+        let remote = TrainingRemoteDataSource()
+        let repository = TrainingRepository(local: local, remote: remote)
         return TrainingUseCase(repository: repository)
     }()
 
-    /// El datasource de Exercise sigue siendo el mock por ahora; la decisión está
-    /// pendiente hasta que el backend Python aterrice este recurso.
     lazy var exerciseUseCase: ExerciseUseCase = {
-        let mockDataSource: ExerciseDataSourceProtocol = ExerciseMockDataSource()
-        let repository: ExerciseRepositoryProtocol = ExerciseRepository(dataSource: mockDataSource)
+        let local: ExerciseDataSourceProtocol = ExerciseLocalDataSource(localStorage: makeUserDefaultsManager())
+        let remote: ExerciseRemoteDataSourceProtocol = ExerciseRemoteDataSource()
+        let repository: ExerciseRepositoryProtocol = ExerciseRepository(local: local, remote: remote)
         return ExerciseUseCase(repository: repository)
     }()
 
@@ -89,6 +96,16 @@ final class DefaultAppComponent: AppComponentProtocol {
     )
 
     lazy var coachUseCase: CoachUseCaseProtocol = CoachUseCase(contextUseCase: aiContextUseCase)
+
+    // MARK: Auth
+
+    var authSession: AuthSession { AuthSession.shared }
+
+    lazy var authService: AuthServiceProtocol = AuthService(
+        appAuthenticator: Config.shared.appAuthenticator,
+        network: Config.shared.network,
+        session: AuthSession.shared
+    )
 }
 
 extension DefaultAppComponent {

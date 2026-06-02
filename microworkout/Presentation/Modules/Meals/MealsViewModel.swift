@@ -84,9 +84,12 @@ final class MealsViewModel: ObservableObject {
     }
 
     private func loadProfileTargets() {
-        let profile = userProfileUseCase.getProfile()
-        uiState.dailyCalorieTarget = profile?.todayCalorieTarget
-        uiState.macroTargets = profile?.todayMacroTargets
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            let profile = try? await self.userProfileUseCase.getProfile()
+            self.uiState.dailyCalorieTarget = profile?.todayCalorieTarget
+            self.uiState.macroTargets = profile?.todayMacroTargets
+        }
     }
 
     func deleteMeal(id: UUID) {

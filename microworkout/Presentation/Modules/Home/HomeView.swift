@@ -21,10 +21,12 @@ struct HomeView: View {
         .pinnedTabHeader(subtitle: "BIENVENIDO", title: welcomeTitle)
         .onAppear {
             if !hasAppeared {
+                viewModel.start()
                 viewModel.loadWeeksWithHealthInfo()
                 hasAppeared = true
+            } else {
+                viewModel.load()
             }
-            viewModel.load()
         }
         .onChange(of: scenePhase) { _, newPhase in
             if newPhase == .active && hasAppeared {
@@ -59,16 +61,10 @@ struct HomeView: View {
                     .padding(.horizontal, 8)
             }
 
-            BurnedCaloriesCard(
+            TodayTrainingCard(
+                workouts: viewModel.uiState.todayHealthWorkouts,
                 burned: viewModel.uiState.caloriesBurnedToday,
-                workoutsCount: viewModel.uiState.workoutsCountToday
-            )
-            .padding(.horizontal, 8)
-
-            CoachInsightCard(
-                insight: viewModel.uiState.coachInsight,
-                isLoading: viewModel.uiState.isLoadingCoach,
-                onOpenChat: { prompt in viewModel.goToChat(prompt: prompt) }
+                onSeeAll: { appState.selectedTab = 1 }
             )
             .padding(.horizontal, 8)
 
@@ -340,53 +336,64 @@ struct HomeView: View {
     }
 }
 
-// MARK: - Burned Calories Card
+// MARK: - Today Training Card
 
-private struct BurnedCaloriesCard: View {
+private struct TodayTrainingCard: View {
+    let workouts: [HealthWorkout]
     let burned: Double
-    let workoutsCount: Int
-
-    private var summaryText: String {
-        if workoutsCount == 0 {
-            return "Sin entrenamientos hoy"
-        }
-        return "\(workoutsCount) \(workoutsCount == 1 ? "entrenamiento" : "entrenamientos")"
-    }
+    let onSeeAll: () -> Void
 
     var body: some View {
-        HStack(spacing: 14) {
-            Image(systemName: "flame.fill")
-                .font(.system(size: 20, weight: .semibold))
-                .foregroundColor(.orange)
-                .frame(width: 44, height: 44)
-                .background(Color.orange.opacity(0.15))
-                .clipShape(Circle())
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .firstTextBaseline) {
+                Text("Entrenado hoy")
+                    .font(.headline)
+                    .fontWeight(.bold)
+                Spacer()
+                Button(action: onSeeAll) {
+                    Text("Ver")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundColor(.green)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 6)
+                        .background(Color.green.opacity(0.15))
+                        .clipShape(Capsule())
+                }
+                .buttonStyle(.plain)
+            }
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Calorías quemadas")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                HStack(alignment: .firstTextBaseline, spacing: 4) {
-                    Text("\(Int(burned))")
-                        .font(.system(size: 22, weight: .bold))
-                        .foregroundColor(.primary)
-                    Text("kcal")
+            if workouts.isEmpty {
+                HStack(spacing: 10) {
+                    Image(systemName: "figure.run")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.secondary)
+                    Text("Sin entrenamientos hoy")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 }
-            }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.vertical, 6)
+            } else {
+                HStack(spacing: 6) {
+                    Image(systemName: "flame.fill")
+                        .font(.caption)
+                        .foregroundColor(.orange)
+                    Text("\(Int(burned)) kcal quemadas")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.secondary)
+                }
 
-            Spacer()
-
-            VStack(alignment: .trailing, spacing: 2) {
-                Text("HOY")
-                    .font(.caption2)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.secondary)
-                    .tracking(1)
-                Text(summaryText)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                VStack(spacing: 0) {
+                    ForEach(Array(workouts.enumerated()), id: \.element.id) { index, workout in
+                        TodayWorkoutRow(workout: workout)
+                            .padding(.vertical, 10)
+                        if index < workouts.count - 1 {
+                            Divider()
+                        }
+                    }
+                }
             }
         }
         .padding(16)
@@ -395,6 +402,48 @@ private struct BurnedCaloriesCard: View {
                 .fill(Color(.secondarySystemGroupedBackground))
                 .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 2)
         )
+    }
+}
+
+private struct TodayWorkoutRow: View {
+    let workout: HealthWorkout
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "applewatch")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(.green)
+                .frame(width: 32, height: 32)
+                .background(Color.green.opacity(0.15))
+                .clipShape(Circle())
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(workout.activityTypeName)
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.primary)
+                Text("\(workout.timeRangeFormatted) · \(workout.durationFormatted)")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+
+            Spacer(minLength: 0)
+
+            VStack(alignment: .trailing, spacing: 4) {
+                if let cal = workout.caloriesFormatted {
+                    Label(cal, systemImage: "flame.fill")
+                        .labelStyle(.titleAndIcon)
+                        .font(.caption2)
+                        .foregroundColor(.orange)
+                }
+                if let hr = workout.heartRateFormatted {
+                    Label(hr, systemImage: "heart.fill")
+                        .labelStyle(.titleAndIcon)
+                        .font(.caption2)
+                        .foregroundColor(.red)
+                }
+            }
+        }
     }
 }
 

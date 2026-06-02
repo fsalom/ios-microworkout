@@ -9,23 +9,38 @@ import WidgetKit
 import SwiftUI
 
 struct Provider: TimelineProvider {
-    var usecase: TrainingUseCase
+    private let datasource: TrainingLocalDataSourceProtocol
 
     init() {
-        let datasource: TrainingLocalDataSourceProtocol = TrainingLocalDataSource(localStorage: DefaultAppComponent().makeUserDefaultsManager())
-        let repository: TrainingRepositoryProtocol = TrainingRepository(local: datasource)
-        self.usecase = TrainingUseCase(repository: repository)
+        self.datasource = TrainingLocalDataSource(localStorage: DefaultAppComponent().makeUserDefaultsManager())
+    }
+
+    /// Reads the in-progress training from the shared local store. Widget runs
+    /// in a separate process and has no network, so it always uses the local cache.
+    private func currentTraining() -> Training? {
+        guard let dto = datasource.getCurrent() else { return nil }
+        return Training(
+            name: dto.name,
+            image: dto.image,
+            type: TrainingType(rawValue: dto.type) ?? .strength,
+            startedAt: dto.startedAt,
+            completedAt: dto.completedAt,
+            sets: dto.sets,
+            numberOfSetsForSlider: dto.numberOfSets,
+            numberOfRepsForSlider: dto.numberOfReps,
+            numberOfMinutesPerSetForSlider: dto.numberOfMinutesPerSet
+        )
     }
 
     func placeholder(in context: Context) -> TrainingEntry {
-        guard let training = usecase.getCurrent() else {
+        guard let training = currentTraining() else {
             return TrainingEntry.mock()
         }
         return TrainingEntry.from(entity: training)
     }
 
     func getSnapshot(in context: Context, completion: @escaping (TrainingEntry) -> ()) {
-        guard let training = usecase.getCurrent() else {
+        guard let training = currentTraining() else {
             completion(TrainingEntry.mock())
             return
         }

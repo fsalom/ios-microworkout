@@ -22,6 +22,8 @@ struct HomeUiState {
     var isLoadingHealth: Bool = true
     var caloriesBurnedToday: Double = 0
     var workoutsCountToday: Int = 0
+    var todayHealthWorkouts: [HealthWorkout] = []
+    var mealsByType: [MealType: [Meal]] = [:]
     var coachInsight: CoachInsight? = nil
     var isLoadingCoach: Bool = false
 }
@@ -54,10 +56,18 @@ final class HomeViewModel: ObservableObject {
         self.userProfileUseCase = userProfileUseCase
         self.coachUseCase = coachUseCase
         self.appState = appState
+    }
+
+    /// Acciones de arranque (datos + permisos + posible salto a workout en curso).
+    /// Llámese desde `.onAppear` de la View; antes vivía en el init y arrancaba
+    /// efectos en cadena (navegación) antes de que la pantalla estuviera viva.
+    func start() {
         self.load()
         self.askForPermissions()
-        if let training = self.trainingUseCase.getCurrent() {
-            appState.changeScreen(to: .workout(training: training))
+        Task { @MainActor in
+            if let training = try? await self.trainingUseCase.getCurrent() {
+                appState.changeScreen(to: .workout(training: training))
+            }
         }
     }
 
@@ -79,7 +89,7 @@ final class HomeViewModel: ObservableObject {
     }
 
     func save(this training: Training) {
-        trainingUseCase.saveCurrent(training)
+        Task { try? await trainingUseCase.saveCurrent(training) }
     }
 
     func showHealthInfo(for day: HealthDay) {
@@ -108,19 +118,17 @@ final class HomeViewModel: ObservableObject {
     }
 
     private func loadTrainings() {
-        Task {
-            await MainActor.run {
-                self.uiState.trainings = trainingUseCase.getTrainings()
-                self.uiState.currentTraining = trainingUseCase.getCurrent()
-            }
+        Task { @MainActor in
+            let trainings = (try? await trainingUseCase.getTrainings()) ?? []
+            let current = try? await trainingUseCase.getCurrent()
+            self.uiState.trainings = trainings
+            self.uiState.currentTraining = current
         }
     }
 
     private func loadLastTrainings() {
-        Task {
-            await MainActor.run {
-                self.uiState.lastTrainings = trainingUseCase.getFinished()
-            }
+        Task { @MainActor in
+            self.uiState.lastTrainings = (try? await trainingUseCase.getFinished()) ?? []
         }
     }
 
@@ -139,23 +147,28 @@ final class HomeViewModel: ObservableObject {
 
             // Today's burned calories from Apple Watch workouts
             let cal = Calendar.current
-            let todayWorkouts = awWorkouts.filter { cal.isDateInToday($0.startDate) }
+            let todayWorkouts = awWorkouts
+                .filter { cal.isDateInToday($0.startDate) }
+                .sorted { $0.startDate > $1.startDate }
             self.uiState.caloriesBurnedToday = todayWorkouts.reduce(0) { $0 + ($1.totalCalories ?? 0) }
             self.uiState.workoutsCountToday = todayWorkouts.count
+            self.uiState.todayHealthWorkouts = todayWorkouts
         }
     }
 
     private func loadCalorieData() {
         Task { @MainActor in
-            let profile = userProfileUseCase.getProfile()
+            let profile = try? await userProfileUseCase.getProfile()
             self.uiState.dailyCalorieTarget = profile?.todayCalorieTarget
             self.uiState.macroTargets = profile?.todayMacroTargets
             self.uiState.userName = profile?.name
             self.uiState.todayIsFreeDay = profile?.todayIsFreeDay ?? false
             self.uiState.hasCycling = profile?.hasCycling ?? false
-            if let totals = try? await mealUseCase.getTodayTotals() {
+            if let meals = try? await mealUseCase.getMealsForToday() {
+                let totals = meals.reduce(NutritionInfo.zero) { $0 + $1.totalNutrition }
                 self.uiState.todayCalories = totals.calories
                 self.uiState.todayNutrition = totals
+                self.uiState.mealsByType = Dictionary(grouping: meals, by: { $0.type })
             }
             self.uiState.isLoadingCalories = false
         }
