@@ -34,26 +34,27 @@ protocol MealUseCaseProtocol {
     // MARK: Favorites
 
     /// Devuelve la lista de alimentos marcados como favoritos.
-    func getFavorites() -> [FoodItem]
+    func getFavorites() async throws -> [FoodItem]
 
-    /// Indica si un alimento está marcado como favorito.
-    func isFavorite(_ food: FoodItem) -> Bool
+    /// Comprueba si `food` está en la colección `favorites` ya cargada.
+    /// El caller mantiene el cache para evitar hits de red en cada celda de la lista.
+    func isFavorite(_ food: FoodItem, in favorites: [FoodItem]) -> Bool
 
     /// Alterna el estado de favorito del alimento.
-    func toggleFavorite(_ food: FoodItem)
+    func toggleFavorite(_ food: FoodItem) async throws
 
     // MARK: My meals (recipes)
 
     /// Devuelve la lista de "Mis comidas" guardadas (recetas).
-    func getMyMeals() -> [MyMeal]
+    func getMyMeals() async throws -> [MyMeal]
 
     /// Guarda o actualiza una receta personalizada.
-    func saveMyMeal(_ myMeal: MyMeal)
+    func saveMyMeal(_ myMeal: MyMeal) async throws
 
     /// Elimina una receta por id.
-    func deleteMyMeal(id: UUID)
+    func deleteMyMeal(id: UUID) async throws
 
-    // MARK: Custom foods (offline fallback for unknown barcodes)
+    // MARK: Custom foods (offline fallback para unknown barcodes — siempre local)
 
     /// Guarda un FoodItem creado por el usuario, identificable por su `barcode`.
     func saveCustomFood(_ food: FoodItem)

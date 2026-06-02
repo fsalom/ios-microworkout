@@ -97,17 +97,17 @@ class MealUseCase: MealUseCaseProtocol {
         return "name:\(food.name.lowercased())"
     }
 
-    func getFavorites() -> [FoodItem] {
-        repository.getFavorites()
+    func getFavorites() async throws -> [FoodItem] {
+        try await repository.getFavorites()
     }
 
-    func isFavorite(_ food: FoodItem) -> Bool {
+    func isFavorite(_ food: FoodItem, in favorites: [FoodItem]) -> Bool {
         let key = favoriteKey(for: food)
-        return getFavorites().contains { favoriteKey(for: $0) == key }
+        return favorites.contains { favoriteKey(for: $0) == key }
     }
 
-    func toggleFavorite(_ food: FoodItem) {
-        var favorites = repository.getFavorites()
+    func toggleFavorite(_ food: FoodItem) async throws {
+        var favorites = try await repository.getFavorites()
         let key = favoriteKey(for: food)
         if let index = favorites.firstIndex(where: { favoriteKey(for: $0) == key }) {
             favorites.remove(at: index)
@@ -118,32 +118,32 @@ class MealUseCase: MealUseCaseProtocol {
             copy.quantity = 100
             favorites.insert(copy, at: 0)
         }
-        repository.saveFavorites(favorites)
+        try await repository.saveFavorites(favorites)
     }
 
     // MARK: - My meals
 
-    func getMyMeals() -> [MyMeal] {
-        repository.getMyMeals().sorted { $0.createdAt > $1.createdAt }
+    func getMyMeals() async throws -> [MyMeal] {
+        try await repository.getMyMeals().sorted { $0.createdAt > $1.createdAt }
     }
 
-    func saveMyMeal(_ myMeal: MyMeal) {
-        var meals = repository.getMyMeals()
+    func saveMyMeal(_ myMeal: MyMeal) async throws {
+        var meals = try await repository.getMyMeals()
         if let index = meals.firstIndex(where: { $0.id == myMeal.id }) {
             meals[index] = myMeal
         } else {
             meals.insert(myMeal, at: 0)
         }
-        repository.saveMyMeals(meals)
+        try await repository.saveMyMeals(meals)
     }
 
-    func deleteMyMeal(id: UUID) {
-        var meals = repository.getMyMeals()
+    func deleteMyMeal(id: UUID) async throws {
+        var meals = try await repository.getMyMeals()
         meals.removeAll { $0.id == id }
-        repository.saveMyMeals(meals)
+        try await repository.saveMyMeals(meals)
     }
 
-    // MARK: - Custom foods (offline fallback)
+    // MARK: - Custom foods (offline fallback) — siempre local
 
     func saveCustomFood(_ food: FoodItem) {
         guard let barcode = food.barcode, !barcode.isEmpty else { return }

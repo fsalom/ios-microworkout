@@ -52,33 +52,49 @@ struct PreviousTopSetCard: View {
         }
     }
 
+    /// Si los pesos top difieren → delta en kg/%; si son iguales → delta en reps.
+    /// Mismo peso y más reps = top set mayor (lo que pide el usuario).
     private var delta: (label: String, color: Color)? {
-        guard let previousMax = Self.maxWeight(in: previous),
-              let currentMax = Self.maxWeight(in: current) else { return nil }
-        let diff = currentMax - previousMax
-        if abs(diff) < 0.01 { return ("=", .secondary) }
+        guard let previousTop = Self.topSet(for: previous),
+              let currentTop = Self.topSet(for: current) else { return nil }
 
-        let arrow = diff > 0 ? "▲" : "▼"
-        let color: Color = diff > 0 ? .green : .red
+        let weightDiff = currentTop.weight - previousTop.weight
+        if abs(weightDiff) >= 0.01 {
+            let arrow = weightDiff > 0 ? "▲" : "▼"
+            let color: Color = weightDiff > 0 ? .green : .red
 
-        // Avoid divide-by-zero (e.g. bodyweight pull-ups with 0 kg load).
-        if previousMax < 0.01 {
+            // Avoid divide-by-zero (e.g. bodyweight pull-ups with 0 kg load).
+            if previousTop.weight < 0.01 {
+                return (
+                    "\(arrow) \(PreviousComparisonFormatting.short(abs(weightDiff))) kg",
+                    color
+                )
+            }
+            let percent = (weightDiff / previousTop.weight) * 100
             return (
-                "\(arrow) \(PreviousComparisonFormatting.short(abs(diff))) kg",
+                "\(arrow) \(PreviousComparisonFormatting.short(abs(percent)))% peso máx.",
                 color
             )
         }
-        let percent = (diff / previousMax) * 100
-        return (
-            "\(arrow) \(PreviousComparisonFormatting.short(abs(percent)))% peso máx.",
-            color
-        )
+
+        let repsDiff = currentTop.reps - previousTop.reps
+        if repsDiff == 0 { return ("=", .secondary) }
+        let arrow = repsDiff > 0 ? "▲" : "▼"
+        let color: Color = repsDiff > 0 ? .green : .red
+        return ("\(arrow) \(abs(repsDiff)) reps", color)
     }
 
     /// Returns the top-set summary. Picks the heaviest weight; among sets at that weight,
     /// the highest rep count; then counts how many sets match that exact (weight, reps) pair.
     /// Format: "<weight> kg × <reps> × <count>". Returns nil if there's no set with weight+reps.
     static func formatTopSet(for exercise: LoggedExercise) -> String? {
+        guard let top = topSet(for: exercise) else { return nil }
+        let weightStr = PreviousComparisonFormatting.short(top.weight)
+        return "\(weightStr) kg × \(top.reps) × \(top.count)"
+    }
+
+    /// Top set canónico: peso máximo + reps máximas a ese peso + nº de series que coinciden.
+    static func topSet(for exercise: LoggedExercise) -> (weight: Double, reps: Int, count: Int)? {
         let sets = exercise.sets.filter { $0.weight != nil && $0.reps != nil }
         guard !sets.isEmpty else { return nil }
         guard let maxWeight = sets.map({ $0.weight! }).max() else { return nil }
@@ -87,12 +103,7 @@ struct PreviousTopSetCard: View {
         guard let bestReps = atMaxWeight.compactMap({ $0.reps }).max() else { return nil }
 
         let count = atMaxWeight.filter { $0.reps == bestReps }.count
-        let weightStr = PreviousComparisonFormatting.short(maxWeight)
-        return "\(weightStr) kg × \(bestReps) × \(count)"
-    }
-
-    private static func maxWeight(in exercise: LoggedExercise) -> Double? {
-        exercise.sets.compactMap { $0.weight }.max()
+        return (maxWeight, bestReps, count)
     }
 
     private func formatDate(_ date: Date) -> String {

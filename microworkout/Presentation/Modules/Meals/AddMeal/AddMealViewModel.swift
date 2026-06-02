@@ -102,15 +102,21 @@ final class AddMealViewModel: ObservableObject {
     }
 
     func loadMyMeals() {
-        uiState.myMeals = mealUseCase.getMyMeals()
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            self.uiState.myMeals = (try? await self.mealUseCase.getMyMeals()) ?? []
+        }
     }
 
     func saveMyMeal(name: String, items: [FoodItem]) {
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty, !items.isEmpty else { return }
         let meal = MyMeal(name: trimmed, items: items)
-        mealUseCase.saveMyMeal(meal)
-        loadMyMeals()
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            try? await self.mealUseCase.saveMyMeal(meal)
+            self.loadMyMeals()
+        }
     }
 
     /// Saves or updates a MyMeal using its existing id (upsert behaviour).
@@ -119,13 +125,19 @@ final class AddMealViewModel: ObservableObject {
         guard !trimmed.isEmpty, !meal.items.isEmpty else { return }
         var copy = meal
         copy.name = trimmed
-        mealUseCase.saveMyMeal(copy)
-        loadMyMeals()
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            try? await self.mealUseCase.saveMyMeal(copy)
+            self.loadMyMeals()
+        }
     }
 
     func deleteMyMeal(id: UUID) {
-        mealUseCase.deleteMyMeal(id: id)
-        loadMyMeals()
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            try? await self.mealUseCase.deleteMyMeal(id: id)
+            self.loadMyMeals()
+        }
     }
 
     /// Re-saves yesterday's meal as a fresh Meal today: same items, same meal type,
@@ -185,14 +197,20 @@ final class AddMealViewModel: ObservableObject {
     }
 
     func loadFavorites() {
-        let favs = mealUseCase.getFavorites()
-        uiState.favoriteFoods = favs
-        uiState.favoriteKeys = Set(favs.map { favoriteKey(for: $0) })
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            let favs = (try? await self.mealUseCase.getFavorites()) ?? []
+            self.uiState.favoriteFoods = favs
+            self.uiState.favoriteKeys = Set(favs.map { self.favoriteKey(for: $0) })
+        }
     }
 
     func toggleFavorite(_ food: FoodItem) {
-        mealUseCase.toggleFavorite(food)
-        loadFavorites()
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            try? await self.mealUseCase.toggleFavorite(food)
+            self.loadFavorites()
+        }
     }
 
     func isFavorite(_ food: FoodItem) -> Bool {
