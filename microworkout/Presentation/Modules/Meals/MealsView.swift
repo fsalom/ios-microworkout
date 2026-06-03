@@ -8,6 +8,7 @@ import SwiftUI
 struct MealsView: View {
     @StateObject var viewModel: MealsViewModel
     let component: AppComponentProtocol
+    @EnvironmentObject var authSession: AuthSession
     @Environment(\.scenePhase) private var scenePhase
     @State private var addMealSheet: AddMealSheetData?
     @State private var editingEntry: EditFoodEntry?
@@ -29,12 +30,14 @@ struct MealsView: View {
                     SummaryCard(state: viewModel.uiState)
                         .padding(.horizontal)
 
-                    CoachInsightCard(
-                        insight: viewModel.uiState.coachInsight,
-                        isLoading: viewModel.uiState.isLoadingCoach,
-                        onOpenChat: { prompt in viewModel.goToChat(prompt: prompt) }
-                    )
-                    .padding(.horizontal)
+                    if authSession.state.isAuthenticated {
+                        CoachInsightCard(
+                            insight: viewModel.uiState.coachInsight,
+                            isLoading: viewModel.uiState.isLoadingCoach,
+                            onOpenChat: { prompt in viewModel.goToChat(prompt: prompt) }
+                        )
+                        .padding(.horizontal)
+                    }
 
                     ForEach(MealType.allCases) { type in
                         MealSectionCard(

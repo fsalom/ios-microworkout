@@ -8,6 +8,7 @@ import SwiftUI
 struct ExerciseTabView: View {
     @StateObject var viewModel: ExerciseTabViewModel
     @EnvironmentObject var appState: AppState
+    @EnvironmentObject var authSession: AuthSession
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
@@ -28,12 +29,14 @@ struct ExerciseTabView: View {
                 SelectedDayCard(day: viewModel.uiState.selectedDay)
                     .padding(.horizontal, 16)
 
-                CoachInsightCard(
-                    insight: viewModel.uiState.coachInsight,
-                    isLoading: viewModel.uiState.isLoadingCoach,
-                    onOpenChat: { prompt in viewModel.goToChat(prompt: prompt) }
-                )
-                .padding(.horizontal, 16)
+                if authSession.state.isAuthenticated {
+                    CoachInsightCard(
+                        insight: viewModel.uiState.coachInsight,
+                        isLoading: viewModel.uiState.isLoadingCoach,
+                        onOpenChat: { prompt in viewModel.goToChat(prompt: prompt) }
+                    )
+                    .padding(.horizontal, 16)
+                }
 
                 DayWorkoutsSection(
                     items: viewModel.workoutsForSelectedDay,
