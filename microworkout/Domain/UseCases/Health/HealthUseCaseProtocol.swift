@@ -12,6 +12,8 @@ protocol HealthUseCaseProtocol {
     func requestAuthorization() async throws -> Bool
     func getDaysPerWeeksWithHealthInfo(for numberOfWeeks: Int) async throws -> [[HealthDay]]
     func getHealthInfoForToday() async throws -> HealthDay
+    /// Promedio diario de pasos durante los 7 días anteriores a hoy (hoy excluido).
+    func getPreviousWeekAverageSteps() async throws -> Int
     func getRecentWorkouts() async throws -> [HealthWorkout]
     func linkWorkout(_ workoutID: String, to trainingID: UUID)
     func unlinkWorkout(_ workoutID: String)

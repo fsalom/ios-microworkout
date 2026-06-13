@@ -266,22 +266,50 @@ struct HomeView: View {
                 .fontWeight(.bold)
 
             HStack(spacing: 12) {
-                StatCard(value: "\(formattedNumber(viewModel.uiState.healthInfoForToday.steps))", label: "Pasos")
+                StatCard(
+                    value: "\(formattedNumber(viewModel.uiState.healthInfoForToday.steps))",
+                    label: "Pasos",
+                    comparison: stepsComparison
+                )
                 StatCard(value: "\(viewModel.uiState.healthInfoForToday.minutesOfExercise)", label: "Min. ejercicio")
                 StatCard(value: "\(viewModel.uiState.healthInfoForToday.minutesStanding)", label: "Min. de pie")
+            }
+
+            if viewModel.uiState.previousWeekStepsAverage > 0 {
+                PreviousWeekStepsBanner(
+                    averagePerDay: viewModel.uiState.previousWeekStepsAverage
+                )
             }
         }
     }
 
+    /// Compara los pasos de hoy con el promedio diario de los 7 días previos.
+    /// nil si aún no hay datos de la semana anterior (evita mostrar un "0%" engañoso).
+    private var stepsComparison: StatComparison? {
+        let avg = viewModel.uiState.previousWeekStepsAverage
+        guard avg > 0 else { return nil }
+        let today = viewModel.uiState.healthInfoForToday.steps
+        let diff = today - avg
+        let percent = Int((Double(diff) / Double(avg)) * 100)
+        return StatComparison(percent: percent)
+    }
+
     @ViewBuilder
-    func StatCard(value: String, label: String) -> some View {
+    func StatCard(value: String, label: String, comparison: StatComparison? = nil) -> some View {
         VStack(spacing: 4) {
             Text(value)
                 .font(.system(size: 28, weight: .bold))
                 .foregroundColor(.primary)
-            Text(label)
-                .font(.footnote)
-                .foregroundColor(.secondary)
+            HStack(spacing: 4) {
+                Text(label)
+                    .font(.footnote)
+                    .foregroundColor(.secondary)
+                if let comparison {
+                    Text("\(comparison.arrow)\(abs(comparison.percent))%")
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundColor(comparison.color)
+                }
+            }
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 18)
@@ -343,6 +371,10 @@ private struct TodayTrainingCard: View {
     let burned: Double
     let onSeeAll: () -> Void
 
+    @State private var expanded: Bool = false
+
+    private var hasWorkouts: Bool { !workouts.isEmpty }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .firstTextBaseline) {
@@ -363,28 +395,44 @@ private struct TodayTrainingCard: View {
                 .buttonStyle(.plain)
             }
 
-            if workouts.isEmpty {
-                HStack(spacing: 10) {
-                    Image(systemName: "figure.run")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.secondary)
-                    Text("Sin entrenamientos hoy")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
+            // Resumen siempre visible: kcal quemadas + nº de entrenos. Tappable para
+            // expandir el detalle cuando hay datos.
+            Button(action: {
+                guard hasWorkouts else { return }
+                withAnimation(.easeInOut(duration: 0.25)) { expanded.toggle() }
+            }) {
+                HStack(spacing: 8) {
+                    if hasWorkouts {
+                        Image(systemName: "flame.fill")
+                            .font(.caption)
+                            .foregroundColor(.orange)
+                        Text("\(Int(burned)) kcal · \(workouts.count) \(workouts.count == 1 ? "entreno" : "entrenos")")
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.primary)
+                    } else {
+                        Image(systemName: "figure.run")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.secondary)
+                        Text("Sin entrenamientos hoy")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
+                    Spacer()
+                    if hasWorkouts {
+                        Image(systemName: "chevron.down")
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.secondary)
+                            .rotationEffect(.degrees(expanded ? 180 : 0))
+                    }
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.vertical, 6)
-            } else {
-                HStack(spacing: 6) {
-                    Image(systemName: "flame.fill")
-                        .font(.caption)
-                        .foregroundColor(.orange)
-                    Text("\(Int(burned)) kcal quemadas")
-                        .font(.caption)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.secondary)
-                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .disabled(!hasWorkouts)
 
+            if hasWorkouts && expanded {
                 VStack(spacing: 0) {
                     ForEach(Array(workouts.enumerated()), id: \.element.id) { index, workout in
                         TodayWorkoutRow(workout: workout)
@@ -444,6 +492,74 @@ private struct TodayWorkoutRow: View {
                 }
             }
         }
+    }
+}
+
+// MARK: - Stat comparison badge
+
+/// Pequeño descriptor para el badge "▲ X%" dentro de un `StatCard` — se usa para
+/// comparar el dato de hoy con la base anterior (p. ej. promedio semana anterior).
+struct StatComparison {
+    let percent: Int
+
+    var arrow: String {
+        if percent > 0 { return "▲" }
+        if percent < 0 { return "▼" }
+        return "="
+    }
+
+    var color: Color {
+        if percent > 0 { return .green }
+        if percent < 0 { return .red }
+        return .secondary
+    }
+}
+
+// MARK: - Previous week steps banner
+
+/// Banner sutil bajo la fila de stats con el promedio de pasos diario de los
+/// 7 días anteriores. Aporta contexto al badge `▲X%` del StatCard de "Pasos".
+private struct PreviousWeekStepsBanner: View {
+    let averagePerDay: Int
+
+    private static func formatted(_ value: Int) -> String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.groupingSeparator = "."
+        return formatter.string(from: NSNumber(value: value)) ?? "\(value)"
+    }
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "figure.walk")
+                .font(.caption2)
+                .foregroundColor(.green)
+                .frame(width: 22, height: 22)
+                .background(Color.green.opacity(0.15))
+                .clipShape(Circle())
+
+            Text("Promedio semana anterior")
+                .font(.caption)
+                .foregroundColor(.secondary)
+
+            Spacer(minLength: 0)
+
+            HStack(alignment: .firstTextBaseline, spacing: 3) {
+                Text(Self.formatted(averagePerDay))
+                    .font(.subheadline)
+                    .fontWeight(.bold)
+                    .foregroundColor(.primary)
+                Text("pasos/día")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .background(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(Color.green.opacity(0.08))
+        )
     }
 }
 

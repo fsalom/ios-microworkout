@@ -49,6 +49,24 @@ class HealthUseCase: HealthUseCaseProtocol {
         }
     }
 
+    /// Promedio diario de pasos durante los 7 días anteriores a hoy (hoy excluido).
+    /// 0 si HealthKit no devuelve datos para el rango.
+    func getPreviousWeekAverageSteps() async throws -> Int {
+        guard try await requestAuthorization() else {
+            throw ErrorHealth.notAuthorized
+        }
+        let calendar = Calendar.current
+        let startOfToday = calendar.startOfDay(for: Date())
+        guard let weekStart = calendar.date(byAdding: .day, value: -7, to: startOfToday) else {
+            return 0
+        }
+        // El backend de HealthKit usa intervalos exclusivos por el final,
+        // así que `endDate = startOfToday` cubre exactamente los 7 días previos.
+        let data = (try? await self.repository.fetchStepsCount(startDate: weekStart, endDate: startOfToday)) ?? [:]
+        let total = data.values.reduce(0, +)
+        return Int(total / 7.0)
+    }
+
     func getHealthInfoForToday() async throws -> HealthDay {
         if try await requestAuthorization() {
             let exercise = try? await self.repository.fetchExerciseTimeToday()

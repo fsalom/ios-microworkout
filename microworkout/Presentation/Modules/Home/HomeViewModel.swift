@@ -23,6 +23,8 @@ struct HomeUiState {
     var caloriesBurnedToday: Double = 0
     var workoutsCountToday: Int = 0
     var todayHealthWorkouts: [HealthWorkout] = []
+    /// Promedio diario de pasos durante los 7 días anteriores a hoy (hoy excluido).
+    var previousWeekStepsAverage: Int = 0
     var mealsByType: [MealType: [Meal]] = [:]
     var coachInsight: CoachInsight? = nil
     var isLoadingCoach: Bool = false
@@ -103,9 +105,11 @@ final class HomeViewModel: ObservableObject {
             do {
                 let weeks = try await healthUseCase.getDaysPerWeeksWithHealthInfo(for: 1)
                 let healthInfoForToday = try await healthUseCase.getHealthInfoForToday()
+                let previousAvg = (try? await healthUseCase.getPreviousWeekAverageSteps()) ?? 0
                 await MainActor.run {
                     self.uiState.weeks = weeks
                     self.uiState.healthInfoForToday = healthInfoForToday
+                    self.uiState.previousWeekStepsAverage = previousAvg
                     self.uiState.isLoadingHealth = false
                 }
             } catch {

@@ -63,6 +63,10 @@ private struct DayCell: View {
     }
 
     var body: some View {
+        // Usamos `.green` (color principal de la app) en vez de `Color.accentColor`
+        // porque éste se resolvía a un fondo casi negro en modo oscuro cuando el
+        // asset de accent del proyecto no está definido.
+        let highlight = Color.green
         Text("\(healthDay.date, formatter: HealthWeeksView.dayFormatter)")
             .font(.caption)
             .fontWeight(isSelected ? .bold : (isToday ? .bold : .thin))
@@ -74,7 +78,7 @@ private struct DayCell: View {
                         .fill(Color.green.opacity(heatmapOpacity))
                     if isSelected {
                         RoundedRectangle(cornerRadius: 8, style: .continuous)
-                            .fill(Color.accentColor)
+                            .fill(highlight)
                     }
                 }
             )
@@ -82,14 +86,14 @@ private struct DayCell: View {
                 RoundedRectangle(cornerRadius: 8, style: .continuous)
                     .stroke(
                         isSelected
-                            ? Color.accentColor
+                            ? highlight
                             : (isToday ? Color.primary : .clear),
                         lineWidth: isSelected ? 2.5 : (isToday ? 2 : 0)
                     )
             )
             .scaleEffect(isSelected ? 1.08 : 1)
             .shadow(
-                color: isSelected ? Color.accentColor.opacity(0.45) : .clear,
+                color: isSelected ? highlight.opacity(0.45) : .clear,
                 radius: 6, x: 0, y: 2
             )
             .animation(.spring(response: 0.3, dampingFraction: 0.75), value: isSelected)
