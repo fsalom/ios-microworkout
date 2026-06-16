@@ -11,37 +11,38 @@ struct SwitcherView: View {
     var body: some View {
         switch appState.screen {
         case .home:
-            TabView(selection: $appState.selectedTab) {
-                HomeBuilder(component: component).build(appState: appState)
-                    .tabItem {
-                        Image(systemName: "house.circle.fill")
-                    }
-                    .tag(0)
-                ExerciseTabBuilder(component: component).build()
-                    .tabItem {
-                        Image(systemName: "dumbbell.fill")
-                    }
-                    .tag(1)
-                WorkoutHistoryBuilder(component: component).build()
-                    .tabItem {
-                        Image(systemName: "figure.strengthtraining.traditional.circle.fill")
-                    }
-                    .tag(2)
-                MealsBuilder(component: component).build()
-                    .tabItem {
-                        Image(systemName: "fork.knife.circle.fill")
-                    }
-                    .tag(3)
-                ProfileBuilder(component: component).build()
-                    .tabItem {
-                        Image(systemName: "person.crop.circle.fill")
-                    }
-                    .tag(4)
-            }
+            tabs
         case .onboarding:
             OnboardingBuilder(component: component).build(appState: appState)
         case .workout, .loading:
             ProgressView()
+        }
+    }
+
+    @ViewBuilder
+    private var tabs: some View {
+        let tabView = TabView(selection: $appState.selectedTab) {
+            Tab("Inicio", systemImage: "house.fill", value: 0) {
+                HomeBuilder(component: component).build(appState: appState)
+            }
+            Tab("Ejercicios", systemImage: "dumbbell.fill", value: 1) {
+                ExerciseTabBuilder(component: component).build()
+            }
+            Tab("Entrenos", systemImage: "figure.strengthtraining.traditional", value: 2) {
+                WorkoutHistoryBuilder(component: component).build()
+            }
+            Tab("Comidas", systemImage: "fork.knife", value: 3) {
+                MealsBuilder(component: component).build()
+            }
+            Tab("Perfil", systemImage: "person.crop.circle.fill", value: 4) {
+                ProfileBuilder(component: component).build()
+            }
+        }
+
+        if #available(iOS 26.0, *) {
+            tabView.tabBarMinimizeBehavior(.onScrollDown)
+        } else {
+            tabView
         }
     }
 }
