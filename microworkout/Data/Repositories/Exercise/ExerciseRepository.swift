@@ -40,6 +40,15 @@ final class ExerciseRepository: ExerciseRepositoryProtocol {
         return dto.toDomain()
     }
 
+    func uploadLocalToRemote() async throws -> Int {
+        var count = 0
+        for dto in try await local.getExercises() {
+            let e = dto.toDomain()
+            _ = try await remote.create(name: e.name, type: e.type); count += 1
+        }
+        return count
+    }
+
     func delete(_ id: UUID) async throws {
         if await isAuthenticated() {
             try await remote.delete(id)

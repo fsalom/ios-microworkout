@@ -36,6 +36,14 @@ class MealRepository: MealRepositoryProtocol {
         try await localDataSource.saveMeal(meal.toDTO())
     }
 
+    func uploadLocalToRemote() async throws -> Int {
+        var count = 0
+        for dto in try await localDataSource.getAllMeals() {
+            _ = try await remote.createMeal(dto.toDomain()); count += 1
+        }
+        return count
+    }
+
     func getMeals(for date: Date) async throws -> [Meal] {
         if await isAuthenticated() {
             return try await remote.listMeals(for: date).map { $0.toDomain() }

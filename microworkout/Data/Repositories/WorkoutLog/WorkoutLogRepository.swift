@@ -70,6 +70,17 @@ final class WorkoutLogRepository: WorkoutLogRepositoryProtocol {
         }
         local.deleteLog(id: id)
     }
+
+    func uploadLocalToRemote() async throws -> Int {
+        var count = 0
+        for dto in local.getAllSessions() {
+            _ = try await remote.upsertSession(dto.toDomain()); count += 1
+        }
+        for dto in local.getAllLogs() {
+            _ = try await remote.upsertLog(dto.toDomain()); count += 1
+        }
+        return count
+    }
 }
 
 fileprivate extension WorkoutSessionDTO {

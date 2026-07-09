@@ -82,6 +82,24 @@ final class DefaultAppComponent: AppComponentProtocol {
         return SetMediaUseCase(repository: repository)
     }()
 
+    lazy var uploadLocalDataUseCase: UploadLocalDataUseCaseProtocol = {
+        let workoutLog = WorkoutLogRepository(
+            local: WorkoutLogLocalDataSource(localStorage: makeUserDefaultsManager()),
+            remote: WorkoutLogRemoteDataSource())
+        let training = TrainingRepository(
+            local: TrainingLocalDataSource(localStorage: makeUserDefaultsManager()),
+            remote: TrainingRemoteDataSource())
+        let exercise = ExerciseRepository(
+            local: ExerciseLocalDataSource(localStorage: makeUserDefaultsManager()),
+            remote: ExerciseRemoteDataSource())
+        let meal = MealRepository(
+            localDataSource: MealLocalDataSource(storage: makeUserDefaultsManager()),
+            remoteApi: OpenFoodFactsApi(),
+            remote: MealRemoteDataSource())
+        return UploadLocalDataUseCase(training: training, workoutLog: workoutLog,
+                                      exercise: exercise, meal: meal)
+    }()
+
     lazy var exerciseProgressionUseCase: ExerciseProgressionUseCaseProtocol = ExerciseProgressionUseCase(
         logUseCase: workoutLogUseCase,
         mediaUseCase: setMediaUseCase

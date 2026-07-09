@@ -5,6 +5,8 @@ import AuthenticationServices
 struct ProfileUiState {
     var authError: String?
     var isSigningIn: Bool = false
+    var isUploading: Bool = false
+    var uploadMessage: String?
     var name: String = ""
     var weight: Double = 70
     var height: Double = 170
@@ -32,15 +34,35 @@ class ProfileViewModel: ObservableObject {
     private var userProfileUseCase: UserProfileUseCaseProtocol
     private var healthUseCase: HealthUseCaseProtocol
     private let authService: AuthServiceProtocol
+    private let uploadLocalDataUseCase: UploadLocalDataUseCaseProtocol
 
     init(userProfileUseCase: UserProfileUseCaseProtocol,
          healthUseCase: HealthUseCaseProtocol,
-         authService: AuthServiceProtocol) {
+         authService: AuthServiceProtocol,
+         uploadLocalDataUseCase: UploadLocalDataUseCaseProtocol) {
         self.userProfileUseCase = userProfileUseCase
         self.healthUseCase = healthUseCase
         self.authService = authService
+        self.uploadLocalDataUseCase = uploadLocalDataUseCase
         loadProfile()
         loadHealthKitStatus()
+    }
+
+    /// Sube a tu cuenta los datos guardados en local (entrenamientos, sesiones,
+    /// logs, ejercicios y comidas). Requiere estar autenticado.
+    func uploadLocalData() {
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            self.uiState.isUploading = true
+            self.uiState.uploadMessage = nil
+            do {
+                let n = try await self.uploadLocalDataUseCase.upload()
+                self.uiState.uploadMessage = "Subidos \(n) elementos a tu cuenta."
+            } catch {
+                self.uiState.uploadMessage = "Error al subir: \(error.localizedDescription)"
+            }
+            self.uiState.isUploading = false
+        }
     }
 
     func loadProfile() {

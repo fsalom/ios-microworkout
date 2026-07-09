@@ -212,6 +212,24 @@ struct ProfileView: View {
                             .foregroundColor(.secondary)
                     }
                 }
+                Button(action: { viewModel.uploadLocalData() }) {
+                    HStack {
+                        if viewModel.uiState.isUploading {
+                            ProgressView().frame(width: 24)
+                        } else {
+                            Image(systemName: "icloud.and.arrow.up").frame(width: 24)
+                        }
+                        Text("Subir mis datos")
+                    }
+                }
+                .disabled(viewModel.uiState.isUploading)
+
+                if let message = viewModel.uiState.uploadMessage {
+                    Text(message)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+
                 Button(role: .destructive, action: { viewModel.signOut() }) {
                     HStack {
                         Image(systemName: "rectangle.portrait.and.arrow.right")

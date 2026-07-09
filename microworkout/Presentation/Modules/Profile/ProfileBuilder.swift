@@ -9,7 +9,8 @@ class ProfileBuilder {
         let viewModel = ProfileViewModel(
             userProfileUseCase: component.userProfileUseCase,
             healthUseCase: component.healthUseCase,
-            authService: component.authService
+            authService: component.authService,
+            uploadLocalDataUseCase: component.uploadLocalDataUseCase
         )
         return ProfileView(viewModel: viewModel, component: component)
     }

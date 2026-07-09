@@ -6,4 +6,5 @@ protocol WorkoutLogRepositoryProtocol {
     func getAllLogs() async throws -> [WorkoutLog]
     func saveLog(_ log: WorkoutLog) async throws
     func deleteLog(id: String) async throws
+    func uploadLocalToRemote() async throws -> Int
 }

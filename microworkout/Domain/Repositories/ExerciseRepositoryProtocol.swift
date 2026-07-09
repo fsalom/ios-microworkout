@@ -5,4 +5,5 @@ protocol ExerciseRepositoryProtocol {
     func getExercises() async throws -> [Exercise]
     func create(_ exercise: Exercise) async throws -> Exercise
     func delete(_ id: UUID) async throws
+    func uploadLocalToRemote() async throws -> Int
 }

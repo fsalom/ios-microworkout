@@ -20,6 +20,7 @@ protocol AppComponentProtocol: AnyObject {
     var aiContextUseCase: AIContextUseCaseProtocol { get }
     var coachUseCase: CoachUseCaseProtocol { get }
     var exerciseProgressionUseCase: ExerciseProgressionUseCaseProtocol { get }
+    var uploadLocalDataUseCase: UploadLocalDataUseCaseProtocol { get }
 
     var authSession: AuthSession { get }
     var authService: AuthServiceProtocol { get }

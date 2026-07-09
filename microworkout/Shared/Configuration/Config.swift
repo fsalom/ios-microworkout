@@ -3,7 +3,8 @@ import Foundation
 class Config: ConfigTripleA {
     static let shared = Config()
 
-    static let baseURL = "http://localhost:8002/"
+    // Producción (backend desplegado). Para desarrollo local: "http://localhost:8002/"
+    static let baseURL = "https://workout.fernandosalom.es/"
     static let scheme = "microworkout"
     static let appName = "microworkout"
 

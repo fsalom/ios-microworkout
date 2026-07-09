@@ -70,6 +70,17 @@ final class TrainingRepository: TrainingRepositoryProtocol {
         }
         return local.getFinished().map { $0.toDomain() }
     }
+
+    func uploadLocalToRemote() async throws -> Int {
+        var count = 0
+        if let current = local.getCurrent() {
+            _ = try await remote.saveCurrent(current.toDomain()); count += 1
+        }
+        for dto in local.getFinished() {
+            _ = try await remote.finish(dto.toDomain()); count += 1
+        }
+        return count
+    }
 }
 
 fileprivate extension TrainingDTO {
