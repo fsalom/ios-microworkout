@@ -7,6 +7,7 @@ import GoogleSignIn
 
 struct ProfileUiState {
     var authError: String?
+    var authSuccessMessage: String?
     var isSigningIn: Bool = false
     var isUploading: Bool = false
     var uploadMessage: String?
@@ -164,8 +165,9 @@ class ProfileViewModel: ObservableObject {
                 defer { uiState.isSigningIn = false }
                 do {
                     try await authService.signInWithApple(authCode: code)
+                    uiState.authSuccessMessage = "Sesión iniciada"
                 } catch {
-                    uiState.authError = error.localizedDescription
+                    uiState.authError = Self.authErrorText(error)
                 }
             }
         }
@@ -191,10 +193,11 @@ class ProfileViewModel: ObservableObject {
                     return
                 }
                 try await authService.signInWithGoogle(idToken: idToken)
+                uiState.authSuccessMessage = "Sesión iniciada con Google"
             } catch {
                 let ns = error as NSError
                 if ns.domain == kGIDSignInErrorDomain && ns.code == GIDSignInError.canceled.rawValue { return }
-                uiState.authError = error.localizedDescription
+                uiState.authError = Self.authErrorText(error)
             }
         }
     }
@@ -210,6 +213,15 @@ class ProfileViewModel: ObservableObject {
     }
 #endif
 
+    /// Traduce un error de inicio de sesión a un mensaje claro para el usuario.
+    static func authErrorText(_ error: Error) -> String {
+        let ns = error as NSError
+        if ns.domain == NSURLErrorDomain {
+            return "No se pudo conectar. Revisa tu conexión e inténtalo de nuevo."
+        }
+        return "No se pudo iniciar sesión. Inténtalo de nuevo."
+    }
+
     func signOut() {
         Task { @MainActor in
             await authService.logout()
@@ -218,5 +230,9 @@ class ProfileViewModel: ObservableObject {
 
     func dismissAuthError() {
         uiState.authError = nil
+    }
+
+    func dismissAuthSuccess() {
+        uiState.authSuccessMessage = nil
     }
 }

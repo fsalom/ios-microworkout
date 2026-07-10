@@ -9,6 +9,10 @@ struct ProfileView: View {
     @AppStorage("appearance_preference") private var appearanceRaw: String = AppearancePreference.system.rawValue
     let component: AppComponentProtocol
 
+    @State private var toastText: String?
+    @State private var toastIsError = false
+    @State private var toastTask: Task<Void, Never>?
+
     var body: some View {
         Group {
             if viewModel.uiState.hasProfile && !viewModel.uiState.isEditing {
@@ -24,15 +28,33 @@ struct ProfileView: View {
                 viewModel.loadHealthKitStatus()
             }
         }
-        .alert(
-            "Error",
-            isPresented: Binding(
-                get: { viewModel.uiState.authError != nil },
-                set: { if !$0 { viewModel.dismissAuthError() } }
-            ),
-            actions: { Button("OK", role: .cancel) { viewModel.dismissAuthError() } },
-            message: { Text(viewModel.uiState.authError ?? "") }
-        )
+        // Feedback como toast (no como alert): un toast es una vista en la jerarquía,
+        // así que se muestra de forma fiable aunque el VC de Google/Apple se esté
+        // cerrando (un .alert no llega a presentarse en ese instante).
+        .overlay(alignment: .bottom) {
+            if let toastText {
+                AuthToastBanner(message: toastText, isError: toastIsError)
+                    .padding(.bottom, 24)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+        }
+        .animation(.easeInOut(duration: 0.25), value: toastText)
+        .onChange(of: viewModel.uiState.authError) { _, err in
+            if let err { showAuthToast(err, isError: true); viewModel.dismissAuthError() }
+        }
+        .onChange(of: viewModel.uiState.authSuccessMessage) { _, msg in
+            if let msg { showAuthToast(msg, isError: false); viewModel.dismissAuthSuccess() }
+        }
+    }
+
+    private func showAuthToast(_ text: String, isError: Bool) {
+        toastTask?.cancel()
+        toastText = text
+        toastIsError = isError
+        toastTask = Task {
+            try? await Task.sleep(nanoseconds: 3_000_000_000)
+            if !Task.isCancelled { await MainActor.run { toastText = nil } }
+        }
     }
 
     // MARK: - Detail View
@@ -393,6 +415,31 @@ private struct ProfileRow: View {
             Text(value)
                 .foregroundColor(.secondary)
         }
+    }
+}
+
+/// Banner de feedback (éxito verde / error rojo) para el inicio de sesión.
+private struct AuthToastBanner: View {
+    let message: String
+    let isError: Bool
+
+    var body: some View {
+        HStack(spacing: 10) {
+            Image(systemName: isError ? "exclamationmark.triangle.fill" : "checkmark.circle.fill")
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundColor(.white)
+            Text(message)
+                .font(.subheadline)
+                .fontWeight(.semibold)
+                .foregroundColor(.white)
+                .multilineTextAlignment(.leading)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(isError ? Color.red : Color.green)
+        .clipShape(Capsule())
+        .shadow(color: Color.black.opacity(0.2), radius: 10, x: 0, y: 4)
+        .padding(.horizontal, 20)
     }
 }
 
