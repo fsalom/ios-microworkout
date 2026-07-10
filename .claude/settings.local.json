@@ -8,7 +8,23 @@
       "Bash(ruby add_files_to_project.rb:*)",
       "WebSearch",
       "Bash(find:*)",
-      "Bash(ruby:*)"
+      "Bash(ruby:*)",
+      "Read(//Users/fer/**)",
+      "Bash(mkdir -p /Users/fer/python-microworkout/driven/db/meals/migrations)",
+      "Bash(touch /Users/fer/python-microworkout/driven/db/meals/__init__.py /Users/fer/python-microworkout/driven/db/meals/migrations/__init__.py)",
+      "Bash(mkdir -p /Users/fer/python-microworkout/application/ports/driven/db/meals /Users/fer/python-microworkout/application/ports/driving/api/meals /Users/fer/python-microworkout/application/di/meals)",
+      "Bash(touch /Users/fer/python-microworkout/application/ports/driven/db/meals/__init__.py /Users/fer/python-microworkout/application/ports/driving/api/meals/__init__.py /Users/fer/python-microworkout/application/di/meals/__init__.py)",
+      "Bash(DJANGO_SETTINGS_MODULE=config.settings.staticfiles ./.venv/bin/python manage.py makemigrations meals --skip-checks)",
+      "Bash(DJANGO_SETTINGS_MODULE=config.settings.staticfiles ./.venv/bin/python manage.py migrate meals --skip-checks)",
+      "Bash(git -C /Users/fer/python-microworkout remote -v)",
+      "Bash(grep -n \"^    }$\\\\|var body\\\\|scrollContent\" /Users/fer/ios-microworkout/microworkout/Presentation/Modules/ExerciseTab/ExerciseTabView.swift)",
+      "Bash(uv run python -c ' *)",
+      "Bash(grep -E \"\\\\.\\(swift\\)$\")",
+      "Bash(grep -E '\\\\.\\(log|deb|DS_Store\\)$|^\\\\.env')",
+      "Bash(awk -F/ '{print $\\(NF-2\\)\"/\"$\\(NF-1\\)}')",
+      "Bash(git -C /Users/fer/ios-microworkout status --short)",
+      "Bash(git -C /Users/fer/ios-microworkout diff --stat HEAD)",
+      "Bash(xargs -I {} basename {})"
     ]
   }
 }

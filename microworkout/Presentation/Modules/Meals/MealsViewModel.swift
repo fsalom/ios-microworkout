@@ -14,6 +14,7 @@ struct MealsUiState {
     var macroTargets: NutritionInfo? = nil
     var isLoading: Bool = false
     var error: String?
+    var savedMyMealName: String?   // confirmación tras guardar una sección como "Mi comida"
     var coachInsight: CoachInsight? = nil
     var isLoadingCoach: Bool = false
 
@@ -171,6 +172,26 @@ final class MealsViewModel: ObservableObject {
                 await MainActor.run {
                     self.uiState.error = "Error al eliminar"
                 }
+            }
+        }
+    }
+
+    /// Guarda todos los alimentos de una sección (p.ej. todo el desayuno) como una
+    /// "Mi comida" reutilizable, para poder añadirla luego de una sola vez.
+    /// Funciona en local (invitado) o contra el backend (logueado), igual que el
+    /// resto de "Mis comidas", y entra en el flujo de subida al iniciar sesión.
+    func saveSectionAsMyMeal(type: MealType, name: String) {
+        let items = (uiState.mealsByType[type] ?? []).flatMap { $0.items }
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !items.isEmpty else { return }
+        let finalName = trimmed.isEmpty ? type.rawValue : trimmed
+        let myMeal = MyMeal(name: finalName, items: items)
+        Task {
+            do {
+                try await mealUseCase.saveMyMeal(myMeal)
+                await MainActor.run { self.uiState.savedMyMealName = finalName }
+            } catch {
+                await MainActor.run { self.uiState.error = "Error al guardar la comida" }
             }
         }
     }

@@ -12,6 +12,8 @@ struct MealsView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var addMealSheet: AddMealSheetData?
     @State private var editingEntry: EditFoodEntry?
+    @State private var savingSection: MealType?     // sección que se va a guardar como "Mi comida"
+    @State private var newMyMealName: String = ""
 
     var body: some View {
         ZStack {
@@ -52,6 +54,10 @@ struct MealsView: View {
                             },
                             onEditItem: { item, mealId in
                                 editingEntry = EditFoodEntry(food: item, mealId: mealId)
+                            },
+                            onSaveAsMyMeal: {
+                                newMyMealName = type.rawValue
+                                savingSection = type
                             }
                         )
                         .padding(.horizontal)
@@ -85,6 +91,29 @@ struct MealsView: View {
             )
             .presentationDetents([.medium])
             .presentationDragIndicator(.visible)
+        }
+        .alert("Guardar como Mi comida", isPresented: Binding(
+            get: { savingSection != nil },
+            set: { if !$0 { savingSection = nil } }
+        )) {
+            TextField("Nombre", text: $newMyMealName)
+            Button("Cancelar", role: .cancel) { savingSection = nil }
+            Button("Guardar") {
+                if let type = savingSection {
+                    viewModel.saveSectionAsMyMeal(type: type, name: newMyMealName)
+                }
+                savingSection = nil
+            }
+        } message: {
+            Text("Se guardará con los alimentos de esta sección para poder añadirla luego de una vez.")
+        }
+        .alert("Comida guardada", isPresented: Binding(
+            get: { viewModel.uiState.savedMyMealName != nil },
+            set: { if !$0 { viewModel.uiState.savedMyMealName = nil } }
+        )) {
+            Button("Hecho", role: .cancel) { viewModel.uiState.savedMyMealName = nil }
+        } message: {
+            Text("«\(viewModel.uiState.savedMyMealName ?? "")» está ahora en Mis comidas.")
         }
     }
 }
@@ -356,6 +385,7 @@ private struct MealSectionCard: View {
     let onDelete: (_ itemId: UUID, _ mealId: UUID) -> Void
     let onDeleteMeal: (_ mealId: UUID) -> Void
     let onEdit: (_ item: FoodItem, _ mealId: UUID) -> Void
+    let onSaveAsMyMeal: () -> Void
 
     @State private var openSwipeRowId: UUID? = nil
 
@@ -364,13 +394,15 @@ private struct MealSectionCard: View {
          onAdd: @escaping () -> Void,
          onDeleteItem: @escaping (_ itemId: UUID, _ mealId: UUID) -> Void,
          onDeleteMeal: @escaping (_ mealId: UUID) -> Void,
-         onEditItem: @escaping (_ item: FoodItem, _ mealId: UUID) -> Void) {
+         onEditItem: @escaping (_ item: FoodItem, _ mealId: UUID) -> Void,
+         onSaveAsMyMeal: @escaping () -> Void) {
         self.type = type
         self.meals = meals
         self.onAdd = onAdd
         self.onDelete = onDeleteItem
         self.onDeleteMeal = onDeleteMeal
         self.onEdit = onEditItem
+        self.onSaveAsMyMeal = onSaveAsMyMeal
     }
 
     private var totalNutrition: NutritionInfo {
@@ -393,39 +425,56 @@ private struct MealSectionCard: View {
         !looseEntries.isEmpty || !recipeMeals.isEmpty
     }
 
-    var body: some View {
-        VStack(spacing: 0) {
-            // Header
-            HStack(spacing: 12) {
-                Image(systemName: type.icon)
-                    .font(.system(size: 14, weight: .semibold))
+    // Cabecera de la sección. Mantener pulsado (contextMenu) permite guardarla
+    // como "Mi comida" reutilizable con todos sus alimentos.
+    private var header: some View {
+        HStack(spacing: 12) {
+            Image(systemName: type.icon)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(.green)
+                .frame(width: 32, height: 32)
+                .background(Color.green.opacity(0.15))
+                .clipShape(Circle())
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(type.rawValue)
+                    .font(.headline)
+                    .fontWeight(.bold)
+                Text(hasContent ? macrosSummary : "Sin comidas registradas")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+
+            Spacer()
+
+            Button(action: onAdd) {
+                Image(systemName: "plus")
+                    .font(.system(size: 14, weight: .bold))
                     .foregroundColor(.green)
-                    .frame(width: 32, height: 32)
+                    .frame(width: 28, height: 28)
                     .background(Color.green.opacity(0.15))
                     .clipShape(Circle())
-
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(type.rawValue)
-                        .font(.headline)
-                        .fontWeight(.bold)
-                    Text(hasContent ? macrosSummary : "Sin comidas registradas")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-
-                Spacer()
-
-                Button(action: onAdd) {
-                    Image(systemName: "plus")
-                        .font(.system(size: 14, weight: .bold))
-                        .foregroundColor(.green)
-                        .frame(width: 28, height: 28)
-                        .background(Color.green.opacity(0.15))
-                        .clipShape(Circle())
-                }
-                .buttonStyle(.plain)
             }
-            .padding(14)
+            .buttonStyle(.plain)
+        }
+        .padding(14)
+    }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            if hasContent {
+                header
+                    .contentShape(Rectangle())
+                    .contextMenu {
+                        Button {
+                            onSaveAsMyMeal()
+                        } label: {
+                            Label("Guardar como Mi comida", systemImage: "square.and.arrow.down")
+                        }
+                    }
+            } else {
+                header
+            }
 
             if hasContent {
                 Divider().padding(.leading, 14)

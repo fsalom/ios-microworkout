@@ -41,6 +41,10 @@ class MealRepository: MealRepositoryProtocol {
         for dto in try await localDataSource.getAllMeals() {
             _ = try await remote.createMeal(dto.toDomain()); count += 1
         }
+        // también las comidas reutilizables ("Mis comidas") guardadas en local
+        for dto in localDataSource.getMyMeals() {
+            _ = try await remote.createMyMeal(dto.toDomain()); count += 1
+        }
         return count
     }
 
