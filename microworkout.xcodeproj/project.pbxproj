@@ -3106,6 +3106,7 @@
 				DEVELOPMENT_TEAM = X8Z657K235;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = microworkout/Info.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Necesitamos acceso a la cámara para escanear códigos de barras de productos.";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Obtenemos información de tu entrenamiento para registrarla y mejorar tus futuros entrenamientos";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Queremos poder actualizar tu información de ejercicio";
@@ -3141,6 +3142,7 @@
 				DEVELOPMENT_TEAM = X8Z657K235;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = microworkout/Info.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Necesitamos acceso a la cámara para escanear códigos de barras de productos.";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Obtenemos información de tu entrenamiento para registrarla y mejorar tus futuros entrenamientos";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Queremos poder actualizar tu información de ejercicio";
