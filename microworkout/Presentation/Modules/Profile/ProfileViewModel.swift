@@ -1,6 +1,9 @@
 import SwiftUI
 import Combine
 import AuthenticationServices
+#if canImport(GoogleSignIn)
+import GoogleSignIn
+#endif
 
 struct ProfileUiState {
     var authError: String?
@@ -167,6 +170,45 @@ class ProfileViewModel: ObservableObject {
             }
         }
     }
+
+#if canImport(GoogleSignIn)
+    /// Lanza el flujo de Google Sign-In, obtiene el `idToken` y lo canjea en el
+    /// backend con el mismo `AuthService` que Apple. Requiere el producto SPM
+    /// GoogleSignIn enlazado al target y `GIDClientID` en el Info.plist.
+    @MainActor
+    func handleGoogleSignIn() {
+        guard let presenter = Self.topViewController() else {
+            uiState.authError = "No se pudo presentar el inicio de sesión de Google"
+            return
+        }
+        Task { @MainActor in
+            uiState.isSigningIn = true
+            defer { uiState.isSigningIn = false }
+            do {
+                let result = try await GIDSignIn.sharedInstance.signIn(withPresenting: presenter)
+                guard let idToken = result.user.idToken?.tokenString else {
+                    uiState.authError = "No se obtuvo el id_token de Google"
+                    return
+                }
+                try await authService.signInWithGoogle(idToken: idToken)
+            } catch {
+                let ns = error as NSError
+                if ns.domain == kGIDSignInErrorDomain && ns.code == GIDSignInError.canceled.rawValue { return }
+                uiState.authError = error.localizedDescription
+            }
+        }
+    }
+
+    private static func topViewController() -> UIViewController? {
+        let window = UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap { $0.windows }
+            .first(where: { $0.isKeyWindow })
+        var top = window?.rootViewController
+        while let presented = top?.presentedViewController { top = presented }
+        return top
+    }
+#endif
 
     func signOut() {
         Task { @MainActor in

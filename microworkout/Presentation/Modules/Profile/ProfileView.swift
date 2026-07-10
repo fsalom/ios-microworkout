@@ -194,6 +194,25 @@ struct ProfileView: View {
                     .frame(height: 44)
                     .disabled(viewModel.uiState.isSigningIn)
                     .opacity(viewModel.uiState.isSigningIn ? 0.5 : 1)
+
+                    #if canImport(GoogleSignIn)
+                    Button {
+                        viewModel.handleGoogleSignIn()
+                    } label: {
+                        HStack(spacing: 8) {
+                            Image(systemName: "g.circle.fill")
+                            Text("Continuar con Google").fontWeight(.medium)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 44)
+                        .foregroundColor(.primary)
+                        .background(Color(.secondarySystemBackground))
+                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.secondary.opacity(0.4)))
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                    }
+                    .disabled(viewModel.uiState.isSigningIn)
+                    .opacity(viewModel.uiState.isSigningIn ? 0.5 : 1)
+                    #endif
                 }
                 .padding(.vertical, 4)
             }

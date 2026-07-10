@@ -13,7 +13,6 @@
 		0484D8FB900F1B72C4BD2033 /* ExerciseTabBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC1232B6A1C6EA87AF9D99E6 /* ExerciseTabBuilder.swift */; };
 		061BF2DB20BEAF645637BEF8 /* SetMediaGalleryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D49CBF4C2D5F78B4DFF5B3E8 /* SetMediaGalleryView.swift */; };
 		06954E92D46A3D37104F0DD7 /* UserProfileUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1F49521E15A540E81A53E92 /* UserProfileUseCase.swift */; };
-		FE00A0DA7A5E0000000000A1 /* UploadLocalDataUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE00A0DA7A5E0000000000A2 /* UploadLocalDataUseCase.swift */; };
 		08219F72B3AB130211FD2E3F /* DetailMediaIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10E9EB2DC7A311BC70AC25D9 /* DetailMediaIndicator.swift */; };
 		0975C640F4138BECF06BB070 /* WorkoutMirrorManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0F2174773291CC40D34FE1E /* WorkoutMirrorManager.swift */; };
 		09E1915A8F849BCA5EFAA9E3 /* ExerciseProgressionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E30BE1EBDF16DCA18C2A9E /* ExerciseProgressionView.swift */; };
@@ -336,6 +335,7 @@
 		F87D0610D0EEE7FF6ACE833D /* WorkoutSessionListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AD9A7B2F4DB4EE6CE262EF5 /* WorkoutSessionListViewModel.swift */; };
 		FBF45EB923FEA9A3EE9ADFF2 /* OnboardingBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB8D8FB300B4B7E3D9447052 /* OnboardingBuilder.swift */; };
 		FCD1096EA4728492DF418790 /* AppError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E0E7A0BC387147668FFA3A3 /* AppError.swift */; };
+		FE00A0DA7A5E0000000000A1 /* UploadLocalDataUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE00A0DA7A5E0000000000A2 /* UploadLocalDataUseCase.swift */; };
 		FE5CD8AB4FA53EE7EA81D319 /* DetailWorkoutBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79644F29AA2785082EDEB5FC /* DetailWorkoutBuilder.swift */; };
 		FF6111DA90342BF7E2687F5B /* LoggedExercise.swift in Sources */ = {isa = PBXBuildFile; fileRef = F51C7769F745A8FCAB7E45F1 /* LoggedExercise.swift */; };
 /* End PBXBuildFile section */
@@ -670,7 +670,6 @@
 		D09B67B982F39F808658074B /* AIChatView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AIChatView.swift; sourceTree = "<group>"; };
 		D0F2174773291CC40D34FE1E /* WorkoutMirrorManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WorkoutMirrorManager.swift; sourceTree = "<group>"; };
 		D1F49521E15A540E81A53E92 /* UserProfileUseCase.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UserProfileUseCase.swift; sourceTree = "<group>"; };
-		FE00A0DA7A5E0000000000A2 /* UploadLocalDataUseCase.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UploadLocalDataUseCase.swift; sourceTree = "<group>"; };
 		D2685A416C5E4B40E85AAFF2 /* TrainingRemoteDataSource.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TrainingRemoteDataSource.swift; sourceTree = "<group>"; };
 		D49CBF4C2D5F78B4DFF5B3E8 /* SetMediaGalleryView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SetMediaGalleryView.swift; sourceTree = "<group>"; };
 		D98A1169C318161217016E94 /* MealDTOs.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MealDTOs.swift; sourceTree = "<group>"; };
@@ -714,17 +713,18 @@
 		F79857C30F10080A5D3380EB /* LoggedSetInput.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LoggedSetInput.swift; sourceTree = "<group>"; };
 		F7F57B2786E37D65887C3ECE /* WorkoutSessionListRouter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WorkoutSessionListRouter.swift; sourceTree = "<group>"; };
 		FAA2C0D1398AB0BEFF278279 /* AppComponent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppComponent.swift; sourceTree = "<group>"; };
+		FE00A0DA7A5E0000000000A2 /* UploadLocalDataUseCase.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UploadLocalDataUseCase.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		C183FE6A2D56809B009EE8B5 /* Exceptions for "gymwidget" folder in "gymwidgetExtension" target */ = {
+		C183FE6A2D56809B009EE8B5 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
 			target = C183FE562D56809A009EE8B5 /* gymwidgetExtension */;
 		};
-		C183FEC62D5A907B009EE8B5 /* Exceptions for "gymwidget" folder in "microworkout" target */ = {
+		C183FEC62D5A907B009EE8B5 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				gymwidgetLiveActivity.swift,
@@ -734,19 +734,7 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		C183FE5D2D56809A009EE8B5 /* gymwidget */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				C183FEC62D5A907B009EE8B5 /* Exceptions for "gymwidget" folder in "microworkout" target */,
-				C183FE6A2D56809B009EE8B5 /* Exceptions for "gymwidget" folder in "gymwidgetExtension" target */,
-			);
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
-			path = gymwidget;
-			sourceTree = "<group>";
-		};
+		C183FE5D2D56809A009EE8B5 /* gymwidget */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (C183FEC62D5A907B009EE8B5 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, C183FE6A2D56809B009EE8B5 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = gymwidget; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -811,7 +799,6 @@
 				1E68B45EE88C70B52B958C53 /* AIContext.swift */,
 				810AC741336B632FBDF6BDA7 /* CoachInsight.swift */,
 			);
-			name = AI;
 			path = AI;
 			sourceTree = "<group>";
 		};
@@ -831,7 +818,6 @@
 				E499C32FAEEB13FE93B99CEF /* ExerciseTabRouter.swift */,
 				898CA1A77A6BB027957CBC29 /* ExerciseTabViewModel.swift */,
 			);
-			name = ExerciseTab;
 			path = ExerciseTab;
 			sourceTree = "<group>";
 		};
@@ -851,7 +837,6 @@
 				C6D316F8E377563E56EB0E57 /* ExerciseProgressionUseCaseProtocol.swift */,
 				DA71E0BB888E31B2282EF3B5 /* ExerciseProgressionUseCase.swift */,
 			);
-			name = ExerciseProgression;
 			path = ExerciseProgression;
 			sourceTree = "<group>";
 		};
@@ -862,7 +847,6 @@
 				B5C84F5600CA12A950FC0180 /* WorkoutLogLocalDataSourceProtocol.swift */,
 				F1101E9842FEC92E90DC4FCC /* WorkoutLogLocalDataSource.swift */,
 			);
-			name = Local;
 			path = Local;
 			sourceTree = "<group>";
 		};
@@ -872,7 +856,6 @@
 				CE1400B52369A62DE4C3A286 /* SetMediaLocalDataSource.swift */,
 				13D6573FCEC799AC3B077AA7 /* DTO */,
 			);
-			name = Local;
 			path = Local;
 			sourceTree = "<group>";
 		};
@@ -881,7 +864,6 @@
 			children = (
 				DAB41D7562D43F8587EDE489 /* SetMediaDTO.swift */,
 			);
-			name = DTO;
 			path = DTO;
 			sourceTree = "<group>";
 		};
@@ -891,7 +873,6 @@
 				3A3A5F670D64D8BDA255BBC0 /* SetMediaUseCaseProtocol.swift */,
 				A2880F7A39F0F2EE68463D52 /* SetMediaUseCase.swift */,
 			);
-			name = SetMedia;
 			path = SetMedia;
 			sourceTree = "<group>";
 		};
@@ -903,7 +884,6 @@
 				F6B70B42DBE059AD8FFADE65 /* WorkoutHistoryViewModel.swift */,
 				7C0323A63D9FA2E6AF617AAB /* WorkoutHistoryView.swift */,
 			);
-			name = WorkoutHistory;
 			path = WorkoutHistory;
 			sourceTree = "<group>";
 		};
@@ -913,7 +893,6 @@
 				B91FD06E3458CBE188E0E1B8 /* UserProfileRemoteDataSource.swift */,
 				D845F6EEB901E8B1DAD94F99 /* DTO */,
 			);
-			name = Remote;
 			path = Remote;
 			sourceTree = "<group>";
 		};
@@ -922,7 +901,6 @@
 			children = (
 				6E9D1A585DD402761808A1BF /* ExerciseApiDTO.swift */,
 			);
-			name = DTO;
 			path = DTO;
 			sourceTree = "<group>";
 		};
@@ -947,7 +925,6 @@
 			children = (
 				764A6342E5C88ACD554AD561 /* TrainingApiDTO.swift */,
 			);
-			name = DTO;
 			path = DTO;
 			sourceTree = "<group>";
 		};
@@ -956,7 +933,6 @@
 			children = (
 				EB41F37B0BA0A83490D872A0 /* SetMediaRepository.swift */,
 			);
-			name = SetMedia;
 			path = SetMedia;
 			sourceTree = "<group>";
 		};
@@ -975,7 +951,6 @@
 				D2685A416C5E4B40E85AAFF2 /* TrainingRemoteDataSource.swift */,
 				38E1BD136929148C8151E47D /* DTO */,
 			);
-			name = Remote;
 			path = Remote;
 			sourceTree = "<group>";
 		};
@@ -985,7 +960,6 @@
 				EB58121B3B29EB8004CE2B72 /* SetMediaDataSourceProtocol.swift */,
 				0D7FDD4342880C28F514AE83 /* Local */,
 			);
-			name = SetMedia;
 			path = SetMedia;
 			sourceTree = "<group>";
 		};
@@ -1003,7 +977,6 @@
 			children = (
 				E2FB1F83BE513D73EB667426 /* DomainError.swift */,
 			);
-			name = Errors;
 			path = Errors;
 			sourceTree = "<group>";
 		};
@@ -1015,7 +988,6 @@
 				E5FFDBC97F630A347E856818 /* ExerciseProgressionBuilder.swift */,
 				B98F50784D0A18074F830389 /* ExerciseProgressionRouter.swift */,
 			);
-			name = ExerciseProgression;
 			path = ExerciseProgression;
 			sourceTree = "<group>";
 		};
@@ -1037,7 +1009,6 @@
 				9CADD66700DACDC3BD9D0EAE /* SetTag.swift */,
 				F1E7D9695F10F9A136509EFB /* ExerciseProgressionMatch.swift */,
 			);
-			name = WorkoutLog;
 			path = WorkoutLog;
 			sourceTree = "<group>";
 		};
@@ -1046,7 +1017,6 @@
 			children = (
 				ED71CD50C8ECCAE181A06E02 /* WorkoutLogApiDTO.swift */,
 			);
-			name = DTO;
 			path = DTO;
 			sourceTree = "<group>";
 		};
@@ -1054,7 +1024,6 @@
 			isa = PBXGroup;
 			children = (
 			);
-			name = Component;
 			path = Component;
 			sourceTree = "<group>";
 		};
@@ -1065,7 +1034,6 @@
 				BAFF5183F352E17637E43607 /* WorkoutLogDetailViewModel.swift */,
 				AAC211504E4A008C7D3E4C43 /* WorkoutLogDetailView.swift */,
 			);
-			name = WorkoutLogDetail;
 			path = WorkoutLogDetail;
 			sourceTree = "<group>";
 		};
@@ -1075,7 +1043,6 @@
 				A9EB4812B5BBD5F07010BC2D /* WorkoutLogRemoteDataSource.swift */,
 				69151A6090811F89F6FE3ABE /* DTO */,
 			);
-			name = Remote;
 			path = Remote;
 			sourceTree = "<group>";
 		};
@@ -1086,7 +1053,6 @@
 				DD663E1AE589CE3351861FDF /* WorkoutSessionEditorViewModel.swift */,
 				1EFA87D5C22A85F73A5D61F5 /* WorkoutSessionEditorView.swift */,
 			);
-			name = WorkoutSessionEditor;
 			path = WorkoutSessionEditor;
 			sourceTree = "<group>";
 		};
@@ -1107,7 +1073,6 @@
 				3C78CA54ACABA556FF294AC2 /* AuthSession.swift */,
 				92B426F523DD7321E2ADFFEF /* AuthService.swift */,
 			);
-			name = Auth;
 			path = Auth;
 			sourceTree = "<group>";
 		};
@@ -1116,7 +1081,6 @@
 			children = (
 				D98A1169C318161217016E94 /* MealDTOs.swift */,
 			);
-			name = DTO;
 			path = DTO;
 			sourceTree = "<group>";
 		};
@@ -1129,7 +1093,6 @@
 				D49CBF4C2D5F78B4DFF5B3E8 /* SetMediaGalleryView.swift */,
 				9DFBD1EB4BF32F6CB7516457 /* AsyncSetMediaViewer.swift */,
 			);
-			name = SetMedia;
 			path = SetMedia;
 			sourceTree = "<group>";
 		};
@@ -1141,7 +1104,6 @@
 				A3D2DA66F23EA0C04B2C5E69 /* WorkoutLogEntryView.swift */,
 				C317C091FC411B4DF95CB7B5 /* Component */,
 			);
-			name = WorkoutLogEntry;
 			path = WorkoutLogEntry;
 			sourceTree = "<group>";
 		};
@@ -1161,7 +1123,6 @@
 				C70A4AE60E2BF859FF1D3BB3 /* ExerciseRemoteDataSource.swift */,
 				3344644854E468BFE5C73506 /* DTO */,
 			);
-			name = Remote;
 			path = Remote;
 			sourceTree = "<group>";
 		};
@@ -1171,7 +1132,6 @@
 				0D434F125B680519FD20B0EB /* Local */,
 				78D3E9DB1C714F67C23EA869 /* Remote */,
 			);
-			name = WorkoutLog;
 			path = WorkoutLog;
 			sourceTree = "<group>";
 		};
@@ -1188,7 +1148,6 @@
 			children = (
 				A74A87BF5A6F8CAC4D94EAF7 /* WorkoutLogRepository.swift */,
 			);
-			name = WorkoutLog;
 			path = WorkoutLog;
 			sourceTree = "<group>";
 		};
@@ -1199,7 +1158,6 @@
 				B29C87159CF3198D35A558BE /* DetailWorkoutView.swift */,
 				0E88A92C60A46F880C232300 /* DetailWorkoutViewModel.swift */,
 			);
-			name = DetailWorkout;
 			path = DetailWorkout;
 			sourceTree = "<group>";
 		};
@@ -1208,7 +1166,6 @@
 			children = (
 				11A279062609123B77B614DC /* ExerciseDTO.swift */,
 			);
-			name = DTO;
 			path = DTO;
 			sourceTree = "<group>";
 		};
@@ -1217,7 +1174,6 @@
 			children = (
 				AC9A56DEF6BA595F1B6055E2 /* AppNotifications.swift */,
 			);
-			name = Notifications;
 			path = Notifications;
 			sourceTree = "<group>";
 		};
@@ -1227,7 +1183,6 @@
 				5AD6C9267D3EA70D9CD42D6B /* WorkoutSessionDTO.swift */,
 				5D69E2A4EAE17EF4D5F60184 /* WorkoutLogDTO.swift */,
 			);
-			name = DTO;
 			path = DTO;
 			sourceTree = "<group>";
 		};
@@ -1354,6 +1309,18 @@
 				C1398FB72D6DF4050092DB50 /* TrainingDTO.swift */,
 			);
 			path = DTO;
+			sourceTree = "<group>";
+		};
+		C147F4BE3000DDB6006B0409 /* Recovered References */ = {
+			isa = PBXGroup;
+			children = (
+				DA11000001AA000000000001 /* HealthStoreProtocol.swift */,
+				DA11000001AA000000000002 /* HealthKitStore.swift */,
+				DA22000001AA000000000003 /* ExerciseTabView.swift */,
+				DA33000001AA000000000004 /* HealthWorkoutDetailRouter.swift */,
+				DA44000001AA000000000005 /* MyMeal.swift */,
+			);
+			name = "Recovered References";
 			sourceTree = "<group>";
 		};
 		C16051D52E2BF463003CB9B8 /* Component */ = {
@@ -1838,6 +1805,7 @@
 				79604E7329A352A7A93DEA25 /* HealthStoreProtocol.swift */,
 				E89037AAEDB2C9126FD32993 /* HealthKitManagerProtocol.swift */,
 				146D7C20DE70AFB8B50BFC8F /* HealthKitStore.swift */,
+				C147F4BE3000DDB6006B0409 /* Recovered References */,
 			);
 			sourceTree = "<group>";
 		};
@@ -2165,7 +2133,6 @@
 				F79857C30F10080A5D3380EB /* LoggedSetInput.swift */,
 				86B4A84245BF9BE1DEC48E1D /* SetMedia */,
 			);
-			name = Component;
 			path = Component;
 			sourceTree = "<group>";
 		};
@@ -2177,7 +2144,6 @@
 				D09B67B982F39F808658074B /* AIChatView.swift */,
 				6B9FC6356F40DCDC5D7DCC10 /* Component */,
 			);
-			name = AIChat;
 			path = AIChat;
 			sourceTree = "<group>";
 		};
@@ -2205,7 +2171,6 @@
 			children = (
 				CB9CD4E1A62E80D46E3D54A5 /* UserProfileApiDTO.swift */,
 			);
-			name = DTO;
 			path = DTO;
 			sourceTree = "<group>";
 		};
@@ -2225,7 +2190,6 @@
 				DB154B366C429047D8B30048 /* CoachUseCaseProtocol.swift */,
 				C48607FBCF75D188C8BC87AD /* CoachUseCase.swift */,
 			);
-			name = AI;
 			path = AI;
 			sourceTree = "<group>";
 		};
@@ -2235,7 +2199,6 @@
 				719394A566F4B4AC95DF0DAE /* WorkoutLogUseCaseProtocol.swift */,
 				EC51C38347427FB45B088A04 /* WorkoutLogUseCase.swift */,
 			);
-			name = WorkoutLog;
 			path = WorkoutLog;
 			sourceTree = "<group>";
 		};
@@ -2247,7 +2210,6 @@
 				5AD9A7B2F4DB4EE6CE262EF5 /* WorkoutSessionListViewModel.swift */,
 				1655D1E24FA5BCB4BFBF3458 /* WorkoutSessionListView.swift */,
 			);
-			name = WorkoutSessionList;
 			path = WorkoutSessionList;
 			sourceTree = "<group>";
 		};
@@ -2257,7 +2219,6 @@
 				CC877C38FA6AACB724F2E2D4 /* SetMediaType.swift */,
 				6F358161EE83B5E3A8DCF0B3 /* SetMedia.swift */,
 			);
-			name = SetMedia;
 			path = SetMedia;
 			sourceTree = "<group>";
 		};
