@@ -13,6 +13,7 @@
 		0484D8FB900F1B72C4BD2033 /* ExerciseTabBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC1232B6A1C6EA87AF9D99E6 /* ExerciseTabBuilder.swift */; };
 		061BF2DB20BEAF645637BEF8 /* SetMediaGalleryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D49CBF4C2D5F78B4DFF5B3E8 /* SetMediaGalleryView.swift */; };
 		06954E92D46A3D37104F0DD7 /* UserProfileUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1F49521E15A540E81A53E92 /* UserProfileUseCase.swift */; };
+		FE00A0DA7A5E0000000000A1 /* UploadLocalDataUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE00A0DA7A5E0000000000A2 /* UploadLocalDataUseCase.swift */; };
 		08219F72B3AB130211FD2E3F /* DetailMediaIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10E9EB2DC7A311BC70AC25D9 /* DetailMediaIndicator.swift */; };
 		0975C640F4138BECF06BB070 /* WorkoutMirrorManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0F2174773291CC40D34FE1E /* WorkoutMirrorManager.swift */; };
 		09E1915A8F849BCA5EFAA9E3 /* ExerciseProgressionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E30BE1EBDF16DCA18C2A9E /* ExerciseProgressionView.swift */; };
@@ -669,6 +670,7 @@
 		D09B67B982F39F808658074B /* AIChatView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AIChatView.swift; sourceTree = "<group>"; };
 		D0F2174773291CC40D34FE1E /* WorkoutMirrorManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WorkoutMirrorManager.swift; sourceTree = "<group>"; };
 		D1F49521E15A540E81A53E92 /* UserProfileUseCase.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UserProfileUseCase.swift; sourceTree = "<group>"; };
+		FE00A0DA7A5E0000000000A2 /* UploadLocalDataUseCase.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UploadLocalDataUseCase.swift; sourceTree = "<group>"; };
 		D2685A416C5E4B40E85AAFF2 /* TrainingRemoteDataSource.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TrainingRemoteDataSource.swift; sourceTree = "<group>"; };
 		D49CBF4C2D5F78B4DFF5B3E8 /* SetMediaGalleryView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SetMediaGalleryView.swift; sourceTree = "<group>"; };
 		D98A1169C318161217016E94 /* MealDTOs.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MealDTOs.swift; sourceTree = "<group>"; };
@@ -1585,6 +1587,7 @@
 				C119855C2E4B39990072ED64 /* WorkoutEntry */,
 				C16051DC2E2D6B77003CB9B8 /* Exercise */,
 				C1398FC02D6E09570092DB50 /* TrainingUseCase.swift */,
+				FE00A0DA7A5E0000000000A2 /* UploadLocalDataUseCase.swift */,
 				C162D66E2B0E17DB00CDCA26 /* Health */,
 				5648B56C53D76F808D460B82 /* User */,
 				956892EA48F90861B855D890 /* TrainingUseCaseProtocol.swift */,
@@ -2697,6 +2700,7 @@
 				742B006DE706E9B67E0D1A44 /* UserProfileRepository.swift in Sources */,
 				80F485AE3E238236C964BDCD /* UserProfileUseCaseProtocol.swift in Sources */,
 				06954E92D46A3D37104F0DD7 /* UserProfileUseCase.swift in Sources */,
+				FE00A0DA7A5E0000000000A1 /* UploadLocalDataUseCase.swift in Sources */,
 				5A79A85FC1B89AE535A6B74D /* OnboardingView.swift in Sources */,
 				0F7A8C69CC63F8DDD5D2426B /* OnboardingViewModel.swift in Sources */,
 				FBF45EB923FEA9A3EE9ADFF2 /* OnboardingBuilder.swift in Sources */,
