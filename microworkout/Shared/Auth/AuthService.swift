@@ -3,6 +3,7 @@ import TripleA
 
 protocol AuthServiceProtocol {
     func signInWithApple(authCode: String) async throws
+    func signInWithGoogle(idToken: String) async throws
     func logout() async
 }
 
@@ -41,6 +42,26 @@ final class AuthService: AuthServiceProtocol {
             headers: ["Accept-Language": Locale.current.identifier]
         )
         try await appAuthenticator.getNewToken(with: ["auth_code": authCode], endpoint: endpoint)
+        let me = try await network.loadAuthorized(
+            this: Endpoint(path: Config.mePath, httpMethod: .get),
+            of: AuthenticatedUser.self
+        )
+        await MainActor.run {
+            session.setAuthenticated(me)
+        }
+    }
+
+    /// Inicia sesión con Google. Recibe el `id_token` obtenido en el dispositivo
+    /// (p.ej. del SDK GoogleSignIn) y sigue la misma secuencia que Apple:
+    /// canjea tokens en el backend, carga /me y marca la sesión como autenticada.
+    func signInWithGoogle(idToken: String) async throws {
+        let endpoint = Endpoint(
+            path: Config.googleLoginPath,
+            httpMethod: .post,
+            parameters: ["id_token": idToken],
+            headers: ["Accept-Language": Locale.current.identifier]
+        )
+        try await appAuthenticator.getNewToken(with: ["id_token": idToken], endpoint: endpoint)
         let me = try await network.loadAuthorized(
             this: Endpoint(path: Config.mePath, httpMethod: .get),
             of: AuthenticatedUser.self

@@ -10,6 +10,7 @@ class Config: ConfigTripleA {
 
     // MARK: API paths
     static let appleLoginPath = "v1/users/apple-login"
+    static let googleLoginPath = "v1/users/google-login"
     static let refreshPath = "v1/users/refresh"
     static let logoutPath = "v1/users/logout"
     static let mePath = "v1/users/me"
