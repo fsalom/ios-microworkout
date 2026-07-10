@@ -35,8 +35,10 @@ final class AuthService: AuthServiceProtocol {
     }
 
     func signInWithApple(authCode: String) async throws {
+        // La `card` de TripleA no aplica baseURL al endpoint (usa URLSession directo),
+        // así que la URL debe ir completa en `path` o falla con "unsupported URL".
         let endpoint = Endpoint(
-            path: Config.appleLoginPath,
+            path: Config.baseURL + Config.appleLoginPath,
             httpMethod: .post,
             parameters: ["auth_code": authCode],
             headers: ["Accept-Language": Locale.current.identifier]
@@ -56,7 +58,7 @@ final class AuthService: AuthServiceProtocol {
     /// canjea tokens en el backend, carga /me y marca la sesión como autenticada.
     func signInWithGoogle(idToken: String) async throws {
         let endpoint = Endpoint(
-            path: Config.googleLoginPath,
+            path: Config.baseURL + Config.googleLoginPath,
             httpMethod: .post,
             parameters: ["id_token": idToken],
             headers: ["Accept-Language": Locale.current.identifier]
