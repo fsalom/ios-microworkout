@@ -32,6 +32,14 @@ final class UserProfileRepository: UserProfileRepositoryProtocol {
         return local.getProfile()
     }
 
+    func uploadLocalToRemote() async throws -> Int {
+        guard let localProfile = local.getProfile() else { return 0 }
+        // No pisar un perfil ya existente en el servidor (p.ej. otro dispositivo).
+        if try await remote.get() != nil { return 0 }
+        _ = try await remote.upsert(localProfile)
+        return 1
+    }
+
     func setOnboardingCompleted(_ completed: Bool) {
         local.setOnboardingCompleted(completed)
     }

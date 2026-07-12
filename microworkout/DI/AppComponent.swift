@@ -96,8 +96,11 @@ final class DefaultAppComponent: AppComponentProtocol {
             localDataSource: MealLocalDataSource(storage: makeUserDefaultsManager()),
             remoteApi: OpenFoodFactsApi(),
             remote: MealRemoteDataSource())
+        let userProfile = UserProfileRepository(
+            local: UserLocalDataSource(storage: makeUserDefaultsManager()),
+            remote: UserProfileRemoteDataSource())
         return UploadLocalDataUseCase(training: training, workoutLog: workoutLog,
-                                      exercise: exercise, meal: meal)
+                                      exercise: exercise, meal: meal, userProfile: userProfile)
     }()
 
     lazy var exerciseProgressionUseCase: ExerciseProgressionUseCaseProtocol = ExerciseProgressionUseCase(
