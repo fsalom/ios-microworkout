@@ -256,6 +256,14 @@ private struct ExercisePickerSheet: View {
                     Button(action: { onPick(exercise) }) {
                         HStack {
                             Text(exercise.name)
+                            if exercise.source == .local {
+                                Text("Local")
+                                    .font(.caption2).fontWeight(.semibold)
+                                    .padding(.horizontal, 6).padding(.vertical, 2)
+                                    .background(Color.secondary.opacity(0.15))
+                                    .foregroundColor(.secondary)
+                                    .clipShape(Capsule())
+                            }
                             Spacer()
                             Image(systemName: "plus")
                                 .foregroundColor(.blue)

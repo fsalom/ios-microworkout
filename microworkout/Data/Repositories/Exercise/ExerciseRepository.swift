@@ -20,16 +20,27 @@ final class ExerciseRepository: ExerciseRepositoryProtocol {
 
     func getExercises(contains searchText: String) async throws -> [Exercise] {
         if await isAuthenticated() {
-            return try await remote.list(contains: searchText).map { $0.toDomain() }
+            let synced = try await remote.list(contains: searchText).map { $0.toDomain() }
+            let localOnly = try await onlyLocal(
+                local.getExercises(contains: searchText).map { $0.toDomain() }, notIn: synced)
+            return synced + localOnly
         }
         return try await local.getExercises(contains: searchText).map { $0.toDomain() }
     }
 
     func getExercises() async throws -> [Exercise] {
         if await isAuthenticated() {
-            return try await remote.list(contains: nil).map { $0.toDomain() }
+            let synced = try await remote.list(contains: nil).map { $0.toDomain() }
+            let localOnly = try await onlyLocal(local.getExercises().map { $0.toDomain() }, notIn: synced)
+            return synced + localOnly
         }
         return try await local.getExercises().map { $0.toDomain() }
+    }
+
+    /// Ejercicios locales que aún no están en el servidor (dedup por nombre).
+    private func onlyLocal(_ locals: [Exercise], notIn synced: [Exercise]) -> [Exercise] {
+        let syncedNames = Set(synced.map { $0.name.lowercased() })
+        return locals.filter { !syncedNames.contains($0.name.lowercased()) }
     }
 
     func create(_ exercise: Exercise) async throws -> Exercise {
@@ -64,7 +75,7 @@ fileprivate extension ExerciseDTO {
     func toDomain() -> Exercise {
         let uuid = UUID(uuidString: self.id) ?? UUID()
         let type = ExerciseType(rawValue: self.type) ?? .none
-        return Exercise(id: uuid, name: self.name, type: type)
+        return Exercise(id: uuid, name: self.name, type: type, source: .local)
     }
 }
 
