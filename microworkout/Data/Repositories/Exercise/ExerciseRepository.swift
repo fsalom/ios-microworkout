@@ -44,7 +44,9 @@ final class ExerciseRepository: ExerciseRepositoryProtocol {
         var count = 0
         for dto in try await local.getExercises() {
             let e = dto.toDomain()
-            _ = try await remote.create(name: e.name, type: e.type); count += 1
+            _ = try await remote.create(name: e.name, type: e.type)
+            try await local.delete(dto.id)   // borrar tras subir: evita duplicar al re-subir
+            count += 1
         }
         return count
     }

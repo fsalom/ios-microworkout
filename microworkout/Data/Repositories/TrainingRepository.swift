@@ -74,11 +74,14 @@ final class TrainingRepository: TrainingRepositoryProtocol {
     func uploadLocalToRemote() async throws -> Int {
         var count = 0
         if let current = local.getCurrent() {
-            _ = try await remote.saveCurrent(current.toDomain()); count += 1
+            _ = try await remote.saveCurrent(current.toDomain())
+            local.clearCurrent(); count += 1
         }
-        for dto in local.getFinished() {
+        let finished = local.getFinished()
+        for dto in finished {
             _ = try await remote.finish(dto.toDomain()); count += 1
         }
+        if !finished.isEmpty { local.clearFinished() }   // borrar tras subir: evita duplicar al re-subir
         return count
     }
 }

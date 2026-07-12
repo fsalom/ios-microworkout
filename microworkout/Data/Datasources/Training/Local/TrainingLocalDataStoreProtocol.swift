@@ -3,4 +3,6 @@ protocol TrainingLocalDataSourceProtocol {
     func saveCurrent(_ training: TrainingDTO)
     func finish(_ training: TrainingDTO)
     func getFinished() -> [TrainingDTO]
+    func clearCurrent()
+    func clearFinished()
 }

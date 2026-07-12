@@ -39,12 +39,16 @@ class MealRepository: MealRepositoryProtocol {
     func uploadLocalToRemote() async throws -> Int {
         var count = 0
         for dto in try await localDataSource.getAllMeals() {
-            _ = try await remote.createMeal(dto.toDomain()); count += 1
+            _ = try await remote.createMeal(dto.toDomain())
+            try await localDataSource.deleteMeal(dto.id)   // borrar tras subir: evita duplicar al re-subir
+            count += 1
         }
         // también las comidas reutilizables ("Mis comidas") guardadas en local
-        for dto in localDataSource.getMyMeals() {
+        let myMeals = localDataSource.getMyMeals()
+        for dto in myMeals {
             _ = try await remote.createMyMeal(dto.toDomain()); count += 1
         }
+        if !myMeals.isEmpty { localDataSource.saveMyMeals([]) }   // limpiar tras subir
         return count
     }
 

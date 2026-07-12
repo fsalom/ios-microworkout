@@ -31,4 +31,12 @@ class TrainingLocalDataSource: TrainingLocalDataSourceProtocol {
     func getFinished() -> [TrainingDTO] {
         return self.localStorage.get(forKey: TrainingKey.finish.rawValue) ?? []
     }
+
+    func clearCurrent() {
+        self.localStorage.remove(forKey: TrainingKey.current.rawValue)
+    }
+
+    func clearFinished() {
+        self.localStorage.remove(forKey: TrainingKey.finish.rawValue)
+    }
 }
