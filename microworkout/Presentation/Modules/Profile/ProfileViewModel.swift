@@ -166,6 +166,7 @@ class ProfileViewModel: ObservableObject {
                 do {
                     try await authService.signInWithApple(authCode: code)
                     uiState.authSuccessMessage = "Sesión iniciada"
+                    uploadLocalData()   // auto-sincroniza lo local al iniciar sesión
                 } catch {
                     uiState.authError = Self.authErrorText(error)
                 }
@@ -194,6 +195,7 @@ class ProfileViewModel: ObservableObject {
                 }
                 try await authService.signInWithGoogle(idToken: idToken)
                 uiState.authSuccessMessage = "Sesión iniciada con Google"
+                uploadLocalData()   // auto-sincroniza lo local al iniciar sesión
             } catch {
                 let ns = error as NSError
                 if ns.domain == kGIDSignInErrorDomain && ns.code == GIDSignInError.canceled.rawValue { return }
