@@ -392,6 +392,11 @@ struct ProfileView: View {
                     }
                 }
             }
+
+            // Cuenta (iniciar/cerrar sesión + subir datos) también en el formulario:
+            // al loguearte sin perfil en el servidor se muestra esta vista, y aun así
+            // debes poder cerrar sesión y sincronizar.
+            accountSection
         }
     }
 }
