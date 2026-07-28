@@ -215,11 +215,11 @@ final class MealsViewModel: ObservableObject {
     var canGoToNextDay: Bool { true }
 
     func goToAddMeal() {
-        router.goToAddMeal(prefilledType: nil)
+        router.goToAddMeal(prefilledType: nil, date: uiState.selectedDate)
     }
 
     func goToAddMeal(for type: MealType) {
-        router.goToAddMeal(prefilledType: type)
+        router.goToAddMeal(prefilledType: type, date: uiState.selectedDate)
     }
 
     func goToBarcodeScanner() {

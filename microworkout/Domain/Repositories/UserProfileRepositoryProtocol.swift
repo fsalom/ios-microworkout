@@ -7,9 +7,12 @@ import Foundation
 protocol UserProfileRepositoryProtocol {
     func saveProfile(_ profile: UserProfile) async throws
     func getProfile() async throws -> UserProfile?
-    /// Sube el perfil guardado en local al servidor (migración invitado→cuenta).
-    /// Devuelve 1 si subió, 0 si no había perfil local o el servidor ya tenía uno.
-    func uploadLocalToRemote() async throws -> Int
+    /// 1 si hay perfil local que aún no está en la cuenta; 0 en otro caso.
+    func pendingSyncCount() async throws -> Int
+    /// Sube el perfil local a la cuenta si el servidor no tiene uno (modelo
+    /// espejo: no borra la copia local, y no pisa un perfil ya existente en el
+    /// servidor). Devuelve 1 si subió, 0 si no.
+    func syncLocalToRemote() async throws -> Int
     func setOnboardingCompleted(_ completed: Bool)
     func isOnboardingCompleted() -> Bool
 }

@@ -39,6 +39,9 @@ final class WorkoutLogRepository: WorkoutLogRepositoryProtocol {
             if let uuid = UUID(uuidString: id) {
                 try await remote.deleteSession(id: uuid)
             }
+            // Borrar también en local: una copia local huérfana se contaría como
+            // pendiente en la siguiente sincronización y se volvería a subir.
+            local.deleteSession(id: id)
             return
         }
         local.deleteSession(id: id)
@@ -66,17 +69,33 @@ final class WorkoutLogRepository: WorkoutLogRepositoryProtocol {
             if let uuid = UUID(uuidString: id) {
                 try await remote.deleteLog(id: uuid)
             }
+            // Ver deleteSession: sin esto la copia local resucita al sincronizar.
+            local.deleteLog(id: id)
             return
         }
         local.deleteLog(id: id)
     }
 
-    func uploadLocalToRemote() async throws -> Int {
+    /// Modelo espejo: cuenta las sesiones y registros locales cuyo id no está
+    /// aún en la cuenta. No modifica nada local.
+    func pendingSyncCount() async throws -> Int {
+        let remoteSessionIds = Set(try await remote.listSessions().map { $0.id })
+        let remoteLogIds = Set(try await remote.listLogs().map { $0.id })
+        let pendingSessions = local.getAllSessions().filter { !remoteSessionIds.contains($0.id) }.count
+        let pendingLogs = local.getAllLogs().filter { !remoteLogIds.contains($0.id) }.count
+        return pendingSessions + pendingLogs
+    }
+
+    /// Sube las sesiones y registros locales que aún no estén en la cuenta (por id).
+    /// Nunca borra la copia local — el dispositivo conserva el respaldo.
+    func syncLocalToRemote() async throws -> Int {
+        let remoteSessionIds = Set(try await remote.listSessions().map { $0.id })
+        let remoteLogIds = Set(try await remote.listLogs().map { $0.id })
         var count = 0
-        for dto in local.getAllSessions() {
+        for dto in local.getAllSessions() where !remoteSessionIds.contains(dto.id) {
             _ = try await remote.upsertSession(dto.toDomain()); count += 1
         }
-        for dto in local.getAllLogs() {
+        for dto in local.getAllLogs() where !remoteLogIds.contains(dto.id) {
             _ = try await remote.upsertLog(dto.toDomain()); count += 1
         }
         return count

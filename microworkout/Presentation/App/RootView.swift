@@ -26,7 +26,7 @@ struct RootView: View {
                     root
                 })
                 .navigationBarBackButtonHidden(false)
-                .tint(.black)
+                .tint(.green)   // color de marca; legible en claro y oscuro (antes .black, invisible en oscuro)
             }
         }
         .fullScreenCover(isPresented: .constant(appState.isWorkoutScreen)) {

@@ -12,10 +12,11 @@ class AddMealBuilder {
         self.component = component
     }
 
-    func build(prefilledType: MealType? = nil) -> AddMealView {
+    func build(prefilledType: MealType? = nil, date: Date = Date()) -> AddMealView {
         let viewModel = AddMealViewModel(
             router: AddMealRouter(navigator: Navigator.shared, component: component),
-            mealUseCase: component.mealUseCase
+            mealUseCase: component.mealUseCase,
+            targetDate: date
         )
         if let prefilledType = prefilledType {
             viewModel.selectMealType(prefilledType)

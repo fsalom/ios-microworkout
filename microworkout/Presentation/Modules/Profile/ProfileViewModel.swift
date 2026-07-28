@@ -1,16 +1,17 @@
 import SwiftUI
 import Combine
+import UIKit
 import AuthenticationServices
-#if canImport(GoogleSignIn)
-import GoogleSignIn
-#endif
 
 struct ProfileUiState {
     var authError: String?
     var authSuccessMessage: String?
     var isSigningIn: Bool = false
-    var isUploading: Bool = false
-    var uploadMessage: String?
+    var isSyncing: Bool = false
+    var isLoadingSyncStatus: Bool = false
+    var hasLoadedSyncStatus: Bool = false
+    var syncReport: SyncReport = .empty()
+    var lastSyncMessage: String?
     var name: String = ""
     var weight: Double = 70
     var height: Double = 170
@@ -38,57 +39,109 @@ class ProfileViewModel: ObservableObject {
     private var userProfileUseCase: UserProfileUseCaseProtocol
     private var healthUseCase: HealthUseCaseProtocol
     private let authService: AuthServiceProtocol
-    private let uploadLocalDataUseCase: UploadLocalDataUseCaseProtocol
+    private let syncLocalDataUseCase: SyncLocalDataUseCaseProtocol
 
     init(userProfileUseCase: UserProfileUseCaseProtocol,
          healthUseCase: HealthUseCaseProtocol,
          authService: AuthServiceProtocol,
-         uploadLocalDataUseCase: UploadLocalDataUseCaseProtocol) {
+         syncLocalDataUseCase: SyncLocalDataUseCaseProtocol) {
         self.userProfileUseCase = userProfileUseCase
         self.healthUseCase = healthUseCase
         self.authService = authService
-        self.uploadLocalDataUseCase = uploadLocalDataUseCase
+        self.syncLocalDataUseCase = syncLocalDataUseCase
         loadProfile()
         loadHealthKitStatus()
     }
 
-    /// Sube a tu cuenta los datos guardados en local (entrenamientos, sesiones,
-    /// logs, ejercicios y comidas). Requiere estar autenticado.
-    func uploadLocalData() {
+    /// Comprueba (sin escribir nada) qué datos locales faltan por subir a la
+    /// cuenta, categoría a categoría. Requiere estar autenticado.
+    func loadSyncStatus() {
         Task { @MainActor [weak self] in
             guard let self else { return }
-            self.uiState.isUploading = true
-            self.uiState.uploadMessage = nil
-            do {
-                let n = try await self.uploadLocalDataUseCase.upload()
-                self.uiState.uploadMessage = "Subidos \(n) elementos a tu cuenta."
-            } catch {
-                self.uiState.uploadMessage = "Error al subir: \(error.localizedDescription)"
+            guard AuthSession.shared.state.isAuthenticated else { return }
+            guard !self.uiState.isSyncing, !self.uiState.isLoadingSyncStatus else { return }
+            self.uiState.isLoadingSyncStatus = true
+            let report = await self.syncLocalDataUseCase.status()
+            self.uiState.syncReport = report
+            self.uiState.hasLoadedSyncStatus = true
+            self.uiState.isLoadingSyncStatus = false
+            // Si el token murió, SessionAwareNetwork (infra) ya pasó a invitado; avisamos.
+            if !AuthSession.shared.state.isAuthenticated {
+                self.uiState.lastSyncMessage = Self.sessionExpiredMessage
             }
-            self.uiState.isUploading = false
         }
+    }
+
+    /// Sincroniza con la cuenta: sube lo que falte en cada categoría (la copia
+    /// local se conserva siempre como respaldo) y refleja el resultado por
+    /// categoría en `syncReport`. Requiere estar autenticado.
+    func sync() {
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            guard AuthSession.shared.state.isAuthenticated else { return }
+            guard !self.uiState.isSyncing else { return }
+            self.uiState.isSyncing = true
+            self.uiState.lastSyncMessage = nil
+            let report = await self.syncLocalDataUseCase.sync()
+            self.uiState.syncReport = report
+            self.uiState.hasLoadedSyncStatus = true
+            // SessionAwareNetwork ya habrá pasado a invitado si el token murió.
+            let expired = !AuthSession.shared.state.isAuthenticated
+            self.uiState.lastSyncMessage = expired ? Self.sessionExpiredMessage : Self.syncSummary(for: report)
+            self.uiState.isSyncing = false
+        }
+    }
+
+    static let sessionExpiredMessage = "Tu sesión ha caducado. Vuelve a iniciar sesión."
+
+    /// Resumen legible del resultado de una sincronización.
+    private static func syncSummary(for report: SyncReport) -> String {
+        if report.hasErrors {
+            if report.totalUploaded > 0 {
+                return "Se subieron \(report.totalUploaded), pero algunas categorías fallaron. Reinténtalo."
+            }
+            return "No se pudo sincronizar. Revisa tu conexión y reinténtalo."
+        }
+        if report.totalUploaded > 0 {
+            return "Sincronizados \(report.totalUploaded) elementos con tu cuenta."
+        }
+        return "Todo está al día en tu cuenta."
     }
 
     func loadProfile() {
         Task { @MainActor [weak self] in
             guard let self else { return }
-            guard let profile = try? await self.userProfileUseCase.getProfile() else { return }
-            self.uiState.name = profile.name
-            self.uiState.weight = profile.weight
-            self.uiState.height = profile.height
-            self.uiState.age = profile.age
-            self.uiState.gender = profile.gender
-            self.uiState.activityLevel = profile.activityLevel
-            self.uiState.fitnessGoal = profile.resolvedGoal
-            self.uiState.macroProfile = profile.resolvedMacroProfile
-            self.uiState.hasProfile = true
-            self.uiState.dailyCalorieTarget = profile.dailyCalorieTarget
-            self.uiState.macroTargets = profile.macroTargets
-            self.uiState.freeDays = profile.resolvedFreeDays
-            self.uiState.freeDayExtraCalories = profile.resolvedFreeDayExtra
-            self.uiState.hasCycling = profile.hasCycling
-            self.uiState.strictDayCalorieTarget = profile.strictDayCalorieTarget
-            self.uiState.freeDayCalorieTarget = profile.freeDayCalorieTarget
+            do {
+                guard let profile = try await self.userProfileUseCase.getProfile() else {
+                    // No hay perfil (invitado sin perfil local, o cuenta nueva):
+                    // el hub muestra el CTA "Completa tu perfil", no datos antiguos.
+                    self.uiState.hasProfile = false
+                    return
+                }
+                self.uiState.name = profile.name
+                self.uiState.weight = profile.weight
+                self.uiState.height = profile.height
+                self.uiState.age = profile.age
+                self.uiState.gender = profile.gender
+                self.uiState.activityLevel = profile.activityLevel
+                self.uiState.fitnessGoal = profile.resolvedGoal
+                self.uiState.macroProfile = profile.resolvedMacroProfile
+                self.uiState.hasProfile = true
+                self.uiState.dailyCalorieTarget = profile.dailyCalorieTarget
+                self.uiState.macroTargets = profile.macroTargets
+                self.uiState.freeDays = profile.resolvedFreeDays
+                self.uiState.freeDayExtraCalories = profile.resolvedFreeDayExtra
+                self.uiState.hasCycling = profile.hasCycling
+                self.uiState.strictDayCalorieTarget = profile.strictDayCalorieTarget
+                self.uiState.freeDayCalorieTarget = profile.freeDayCalorieTarget
+            } catch {
+                // Si el token murió, SessionAwareNetwork (infra) ya pasó a invitado;
+                // aquí solo mostramos el aviso. Otros errores (red transitoria):
+                // mantenemos el último estado conocido.
+                if !AuthSession.shared.state.isAuthenticated {
+                    self.uiState.authError = Self.sessionExpiredMessage
+                }
+            }
         }
     }
 
@@ -166,7 +219,7 @@ class ProfileViewModel: ObservableObject {
                 do {
                     try await authService.signInWithApple(authCode: code)
                     uiState.authSuccessMessage = "Sesión iniciada"
-                    uploadLocalData()   // auto-sincroniza lo local al iniciar sesión
+                    sync()   // auto-sincroniza lo local al iniciar sesión
                 } catch {
                     uiState.authError = Self.authErrorText(error)
                 }
@@ -174,46 +227,24 @@ class ProfileViewModel: ObservableObject {
         }
     }
 
-#if canImport(GoogleSignIn)
-    /// Lanza el flujo de Google Sign-In, obtiene el `idToken` y lo canjea en el
-    /// backend con el mismo `AuthService` que Apple. Requiere el producto SPM
-    /// GoogleSignIn enlazado al target y `GIDClientID` en el Info.plist.
+    /// Inicia sesión con Google. El SDK y la presentación viven en `AuthService`
+    /// (infra); aquí solo orquestamos el estado de UI y la auto-sincronización.
     @MainActor
     func handleGoogleSignIn() {
-        guard let presenter = Self.topViewController() else {
-            uiState.authError = "No se pudo presentar el inicio de sesión de Google"
-            return
-        }
         Task { @MainActor in
             uiState.isSigningIn = true
             defer { uiState.isSigningIn = false }
             do {
-                let result = try await GIDSignIn.sharedInstance.signIn(withPresenting: presenter)
-                guard let idToken = result.user.idToken?.tokenString else {
-                    uiState.authError = "No se obtuvo el id_token de Google"
-                    return
-                }
-                try await authService.signInWithGoogle(idToken: idToken)
+                try await authService.signInWithGoogle()
                 uiState.authSuccessMessage = "Sesión iniciada con Google"
-                uploadLocalData()   // auto-sincroniza lo local al iniciar sesión
+                sync()   // auto-sincroniza lo local al iniciar sesión
+            } catch AuthServiceError.cancelled {
+                return
             } catch {
-                let ns = error as NSError
-                if ns.domain == kGIDSignInErrorDomain && ns.code == GIDSignInError.canceled.rawValue { return }
                 uiState.authError = Self.authErrorText(error)
             }
         }
     }
-
-    private static func topViewController() -> UIViewController? {
-        let window = UIApplication.shared.connectedScenes
-            .compactMap { $0 as? UIWindowScene }
-            .flatMap { $0.windows }
-            .first(where: { $0.isKeyWindow })
-        var top = window?.rootViewController
-        while let presented = top?.presentedViewController { top = presented }
-        return top
-    }
-#endif
 
     /// Traduce un error de inicio de sesión a un mensaje claro para el usuario.
     static func authErrorText(_ error: Error) -> String {

@@ -36,20 +36,51 @@ class MealRepository: MealRepositoryProtocol {
         try await localDataSource.saveMeal(meal.toDTO())
     }
 
-    func uploadLocalToRemote() async throws -> Int {
+    /// Modelo espejo: cuenta las comidas y "mis comidas" locales cuyo id no está
+    /// aún en la cuenta. No modifica nada local.
+    func pendingSyncCount() async throws -> Int {
+        var pending = 0
+        let localMeals = try await localDataSource.getAllMeals()
+        if !localMeals.isEmpty {
+            let remoteIds = try await remoteMealIds(covering: localMeals)
+            pending += localMeals.filter { !remoteIds.contains($0.id) }.count
+        }
+        let localMyMeals = localDataSource.getMyMeals()
+        if !localMyMeals.isEmpty {
+            let remoteMyMealIds = Set(try await remote.listMyMeals().map { $0.id })
+            pending += localMyMeals.filter { !remoteMyMealIds.contains($0.id) }.count
+        }
+        return pending
+    }
+
+    /// Sube las comidas y recetas locales que aún no estén en la cuenta (por id).
+    /// Nunca borra la copia local — el dispositivo conserva el respaldo.
+    func syncLocalToRemote() async throws -> Int {
         var count = 0
-        for dto in try await localDataSource.getAllMeals() {
-            _ = try await remote.createMeal(dto.toDomain())
-            try await localDataSource.deleteMeal(dto.id)   // borrar tras subir: evita duplicar al re-subir
-            count += 1
+        let localMeals = try await localDataSource.getAllMeals()
+        if !localMeals.isEmpty {
+            let remoteIds = try await remoteMealIds(covering: localMeals)
+            for dto in localMeals where !remoteIds.contains(dto.id) {
+                _ = try await remote.createMeal(dto.toDomain()); count += 1
+            }
         }
-        // también las comidas reutilizables ("Mis comidas") guardadas en local
-        let myMeals = localDataSource.getMyMeals()
-        for dto in myMeals {
-            _ = try await remote.createMyMeal(dto.toDomain()); count += 1
+        let localMyMeals = localDataSource.getMyMeals()
+        if !localMyMeals.isEmpty {
+            let remoteMyMealIds = Set(try await remote.listMyMeals().map { $0.id })
+            for dto in localMyMeals where !remoteMyMealIds.contains(dto.id) {
+                _ = try await remote.createMyMeal(dto.toDomain()); count += 1
+            }
         }
-        if !myMeals.isEmpty { localDataSource.saveMyMeals([]) }   // limpiar tras subir
         return count
+    }
+
+    /// Ids de comidas ya en la cuenta que cubren el rango de fechas de las
+    /// comidas locales (el backend lista comidas por rango de fechas).
+    private func remoteMealIds(covering localMeals: [MealDTO]) async throws -> Set<UUID> {
+        let timestamps = localMeals.map { $0.timestamp }
+        guard let from = timestamps.min(), let to = timestamps.max() else { return [] }
+        let remoteMeals = try await remote.listMeals(from: from, to: to)
+        return Set(remoteMeals.map { $0.id })
     }
 
     func getMeals(for date: Date) async throws -> [Meal] {
@@ -69,6 +100,10 @@ class MealRepository: MealRepositoryProtocol {
     func deleteMeal(_ mealId: UUID) async throws {
         if await isAuthenticated() {
             try await remote.deleteMeal(id: mealId)
+            // Borrar también la copia local: si se queda, la siguiente
+            // sincronización la ve como "pendiente" (no está en el servidor) y la
+            // vuelve a subir, resucitando una comida que el usuario borró.
+            try? await localDataSource.deleteMeal(mealId)
             return
         }
         try await localDataSource.deleteMeal(mealId)

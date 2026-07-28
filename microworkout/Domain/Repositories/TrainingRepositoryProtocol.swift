@@ -4,6 +4,9 @@ protocol TrainingRepositoryProtocol {
     func saveCurrent(_ training: Training) async throws
     func finish(_ training: Training) async throws
     func getFinished() async throws -> [Training]
-    /// Sube a servidor los datos guardados en local (para migrar al iniciar sesión).
-    func uploadLocalToRemote() async throws -> Int
+    /// Cuántos entrenamientos locales todavía no están en la cuenta.
+    func pendingSyncCount() async throws -> Int
+    /// Sube a la cuenta los entrenamientos locales que aún no estén en el
+    /// servidor (modelo espejo: no borra la copia local). Devuelve cuántos subió.
+    func syncLocalToRemote() async throws -> Int
 }

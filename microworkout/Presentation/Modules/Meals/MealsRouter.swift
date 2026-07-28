@@ -14,8 +14,8 @@ class MealsRouter {
         self.component = component
     }
 
-    func goToAddMeal(prefilledType: MealType? = nil) {
-        navigator.push(to: AddMealBuilder(component: component).build(prefilledType: prefilledType))
+    func goToAddMeal(prefilledType: MealType? = nil, date: Date = Date()) {
+        navigator.push(to: AddMealBuilder(component: component).build(prefilledType: prefilledType, date: date))
     }
 
     func goToBarcodeScanner() {

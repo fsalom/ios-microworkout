@@ -32,9 +32,16 @@ final class UserProfileRepository: UserProfileRepositoryProtocol {
         return local.getProfile()
     }
 
-    func uploadLocalToRemote() async throws -> Int {
+    /// Modelo espejo: 1 si hay perfil local y la cuenta aún no tiene uno; 0 si no.
+    func pendingSyncCount() async throws -> Int {
+        guard local.getProfile() != nil else { return 0 }
+        return try await remote.get() == nil ? 1 : 0
+    }
+
+    /// Sube el perfil local si la cuenta no tiene uno. No pisa un perfil ya
+    /// existente en el servidor y nunca borra la copia local.
+    func syncLocalToRemote() async throws -> Int {
         guard let localProfile = local.getProfile() else { return 0 }
-        // No pisar un perfil ya existente en el servidor (p.ej. otro dispositivo).
         if try await remote.get() != nil { return 0 }
         _ = try await remote.upsert(localProfile)
         return 1

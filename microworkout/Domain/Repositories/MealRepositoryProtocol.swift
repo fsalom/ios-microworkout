@@ -13,7 +13,11 @@ protocol MealRepositoryProtocol {
     func getMeals(for date: Date) async throws -> [Meal]
     func getMeals(from startDate: Date, to endDate: Date) async throws -> [Meal]
     func deleteMeal(_ mealId: UUID) async throws
-    func uploadLocalToRemote() async throws -> Int
+    /// Cuántas comidas + "mis comidas" locales todavía no están en la cuenta.
+    func pendingSyncCount() async throws -> Int
+    /// Sube a la cuenta las comidas y recetas locales que aún no estén en el
+    /// servidor (modelo espejo: no borra la copia local). Devuelve cuántos subió.
+    func syncLocalToRemote() async throws -> Int
     func fetchFoodInfo(barcode: String) async throws -> FoodItem?
     func searchFoods(query: String) async throws -> [FoodItem]
 

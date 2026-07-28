@@ -82,7 +82,7 @@ final class DefaultAppComponent: AppComponentProtocol {
         return SetMediaUseCase(repository: repository)
     }()
 
-    lazy var uploadLocalDataUseCase: UploadLocalDataUseCaseProtocol = {
+    lazy var syncLocalDataUseCase: SyncLocalDataUseCaseProtocol = {
         let workoutLog = WorkoutLogRepository(
             local: WorkoutLogLocalDataSource(localStorage: makeUserDefaultsManager()),
             remote: WorkoutLogRemoteDataSource())
@@ -99,8 +99,8 @@ final class DefaultAppComponent: AppComponentProtocol {
         let userProfile = UserProfileRepository(
             local: UserLocalDataSource(storage: makeUserDefaultsManager()),
             remote: UserProfileRemoteDataSource())
-        return UploadLocalDataUseCase(training: training, workoutLog: workoutLog,
-                                      exercise: exercise, meal: meal, userProfile: userProfile)
+        return SyncLocalDataUseCase(training: training, workoutLog: workoutLog,
+                                    exercise: exercise, meal: meal, userProfile: userProfile)
     }()
 
     lazy var exerciseProgressionUseCase: ExerciseProgressionUseCaseProtocol = ExerciseProgressionUseCase(

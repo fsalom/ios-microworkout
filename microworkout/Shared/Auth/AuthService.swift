@@ -1,20 +1,32 @@
 import Foundation
+import UIKit
 import TripleA
+#if canImport(GoogleSignIn)
+import GoogleSignIn
+#endif
 
 protocol AuthServiceProtocol {
     func signInWithApple(authCode: String) async throws
-    func signInWithGoogle(idToken: String) async throws
+    /// Ejecuta el flujo nativo de Google (presentación + id_token) y lo canjea en
+    /// el backend. El SDK queda encapsulado aquí; la capa de presentación no lo conoce.
+    func signInWithGoogle() async throws
     func logout() async
+    /// Entrega a Google el callback OAuth (`.onOpenURL`). Devuelve si lo gestionó.
+    @discardableResult func handleOpenURL(_ url: URL) -> Bool
 }
 
 enum AuthServiceError: Error, LocalizedError {
     case missingAuthorizationCode
     case backendUnavailable
+    case cancelled
+    case googleUnavailable
 
     var errorDescription: String? {
         switch self {
         case .missingAuthorizationCode: return "No se obtuvo código de autorización de Apple"
         case .backendUnavailable: return "No se pudo contactar con el servidor"
+        case .cancelled: return nil
+        case .googleUnavailable: return "Inicio de sesión con Google no disponible"
         }
     }
 }
@@ -53,10 +65,12 @@ final class AuthService: AuthServiceProtocol {
         }
     }
 
-    /// Inicia sesión con Google. Recibe el `id_token` obtenido en el dispositivo
-    /// (p.ej. del SDK GoogleSignIn) y sigue la misma secuencia que Apple:
-    /// canjea tokens en el backend, carga /me y marca la sesión como autenticada.
-    func signInWithGoogle(idToken: String) async throws {
+    /// Inicia sesión con Google: presenta el flujo nativo, obtiene el `id_token`,
+    /// lo canjea en el backend, carga /me y marca la sesión como autenticada.
+    /// Todo el SDK de Google vive aquí (infra), no en la capa de presentación.
+    func signInWithGoogle() async throws {
+        #if canImport(GoogleSignIn)
+        let idToken = try await Self.googleIdToken()
         let endpoint = Endpoint(
             path: Config.baseURL + Config.googleLoginPath,
             httpMethod: .post,
@@ -71,6 +85,9 @@ final class AuthService: AuthServiceProtocol {
         await MainActor.run {
             session.setAuthenticated(me)
         }
+        #else
+        throw AuthServiceError.googleUnavailable
+        #endif
     }
 
     func logout() async {
@@ -79,4 +96,45 @@ final class AuthService: AuthServiceProtocol {
             session.setGuest()
         }
     }
+
+    @discardableResult
+    func handleOpenURL(_ url: URL) -> Bool {
+        #if canImport(GoogleSignIn)
+        return GIDSignIn.sharedInstance.handle(url)
+        #else
+        return false
+        #endif
+    }
+
+    #if canImport(GoogleSignIn)
+    /// Lanza el flujo nativo de Google Sign-In y devuelve el `id_token`.
+    /// Traduce la cancelación del usuario a `AuthServiceError.cancelled`.
+    @MainActor
+    private static func googleIdToken() async throws -> String {
+        guard let presenter = topViewController() else {
+            throw AuthServiceError.googleUnavailable
+        }
+        do {
+            let result = try await GIDSignIn.sharedInstance.signIn(withPresenting: presenter)
+            guard let idToken = result.user.idToken?.tokenString else {
+                throw AuthServiceError.missingAuthorizationCode
+            }
+            return idToken
+        } catch let ns as NSError where ns.domain == kGIDSignInErrorDomain
+            && ns.code == GIDSignInError.canceled.rawValue {
+            throw AuthServiceError.cancelled
+        }
+    }
+
+    @MainActor
+    private static func topViewController() -> UIViewController? {
+        let window = UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap { $0.windows }
+            .first(where: { $0.isKeyWindow })
+        var top = window?.rootViewController
+        while let presented = top?.presentedViewController { top = presented }
+        return top
+    }
+    #endif
 }

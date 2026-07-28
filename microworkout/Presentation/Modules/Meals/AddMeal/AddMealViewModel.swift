@@ -17,7 +17,6 @@ enum AddMealListTab: String, CaseIterable, Identifiable {
 
 struct AddMealUiState {
     var selectedType: MealType = .forCurrentTime()
-    var selectedTime: Date = Date()
     var items: [FoodItem] = []
     var recentFoods: [FoodItem] = []
     var favoriteFoods: [FoodItem] = []
@@ -71,13 +70,32 @@ final class AddMealViewModel: ObservableObject {
     /// when a task is cancelled by a follow-up search.
     private var searchGeneration: Int = 0
 
-    init(router: AddMealRouter, mealUseCase: MealUseCaseProtocol) {
+    /// The day the meal will be logged to. Comes from the Meals screen's selected
+    /// date, so adding food while viewing another day lands on that day, not today.
+    private let targetDate: Date
+
+    init(router: AddMealRouter, mealUseCase: MealUseCaseProtocol, targetDate: Date = Date()) {
         self.router = router
         self.mealUseCase = mealUseCase
+        self.targetDate = targetDate
         loadRecentFoods()
         loadFavorites()
         loadMyMeals()
         loadPreviousDayMeals()
+    }
+
+    /// Timestamp for a newly created meal: the `targetDate`'s day combined with the
+    /// current time-of-day. For "today" this is effectively now (preserving the
+    /// previous behaviour); for any other day it lands the meal on that day while
+    /// keeping a sensible within-day ordering.
+    private func mealTimestamp() -> Date {
+        let calendar = Calendar.current
+        if calendar.isDateInToday(targetDate) { return Date() }
+        let time = calendar.dateComponents([.hour, .minute, .second], from: Date())
+        return calendar.date(bySettingHour: time.hour ?? 12,
+                             minute: time.minute ?? 0,
+                             second: time.second ?? 0,
+                             of: targetDate) ?? targetDate
     }
 
     /// Fetches yesterday's meals that match the currently selected meal type.
@@ -85,7 +103,7 @@ final class AddMealViewModel: ObservableObject {
     /// when adding breakfast, only yesterday's breakfast is shown.
     func loadPreviousDayMeals() {
         let type = uiState.selectedType
-        let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: Date()) ?? Date()
+        let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: targetDate) ?? targetDate
         Task {
             do {
                 let meals = try await mealUseCase.getMeals(for: yesterday)
@@ -148,7 +166,7 @@ final class AddMealViewModel: ObservableObject {
 
         let meal = Meal(
             type: uiState.selectedType,
-            timestamp: Date(),
+            timestamp: mealTimestamp(),
             items: source.items,
             myMealName: source.myMealName
         )
@@ -175,7 +193,7 @@ final class AddMealViewModel: ObservableObject {
     func addMyMeal(_ myMeal: MyMeal) {
         let meal = Meal(
             type: uiState.selectedType,
-            timestamp: Date(),
+            timestamp: mealTimestamp(),
             items: myMeal.items,
             myMealName: myMeal.name
         )
@@ -263,7 +281,7 @@ final class AddMealViewModel: ObservableObject {
         )
         let meal = Meal(
             type: uiState.selectedType,
-            timestamp: Date(),
+            timestamp: mealTimestamp(),
             items: [item]
         )
 
@@ -463,7 +481,7 @@ final class AddMealViewModel: ObservableObject {
 
         let meal = Meal(
             type: uiState.selectedType,
-            timestamp: uiState.selectedTime,
+            timestamp: mealTimestamp(),
             items: uiState.items
         )
 

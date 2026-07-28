@@ -1,7 +1,4 @@
 import SwiftUI
-#if canImport(GoogleSignIn)
-import GoogleSignIn
-#endif
 
 enum AppearancePreference: String, CaseIterable, Identifiable {
     case system
@@ -58,11 +55,9 @@ struct MicroWorkoutApp: App {
                 .task {
                     await authSession.bootstrap()
                 }
-                #if canImport(GoogleSignIn)
                 .onOpenURL { url in
-                    GIDSignIn.sharedInstance.handle(url)
+                    component.authService.handleOpenURL(url)
                 }
-                #endif
                 .onAppear {
                     _ = PhoneConnectivityManager.shared
                     Task {

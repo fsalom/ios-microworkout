@@ -51,12 +51,23 @@ final class ExerciseRepository: ExerciseRepositoryProtocol {
         return dto.toDomain()
     }
 
-    func uploadLocalToRemote() async throws -> Int {
+    /// Modelo espejo: cuenta los ejercicios locales cuyo nombre no está aún en
+    /// la cuenta (dedup por nombre, como en las lecturas). No modifica nada local.
+    func pendingSyncCount() async throws -> Int {
+        let syncedNames = Set(try await remote.list(contains: nil).map { $0.name.lowercased() })
+        return try await local.getExercises()
+            .filter { !syncedNames.contains($0.name.lowercased()) }
+            .count
+    }
+
+    /// Sube los ejercicios locales que aún no existan en la cuenta (por nombre).
+    /// Nunca borra la copia local — el dispositivo conserva el respaldo.
+    func syncLocalToRemote() async throws -> Int {
+        let syncedNames = Set(try await remote.list(contains: nil).map { $0.name.lowercased() })
         var count = 0
-        for dto in try await local.getExercises() {
+        for dto in try await local.getExercises() where !syncedNames.contains(dto.name.lowercased()) {
             let e = dto.toDomain()
             _ = try await remote.create(name: e.name, type: e.type)
-            try await local.delete(dto.id)   // borrar tras subir: evita duplicar al re-subir
             count += 1
         }
         return count
@@ -65,6 +76,10 @@ final class ExerciseRepository: ExerciseRepositoryProtocol {
     func delete(_ id: UUID) async throws {
         if await isAuthenticated() {
             try await remote.delete(id)
+            // Borrar también en local. El dedup de ejercicios es por nombre, así
+            // que una copia local que sobreviva se vuelve a subir en la siguiente
+            // sincronización y el ejercicio borrado reaparece.
+            try? await local.delete(id.uuidString)
         } else {
             try await local.delete(id.uuidString)
         }

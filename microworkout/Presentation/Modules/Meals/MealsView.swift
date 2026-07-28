@@ -45,7 +45,7 @@ struct MealsView: View {
                         MealSectionCard(
                             type: type,
                             meals: viewModel.uiState.mealsByType[type] ?? [],
-                            onAdd: { addMealSheet = AddMealSheetData(mealType: type) },
+                            onAdd: { addMealSheet = AddMealSheetData(mealType: type, date: viewModel.uiState.selectedDate) },
                             onDeleteItem: { itemId, mealId in
                                 viewModel.deleteFoodItem(itemId: itemId, mealId: mealId)
                             },
@@ -78,7 +78,7 @@ struct MealsView: View {
             }
         }
         .sheet(item: $addMealSheet, onDismiss: { viewModel.loadMeals() }) { data in
-            AddMealBuilder(component: component).build(prefilledType: data.mealType)
+            AddMealBuilder(component: component).build(prefilledType: data.mealType, date: data.date)
         }
         .sheet(item: $editingEntry) { entry in
             QuantityPickerSheet(
@@ -121,6 +121,7 @@ struct MealsView: View {
 struct AddMealSheetData: Identifiable {
     let id = UUID()
     let mealType: MealType?
+    let date: Date
 }
 
 struct EditFoodEntry: Identifiable {
