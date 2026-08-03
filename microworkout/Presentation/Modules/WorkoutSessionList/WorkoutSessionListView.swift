@@ -6,6 +6,13 @@ struct WorkoutSessionListView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 10) {
+                CoachInsightCard(
+                    insight: viewModel.uiState.coachInsight,
+                    isLoading: viewModel.uiState.isLoadingCoach,
+                    onOpenChat: { prompt in viewModel.goToChat(prompt: prompt) }
+                )
+                .padding(.bottom, 6)
+
                 if viewModel.uiState.sessions.isEmpty {
                     EmptyState()
                         .padding(.top, 60)

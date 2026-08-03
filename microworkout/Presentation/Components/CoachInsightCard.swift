@@ -44,6 +44,13 @@ struct CoachInsightCard: View {
                     }
                 }
 
+                if !insight.isFromModel {
+                    Text("Cálculo local — inicia sesión o revisa la conexión para el análisis completo")
+                        .font(.caption2)
+                        .foregroundColor(.white.opacity(0.5))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+
                 openChatButton(prompt: insight.prompt)
             } else if isLoading {
                 Text("Preparando análisis…")
@@ -84,7 +91,7 @@ struct CoachInsightCard: View {
                 .tracking(0.5)
             Spacer()
             if let insight = insight {
-                Text(kindLabel(insight.kind))
+                Text(insight.topic.shortLabel)
                     .font(.caption2)
                     .fontWeight(.semibold)
                     .foregroundColor(.white.opacity(0.6))
@@ -108,13 +115,5 @@ struct CoachInsightCard: View {
             .clipShape(RoundedRectangle(cornerRadius: 12))
         }
         .buttonStyle(.plain)
-    }
-
-    private func kindLabel(_ kind: CoachInsight.Kind) -> String {
-        switch kind {
-        case .workout: return "PROGRESIÓN"
-        case .nutrition: return "NUTRICIÓN"
-        case .home: return "RESUMEN"
-        }
     }
 }

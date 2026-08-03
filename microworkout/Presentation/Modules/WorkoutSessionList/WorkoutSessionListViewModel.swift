@@ -3,6 +3,8 @@ import SwiftUI
 
 struct WorkoutSessionListUiState {
     var sessions: [WorkoutSession] = []
+    var coachInsight: CoachInsight? = nil
+    var isLoadingCoach: Bool = false
 }
 
 final class WorkoutSessionListViewModel: ObservableObject {
@@ -10,10 +12,16 @@ final class WorkoutSessionListViewModel: ObservableObject {
 
     private let router: WorkoutSessionListRouter
     private let useCase: WorkoutLogUseCaseProtocol
+    private let coachUseCase: CoachUseCaseProtocol
 
-    init(router: WorkoutSessionListRouter, useCase: WorkoutLogUseCaseProtocol) {
+    init(
+        router: WorkoutSessionListRouter,
+        useCase: WorkoutLogUseCaseProtocol,
+        coachUseCase: CoachUseCaseProtocol
+    ) {
         self.router = router
         self.useCase = useCase
+        self.coachUseCase = coachUseCase
     }
 
     func load() {
@@ -22,6 +30,21 @@ final class WorkoutSessionListViewModel: ObservableObject {
             let sessions = (try? await self.useCase.getAllSessions()) ?? []
             self.uiState.sessions = sessions.sorted { $0.updatedAt > $1.updatedAt }
         }
+        loadCoach()
+    }
+
+    private func loadCoach() {
+        guard !uiState.isLoadingCoach else { return }
+        uiState.isLoadingCoach = true
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            self.uiState.coachInsight = await self.coachUseCase.planInsight()
+            self.uiState.isLoadingCoach = false
+        }
+    }
+
+    func goToChat(prompt: String) {
+        router.goToChat(prompt: prompt, topic: .plan)
     }
 
     func createNew() {

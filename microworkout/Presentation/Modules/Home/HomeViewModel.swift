@@ -206,6 +206,6 @@ final class HomeViewModel: ObservableObject {
     }
 
     func goToChat(prompt: String) {
-        router.goToChat(prompt: prompt)
+        router.goToChat(prompt: prompt, topic: .daily)
     }
 }

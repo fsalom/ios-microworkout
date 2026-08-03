@@ -227,6 +227,6 @@ final class MealsViewModel: ObservableObject {
     }
 
     func goToChat(prompt: String) {
-        router.goToChat(prompt: prompt)
+        router.goToChat(prompt: prompt, topic: .nutrition)
     }
 }

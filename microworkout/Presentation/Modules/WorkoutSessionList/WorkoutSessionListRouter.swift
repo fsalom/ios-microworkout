@@ -12,4 +12,10 @@ class WorkoutSessionListRouter {
     func goToEditor(_ session: WorkoutSession, isNew: Bool = false) {
         navigator.push(to: WorkoutSessionEditorBuilder(component: component).build(session: session, isNew: isNew))
     }
+
+    func goToChat(prompt: String, topic: AICoachTopic) {
+        navigator.push(
+            to: AIChatBuilder(component: component).build(topic: topic, initialPrompt: prompt)
+        )
+    }
 }

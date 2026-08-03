@@ -1,191 +1,160 @@
 import Foundation
 
-/// Implementación temporal: genera insights "mock" derivados de datos reales del
-/// usuario (logs, comidas, salud). Cuando conectemos un modelo real, sustituye el
-/// cuerpo de cada función por una llamada al modelo pasando `AIContext` y el prompt
-/// adecuado.
-class CoachUseCase: CoachUseCaseProtocol {
+/// Consejo del coach para las tarjetas de las pestañas.
+///
+/// Tres capas, en este orden:
+/// 1. **Caché local.** Cada tarjeta se pide al aparecer la pestaña, así que sin
+///    caché una sesión normal de la app dispararía docenas de llamadas al modelo.
+/// 2. **Modelo** (`/v1/ai/insight`) cuando la caché no vale.
+/// 3. **Heurísticas locales** si no hay cuenta o la llamada falla — la tarjeta
+///    nunca se queda en blanco por un problema de red.
+///
+/// La caché se invalida por dos vías: por TTL y por huella de los datos. Solo con
+/// TTL, registrar una serie o una comida dejaría la tarjeta contando algo viejo;
+/// solo con huella, el consejo no se renovaría nunca en un día sin actividad.
+final class CoachUseCase: CoachUseCaseProtocol {
     private let contextUseCase: AIContextUseCaseProtocol
+    private let repository: AICoachRepositoryProtocol
+    private let storage: UserDefaultsManagerProtocol
+    private let heuristics = HeuristicCoach()
+    private let ttl: TimeInterval
 
-    init(contextUseCase: AIContextUseCaseProtocol) {
+    init(
+        contextUseCase: AIContextUseCaseProtocol,
+        repository: AICoachRepositoryProtocol,
+        storage: UserDefaultsManagerProtocol,
+        ttl: TimeInterval = 6 * 60 * 60
+    ) {
         self.contextUseCase = contextUseCase
+        self.repository = repository
+        self.storage = storage
+        self.ttl = ttl
     }
 
-    func workoutInsight() async -> CoachInsight {
-        let ctx = await contextUseCase.buildContext(mealDaysBack: 0, healthWeeksBack: 1)
-        let logs = ctx.workoutLogs.sorted { $0.startedAt > $1.startedAt }
-        let recent = logs.prefix(7)
-        let exerciseStats = collectExerciseStats(from: Array(recent))
+    // MARK: - API
 
+    func insight(for topic: AICoachTopic) async -> CoachInsight {
+        await resolve(topic: topic, ignoringCache: false)
+    }
+
+    func refreshInsight(for topic: AICoachTopic) async -> CoachInsight {
+        await resolve(topic: topic, ignoringCache: true)
+    }
+
+    private func resolve(topic: AICoachTopic, ignoringCache: Bool) async -> CoachInsight {
+        let depth = ContextDepth.for(topic)
+        let context = await contextUseCase.buildContext(
+            mealDaysBack: depth.mealDaysBack,
+            healthWeeksBack: depth.healthWeeksBack
+        )
+        let fingerprint = Self.fingerprint(of: context)
+        let key = await cacheKey(for: topic)
+
+        if !ignoringCache,
+           let cached: CachedInsight = storage.get(forKey: key),
+           cached.fingerprint == fingerprint,
+           Date().timeIntervalSince(cached.createdAt) < ttl {
+            return cached.toDomain(topic: topic)
+        }
+
+        do {
+            let insight = try await repository.insight(context: context, topic: topic)
+            storage.save(
+                CachedInsight(insight: insight, fingerprint: fingerprint),
+                forKey: key
+            )
+            return insight
+        } catch {
+            // Invitado o fallo de red: no es un error que merezca UI propia, la
+            // tarjeta simplemente muestra el consejo local.
+            return heuristics.insight(for: topic, context: context)
+        }
+    }
+
+    // MARK: - Profundidad de contexto por tema
+
+    private struct ContextDepth {
+        let mealDaysBack: Int
+        let healthWeeksBack: Int
+
+        /// Cada tema mira datos distintos; construir el contexto completo para
+        /// una tarjeta de progresión es leer un mes de comidas para nada.
+        static func `for`(_ topic: AICoachTopic) -> ContextDepth {
+            switch topic {
+            case .workout, .plan: return ContextDepth(mealDaysBack: 1, healthWeeksBack: 1)
+            case .nutrition: return ContextDepth(mealDaysBack: 14, healthWeeksBack: 1)
+            case .daily: return ContextDepth(mealDaysBack: 7, healthWeeksBack: 1)
+            case .free: return ContextDepth(mealDaysBack: 30, healthWeeksBack: 4)
+            }
+        }
+    }
+
+    // MARK: - Caché
+
+    private func cacheKey(for topic: AICoachTopic) async -> String {
+        // Se mete el usuario en la clave para que al cambiar de cuenta no se vea
+        // el consejo de la anterior.
+        let user = await MainActor.run { AuthSession.shared.state.user?.id }
+        let scope = user.map(String.init) ?? "guest"
+        return "ai.coach.insight.\(scope).\(topic.rawValue)"
+    }
+
+    /// Resumen barato de "qué datos hay". Cambia en cuanto el usuario registra
+    /// algo relevante, que es exactamente cuando el consejo se queda viejo.
+    private static func fingerprint(of context: AIContext) -> String {
+        let calendar = Calendar.current
+        let lastLog = context.workoutLogs.map(\.startedAt).max() ?? .distantPast
+        let todayKcal = context.meals
+            .filter { calendar.isDateInToday($0.timestamp) }
+            .reduce(0.0) { $0 + $1.totalNutrition.calories }
+        let todaySteps = context.healthDays.first { calendar.isDateInToday($0.date) }?.steps ?? 0
+
+        // Se construye a trozos y no como un literal de array: con 10 expresiones
+        // mezclando Int/Double/Date el type-checker se atraganta.
+        var parts: [String] = []
+        parts.append(String(Int(calendar.startOfDay(for: Date()).timeIntervalSince1970)))
+        parts.append(String(context.workoutLogs.count))
+        parts.append(String(context.workoutSessions.count))
+        parts.append(String(context.manualEntries.count))
+        parts.append(String(context.meals.count))
+        parts.append(String(Int(lastLog.timeIntervalSince1970)))
+        parts.append(String(Int(todayKcal.rounded())))
+        parts.append(String(todaySteps))
+
+        let weight: Double = context.profile?.weightKg ?? 0
+        let target: Double = context.profile?.todayCalorieTarget ?? 0
+        parts.append(String(Int(weight * 10)))
+        parts.append(String(Int(target)))
+
+        return parts.joined(separator: "|")
+    }
+
+    private struct CachedInsight: Codable {
         let title: String
         let body: String
-        var bullets: [String] = []
+        let bullets: [String]
+        let prompt: String
+        let fingerprint: String
+        let createdAt: Date
 
-        if logs.isEmpty {
-            title = "Empieza a registrar tus entrenos"
-            body = "Cuando guardes algunos entrenamientos, te daré recomendaciones de progresión por ejercicio."
-        } else if exerciseStats.isEmpty {
-            title = "Próxima semana: añade peso poco a poco"
-            body = "Estás registrando series sin peso. Si añades carga te diré cuándo subir."
-        } else {
-            title = "Próxima semana: sube empuje, mantén pierna"
-            body = "Análisis de tus últimas \(recent.count) sesiones."
-            bullets = exerciseStats.prefix(4).map { stat in
-                let trend = stat.suggestion
-                return "\(stat.name): \(trend)"
-            }
+        init(insight: CoachInsight, fingerprint: String, createdAt: Date = Date()) {
+            self.title = insight.title
+            self.body = insight.body
+            self.bullets = insight.bullets
+            self.prompt = insight.prompt
+            self.fingerprint = fingerprint
+            self.createdAt = createdAt
         }
 
-        return CoachInsight(
-            kind: .workout,
-            title: title,
-            body: body,
-            bullets: bullets,
-            prompt: "¿Cómo progreso la próxima semana en mis ejercicios?"
-        )
-    }
-
-    func nutritionInsight() async -> CoachInsight {
-        let ctx = await contextUseCase.buildContext(mealDaysBack: 1, healthWeeksBack: 0)
-        let cal = Calendar.current
-        let today = ctx.meals.filter { cal.isDateInToday($0.timestamp) }
-
-        var kcal: Double = 0
-        var protein: Double = 0
-        var carbs: Double = 0
-        var fats: Double = 0
-        for meal in today {
-            kcal += meal.totalNutrition.calories
-            protein += meal.totalNutrition.proteinsG
-            carbs += meal.totalNutrition.carbohydratesG
-            fats += meal.totalNutrition.fatsG
+        func toDomain(topic: AICoachTopic) -> CoachInsight {
+            CoachInsight(
+                topic: topic,
+                title: title,
+                body: body,
+                bullets: bullets,
+                prompt: prompt,
+                isFromModel: true
+            )
         }
-
-        let target = ctx.profile?.todayCalorieTarget ?? 0
-        let macros = ctx.profile?.macroTargets
-
-        let title = nutritionTitle(today: today, kcal: kcal, target: target)
-        let body = today.isEmpty
-            ? "Cuando añadas algo te diré cómo encaja con tu objetivo del día."
-            : "Estado de tus macros del día."
-
-        var bullets: [String] = []
-        if !today.isEmpty {
-            if let m = macros {
-                bullets.append(macroLine("Proteína", current: protein, target: m.proteinsG, unit: "g"))
-                bullets.append(macroLine("Carbos", current: carbs, target: m.carbohydratesG, unit: "g"))
-                bullets.append(macroLine("Grasa", current: fats, target: m.fatsG, unit: "g"))
-            } else {
-                bullets.append("Proteína: \(Int(protein))g")
-                bullets.append("Carbos: \(Int(carbs))g")
-                bullets.append("Grasa: \(Int(fats))g")
-            }
-        }
-
-        return CoachInsight(
-            kind: .nutrition,
-            title: title,
-            body: body,
-            bullets: bullets,
-            prompt: "Analiza mis comidas de hoy y dame recomendaciones."
-        )
-    }
-
-    private func nutritionTitle(today: [AIMealSnapshot], kcal: Double, target: Double) -> String {
-        if today.isEmpty {
-            return "Aún no has registrado comidas hoy"
-        }
-        guard target > 0 else {
-            return "\(Int(kcal)) kcal hoy"
-        }
-        let diff = target - kcal
-        if diff > 200 { return "Te quedan \(Int(diff)) kcal por comer" }
-        if diff < -200 { return "Te has pasado \(Int(-diff)) kcal del objetivo" }
-        return "Vas en línea con tu objetivo"
-    }
-
-    func homeInsight() async -> CoachInsight {
-        let ctx = await contextUseCase.buildContext(mealDaysBack: 7, healthWeeksBack: 1)
-        let cal = Calendar.current
-        let last7 = ctx.workoutLogs.filter {
-            guard let days = cal.dateComponents([.day], from: $0.startedAt, to: Date()).day else { return false }
-            return days < 7
-        }.count
-        let kcalToday = ctx.meals
-            .filter { cal.isDateInToday($0.timestamp) }
-            .reduce(0.0) { $0 + $1.totalNutrition.calories }
-        let stepsToday = ctx.healthDays.first(where: { cal.isDateInToday($0.date) })?.steps ?? 0
-
-        let title = "Resumen del día"
-        var bullets: [String] = []
-        bullets.append("Entrenos esta semana: \(last7)")
-        if kcalToday > 0 {
-            bullets.append("Has comido \(Int(kcalToday)) kcal hoy")
-        } else {
-            bullets.append("Aún no has registrado comidas hoy")
-        }
-        if stepsToday > 0 {
-            bullets.append("Pasos: \(stepsToday)")
-        }
-
-        let body = "Visión rápida de tu día."
-
-        return CoachInsight(
-            kind: .home,
-            title: title,
-            body: body,
-            bullets: bullets,
-            prompt: "Hazme un resumen del día y de la semana."
-        )
-    }
-
-    // MARK: - Helpers
-
-    private struct ExerciseStat {
-        let name: String
-        let firstTopWeight: Double
-        let lastTopWeight: Double
-
-        var suggestion: String {
-            if lastTopWeight > firstTopWeight {
-                let diff = lastTopWeight - firstTopWeight
-                return "subes \(format(diff)) kg → mantén"
-            } else if lastTopWeight < firstTopWeight {
-                return "estancado en \(format(lastTopWeight)) kg → repite"
-            } else {
-                return "estable en \(format(lastTopWeight)) kg → +2.5 kg"
-            }
-        }
-
-        private func format(_ v: Double) -> String {
-            v.truncatingRemainder(dividingBy: 1) == 0 ? String(Int(v)) : String(format: "%.1f", v)
-        }
-    }
-
-    private func collectExerciseStats(from logs: [AIWorkoutLogSnapshot]) -> [ExerciseStat] {
-        var byName: [String: [(date: Date, top: Double)]] = [:]
-        for log in logs {
-            for ex in log.exercises {
-                let topWeight = ex.sets.compactMap { $0.weightKg }.max() ?? 0
-                guard topWeight > 0 else { continue }
-                byName[ex.name, default: []].append((log.startedAt, topWeight))
-            }
-        }
-        return byName.compactMap { name, points in
-            let sorted = points.sorted { $0.date < $1.date }
-            guard let first = sorted.first, let last = sorted.last else { return nil }
-            return ExerciseStat(name: name, firstTopWeight: first.top, lastTopWeight: last.top)
-        }
-        .sorted { $0.name < $1.name }
-    }
-
-    private func macroLine(_ label: String, current: Double, target: Double, unit: String) -> String {
-        guard target > 0 else { return "\(label): \(Int(current))\(unit)" }
-        let diff = target - current
-        if abs(diff) < 5 {
-            return "\(label): \(Int(current))/\(Int(target))\(unit) ✅"
-        }
-        let sign = diff > 0 ? "−" : "+"
-        return "\(label): \(Int(current))/\(Int(target))\(unit) (\(sign)\(Int(abs(diff)))\(unit))"
     }
 }

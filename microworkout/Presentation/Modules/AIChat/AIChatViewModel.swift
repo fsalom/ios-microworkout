@@ -10,7 +10,8 @@ struct AIChatMessage: Identifiable, Equatable {
 
     let id: UUID
     let role: Role
-    let text: String
+    /// Mutable porque la respuesta del modelo se va rellenando por streaming.
+    var text: String
     let timestamp: Date
 
     init(id: UUID = UUID(), role: Role, text: String, timestamp: Date = Date()) {
@@ -19,54 +20,81 @@ struct AIChatMessage: Identifiable, Equatable {
         self.text = text
         self.timestamp = timestamp
     }
+
+    /// Los mensajes de sistema son avisos de la app, no parte de la conversación
+    /// con el modelo, así que no viajan al backend.
+    var asTurn: AIChatTurn? {
+        switch role {
+        case .user: return AIChatTurn(role: .user, content: text)
+        case .assistant: return AIChatTurn(role: .assistant, content: text)
+        case .system: return nil
+        }
+    }
 }
 
 struct AIChatUiState {
     var messages: [AIChatMessage] = []
     var input: String = ""
     var isPreparing: Bool = false
+    /// Hay una respuesta llegando ahora mismo.
+    var isStreaming: Bool = false
     var contextJSON: String = ""
     var contextSummary: String = ""
     var isContextSheetVisible: Bool = false
     var isContextReady: Bool = false
+    var error: String?
+
+    var canSend: Bool {
+        !isStreaming && !input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
 }
 
+/// No se marca `@MainActor` a propósito: los builders construyen los ViewModels
+/// desde contextos sincronos no aislados, igual que el resto de la app. Los saltos
+/// al main actor se hacen explícitos en cada mutación de `uiState`.
 final class AIChatViewModel: ObservableObject {
     @Published var uiState: AIChatUiState = .init()
 
-    private let useCase: AIContextUseCaseProtocol
+    private let contextUseCase: AIContextUseCaseProtocol
+    private let chatUseCase: AICoachChatUseCaseProtocol
+    private let topic: AICoachTopic
     private var cachedContext: AIContext?
-    private let initialPrompt: String?
+    private var streamTask: Task<Void, Never>?
 
-    init(useCase: AIContextUseCaseProtocol, initialPrompt: String? = nil) {
-        self.useCase = useCase
-        self.initialPrompt = initialPrompt
-        self.uiState.messages = [
-            AIChatMessage(
-                role: .assistant,
-                text: "Hola. Aún no estoy conectado a ningún modelo, pero ya recopilo todos tus datos. Pulsa la lupa para revisarlos antes de conectar la IA."
-            )
-        ]
-        if let prompt = initialPrompt {
-            self.uiState.input = prompt
+    init(
+        contextUseCase: AIContextUseCaseProtocol,
+        chatUseCase: AICoachChatUseCaseProtocol,
+        topic: AICoachTopic = .free,
+        initialPrompt: String? = nil
+    ) {
+        self.contextUseCase = contextUseCase
+        self.chatUseCase = chatUseCase
+        self.topic = topic
+        if let initialPrompt {
+            self.uiState.input = initialPrompt
         }
     }
 
+    deinit {
+        streamTask?.cancel()
+    }
+
+    // MARK: - Contexto
+
     func prepareContext() {
-        guard !uiState.isPreparing else { return }
+        guard !uiState.isPreparing, !uiState.isContextReady else { return }
         uiState.isPreparing = true
         Task { @MainActor in
-            let context = await useCase.buildContext(mealDaysBack: 30, healthWeeksBack: 4)
-            self.cachedContext = context
-            self.uiState.contextJSON = useCase.toJSON(context, pretty: true)
-            self.uiState.contextSummary = summarize(context)
+            let context = await self.resolveContext()
+            self.uiState.contextJSON = self.contextUseCase.toJSON(context, pretty: true)
+            self.uiState.contextSummary = Self.summarize(context)
             self.uiState.isContextReady = true
             self.uiState.isPreparing = false
         }
     }
 
     func openContextSheet() {
-        if !uiState.isContextReady { prepareContext() }
+        prepareContext()
         uiState.isContextSheetVisible = true
     }
 
@@ -74,44 +102,124 @@ final class AIChatViewModel: ObservableObject {
         uiState.isContextSheetVisible = false
     }
 
-    func send() {
-        let trimmed = uiState.input.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return }
-        let userMessage = AIChatMessage(role: .user, text: trimmed)
-        uiState.messages.append(userMessage)
-        uiState.input = ""
+    // MARK: - Conversación
 
-        // Mock response: la conexión real al modelo se añadirá más tarde.
-        // Por ahora confirmamos que el contexto está preparado y damos pistas.
-        Task { @MainActor in
-            if !uiState.isContextReady { prepareContext() }
-            try? await Task.sleep(nanoseconds: 350_000_000)
-            let summary = uiState.contextSummary.isEmpty
-                ? "(contexto cargándose…)"
-                : uiState.contextSummary
-            let mock = AIChatMessage(
-                role: .assistant,
-                text:
-                    "Recibido. Aún no estoy conectado a ningún modelo de IA, " +
-                    "así que esto es una respuesta simulada. Cuando conectemos " +
-                    "una API, le pasaré el siguiente contexto:\n\n\(summary)"
-            )
-            uiState.messages.append(mock)
+    func send() {
+        let question = uiState.input.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !question.isEmpty, !uiState.isStreaming else { return }
+
+        uiState.error = nil
+        uiState.input = ""
+        // El historial que ve el modelo es el de *antes* de este turno: la pregunta
+        // actual va aparte, así que hay que capturarlo antes de añadir el mensaje.
+        let conversation = uiState.messages.compactMap(\.asTurn)
+        uiState.messages.append(AIChatMessage(role: .user, text: question))
+
+        let placeholder = AIChatMessage(role: .assistant, text: "")
+        uiState.messages.append(placeholder)
+        uiState.isStreaming = true
+
+        streamTask = Task { [weak self] in
+            await self?.consume(question: question, conversation: conversation, into: placeholder.id)
         }
     }
 
-    private func summarize(_ ctx: AIContext) -> String {
-        let p = ctx.profile
-        var lines: [String] = []
-        if let p = p {
-            lines.append("• Perfil: \(p.name), \(p.age) años, \(Int(p.weightKg)) kg, objetivo \(p.fitnessGoal ?? "—"), \(Int(p.dailyCalorieTarget)) kcal/día")
+    /// Corta la respuesta en curso. Lo ya recibido se queda en pantalla.
+    func stopStreaming() {
+        streamTask?.cancel()
+        streamTask = nil
+        uiState.isStreaming = false
+        dropPlaceholderIfEmpty()
+    }
+
+    func retryLast() {
+        guard !uiState.isStreaming else { return }
+        uiState.error = nil
+
+        // Se descarta la respuesta fallida completa (aunque llegara a medias: al
+        // reintentar se pide de nuevo entera) y se recupera la pregunta.
+        if uiState.messages.last?.role == .assistant {
+            uiState.messages.removeLast()
         }
-        lines.append("• Plantillas de sesión: \(ctx.workoutSessions.count)")
-        lines.append("• Logs de entrenamiento: \(ctx.workoutLogs.count)")
-        lines.append("• Entries manuales: \(ctx.manualEntries.count)")
-        lines.append("• Comidas: \(ctx.meals.count)")
-        lines.append("• Días con datos de salud: \(ctx.healthDays.count)")
-        lines.append("• Workouts del Apple Watch: \(ctx.healthWorkouts.count)")
+        guard let question = uiState.messages.last, question.role == .user else { return }
+        uiState.messages.removeLast()
+        uiState.input = question.text
+        send()
+    }
+
+    private func consume(question: String, conversation: [AIChatTurn], into messageId: UUID) async {
+        let context = await resolveContext()
+
+        do {
+            for try await chunk in chatUseCase.stream(
+                context: context,
+                question: question,
+                topic: topic,
+                conversation: conversation
+            ) {
+                guard !Task.isCancelled else { break }
+                await MainActor.run { self.append(chunk, to: messageId) }
+            }
+            await MainActor.run {
+                self.uiState.isStreaming = false
+                self.dropPlaceholderIfEmpty()
+            }
+        } catch {
+            await MainActor.run {
+                self.uiState.isStreaming = false
+                self.uiState.error = Self.message(for: error)
+                self.dropPlaceholderIfEmpty()
+            }
+        }
+    }
+
+    /// El contexto se construye una vez por pantalla y se reutiliza en los turnos
+    /// siguientes: leer HealthKit y todo el histórico en cada mensaje sería caro y
+    /// entre turno y turno no cambia.
+    private func resolveContext() async -> AIContext {
+        if let cachedContext { return cachedContext }
+        let context = await contextUseCase.buildContext(mealDaysBack: 30, healthWeeksBack: 4)
+        cachedContext = context
+        return context
+    }
+
+    private func append(_ chunk: String, to messageId: UUID) {
+        guard let index = uiState.messages.firstIndex(where: { $0.id == messageId }) else { return }
+        uiState.messages[index].text += chunk
+    }
+
+    /// Si el modelo no llegó a decir nada (error o cancelación inmediata), la
+    /// burbuja vacía sobra.
+    private func dropPlaceholderIfEmpty() {
+        if let last = uiState.messages.last, last.role == .assistant, last.text.isEmpty {
+            uiState.messages.removeLast()
+        }
+    }
+
+    private static func message(for error: Error) -> String {
+        if case DomainError.notAuthorized = error {
+            return "Inicia sesión para usar el coach IA: el modelo se ejecuta en el servidor."
+        }
+        return (error as? LocalizedError)?.errorDescription
+            ?? "No se pudo contactar con el coach. Inténtalo de nuevo."
+    }
+
+    // MARK: - Resumen del contexto (hoja de datos)
+
+    private static func summarize(_ context: AIContext) -> String {
+        var lines: [String] = []
+        if let profile = context.profile {
+            lines.append(
+                "• Perfil: \(profile.name), \(profile.age) años, \(Int(profile.weightKg)) kg, "
+                + "objetivo \(profile.fitnessGoal ?? "—"), \(Int(profile.dailyCalorieTarget)) kcal/día"
+            )
+        }
+        lines.append("• Plantillas de sesión: \(context.workoutSessions.count)")
+        lines.append("• Logs de entrenamiento: \(context.workoutLogs.count)")
+        lines.append("• Entries manuales: \(context.manualEntries.count)")
+        lines.append("• Comidas: \(context.meals.count)")
+        lines.append("• Días con datos de salud: \(context.healthDays.count)")
+        lines.append("• Workouts del Apple Watch: \(context.healthWorkouts.count)")
         return lines.joined(separator: "\n")
     }
 }

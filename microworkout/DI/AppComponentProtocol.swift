@@ -19,6 +19,7 @@ protocol AppComponentProtocol: AnyObject {
     var setMediaUseCase: SetMediaUseCase { get }
     var aiContextUseCase: AIContextUseCaseProtocol { get }
     var coachUseCase: CoachUseCaseProtocol { get }
+    var aiCoachChatUseCase: AICoachChatUseCaseProtocol { get }
     var exerciseProgressionUseCase: ExerciseProgressionUseCaseProtocol { get }
     var syncLocalDataUseCase: SyncLocalDataUseCaseProtocol { get }
 

@@ -116,7 +116,19 @@ final class DefaultAppComponent: AppComponentProtocol {
         healthUseCase: healthUseCase
     )
 
-    lazy var coachUseCase: CoachUseCaseProtocol = CoachUseCase(contextUseCase: aiContextUseCase)
+    lazy var aiCoachRepository: AICoachRepositoryProtocol = AICoachRepository(
+        remote: AICoachRemoteDataSource()
+    )
+
+    lazy var coachUseCase: CoachUseCaseProtocol = CoachUseCase(
+        contextUseCase: aiContextUseCase,
+        repository: aiCoachRepository,
+        storage: makeUserDefaultsManager()
+    )
+
+    lazy var aiCoachChatUseCase: AICoachChatUseCaseProtocol = AICoachChatUseCase(
+        repository: aiCoachRepository
+    )
 
     // MARK: Auth
 

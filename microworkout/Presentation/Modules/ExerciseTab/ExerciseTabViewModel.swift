@@ -176,7 +176,7 @@ final class ExerciseTabViewModel: ObservableObject {
     }
 
     func goToChat(prompt: String) {
-        router.goToChat(prompt: prompt)
+        router.goToChat(prompt: prompt, topic: .workout)
     }
 
     var currentMonthLabel: String {

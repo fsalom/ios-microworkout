@@ -7,9 +7,14 @@ class AIChatBuilder {
         self.component = component
     }
 
-    func build(initialPrompt: String? = nil) -> AIChatView {
+    /// - Parameters:
+    ///   - topic: área desde la que se abre el chat. Decide el prompt de sistema
+    ///     que usa el backend; `.free` para una pregunta suelta del usuario.
+    func build(topic: AICoachTopic = .free, initialPrompt: String? = nil) -> AIChatView {
         let viewModel = AIChatViewModel(
-            useCase: component.aiContextUseCase,
+            contextUseCase: component.aiContextUseCase,
+            chatUseCase: component.aiCoachChatUseCase,
+            topic: topic,
             initialPrompt: initialPrompt
         )
         return AIChatView(viewModel: viewModel)

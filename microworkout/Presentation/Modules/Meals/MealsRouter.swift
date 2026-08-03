@@ -26,7 +26,9 @@ class MealsRouter {
         navigator.dismiss()
     }
 
-    func goToChat(prompt: String) {
-        navigator.push(to: AIChatBuilder(component: component).build(initialPrompt: prompt))
+    func goToChat(prompt: String, topic: AICoachTopic) {
+        navigator.push(
+            to: AIChatBuilder(component: component).build(topic: topic, initialPrompt: prompt)
+        )
     }
 }
