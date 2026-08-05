@@ -118,7 +118,11 @@ class MealRepository: MealRepositoryProtocol {
         let local = try await localDataSource.getMeals(for: date).map { $0.toDomain() }
         guard await isAuthenticated() else { return local }
 
-        let synced = try await remote.listMeals(for: date).map { $0.toDomain() }
+        // Si el servidor falla se degrada a local en vez de propagar: lo local es la
+        // única copia de lo registrado como invitado, y perderlo de vista por un
+        // fallo de red es peor que mostrar solo una parte. Los llamantes que usan
+        // `try?` (como el contexto de la IA) se quedaban sin NADA del día.
+        let synced = (try? await remote.listMeals(for: date))?.map { $0.toDomain() } ?? []
         return Self.merge(synced: synced, local: local)
     }
 
@@ -127,8 +131,8 @@ class MealRepository: MealRepositoryProtocol {
             .getMeals(from: startDate, to: endDate).map { $0.toDomain() }
         guard await isAuthenticated() else { return local }
 
-        let synced = try await remote
-            .listMeals(from: startDate, to: endDate).map { $0.toDomain() }
+        let synced = (try? await remote.listMeals(from: startDate, to: endDate))?
+            .map { $0.toDomain() } ?? []
         return Self.merge(synced: synced, local: local)
     }
 
@@ -185,7 +189,9 @@ class MealRepository: MealRepositoryProtocol {
         let local = localDataSource.getFavorites().map { $0.toDomain() }
         guard await isAuthenticated() else { return local }
 
-        let synced = try await remote.listFavorites().map { $0.toDomain() }
+        // Igual que con las comidas: un fallo del servidor no debe esconder los
+        // favoritos que solo existen en el dispositivo.
+        let synced = (try? await remote.listFavorites())?.map { $0.toDomain() } ?? []
         let syncedKeys = Set(synced.map { $0.identityKey })
         return synced + local.filter { !syncedKeys.contains($0.identityKey) }
     }

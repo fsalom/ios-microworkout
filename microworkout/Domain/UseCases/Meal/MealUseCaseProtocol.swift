@@ -15,6 +15,9 @@ protocol MealUseCaseProtocol {
 
     /// Recupera las comidas de una fecha específica.
     func getMeals(for date: Date) async throws -> [Meal]
+    /// Comidas de un rango, en una sola consulta. Pedir día a día multiplica las
+    /// idas y venidas al servidor y, si falla una, se pierde ese día entero.
+    func getMeals(from startDate: Date, to endDate: Date) async throws -> [Meal]
 
     /// Elimina una comida por su identificador.
     func deleteMeal(_ mealId: UUID) async throws

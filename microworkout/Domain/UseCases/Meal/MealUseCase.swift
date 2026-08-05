@@ -29,6 +29,10 @@ class MealUseCase: MealUseCaseProtocol {
         try await repository.getMeals(for: date)
     }
 
+    func getMeals(from startDate: Date, to endDate: Date) async throws -> [Meal] {
+        try await repository.getMeals(from: startDate, to: endDate)
+    }
+
     func deleteMeal(_ mealId: UUID) async throws {
         try await repository.deleteMeal(mealId)
         await MainActor.run {

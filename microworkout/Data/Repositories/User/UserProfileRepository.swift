@@ -25,9 +25,16 @@ final class UserProfileRepository: UserProfileRepositoryProtocol {
         local.save(profile: profile)
     }
 
+    /// Con sesión, el perfil de la cuenta manda; pero si la cuenta **no tiene**
+    /// perfil todavía (creado como invitado y sin subir), se usa el local en vez de
+    /// devolver `nil`. Devolver `nil` dejaba la app sin objetivo de calorías: el
+    /// anillo y "OBJETIVO" salían en "—" y el cálculo semanal no podía hacerse,
+    /// aunque el perfil estuviera relleno en el dispositivo.
     func getProfile() async throws -> UserProfile? {
-        if await isAuthenticated() {
-            return try await remote.get()?.toDomain()
+        guard await isAuthenticated() else { return local.getProfile() }
+
+        if let remoteProfile = try await remote.get()?.toDomain() {
+            return remoteProfile
         }
         return local.getProfile()
     }

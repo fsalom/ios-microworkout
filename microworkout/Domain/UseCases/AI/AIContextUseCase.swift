@@ -131,14 +131,16 @@ class AIContextUseCase: AIContextUseCaseProtocol {
     }
 
     private func buildMeals(daysBack: Int) async -> [AIMealSnapshot] {
+        // Una consulta por rango, no una por día: con 14 o 30 días eran 14 o 30
+        // idas y venidas secuenciales al servidor, y bastaba que fallara la de HOY
+        // para que `try?` se comiera el día entero y el coach dijera que no habías
+        // registrado nada.
         let cal = Calendar.current
-        var all: [Meal] = []
-        for offset in 0..<max(1, daysBack) {
-            guard let date = cal.date(byAdding: .day, value: -offset, to: Date()) else { continue }
-            if let meals = try? await mealUseCase.getMeals(for: date) {
-                all.append(contentsOf: meals)
-            }
-        }
+        let now = Date()
+        let start = cal.startOfDay(
+            for: cal.date(byAdding: .day, value: -(max(1, daysBack) - 1), to: now) ?? now
+        )
+        let all = (try? await mealUseCase.getMeals(from: start, to: now)) ?? []
         return all.map {
             AIMealSnapshot(
                 id: $0.id.uuidString,

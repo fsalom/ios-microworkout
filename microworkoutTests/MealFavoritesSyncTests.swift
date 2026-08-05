@@ -319,3 +319,57 @@ extension MealFavoritesSyncTests {
         }
     }
 }
+
+/// Un fallo del servidor no debe esconder lo que solo existe en el dispositivo:
+/// los llamantes que usan `try?` (el contexto de la IA) se quedaban sin nada.
+extension MealFavoritesSyncTests {
+
+    private final class FailingRemote: MealRemoteDataSourceProtocol {
+        enum Boom: Error { case network }
+
+        func createMeal(_ meal: Meal) async throws -> MealApiDTO { throw Boom.network }
+        func listMeals(for date: Date) async throws -> [MealApiDTO] { throw Boom.network }
+        func listMeals(from start: Date, to end: Date) async throws -> [MealApiDTO] { throw Boom.network }
+        func deleteMeal(id: UUID) async throws { throw Boom.network }
+        func foodByBarcode(_ barcode: String) async throws -> FoodApiDTO? { throw Boom.network }
+        func listFavorites() async throws -> [FoodApiDTO] { throw Boom.network }
+        func addFavorite(foodId: UUID) async throws { throw Boom.network }
+        func removeFavorite(foodId: UUID) async throws { throw Boom.network }
+        func createCustomFood(_ food: FoodItem) async throws -> FoodApiDTO { throw Boom.network }
+        func listMyMeals() async throws -> [MyMealApiDTO] { throw Boom.network }
+        func createMyMeal(_ myMeal: MyMeal) async throws -> MyMealApiDTO { throw Boom.network }
+        func deleteMyMeal(id: UUID) async throws { throw Boom.network }
+    }
+
+    func testServerFailureDegradesToLocalMealsInsteadOfLosingTheDay() async throws {
+        let local = FakeLocal()
+        let breakfast = meal(UUID(), .breakfast, hour: 9)
+        local.meals = [breakfast.toDTO()]
+        let repository = MealRepository(
+            localDataSource: local, remoteApi: FakeOpenFoodFacts(), remote: FailingRemote()
+        )
+
+        try await withAuthenticatedSession {
+            let result = try await repository.getMeals(for: Date())
+            XCTAssertEqual(result.map(\.id), [breakfast.id], "se ve lo local aunque falle el servidor")
+
+            let range = try await repository.getMeals(
+                from: Date().addingTimeInterval(-86_400), to: Date()
+            )
+            XCTAssertEqual(range.count, 1)
+        }
+    }
+
+    func testServerFailureDegradesToLocalFavorites() async throws {
+        let local = FakeLocal()
+        local.favorites = [food("Avena").toDTO()]
+        let repository = MealRepository(
+            localDataSource: local, remoteApi: FakeOpenFoodFacts(), remote: FailingRemote()
+        )
+
+        try await withAuthenticatedSession {
+            let result = try await repository.getFavorites()
+            XCTAssertEqual(result.map(\.name), ["Avena"])
+        }
+    }
+}
