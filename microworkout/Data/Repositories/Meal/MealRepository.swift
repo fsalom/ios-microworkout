@@ -107,18 +107,38 @@ class MealRepository: MealRepositoryProtocol {
         return Set(remoteMeals.map { $0.id })
     }
 
+    /// Cuenta + comidas locales que aún no están en ella.
+    ///
+    /// La subida a la cuenta es manual (Perfil → Sincronización), así que sin esta
+    /// mezcla las comidas registradas como invitado quedaban invisibles al iniciar
+    /// sesión hasta que el usuario pulsara el botón. Aquí el dedup **sí** puede ser
+    /// por `id`: `createMeal` manda el id local, así que una comida subida conserva
+    /// el mismo identificador en las dos partes.
     func getMeals(for date: Date) async throws -> [Meal] {
-        if await isAuthenticated() {
-            return try await remote.listMeals(for: date).map { $0.toDomain() }
-        }
-        return try await localDataSource.getMeals(for: date).map { $0.toDomain() }
+        let local = try await localDataSource.getMeals(for: date).map { $0.toDomain() }
+        guard await isAuthenticated() else { return local }
+
+        let synced = try await remote.listMeals(for: date).map { $0.toDomain() }
+        return Self.merge(synced: synced, local: local)
     }
 
     func getMeals(from startDate: Date, to endDate: Date) async throws -> [Meal] {
-        if await isAuthenticated() {
-            return try await remote.listMeals(from: startDate, to: endDate).map { $0.toDomain() }
-        }
-        return try await localDataSource.getMeals(from: startDate, to: endDate).map { $0.toDomain() }
+        let local = try await localDataSource
+            .getMeals(from: startDate, to: endDate).map { $0.toDomain() }
+        guard await isAuthenticated() else { return local }
+
+        let synced = try await remote
+            .listMeals(from: startDate, to: endDate).map { $0.toDomain() }
+        return Self.merge(synced: synced, local: local)
+    }
+
+    /// Se ordena por hora al mezclar: los consumidores que agrupan por tipo de
+    /// comida no dependían del orden de llegada, pero concatenar dos fuentes sin
+    /// ordenar dejaría el día descolocado.
+    private static func merge(synced: [Meal], local: [Meal]) -> [Meal] {
+        let syncedIds = Set(synced.map { $0.id })
+        return (synced + local.filter { !syncedIds.contains($0.id) })
+            .sorted { $0.timestamp < $1.timestamp }
     }
 
     func deleteMeal(_ mealId: UUID) async throws {

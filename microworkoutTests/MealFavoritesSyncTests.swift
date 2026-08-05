@@ -20,10 +20,11 @@ final class MealFavoritesSyncTests: XCTestCase {
         var removedFavoriteIds: [UUID] = []
         /// Ids que el servidor asigna al crear, en orden.
         var idsToAssign: [UUID] = []
+        var meals: [MealApiDTO] = []
 
         func createMeal(_ meal: Meal) async throws -> MealApiDTO { throw Fake.unused }
-        func listMeals(for date: Date) async throws -> [MealApiDTO] { [] }
-        func listMeals(from start: Date, to end: Date) async throws -> [MealApiDTO] { [] }
+        func listMeals(for date: Date) async throws -> [MealApiDTO] { meals }
+        func listMeals(from start: Date, to end: Date) async throws -> [MealApiDTO] { meals }
         func deleteMeal(id: UUID) async throws {}
 
         func foodByBarcode(_ barcode: String) async throws -> FoodApiDTO? {
@@ -259,5 +260,62 @@ final class MealFavoritesSyncTests: XCTestCase {
         let result = try await repository.getFavorites()
         XCTAssertEqual(result.map(\.name), ["Avena"])
         XCTAssertTrue(remote.addedFavoriteIds.isEmpty)
+    }
+}
+
+/// Las comidas (desayuno/comida/cena) registradas como invitado tenían el mismo
+/// problema que los favoritos, y además la subida a la cuenta es MANUAL, así que
+/// quedaban invisibles hasta que el usuario pulsaba Sincronizar.
+extension MealFavoritesSyncTests {
+
+    private func meal(_ id: UUID, _ type: MealType, hour: Int) -> Meal {
+        Meal(
+            id: id,
+            type: type,
+            timestamp: Calendar.current.date(
+                bySettingHour: hour, minute: 0, second: 0, of: Date()
+            ) ?? Date(),
+            items: []
+        )
+    }
+
+    func testGuestMealsRemainVisibleAfterLogin() async throws {
+        let local = FakeLocal()
+        let breakfast = meal(UUID(), .breakfast, hour: 9)
+        let dinner = meal(UUID(), .dinner, hour: 21)
+        local.meals = [breakfast.toDTO(), dinner.toDTO()]
+
+        let remote = FakeRemote()
+        let repository = makeRepository(local: local, remote: remote)
+
+        try await withAuthenticatedSession {
+            let result = try await repository.getMeals(for: Date())
+            XCTAssertEqual(
+                result.map(\.id), [breakfast.id, dinner.id],
+                "las comidas locales siguen visibles, y ordenadas por hora"
+            )
+        }
+    }
+
+    func testSyncedMealIsNotDuplicatedAfterUpload() async throws {
+        let shared = UUID()
+        let local = FakeLocal()
+        local.meals = [meal(shared, .lunch, hour: 14).toDTO()]
+
+        let remote = FakeRemote()
+        // Ya subida: el backend conserva el id local que le manda `createMeal`.
+        let lunch = meal(shared, .lunch, hour: 14)
+        remote.meals = [
+            MealApiDTO(
+                id: lunch.id, type: lunch.type.rawValue,
+                timestamp: lunch.timestamp, items: [], myMealName: nil
+            )
+        ]
+        let repository = makeRepository(local: local, remote: remote)
+
+        try await withAuthenticatedSession {
+            let result = try await repository.getMeals(for: Date())
+            XCTAssertEqual(result.count, 1, "dedup por id, no se duplica")
+        }
     }
 }
