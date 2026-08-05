@@ -9,6 +9,7 @@ import SwiftUI
 
 struct RootView: View {
     @EnvironmentObject var appState: AppState
+    @ObservedObject private var authSession = AuthSession.shared
     @State var navigator: NavigatorProtocol
     private let component: AppComponentProtocol
     let rootTransition: AnyTransition = .opacity
@@ -35,6 +36,15 @@ struct RootView: View {
             }
         }
         .overlay(MediaProcessingBanner())
+        .overlay(SyncBanner())
+        .onChange(of: authSession.state) { previous, current in
+            // Solo un login de verdad (invitado → autenticado) sube los datos
+            // locales. Un arranque en frío con sesión guardada pasa de `.unknown`
+            // a `.authenticated`, y ahí no toca subir nada: no ha cambiado nada
+            // desde la última vez.
+            guard case .guest = previous, current.isAuthenticated else { return }
+            SyncTracker.shared.syncAfterLogin(using: component.syncLocalDataUseCase)
+        }
     }
 }
 

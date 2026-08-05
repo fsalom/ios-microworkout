@@ -20,7 +20,8 @@ enum SyncCategory: String, CaseIterable, Identifiable {
         case .exercises:   return "Ejercicios"
         case .trainings:   return "Entrenamientos"
         case .workoutLogs: return "Sesiones y registros"
-        case .meals:       return "Comidas"
+        // Esta categoría cubre comidas, recetas y alimentos favoritos.
+        case .meals:       return "Comidas y alimentos"
         }
     }
 
@@ -93,7 +94,15 @@ protocol SyncLocalDataUseCaseProtocol {
 
     /// Sube lo pendiente de cada categoría y devuelve el informe resultante
     /// (subidos + lo que quede pendiente + errores por categoría).
-    func sync() async -> SyncReport
+    ///
+    /// - Parameter progress: se invoca al empezar cada categoría, para que la UI
+    ///   pueda decir qué se está subiendo ahora mismo. No se llama en el hilo
+    ///   principal; quien lo consuma debe saltar él.
+    func sync(progress: ((SyncCategory) -> Void)?) async -> SyncReport
+}
+
+extension SyncLocalDataUseCaseProtocol {
+    func sync() async -> SyncReport { await sync(progress: nil) }
 }
 
 final class SyncLocalDataUseCase: SyncLocalDataUseCaseProtocol {
@@ -128,9 +137,10 @@ final class SyncLocalDataUseCase: SyncLocalDataUseCaseProtocol {
         return SyncReport(statuses: statuses)
     }
 
-    func sync() async -> SyncReport {
+    func sync(progress: ((SyncCategory) -> Void)? = nil) async -> SyncReport {
         var statuses: [SyncCategoryStatus] = []
         for category in SyncCategory.allCases {
+            progress?(category)
             do {
                 let uploaded = try await upload(for: category)
                 // Recalcular lo pendiente tras subir para que el contador sea fiel.
