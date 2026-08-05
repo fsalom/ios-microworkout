@@ -37,6 +37,17 @@ public struct FoodItem: Identifiable, Hashable, Codable {
         nutritionPer100g.scaled(by: quantity / 100.0)
     }
 
+    /// Identidad del alimento **a ojos del usuario**, que no es el `id`: el mismo
+    /// alimento creado en local y luego subido a la cuenta tiene dos UUID, y por
+    /// `id` saldría duplicado al mezclar servidor y local.
+    ///
+    /// El código de barras identifica el producto de forma fiable; sin él, el
+    /// nombre es lo único que hay.
+    public var identityKey: String {
+        if let barcode = barcode, !barcode.isEmpty { return "barcode:\(barcode)" }
+        return "name:\(name.lowercased())"
+    }
+
     /// Formatted quantity string
     public var formattedQuantity: String {
         if quantity == floor(quantity) {

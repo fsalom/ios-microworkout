@@ -50,7 +50,18 @@ class MealRepository: MealRepositoryProtocol {
             let remoteMyMealIds = Set(try await remote.listMyMeals().map { $0.id })
             pending += localMyMeals.filter { !remoteMyMealIds.contains($0.id) }.count
         }
+        pending += try await unsyncedFavorites().count
         return pending
+    }
+
+    /// Favoritos locales que aún no están en la cuenta. Se comparan por
+    /// `identityKey` y no por `id`: el mismo alimento tiene UUID distinto en local
+    /// y en servidor.
+    private func unsyncedFavorites() async throws -> [FoodItem] {
+        let local = localDataSource.getFavorites().map { $0.toDomain() }
+        guard !local.isEmpty else { return [] }
+        let syncedKeys = Set(try await remote.listFavorites().map { $0.toDomain().identityKey })
+        return local.filter { !syncedKeys.contains($0.identityKey) }
     }
 
     /// Sube las comidas y recetas locales que aún no estén en la cuenta (por id).
@@ -69,6 +80,19 @@ class MealRepository: MealRepositoryProtocol {
             let remoteMyMealIds = Set(try await remote.listMyMeals().map { $0.id })
             for dto in localMyMeals where !remoteMyMealIds.contains(dto.id) {
                 _ = try await remote.createMyMeal(dto.toDomain()); count += 1
+            }
+        }
+        // Los favoritos también se suben: sin esto, los alimentos añadidos como
+        // invitado se quedaban para siempre fuera de la cuenta (visibles solo por
+        // la mezcla de lectura, y perdidos al cambiar de dispositivo).
+        for food in try await unsyncedFavorites() {
+            do {
+                try await remote.addFavorite(foodId: try await serverFoodId(for: food))
+                count += 1
+            } catch {
+                // Un favorito que el backend rechaza no debe abortar el resto de la
+                // sincronización: se queda como pendiente y se reintenta al siguiente login.
+                continue
             }
         }
         return count
@@ -133,11 +157,17 @@ class MealRepository: MealRepositoryProtocol {
 
     // MARK: Favorites
 
+    /// Mismo criterio que `ExerciseRepository`: al estar autenticado se muestran los
+    /// de la cuenta MÁS los locales que aún no están en ella, en vez de solo los del
+    /// servidor. Si no, los alimentos añadidos como invitado desaparecen de la
+    /// pestaña "Favoritos" al iniciar sesión — no se borran, pero nadie los lee.
     func getFavorites() async throws -> [FoodItem] {
-        if await isAuthenticated() {
-            return try await remote.listFavorites().map { $0.toDomain() }
-        }
-        return localDataSource.getFavorites().map { $0.toDomain() }
+        let local = localDataSource.getFavorites().map { $0.toDomain() }
+        guard await isAuthenticated() else { return local }
+
+        let synced = try await remote.listFavorites().map { $0.toDomain() }
+        let syncedKeys = Set(synced.map { $0.identityKey })
+        return synced + local.filter { !syncedKeys.contains($0.identityKey) }
     }
 
     /// Diffea contra el servidor cuando el usuario está autenticado para emitir
@@ -150,29 +180,42 @@ class MealRepository: MealRepositoryProtocol {
             let newIds = Set(favorites.map { $0.id })
 
             for id in newIds.subtracting(currentIds) {
-                try await ensureFoodOnServer(id: id, in: favorites)
-                try await remote.addFavorite(foodId: id)
+                guard let food = favorites.first(where: { $0.id == id }) else { continue }
+                try await remote.addFavorite(foodId: try await serverFoodId(for: food))
             }
             for id in currentIds.subtracting(newIds) {
                 try await remote.removeFavorite(foodId: id)
             }
+            // La copia local se reescribe también estando autenticado. Si no, al
+            // quitar un favorito que solo existía en local no se borraría de
+            // ninguna parte (el servidor no lo tiene) y la mezcla de `getFavorites`
+            // lo resucitaría en la siguiente lectura.
+            localDataSource.saveFavorites(favorites.map { $0.toDTO() })
             return
         }
         localDataSource.saveFavorites(favorites.map { $0.toDTO() })
     }
 
-    /// El endpoint `POST /v1/foods/{id}/favorite` requiere que el food ya exista
-    /// en `/v1/foods/custom`. Para favoritos creados desde OpenFoodFacts (sin
-    /// existir aún en backend) los registramos primero.
-    private func ensureFoodOnServer(id: UUID, in foods: [FoodItem]) async throws {
-        guard let food = foods.first(where: { $0.id == id }) else { return }
-        // Best-effort: si ya existe (mismo barcode), el backend devolverá un 4xx
-        // por unique constraint; ignoramos para que el flujo no se rompa.
-        do {
-            _ = try await remote.createCustomFood(food)
-        } catch {
-            // Silenciar — el favorito puede provenir de un Food preexistente.
+    /// Id que el alimento tiene **en el servidor**, creándolo allí si no existe.
+    ///
+    /// `POST /v1/foods/custom` no acepta id: la BD genera el suyo y lo devuelve. El
+    /// id local por tanto no vale para `POST /v1/foods/{id}/favorite`, que apuntaría
+    /// a un alimento inexistente — por eso marcar como favorito un alimento de
+    /// OpenFoodFacts fallaba en silencio estando logueado.
+    ///
+    /// Se busca primero por código de barras para no crear duplicados en cada
+    /// intento; sin barcode no hay forma de reconocerlo y se crea.
+    private func serverFoodId(for food: FoodItem) async throws -> UUID {
+        if let barcode = food.barcode, !barcode.isEmpty,
+           let existing = try? await remote.foodByBarcode(barcode),
+           let existingId = existing.id {
+            return existingId
         }
+        let created = try await remote.createCustomFood(food)
+        guard let createdId = created.id else {
+            throw DomainError.decoding(underlying: URLError(.cannotParseResponse))
+        }
+        return createdId
     }
 
     // MARK: My meals (recipes)

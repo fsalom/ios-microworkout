@@ -92,24 +92,20 @@ class MealUseCase: MealUseCaseProtocol {
 
     // MARK: - Favorites
 
-    private func favoriteKey(for food: FoodItem) -> String {
-        if let barcode = food.barcode, !barcode.isEmpty { return "barcode:\(barcode)" }
-        return "name:\(food.name.lowercased())"
-    }
 
     func getFavorites() async throws -> [FoodItem] {
         try await repository.getFavorites()
     }
 
     func isFavorite(_ food: FoodItem, in favorites: [FoodItem]) -> Bool {
-        let key = favoriteKey(for: food)
-        return favorites.contains { favoriteKey(for: $0) == key }
+        let key = food.identityKey
+        return favorites.contains { $0.identityKey == key }
     }
 
     func toggleFavorite(_ food: FoodItem) async throws {
         var favorites = try await repository.getFavorites()
-        let key = favoriteKey(for: food)
-        if let index = favorites.firstIndex(where: { favoriteKey(for: $0) == key }) {
+        let key = food.identityKey
+        if let index = favorites.firstIndex(where: { $0.identityKey == key }) {
             favorites.remove(at: index)
         } else {
             // Store a clean copy at quantity 100g (canonical) so future quick-adds use a

@@ -219,7 +219,7 @@ final class AddMealViewModel: ObservableObject {
             guard let self else { return }
             let favs = (try? await self.mealUseCase.getFavorites()) ?? []
             self.uiState.favoriteFoods = favs
-            self.uiState.favoriteKeys = Set(favs.map { self.favoriteKey(for: $0) })
+            self.uiState.favoriteKeys = Set(favs.map { $0.identityKey })
         }
     }
 
@@ -232,13 +232,9 @@ final class AddMealViewModel: ObservableObject {
     }
 
     func isFavorite(_ food: FoodItem) -> Bool {
-        uiState.favoriteKeys.contains(favoriteKey(for: food))
+        uiState.favoriteKeys.contains(food.identityKey)
     }
 
-    private func favoriteKey(for food: FoodItem) -> String {
-        if let barcode = food.barcode, !barcode.isEmpty { return "barcode:\(barcode)" }
-        return "name:\(food.name.lowercased())"
-    }
 
     /// Prepends favorites that match the query to the search results.
     /// Avoids duplicates by removing the same food from `results` if also in favorites.
@@ -249,8 +245,8 @@ final class AddMealViewModel: ObservableObject {
         }
         guard !matchingFavorites.isEmpty else { return results }
 
-        let favKeys = Set(matchingFavorites.map { favoriteKey(for: $0) })
-        let withoutDuplicates = results.filter { !favKeys.contains(favoriteKey(for: $0)) }
+        let favKeys = Set(matchingFavorites.map { $0.identityKey })
+        let withoutDuplicates = results.filter { !favKeys.contains($0.identityKey) }
         return matchingFavorites + withoutDuplicates
     }
 
