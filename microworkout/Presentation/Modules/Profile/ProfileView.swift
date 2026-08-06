@@ -89,6 +89,14 @@ struct ProfileView: View {
                 } label: {
                     hubRowLabel(icon: "sparkles", title: "Asistente IA", iconColor: .purple)
                 }
+
+                if authSession.state.isAuthenticated {
+                    NavigationLink {
+                        UserReportBuilder(component: component).build()
+                    } label: {
+                        hubRowLabel(icon: "text.book.closed", title: "Informe para el coach", iconColor: .purple)
+                    }
+                }
             }
 
             if viewModel.uiState.isHealthDataAvailable { healthSection }

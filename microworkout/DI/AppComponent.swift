@@ -130,6 +130,10 @@ final class DefaultAppComponent: AppComponentProtocol {
         repository: aiCoachRepository
     )
 
+    lazy var userReportUseCase: UserReportUseCaseProtocol = UserReportUseCase(
+        repository: UserReportRepository(remote: UserReportRemoteDataSource())
+    )
+
     // MARK: Auth
 
     var authSession: AuthSession { AuthSession.shared }

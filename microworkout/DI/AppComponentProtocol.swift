@@ -20,6 +20,7 @@ protocol AppComponentProtocol: AnyObject {
     var aiContextUseCase: AIContextUseCaseProtocol { get }
     var coachUseCase: CoachUseCaseProtocol { get }
     var aiCoachChatUseCase: AICoachChatUseCaseProtocol { get }
+    var userReportUseCase: UserReportUseCaseProtocol { get }
     var exerciseProgressionUseCase: ExerciseProgressionUseCaseProtocol { get }
     var syncLocalDataUseCase: SyncLocalDataUseCaseProtocol { get }
 
