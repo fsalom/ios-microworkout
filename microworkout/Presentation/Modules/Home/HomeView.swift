@@ -347,7 +347,10 @@ struct HomeView: View {
     func ListMicroTrainings() -> some View {
         ScrollView(.horizontal, showsIndicators: false) {
             LazyHStack(spacing: 16) {
-                ForEach(viewModel.uiState.lastTrainings, id: \.id) { training in
+                // Por posición y no por `id`: al empezar un preset se conserva su
+                // UUID, así que todas las veces que has hecho "Flexiones" tienen el
+                // mismo id y SwiftUI no puede distinguirlas.
+                ForEach(Array(viewModel.uiState.lastTrainings.enumerated()), id: \.offset) { _, training in
                     Image(training.image)
                         .resizable()
                         .scaledToFill()

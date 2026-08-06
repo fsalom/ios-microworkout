@@ -1,4 +1,7 @@
 import Foundation
+// `NetworkError` vive en TripleA: hace falta para distinguir un 404 del servidor
+// de un fallo de red al borrar.
+import TripleA
 
 /// Auth-aware repository: guest → UserDefaults; authenticated → `/v1/sessions` + `/v1/logs`.
 final class WorkoutLogRepository: WorkoutLogRepositoryProtocol {
@@ -20,60 +23,101 @@ final class WorkoutLogRepository: WorkoutLogRepositoryProtocol {
     // MARK: Sessions
 
     func getAllSessions() async throws -> [WorkoutSession] {
-        if await isAuthenticated() {
-            return try await remote.listSessions().map { $0.toDomain() }
-        }
-        return local.getAllSessions().map { $0.toDomain() }
+        let stored = local.getAllSessions().map { $0.toDomain() }
+        guard await isAuthenticated() else { return stored }
+
+        // Se fusiona en vez de devolver solo lo remoto. Devolver solo el servidor
+        // hacía DESAPARECER de la pantalla todo lo registrado como invitado: si la
+        // subida al entrar en la cuenta falló (o aún no había pasado), lo local
+        // seguía en el dispositivo pero nadie lo veía, y eso se lee como "he
+        // perdido mis entrenos". Un fallo del servidor degrada a local por lo
+        // mismo: esconder el historial es peor que mostrar solo una parte.
+        let synced = (try? await remote.listSessions())?.map { $0.toDomain() } ?? []
+        let syncedIds = Set(synced.map { $0.id })
+        return synced + stored.filter { !syncedIds.contains($0.id) }
     }
 
     func saveSession(_ session: WorkoutSession) async throws {
-        if await isAuthenticated() {
-            _ = try await remote.upsertSession(session)
-            return
+        guard await isAuthenticated() else {
+            return local.saveSession(session.toDTO())
         }
-        local.saveSession(session.toDTO())
+        do {
+            _ = try await remote.upsertSession(session)
+        } catch {
+            // Si el servidor no está, se guarda en el dispositivo y la
+            // sincronización lo subirá (compara por id, así que no duplica).
+            // Antes se propagaba, y como TODOS los llamantes hacen `try?`, la
+            // pantalla se cerraba como si se hubiera guardado: el entreno se
+            // perdía sin que nada lo dijera.
+            local.saveSession(session.toDTO())
+        }
     }
 
     func deleteSession(id: String) async throws {
-        if await isAuthenticated() {
-            if let uuid = UUID(uuidString: id) {
+        if await isAuthenticated(), let uuid = UUID(uuidString: id) {
+            do {
                 try await remote.deleteSession(id: uuid)
+            } catch {
+                // 404 = no estaba en el servidor (se creó como invitado y nunca se
+                // subió): borrarlo solo del dispositivo es lo correcto. Cualquier
+                // otro error sí se propaga: si no, el borrado se daría por hecho y
+                // el elemento reaparecería del servidor en la siguiente lectura.
+                guard Self.isNotFound(error) else { throw error }
             }
-            // Borrar también en local: una copia local huérfana se contaría como
-            // pendiente en la siguiente sincronización y se volvería a subir.
-            local.deleteSession(id: id)
-            return
         }
+        // Borrar también en local: una copia local huérfana se contaría como
+        // pendiente en la siguiente sincronización y se volvería a subir.
         local.deleteSession(id: id)
     }
 
     // MARK: Logs
 
     func getAllLogs() async throws -> [WorkoutLog] {
-        if await isAuthenticated() {
-            return try await remote.listLogs().map { $0.toDomain() }
-        }
-        return local.getAllLogs().map { $0.toDomain() }
+        let stored = local.getAllLogs().map { $0.toDomain() }
+        guard await isAuthenticated() else { return stored }
+
+        // Ver `getAllSessions`: fusión por id y degradación a local.
+        let synced = (try? await remote.listLogs())?.map { $0.toDomain() } ?? []
+        let syncedIds = Set(synced.map { $0.id })
+        // Se ordena al mezclar (más reciente primero): concatenar dos fuentes
+        // dejaba el historial descolocado para quien no ordena por su cuenta.
+        return (synced + stored.filter { !syncedIds.contains($0.id) })
+            .sorted { $0.startedAt > $1.startedAt }
     }
 
     func saveLog(_ log: WorkoutLog) async throws {
-        if await isAuthenticated() {
-            _ = try await remote.upsertLog(log)
-            return
+        guard await isAuthenticated() else {
+            return local.saveLog(log.toDTO())
         }
-        local.saveLog(log.toDTO())
+        do {
+            _ = try await remote.upsertLog(log)
+        } catch {
+            // Ver `saveSession`: un fallo del servidor no puede tragarse el
+            // registro de un entreno que el usuario acaba de hacer.
+            local.saveLog(log.toDTO())
+        }
     }
 
     func deleteLog(id: String) async throws {
-        if await isAuthenticated() {
-            if let uuid = UUID(uuidString: id) {
+        if await isAuthenticated(), let uuid = UUID(uuidString: id) {
+            do {
                 try await remote.deleteLog(id: uuid)
+            } catch {
+                guard Self.isNotFound(error) else { throw error }
             }
-            // Ver deleteSession: sin esto la copia local resucita al sincronizar.
-            local.deleteLog(id: id)
-            return
         }
+        // Ver deleteSession: sin esto la copia local resucita al sincronizar.
         local.deleteLog(id: id)
+    }
+
+    /// `true` si el servidor contestó 404. Se usa para distinguir "esto no existía
+    /// en la cuenta" de "no he podido hablar con el servidor", que exigen lo
+    /// contrario: borrar sin más, o no dar el borrado por hecho.
+    private static func isNotFound(_ error: Error) -> Bool {
+        if case NetworkError.failure(let statusCode, _, _) = error {
+            return statusCode == 404
+        }
+        return false
     }
 
     /// Modelo espejo: cuenta las sesiones y registros locales cuyo id no está

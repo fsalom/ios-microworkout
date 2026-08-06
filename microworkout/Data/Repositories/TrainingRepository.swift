@@ -57,33 +57,68 @@ final class TrainingRepository: TrainingRepositoryProtocol {
     }
 
     func getCurrent() async throws -> Training? {
-        if await isAuthenticated() {
+        guard await isAuthenticated() else { return local.getCurrent()?.toDomain() }
+        do {
+            // `nil` aquí es una RESPUESTA ("no hay ninguno en curso"), no un fallo:
+            // no se recurre al local, que puede ser uno ya terminado en otro sitio.
             return try await remote.current()?.toDomain()
+        } catch {
+            // Sin servidor, el entreno en curso del dispositivo es lo único que hay.
+            return local.getCurrent()?.toDomain()
         }
-        return local.getCurrent()?.toDomain()
     }
 
+    /// Se guarda SIEMPRE en el dispositivo, tanto como invitado como con sesión: el
+    /// entreno en curso es lo que se pierde si la app muere o no hay cobertura, y
+    /// con la copia local la sincronización lo sube después (dedup por id).
     func saveCurrent(_ training: Training) async throws {
-        if await isAuthenticated() {
-            _ = try await remote.saveCurrent(training)
-            return
-        }
         local.saveCurrent(training.toDTO())
+        guard await isAuthenticated() else { return }
+        // Un fallo del servidor no se propaga: ya está guardado en el dispositivo y
+        // `pendingSyncCount` lo cuenta como pendiente. Antes se propagaba y, como
+        // los llamantes hacen `try?`, no quedaba constancia en ninguna parte.
+        _ = try? await remote.saveCurrent(training)
     }
 
     func finish(_ training: Training) async throws {
-        if await isAuthenticated() {
-            _ = try await remote.finish(training)
-            return
-        }
+        // Igual que `saveCurrent`: el registro de lo entrenado se guarda en el
+        // dispositivo pase lo que pase. `local.finish` además limpia el entreno en
+        // curso, así que la pantalla queda consistente aunque el servidor falle.
         local.finish(training.toDTO())
+        guard await isAuthenticated() else { return }
+        _ = try? await remote.finish(training)
     }
 
     func getFinished() async throws -> [Training] {
-        if await isAuthenticated() {
-            return try await remote.listFinished().map { $0.toDomain() }
-        }
-        return local.getFinished().map { $0.toDomain() }
+        let stored = local.getFinished().map { $0.toDomain() }
+        guard await isAuthenticated() else { return stored }
+
+        // Fusión, no reemplazo: devolver solo el servidor hacía desaparecer del
+        // historial todo lo entrenado como invitado mientras la subida no hubiera
+        // pasado (o hubiera fallado), aunque siguiera en el dispositivo. Un fallo
+        // del servidor degrada a local por lo mismo — y aquí importa el doble,
+        // porque quien consume esto usa `try?` y se quedaba con la lista vacía.
+        let synced = (try? await remote.listFinished())?.map { $0.toDomain() } ?? []
+        let syncedKeys = Set(synced.map(Self.instanceKey))
+        return (synced + stored.filter { !syncedKeys.contains(Self.instanceKey($0)) })
+            .sorted { Self.date(of: $0) > Self.date(of: $1) }
+    }
+
+    /// Identidad de UN entreno terminado concreto.
+    ///
+    /// NO vale el id a secas: al empezar un preset se conserva su UUID, así que
+    /// todas las veces que has hecho "Flexiones" comparten id. Deduplicar por id
+    /// borraría del historial todas las repeticiones menos una — justo lo que este
+    /// método existe para evitar. Lo que distingue una instancia es cuándo se
+    /// terminó, redondeado al segundo porque servidor y dispositivo no coinciden en
+    /// la fracción.
+    private static func instanceKey(_ training: Training) -> String {
+        let seconds = (training.completedAt ?? training.startedAt).map { Int($0.timeIntervalSince1970.rounded()) }
+        return "\(training.id.uuidString)|\(seconds.map(String.init) ?? "-")"
+    }
+
+    private static func date(of training: Training) -> Date {
+        training.completedAt ?? training.startedAt ?? .distantPast
     }
 
     /// Modelo espejo: cuenta los entrenamientos locales cuyo id no está aún en
