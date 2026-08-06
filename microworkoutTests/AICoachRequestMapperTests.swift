@@ -123,7 +123,27 @@ final class AICoachRequestMapperTests: XCTestCase {
         let request = AICoachRequestApiDTO(
             context: makeContext(), topic: .daily, question: nil
         )
-        XCTAssertEqual(request.profile.language, "es_ES")
+        XCTAssertEqual(request.profile.language, AICoachRequestApiDTO.appLanguage)
+    }
+
+    /// El idioma que se manda es el de LA APP, no el del dispositivo. Con el móvil
+    /// en inglés el coach contestaba en inglés dentro de una app en español, y
+    /// además el backend buscaba los prompts del admin con `language="en"`, así que
+    /// los guardados como "es" no se aplicaban nunca.
+    func testLanguageIsTheAppsNotTheDevices() throws {
+        // El contexto trae un locale inglés, como un móvil configurado en inglés.
+        let context = AIContext(
+            generatedAt: Date(), locale: "en_US", profile: fullProfile(),
+            workoutSessions: [], workoutLogs: [], manualEntries: [],
+            meals: [], healthDays: [], healthWorkouts: []
+        )
+        let request = AICoachRequestApiDTO(context: context, topic: .daily, question: nil)
+
+        XCTAssertEqual(request.profile.language, "es")
+        XCTAssertFalse(
+            request.profile.language.hasPrefix("en"),
+            "el backend resolvería inglés y se saltaría los prompts guardados en español"
+        )
     }
 
     // MARK: - Claves del contrato

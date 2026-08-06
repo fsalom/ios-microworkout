@@ -12,6 +12,12 @@ import Foundation
 /// enviarse con el campo ausente en vez de con un 0.
 extension AICoachRequestApiDTO {
 
+    /// Idioma en el que habla la app, y por tanto en el que debe hablar el coach.
+    ///
+    /// Constante mientras la interfaz sea solo española: derivarlo del dispositivo
+    /// desacopla al coach de la app, que es un bug, no una funcionalidad.
+    static let appLanguage = "es"
+
     // Límites del backend (`domain/entities/ai.py`).
     private enum Limits {
         static let history = 40
@@ -56,7 +62,15 @@ extension AICoachRequestApiDTO {
 
     private static func profile(from context: AIContext) -> Profile {
         // `language` es lo único obligatorio; el backend solo mira si empieza por "en".
-        let language = String(context.locale.prefix(8))
+        //
+        // Se manda el idioma de LA APP, no el del dispositivo. Toda la interfaz está
+        // en español (no hay .lproj ni Localizable.strings), así que con el móvil en
+        // inglés el coach contestaba en inglés dentro de una app en español — y de
+        // paso ignoraba los prompts que el admin tiene guardados para "es".
+        //
+        // Cuando la app se localice, esto debe pasar a ser la localización efectiva
+        // del bundle (`Bundle.main.preferredLocalizations.first`), no `Locale.current`.
+        let language = appLanguage
         guard let snapshot = context.profile else {
             return Profile(
                 name: nil, gender: nil, age: nil, heightCm: nil, weightKg: nil,
