@@ -23,4 +23,10 @@ final class MockHealthStore: HealthStoreProtocol {
     func execute(_ query: HKQuery) {
         lastExecutedQueries.append(query)
     }
+
+    private(set) var savedObjects: [HKObject] = []
+
+    func save(_ object: HKObject) async throws {
+        savedObjects.append(object)
+    }
 }

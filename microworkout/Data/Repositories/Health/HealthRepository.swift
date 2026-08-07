@@ -50,6 +50,16 @@ class HealthRepository: HealthRepositoryProtocol {
         catch { throw mapHealthError(error) }
     }
 
+    func fetchBodyMass(startDate: Date, endDate: Date) async throws -> [Date: Double] {
+        do { return try await dataSource.fetchBodyMass(startDate: startDate, endDate: endDate) }
+        catch { throw mapHealthError(error) }
+    }
+
+    func saveBodyMass(kilograms: Double, on date: Date) async throws {
+        do { try await dataSource.saveBodyMass(kilograms: kilograms, on: date) }
+        catch { throw mapHealthError(error) }
+    }
+
     func fetchWorkouts() async throws -> [HealthWorkout] {
         do { return try await dataSource.fetchWorkouts() }
         catch { throw mapHealthError(error) }

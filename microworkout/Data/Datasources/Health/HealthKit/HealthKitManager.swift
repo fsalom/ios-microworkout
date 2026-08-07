@@ -10,6 +10,7 @@ class HealthKitManager: HealthKitManagerProtocol {
     private let standingTimeType: HKQuantityType? = HKQuantityType.quantityType(forIdentifier: .appleStandTime)
     private let activeEnergyType: HKQuantityType? = HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned)
     private let distanceType: HKQuantityType? = HKQuantityType.quantityType(forIdentifier: .distanceWalkingRunning)
+    private let bodyMassType: HKQuantityType? = HKQuantityType.quantityType(forIdentifier: .bodyMass)
 
     var store: HealthStoreProtocol { healthStore }
 
@@ -41,6 +42,10 @@ class HealthKitManager: HealthKitManagerProtocol {
         if let st = standingTimeType { readTypes.insert(st) }
         if let ae = activeEnergyType { readTypes.insert(ae) }
         if let d = distanceType { readTypes.insert(d) }
+        // El peso se pide de lectura Y escritura: Salud es la fuente (ahí escribe
+        // la báscula) y lo que el usuario anote en la app se devuelve allí, para
+        // no acabar con dos historiales que se contradicen.
+        if let bm = bodyMassType { readTypes.insert(bm); writeTypes.insert(bm) }
         readTypes.insert(HKObjectType.workoutType())
         writeTypes.insert(HKObjectType.workoutType())
 
@@ -148,6 +153,62 @@ class HealthKitManager: HealthKitManagerProtocol {
         }
         let secondsByDay = try await dailyCumulativeSum(quantityType: stType, from: startDate, to: endDate, unit: .second())
         return secondsByDay?.mapValues { $0 / 60 }
+    }
+
+    // MARK: - Peso
+
+    /// Peso por día en el rango, en kilos.
+    ///
+    /// `.discreteMostRecent` y no una media: si te pesas tres veces un martes, el
+    /// peso de ese martes es el último, no el promedio de las tres. Coincide con
+    /// la regla del servidor (una medida por día, gana la última).
+    func fetchBodyMass(startDate: Date, endDate: Date) async throws -> [Date: Double] {
+        guard let bodyMassType else {
+            throw NSError(domain: "HealthKit", code: 7, userInfo: [NSLocalizedDescriptionKey: "Tipo bodyMass no disponible."])
+        }
+        let predicate = HKQuery.predicateForSamples(withStart: startDate, end: endDate, options: .strictStartDate)
+        let anchor = Calendar.current.startOfDay(for: startDate)
+        return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<[Date: Double], Error>) in
+            let query = HKStatisticsCollectionQuery(
+                quantityType: bodyMassType,
+                quantitySamplePredicate: predicate,
+                options: .discreteMostRecent,
+                anchorDate: anchor,
+                intervalComponents: DateComponents(day: 1)
+            )
+            query.initialResultsHandler = { _, result, error in
+                if let error {
+                    continuation.resume(throwing: error)
+                    return
+                }
+                guard let result else {
+                    continuation.resume(returning: [:])
+                    return
+                }
+                var byDay: [Date: Double] = [:]
+                result.enumerateStatistics(from: anchor, to: endDate) { statistics, _ in
+                    // Los días sin pesada no traen cantidad: se omiten en vez de
+                    // rellenarse, porque un hueco en la serie es información.
+                    guard let quantity = statistics.mostRecentQuantity() else { return }
+                    let day = Calendar.current.startOfDay(for: statistics.startDate)
+                    byDay[day] = quantity.doubleValue(for: .gramUnit(with: .kilo))
+                }
+                continuation.resume(returning: byDay)
+            }
+            healthStore.execute(query)
+        }
+    }
+
+    /// Escribe un peso en Salud con la fecha indicada.
+    func saveBodyMass(kilograms: Double, on date: Date) async throws {
+        guard let bodyMassType else {
+            throw NSError(domain: "HealthKit", code: 7, userInfo: [NSLocalizedDescriptionKey: "Tipo bodyMass no disponible."])
+        }
+        let quantity = HKQuantity(unit: .gramUnit(with: .kilo), doubleValue: kilograms)
+        let sample = HKQuantitySample(
+            type: bodyMassType, quantity: quantity, start: date, end: date
+        )
+        try await healthStore.save(sample)
     }
 
     // MARK: - Workouts

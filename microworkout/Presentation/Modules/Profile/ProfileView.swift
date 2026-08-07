@@ -90,6 +90,14 @@ struct ProfileView: View {
                     hubRowLabel(icon: "sparkles", title: "Asistente IA", iconColor: .purple)
                 }
 
+                // Sin `if isAuthenticated`: el peso funciona como invitado (Salud +
+                // dispositivo) y solo la copia en la cuenta necesita sesión.
+                NavigationLink {
+                    WeightProgressBuilder(component: component).build()
+                } label: {
+                    hubRowLabel(icon: "scalemass", title: "Peso y progresión", iconColor: .teal)
+                }
+
                 if authSession.state.isAuthenticated {
                     NavigationLink {
                         UserReportBuilder(component: component).build()

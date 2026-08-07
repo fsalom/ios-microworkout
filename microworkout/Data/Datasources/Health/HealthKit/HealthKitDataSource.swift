@@ -52,6 +52,14 @@ class HealthKitDataSource: HealthKitDataSourceProtocol {
         try await healthKitManager.fetchExerciseTime(startDate: startDate, endDate: endDate)
     }
 
+    func fetchBodyMass(startDate: Date, endDate: Date) async throws -> [Date: Double] {
+        try await healthKitManager.fetchBodyMass(startDate: startDate, endDate: endDate)
+    }
+
+    func saveBodyMass(kilograms: Double, on date: Date) async throws {
+        try await healthKitManager.saveBodyMass(kilograms: kilograms, on: date)
+    }
+
     func fetchWorkouts() async throws -> [HealthWorkout] {
         let hkWorkouts = try await healthKitManager.fetchWorkouts()
         var results: [HealthWorkout] = []

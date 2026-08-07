@@ -10,5 +10,7 @@ protocol HealthRepositoryProtocol {
     func fetchStepsCount(startDate: Date, endDate: Date) async throws -> [Date: Double]?
     func fetchStandingTime() async throws -> Double?
     func fetchStandingTime(startDate: Date, endDate: Date) async throws -> [Date: Double]?
+    func fetchBodyMass(startDate: Date, endDate: Date) async throws -> [Date: Double]
+    func saveBodyMass(kilograms: Double, on date: Date) async throws
     func fetchWorkouts() async throws -> [HealthWorkout]
 }

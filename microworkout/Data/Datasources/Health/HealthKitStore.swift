@@ -16,4 +16,8 @@ final class HealthKitStore: HealthStoreProtocol {
     func execute(_ query: HKQuery) {
         store.execute(query)
     }
+
+    func save(_ object: HKObject) async throws {
+        try await store.save(object)
+    }
 }

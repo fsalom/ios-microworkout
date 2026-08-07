@@ -18,6 +18,10 @@ protocol HealthKitManagerProtocol {
     func fetchStandingTime() async throws -> Double?
     func fetchStandingTime(startDate: Date, endDate: Date) async throws -> [Date: Double]?
 
+    /// Peso por día (kg). Un valor por día: el último de ese día.
+    func fetchBodyMass(startDate: Date, endDate: Date) async throws -> [Date: Double]
+    func saveBodyMass(kilograms: Double, on date: Date) async throws
+
     func fetchWorkouts() async throws -> [HKWorkout]
     func fetchAverageHeartRate(for workout: HKWorkout) async -> Double?
 }

@@ -42,6 +42,21 @@ final class DefaultAppComponent: AppComponentProtocol {
         return HealthUseCase(repository: repository, linkRepository: linkRepository)
     }()
 
+    lazy var bodyMetricsUseCase: BodyMetricsUseCaseProtocol = {
+        return BodyMetricsUseCase(repository: makeBodyMetricsRepository())
+    }()
+
+    /// El repositorio de medidas se construye aparte porque lo usan dos sitios: el
+    /// use case de la pantalla y la sincronización.
+    private func makeBodyMetricsRepository() -> BodyMetricsRepositoryProtocol {
+        let dataSource = HealthKitDataSource(healthKitManager: makeHealthKitManager())
+        return BodyMetricsRepository(
+            health: HealthRepository(dataSource: dataSource),
+            local: BodyMetricsLocalDataSource(storage: makeUserDefaultsManager()),
+            remote: BodyMetricsRemoteDataSource()
+        )
+    }
+
     lazy var workoutLogUseCase: WorkoutLogUseCaseProtocol = {
         let local = WorkoutLogLocalDataSource(localStorage: makeUserDefaultsManager())
         let remote: WorkoutLogRemoteDataSourceProtocol = WorkoutLogRemoteDataSource()
@@ -100,7 +115,8 @@ final class DefaultAppComponent: AppComponentProtocol {
             local: UserLocalDataSource(storage: makeUserDefaultsManager()),
             remote: UserProfileRemoteDataSource())
         return SyncLocalDataUseCase(training: training, workoutLog: workoutLog,
-                                    exercise: exercise, meal: meal, userProfile: userProfile)
+                                    exercise: exercise, meal: meal, userProfile: userProfile,
+                                    bodyMetrics: makeBodyMetricsRepository())
     }()
 
     lazy var exerciseProgressionUseCase: ExerciseProgressionUseCaseProtocol = ExerciseProgressionUseCase(

@@ -11,6 +11,7 @@ enum SyncCategory: String, CaseIterable, Identifiable {
     case trainings
     case workoutLogs
     case meals
+    case bodyMetrics
 
     var id: String { rawValue }
 
@@ -22,6 +23,7 @@ enum SyncCategory: String, CaseIterable, Identifiable {
         case .workoutLogs: return "Sesiones y registros"
         // Esta categoría cubre comidas, recetas y alimentos favoritos.
         case .meals:       return "Comidas y alimentos"
+        case .bodyMetrics: return "Peso"
         }
     }
 
@@ -32,6 +34,7 @@ enum SyncCategory: String, CaseIterable, Identifiable {
         case .trainings:   return "figure.strengthtraining.traditional"
         case .workoutLogs: return "list.bullet.clipboard"
         case .meals:       return "fork.knife"
+        case .bodyMetrics: return "scalemass"
         }
     }
 }
@@ -111,17 +114,20 @@ final class SyncLocalDataUseCase: SyncLocalDataUseCaseProtocol {
     private let exercise: ExerciseRepositoryProtocol
     private let meal: MealRepositoryProtocol
     private let userProfile: UserProfileRepositoryProtocol
+    private let bodyMetrics: BodyMetricsRepositoryProtocol
 
     init(training: TrainingRepositoryProtocol,
          workoutLog: WorkoutLogRepositoryProtocol,
          exercise: ExerciseRepositoryProtocol,
          meal: MealRepositoryProtocol,
-         userProfile: UserProfileRepositoryProtocol) {
+         userProfile: UserProfileRepositoryProtocol,
+         bodyMetrics: BodyMetricsRepositoryProtocol) {
         self.training = training
         self.workoutLog = workoutLog
         self.exercise = exercise
         self.meal = meal
         self.userProfile = userProfile
+        self.bodyMetrics = bodyMetrics
     }
 
     func status() async -> SyncReport {
@@ -162,6 +168,7 @@ final class SyncLocalDataUseCase: SyncLocalDataUseCaseProtocol {
         case .trainings:   return try await training.pendingSyncCount()
         case .workoutLogs: return try await workoutLog.pendingSyncCount()
         case .meals:       return try await meal.pendingSyncCount()
+        case .bodyMetrics: return try await bodyMetrics.pendingSyncCount()
         }
     }
 
@@ -172,6 +179,7 @@ final class SyncLocalDataUseCase: SyncLocalDataUseCaseProtocol {
         case .trainings:   return try await training.syncLocalToRemote()
         case .workoutLogs: return try await workoutLog.syncLocalToRemote()
         case .meals:       return try await meal.syncLocalToRemote()
+        case .bodyMetrics: return try await bodyMetrics.syncLocalToRemote()
         }
     }
 
