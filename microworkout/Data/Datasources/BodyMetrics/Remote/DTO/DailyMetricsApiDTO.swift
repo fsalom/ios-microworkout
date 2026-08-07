@@ -5,16 +5,26 @@ import Foundation
 /// `date` viaja como día suelto (`2026-08-01`), no como instante: la medida es de
 /// un día, no de un momento. Por eso se formatea a mano y no con el decodificador
 /// de fechas ISO del resto de DTOs, que espera hora y zona y fallaría.
-struct BodyMeasurementApiDTO: Decodable {
+struct DailyMetricsApiDTO: Decodable {
     let date: Date
     let weightKg: Double?
     let bodyFatPercentage: Double?
+    let steps: Int?
+    let activeKcal: Double?
+    let exerciseMinutes: Double?
+    let standingMinutes: Double?
+    let restingHeartRate: Double?
     let source: String
 
     enum CodingKeys: String, CodingKey {
         case date
         case weightKg = "weight_kg"
         case bodyFatPercentage = "body_fat_percentage"
+        case steps
+        case activeKcal = "active_kcal"
+        case exerciseMinutes = "exercise_minutes"
+        case standingMinutes = "standing_minutes"
+        case restingHeartRate = "resting_heart_rate"
         case source
     }
 
@@ -29,14 +39,24 @@ struct BodyMeasurementApiDTO: Decodable {
         date = parsed
         weightKg = try container.decodeIfPresent(Double.self, forKey: .weightKg)
         bodyFatPercentage = try container.decodeIfPresent(Double.self, forKey: .bodyFatPercentage)
+        steps = try container.decodeIfPresent(Int.self, forKey: .steps)
+        activeKcal = try container.decodeIfPresent(Double.self, forKey: .activeKcal)
+        exerciseMinutes = try container.decodeIfPresent(Double.self, forKey: .exerciseMinutes)
+        standingMinutes = try container.decodeIfPresent(Double.self, forKey: .standingMinutes)
+        restingHeartRate = try container.decodeIfPresent(Double.self, forKey: .restingHeartRate)
         source = try container.decode(String.self, forKey: .source)
     }
 
-    func toDomain() -> BodyMeasurement {
-        BodyMeasurement(
+    func toDomain() -> DailyMetrics {
+        DailyMetrics(
             date: date,
             weightKg: weightKg,
             bodyFatPercentage: bodyFatPercentage,
+            steps: steps,
+            activeKcal: activeKcal,
+            exerciseMinutes: exerciseMinutes,
+            standingMinutes: standingMinutes,
+            restingHeartRate: restingHeartRate,
             // Una fuente que no conocemos se trata como manual: es lo que el
             // usuario puede corregir, así que es el lado seguro.
             source: MeasurementSource(rawValue: source) ?? .manual
@@ -61,7 +81,7 @@ struct MeasurementTrendApiDTO: Decodable {
 }
 
 struct MeasurementListApiDTO: Decodable {
-    let measurements: [BodyMeasurementApiDTO]
+    let measurements: [DailyMetricsApiDTO]
     let trend: MeasurementTrendApiDTO?
 }
 

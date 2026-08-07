@@ -9,9 +9,8 @@ import TripleA
 /// dejaba de verse. Y, ya con sesión, un fallo del servidor al guardar se tragaba
 /// el entreno recién hecho, porque todos los llamantes usan `try?`.
 ///
-/// Mismo planteamiento que `MealFavoritesSyncTests`: los repositorios deciden por
-/// `AuthSession.shared`, un singleton `@MainActor`, así que cada test con sesión
-/// la pone y la restaura.
+/// Mismo planteamiento que `MealFavoritesSyncTests`: la sesión se INYECTA en el
+/// repositorio en vez de tocar `AuthSession.shared`, que lo comparte toda la suite.
 final class WorkoutHistorySyncTests: XCTestCase {
 
     // MARK: - Dobles
@@ -151,22 +150,15 @@ final class WorkoutHistorySyncTests: XCTestCase {
     }
 
     // MARK: - Utilidades
-
-    @MainActor
-    private func withAuthenticatedSession(_ body: () async throws -> Void) async rethrows {
-        let previous = AuthSession.shared.state
-        AuthSession.shared.setAuthenticated(
-            AuthenticatedUser(id: 1, email: "a@b.c", fullname: "Test", phone: nil)
-        )
-        defer {
-            if case .authenticated(let user) = previous {
-                AuthSession.shared.setAuthenticated(user)
-            } else {
-                AuthSession.shared.setGuest()
-            }
-        }
-        try await body()
+    /// Sesión propia del test. Antes se cambiaba `AuthSession.shared`, que es un
+    /// singleton compartido por toda la suite: con los tests corriendo en PARALELO,
+    /// un test que la cambiaba hacía fallar a otro que se ejecutaba a la vez, y el
+    /// fallo salía en la clase equivocada.
+    private struct StubSession: AuthStateProviding {
+        let authenticated: Bool
+        var isAuthenticated: Bool { get async { authenticated } }
     }
+
 
     private func sessionDTO(_ id: UUID, _ name: String) -> WorkoutSessionDTO {
         WorkoutSessionDTO(
@@ -209,15 +201,13 @@ final class WorkoutHistorySyncTests: XCTestCase {
             WorkoutSessionApiDTO(id: UUID(), name: "Pierna de la cuenta", exercises: [],
                                  createdAt: Date(), updatedAt: Date())
         ]
-        let repository = WorkoutLogRepository(local: local, remote: remote)
+        let repository = WorkoutLogRepository(local: local, remote: remote, session: StubSession(authenticated: true))
 
-        try await withAuthenticatedSession {
-            let result = try await repository.getAllSessions()
-            XCTAssertEqual(
-                Set(result.map(\.name)), ["Pierna de la cuenta", "Torso de invitado"],
-                "las sesiones de invitado deben convivir con las de la cuenta"
-            )
-        }
+        let result = try await repository.getAllSessions()
+        XCTAssertEqual(
+            Set(result.map(\.name)), ["Pierna de la cuenta", "Torso de invitado"],
+            "las sesiones de invitado deben convivir con las de la cuenta"
+        )
     }
 
     func testSyncedSessionIsNotDuplicated() async throws {
@@ -229,12 +219,10 @@ final class WorkoutHistorySyncTests: XCTestCase {
             WorkoutSessionApiDTO(id: shared, name: "Torso", exercises: [],
                                  createdAt: Date(), updatedAt: Date())
         ]
-        let repository = WorkoutLogRepository(local: local, remote: remote)
+        let repository = WorkoutLogRepository(local: local, remote: remote, session: StubSession(authenticated: true))
 
-        try await withAuthenticatedSession {
-            let result = try await repository.getAllSessions()
-            XCTAssertEqual(result.count, 1, "la copia local ya subida no debe salir dos veces")
-        }
+        let result = try await repository.getAllSessions()
+        XCTAssertEqual(result.count, 1, "la copia local ya subida no debe salir dos veces")
     }
 
     func testServerFailureDoesNotHideLocalLogs() async throws {
@@ -242,12 +230,10 @@ final class WorkoutHistorySyncTests: XCTestCase {
         local.logs = [logDTO(UUID(), "Torso", at: Date())]
         let remote = FakeLogRemote()
         remote.isOffline = true
-        let repository = WorkoutLogRepository(local: local, remote: remote)
+        let repository = WorkoutLogRepository(local: local, remote: remote, session: StubSession(authenticated: true))
 
-        try await withAuthenticatedSession {
-            let result = try await repository.getAllLogs()
-            XCTAssertEqual(result.count, 1, "si el servidor falla se muestra lo local, no una lista vacía")
-        }
+        let result = try await repository.getAllLogs()
+        XCTAssertEqual(result.count, 1, "si el servidor falla se muestra lo local, no una lista vacía")
     }
 
     func testLogsComeBackNewestFirst() async throws {
@@ -260,52 +246,46 @@ final class WorkoutHistorySyncTests: XCTestCase {
             WorkoutLogApiDTO(id: UUID(), sessionId: nil, sessionName: "Servidor antiguo",
                              startedAt: old, endedAt: nil, linkedHealthWorkoutId: nil, exercises: [])
         ]
-        let repository = WorkoutLogRepository(local: local, remote: remote)
+        let repository = WorkoutLogRepository(local: local, remote: remote, session: StubSession(authenticated: true))
 
-        try await withAuthenticatedSession {
-            let result = try await repository.getAllLogs()
-            XCTAssertEqual(result.map(\.sessionName), ["Local reciente", "Servidor antiguo"])
-        }
+        let result = try await repository.getAllLogs()
+        XCTAssertEqual(result.map(\.sessionName), ["Local reciente", "Servidor antiguo"])
     }
 
     func testLogSurvivesWhenTheServerIsDown() async throws {
         let local = FakeLogLocal()
         let remote = FakeLogRemote()
         remote.isOffline = true
-        let repository = WorkoutLogRepository(local: local, remote: remote)
+        let repository = WorkoutLogRepository(local: local, remote: remote, session: StubSession(authenticated: true))
         let log = WorkoutLog(
             id: UUID(), sessionId: nil, sessionName: "Torso", startedAt: Date(),
             endedAt: nil, exercises: [], linkedHealthWorkoutId: nil
         )
 
-        try await withAuthenticatedSession {
-            try await repository.saveLog(log)
-            XCTAssertEqual(local.logs.count, 1, "el entreno debe quedar en el dispositivo, no perderse")
+        try await repository.saveLog(log)
+        XCTAssertEqual(local.logs.count, 1, "el entreno debe quedar en el dispositivo, no perderse")
 
-            // Y cuando vuelve la conexión, la sincronización sabe que falta por subir.
-            remote.isOffline = false
-            let pending = try await repository.pendingSyncCount()
-            XCTAssertEqual(pending, 1, "queda contado como pendiente hasta que se suba")
-        }
+        // Y cuando vuelve la conexión, la sincronización sabe que falta por subir.
+        remote.isOffline = false
+        let pending = try await repository.pendingSyncCount()
+        XCTAssertEqual(pending, 1, "queda contado como pendiente hasta que se suba")
     }
 
     func testLogSavedOfflineIsUploadedLater() async throws {
         let local = FakeLogLocal()
         let remote = FakeLogRemote()
         remote.isOffline = true
-        let repository = WorkoutLogRepository(local: local, remote: remote)
+        let repository = WorkoutLogRepository(local: local, remote: remote, session: StubSession(authenticated: true))
         let log = WorkoutLog(
             id: UUID(), sessionId: nil, sessionName: "Torso", startedAt: Date(),
             endedAt: nil, exercises: [], linkedHealthWorkoutId: nil
         )
 
-        try await withAuthenticatedSession {
-            try await repository.saveLog(log)
-            remote.isOffline = false
-            let uploaded = try await repository.syncLocalToRemote()
-            XCTAssertEqual(uploaded, 1)
-            XCTAssertEqual(remote.upsertedLogIds, [log.id])
-        }
+        try await repository.saveLog(log)
+        remote.isOffline = false
+        let uploaded = try await repository.syncLocalToRemote()
+        XCTAssertEqual(uploaded, 1)
+        XCTAssertEqual(remote.upsertedLogIds, [log.id])
     }
 
     func testDeletingALocalOnlyLogDoesNotFail() async throws {
@@ -314,12 +294,10 @@ final class WorkoutHistorySyncTests: XCTestCase {
         local.logs = [logDTO(id, "Torso", at: Date())]
         let remote = FakeLogRemote()
         remote.unknownOnDelete = [id]
-        let repository = WorkoutLogRepository(local: local, remote: remote)
+        let repository = WorkoutLogRepository(local: local, remote: remote, session: StubSession(authenticated: true))
 
-        try await withAuthenticatedSession {
-            try await repository.deleteLog(id: id.uuidString)
-            XCTAssertTrue(local.logs.isEmpty, "un 404 del servidor no debe impedir borrarlo del dispositivo")
-        }
+        try await repository.deleteLog(id: id.uuidString)
+        XCTAssertTrue(local.logs.isEmpty, "un 404 del servidor no debe impedir borrarlo del dispositivo")
     }
 
     func testDeleteIsNotAssumedWhenTheServerIsUnreachable() async throws {
@@ -328,15 +306,13 @@ final class WorkoutHistorySyncTests: XCTestCase {
         local.logs = [logDTO(id, "Torso", at: Date())]
         let remote = FakeLogRemote()
         remote.isOffline = true
-        let repository = WorkoutLogRepository(local: local, remote: remote)
+        let repository = WorkoutLogRepository(local: local, remote: remote, session: StubSession(authenticated: true))
 
-        try await withAuthenticatedSession {
-            do {
-                try await repository.deleteLog(id: id.uuidString)
-                XCTFail("sin servidor el borrado no se puede dar por hecho")
-            } catch {
-                XCTAssertEqual(local.logs.count, 1, "la copia local se conserva hasta poder borrar en el servidor")
-            }
+        do {
+            try await repository.deleteLog(id: id.uuidString)
+            XCTFail("sin servidor el borrado no se puede dar por hecho")
+        } catch {
+            XCTAssertEqual(local.logs.count, 1, "la copia local se conserva hasta poder borrar en el servidor")
         }
     }
 
@@ -347,15 +323,13 @@ final class WorkoutHistorySyncTests: XCTestCase {
         local.finished = [trainingDTO(UUID(), "Flexiones de invitado", completedAt: Date(timeIntervalSince1970: 500))]
         let remote = FakeTrainingRemote()
         remote.finished = [finishedApiDTO(UUID(), "Dominadas de la cuenta", completedAt: Date(timeIntervalSince1970: 900))]
-        let repository = TrainingRepository(local: local, remote: remote)
+        let repository = TrainingRepository(local: local, remote: remote, session: StubSession(authenticated: true))
 
-        try await withAuthenticatedSession {
-            let result = try await repository.getFinished()
-            XCTAssertEqual(
-                Set(result.map(\.name)), ["Flexiones de invitado", "Dominadas de la cuenta"],
-                "el historial de invitado no puede desaparecer al entrar en la cuenta"
-            )
-        }
+        let result = try await repository.getFinished()
+        XCTAssertEqual(
+            Set(result.map(\.name)), ["Flexiones de invitado", "Dominadas de la cuenta"],
+            "el historial de invitado no puede desaparecer al entrar en la cuenta"
+        )
     }
 
     /// El caso que rompería un dedup ingenuo: al empezar un preset se conserva su
@@ -371,31 +345,27 @@ final class WorkoutHistorySyncTests: XCTestCase {
         ]
         let remote = FakeTrainingRemote()
         remote.finished = [finishedApiDTO(presetId, "Flexiones", completedAt: secondRun)]
-        let repository = TrainingRepository(local: local, remote: remote)
+        let repository = TrainingRepository(local: local, remote: remote, session: StubSession(authenticated: true))
 
-        try await withAuthenticatedSession {
-            let result = try await repository.getFinished()
-            XCTAssertEqual(result.count, 2, "la serie subida no debe borrar del historial las otras del mismo preset")
-            XCTAssertEqual(result.map { $0.completedAt }, [secondRun, firstRun], "más reciente primero")
-        }
+        let result = try await repository.getFinished()
+        XCTAssertEqual(result.count, 2, "la serie subida no debe borrar del historial las otras del mismo preset")
+        XCTAssertEqual(result.map { $0.completedAt }, [secondRun, firstRun], "más reciente primero")
     }
 
     func testFinishedTrainingSurvivesWhenTheServerIsDown() async throws {
         let local = FakeTrainingLocal()
         let remote = FakeTrainingRemote()
         remote.isOffline = true
-        let repository = TrainingRepository(local: local, remote: remote)
+        let repository = TrainingRepository(local: local, remote: remote, session: StubSession(authenticated: false))
         var training = Training(name: "Flexiones", image: "push-up-1", type: .strength,
                                 numberOfSetsForSlider: 3, numberOfRepsForSlider: 10,
                                 numberOfMinutesPerSetForSlider: 1)
         training.completedAt = Date()
 
-        try await withAuthenticatedSession {
-            try await repository.finish(training)
-            XCTAssertEqual(local.finished.count, 1, "lo entrenado se guarda en el dispositivo aunque falle el servidor")
-            let result = try await repository.getFinished()
-            XCTAssertEqual(result.count, 1, "y se sigue viendo en el historial")
-        }
+        try await repository.finish(training)
+        XCTAssertEqual(local.finished.count, 1, "lo entrenado se guarda en el dispositivo aunque falle el servidor")
+        let result = try await repository.getFinished()
+        XCTAssertEqual(result.count, 1, "y se sigue viendo en el historial")
     }
 
     func testNoCurrentTrainingOnTheServerDoesNotResurrectTheLocalOne() async throws {
@@ -403,12 +373,10 @@ final class WorkoutHistorySyncTests: XCTestCase {
         local.current = trainingDTO(UUID(), "Flexiones ya terminadas en otro sitio", completedAt: nil)
         let remote = FakeTrainingRemote()
         remote.currentTraining = nil
-        let repository = TrainingRepository(local: local, remote: remote)
+        let repository = TrainingRepository(local: local, remote: remote, session: StubSession(authenticated: true))
 
-        try await withAuthenticatedSession {
-            let current = try await repository.getCurrent()
-            XCTAssertNil(current, "que el servidor diga que no hay ninguno es una respuesta, no un fallo")
-        }
+        let current = try await repository.getCurrent()
+        XCTAssertNil(current, "que el servidor diga que no hay ninguno es una respuesta, no un fallo")
     }
 
     func testCurrentTrainingFallsBackToLocalWhenTheServerFails() async throws {
@@ -416,30 +384,17 @@ final class WorkoutHistorySyncTests: XCTestCase {
         local.current = trainingDTO(UUID(), "Flexiones en curso", completedAt: nil)
         let remote = FakeTrainingRemote()
         remote.isOffline = true
-        let repository = TrainingRepository(local: local, remote: remote)
+        let repository = TrainingRepository(local: local, remote: remote, session: StubSession(authenticated: true))
 
-        try await withAuthenticatedSession {
-            let current = try await repository.getCurrent()
-            XCTAssertEqual(current?.name, "Flexiones en curso", "sin servidor, el del dispositivo es el que hay")
-        }
+        let current = try await repository.getCurrent()
+        XCTAssertEqual(current?.name, "Flexiones en curso", "sin servidor, el del dispositivo es el que hay")
     }
 
-    @MainActor
     func testGuestModeNeverTouchesTheServer() async throws {
-        let previous = AuthSession.shared.state
-        AuthSession.shared.setGuest()
-        defer {
-            if case .authenticated(let user) = previous {
-                AuthSession.shared.setAuthenticated(user)
-            } else {
-                AuthSession.shared.setGuest()
-            }
-        }
-
         let local = FakeTrainingLocal()
         let remote = FakeTrainingRemote()
         remote.isOffline = true   // cualquier llamada al servidor haría fallar el test
-        let repository = TrainingRepository(local: local, remote: remote)
+        let repository = TrainingRepository(local: local, remote: remote, session: StubSession(authenticated: false))
         var training = Training(name: "Flexiones", image: "push-up-1", type: .strength,
                                 numberOfSetsForSlider: 3, numberOfRepsForSlider: 10,
                                 numberOfMinutesPerSetForSlider: 1)

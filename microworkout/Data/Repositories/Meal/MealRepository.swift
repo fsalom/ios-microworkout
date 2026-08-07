@@ -12,18 +12,22 @@ class MealRepository: MealRepositoryProtocol {
     private let remoteApi: OpenFoodFactsApiProtocol
     private let remote: MealRemoteDataSourceProtocol
 
+    private let session: AuthStateProviding
+
     init(
         localDataSource: MealDataSourceProtocol,
         remoteApi: OpenFoodFactsApiProtocol,
-        remote: MealRemoteDataSourceProtocol
+        remote: MealRemoteDataSourceProtocol,
+        session: AuthStateProviding = SharedAuthState()
     ) {
         self.localDataSource = localDataSource
         self.remoteApi = remoteApi
         self.remote = remote
+        self.session = session
     }
 
     private func isAuthenticated() async -> Bool {
-        await MainActor.run { AuthSession.shared.state.isAuthenticated }
+        await session.isAuthenticated
     }
 
     // MARK: Meals

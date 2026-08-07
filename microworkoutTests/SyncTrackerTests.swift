@@ -35,6 +35,14 @@ final class SyncTrackerTests: XCTestCase {
         }
     }
 
+    /// Tracker propio por test, y no `tracker`: el singleton arrastra
+    /// estado entre tests y su banner se esconde solo a los 3,5 s, así que la
+    /// comprobación competía contra un reloj de pared y fallaba en cuanto la
+    /// máquina iba cargada. Una ventana larga hace la prueba determinista.
+    private func makeTracker() -> SyncTracker {
+        SyncTracker(visibleAfterFinish: .seconds(600))
+    }
+
     /// Semáforo mínimo para que el test decida cuándo acaba la subida.
     private actor AsyncGate {
         private var isOpen = false
@@ -52,10 +60,8 @@ final class SyncTrackerTests: XCTestCase {
         }
     }
 
-    override func setUp() async throws {
-        // El tracker es un singleton: se deja en reposo antes de cada test.
-        await waitUntil { SyncTracker.shared.phase == .idle }
-    }
+    // Ya no hace falta un `setUp` que espere a que el singleton vuelva a reposo:
+    // cada test tiene su propio tracker y arranca en `.idle` por construcción.
 
     private func waitUntil(
         timeout: TimeInterval = 2,
@@ -68,15 +74,16 @@ final class SyncTrackerTests: XCTestCase {
     }
 
     func testBannerReportsEachCategoryWhileSyncing() async throws {
+        let tracker = makeTracker()
         let useCase = FakeSyncUseCase()
-        SyncTracker.shared.syncAfterLogin(using: useCase)
+        tracker.syncAfterLogin(using: useCase)
 
-        await waitUntil { SyncTracker.shared.isVisible }
-        XCTAssertTrue(SyncTracker.shared.isVisible, "el banner debe aparecer al arrancar")
+        await waitUntil { tracker.isVisible }
+        XCTAssertTrue(tracker.isVisible, "el banner debe aparecer al arrancar")
 
         await useCase.gate.open()
         await waitUntil {
-            if case .finished = SyncTracker.shared.phase { return true }
+            if case .finished = tracker.phase { return true }
             return false
         }
 
@@ -84,36 +91,38 @@ final class SyncTrackerTests: XCTestCase {
             useCase.reportedCategories, SyncCategory.allCases,
             "debe informar de todas las categorías, en orden"
         )
-        XCTAssertEqual(SyncTracker.shared.phase, .finished(uploaded: 3, hasErrors: false))
+        XCTAssertEqual(tracker.phase, .finished(uploaded: 3, hasErrors: false))
     }
 
     func testASecondLoginWhileSyncingDoesNotStartAnotherUpload() async throws {
+        let tracker = makeTracker()
         let useCase = FakeSyncUseCase()
-        SyncTracker.shared.syncAfterLogin(using: useCase)
-        await waitUntil { SyncTracker.shared.isVisible }
+        tracker.syncAfterLogin(using: useCase)
+        await waitUntil { tracker.isVisible }
 
         // RootView puede ver el mismo cambio de estado dos veces.
-        SyncTracker.shared.syncAfterLogin(using: useCase)
-        SyncTracker.shared.syncAfterLogin(using: useCase)
+        tracker.syncAfterLogin(using: useCase)
+        tracker.syncAfterLogin(using: useCase)
 
         await useCase.gate.open()
         await waitUntil {
-            if case .finished = SyncTracker.shared.phase { return true }
+            if case .finished = tracker.phase { return true }
             return false
         }
         XCTAssertEqual(useCase.syncCalls, 1, "solo una subida en curso")
     }
 
     func testErrorsAreSurfacedInTheBanner() async throws {
+        let tracker = makeTracker()
         let useCase = FakeSyncUseCase()
         useCase.hasErrors = true
-        SyncTracker.shared.syncAfterLogin(using: useCase)
+        tracker.syncAfterLogin(using: useCase)
         await useCase.gate.open()
 
         await waitUntil {
-            if case .finished = SyncTracker.shared.phase { return true }
+            if case .finished = tracker.phase { return true }
             return false
         }
-        XCTAssertEqual(SyncTracker.shared.phase, .finished(uploaded: 3, hasErrors: true))
+        XCTAssertEqual(tracker.phase, .finished(uploaded: 3, hasErrors: true))
     }
 }

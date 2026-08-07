@@ -60,6 +60,16 @@ class HealthRepository: HealthRepositoryProtocol {
         catch { throw mapHealthError(error) }
     }
 
+    func fetchActiveEnergy(startDate: Date, endDate: Date) async throws -> [Date: Double] {
+        do { return try await dataSource.fetchActiveEnergy(startDate: startDate, endDate: endDate) }
+        catch { throw mapHealthError(error) }
+    }
+
+    func fetchRestingHeartRate(startDate: Date, endDate: Date) async throws -> [Date: Double] {
+        do { return try await dataSource.fetchRestingHeartRate(startDate: startDate, endDate: endDate) }
+        catch { throw mapHealthError(error) }
+    }
+
     func fetchWorkouts() async throws -> [HealthWorkout] {
         do { return try await dataSource.fetchWorkouts() }
         catch { throw mapHealthError(error) }

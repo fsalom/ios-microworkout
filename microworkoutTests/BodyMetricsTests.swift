@@ -24,7 +24,7 @@ final class BodyMetricsTests: XCTestCase {
         func fetchExerciseTimeToday() async throws -> Double? { nil }
         func fetchExerciseTime(startDate: Date, endDate: Date) async throws -> [Date: Double]? { nil }
         func fetchStepsCountToday() async throws -> Double? { nil }
-        func fetchStepsCount(startDate: Date, endDate: Date) async throws -> [Date: Double]? { nil }
+        func fetchStepsCount(startDate: Date, endDate: Date) async throws -> [Date: Double]? { stepsByDay }
         func fetchStandingTime() async throws -> Double? { nil }
         func fetchStandingTime(startDate: Date, endDate: Date) async throws -> [Date: Double]? { nil }
         func fetchWorkouts() async throws -> [HealthWorkout] { [] }
@@ -34,6 +34,22 @@ final class BodyMetricsTests: XCTestCase {
             return byDay
         }
 
+        /// Series de actividad. `stepsFails` aparte para poder comprobar que un
+        /// permiso denegado en UNA métrica no se lleva por delante las demás.
+        var stepsByDay: [Date: Double] = [:]
+        var energyByDay: [Date: Double] = [:]
+        var restingByDay: [Date: Double] = [:]
+        var restingFails = false
+
+        func fetchActiveEnergy(startDate: Date, endDate: Date) async throws -> [Date: Double] {
+            energyByDay
+        }
+
+        func fetchRestingHeartRate(startDate: Date, endDate: Date) async throws -> [Date: Double] {
+            if restingFails { throw Fake.denied }
+            return restingByDay
+        }
+
         func saveBodyMass(kilograms: Double, on date: Date) async throws {
             if failsOnWrite { throw Fake.denied }
             saved.append((kilograms, date))
@@ -41,9 +57,9 @@ final class BodyMetricsTests: XCTestCase {
     }
 
     private final class FakeLocal: BodyMetricsLocalDataSourceProtocol {
-        var stored: [BodyMeasurementDTO] = []
-        func getAll() -> [BodyMeasurementDTO] { stored }
-        func save(_ measurement: BodyMeasurementDTO) {
+        var stored: [DailyMetricsDTO] = []
+        func getAll() -> [DailyMetricsDTO] { stored }
+        func save(_ measurement: DailyMetricsDTO) {
             stored.removeAll { Calendar.current.isDate($0.date, inSameDayAs: measurement.date) }
             stored.append(measurement)
         }
@@ -53,19 +69,19 @@ final class BodyMetricsTests: XCTestCase {
     }
 
     private final class FakeRemote: BodyMetricsRemoteDataSourceProtocol {
-        var stored: [BodyMeasurement] = []
+        var stored: [DailyMetrics] = []
         var isOffline = false
         private(set) var bulkCalls = 0
         private(set) var upsertCalls = 0
 
-        func list(from start: Date?, to end: Date?) async throws -> [BodyMeasurementApiDTO] {
+        func list(from start: Date?, to end: Date?) async throws -> [DailyMetricsApiDTO] {
             if isOffline { throw Fake.offline }
             // El doble devuelve entidades ya mapeadas: lo que se prueba aquí es la
             // fusión, no el JSON (eso lo cubre `testDateContract`).
             return try stored.map { try Self.dto(from: $0) }
         }
 
-        func upsert(_ measurement: BodyMeasurement) async throws -> BodyMeasurementApiDTO {
+        func upsert(_ measurement: DailyMetrics) async throws -> DailyMetricsApiDTO {
             if isOffline { throw Fake.offline }
             upsertCalls += 1
             stored.removeAll { $0.date == measurement.date }
@@ -73,7 +89,7 @@ final class BodyMetricsTests: XCTestCase {
             return try Self.dto(from: measurement)
         }
 
-        func upsertMany(_ measurements: [BodyMeasurement]) async throws -> Int {
+        func upsertMany(_ measurements: [DailyMetrics]) async throws -> Int {
             if isOffline { throw Fake.offline }
             bulkCalls += 1
             for measurement in measurements {
@@ -90,18 +106,30 @@ final class BodyMetricsTests: XCTestCase {
 
         /// Construye el DTO pasando por JSON, así el doble no puede divergir del
         /// formato real de la API.
-        static func dto(from measurement: BodyMeasurement) throws -> BodyMeasurementApiDTO {
+        static func dto(from measurement: DailyMetrics) throws -> DailyMetricsApiDTO {
             var json: [String: Any] = [
                 "date": BodyMetricsDateFormat.day.string(from: measurement.date),
                 "source": measurement.source.rawValue,
             ]
             if let weight = measurement.weightKg { json["weight_kg"] = weight }
+            if let steps = measurement.steps { json["steps"] = steps }
+            if let kcal = measurement.activeKcal { json["active_kcal"] = kcal }
+            if let hr = measurement.restingHeartRate { json["resting_heart_rate"] = hr }
             let data = try JSONSerialization.data(withJSONObject: json)
-            return try JSONDecoder().decode(BodyMeasurementApiDTO.self, from: data)
+            return try JSONDecoder().decode(DailyMetricsApiDTO.self, from: data)
         }
     }
 
     // MARK: - Utilidades
+    /// Sesión propia del test. Antes se cambiaba `AuthSession.shared`, que es un
+    /// singleton compartido por toda la suite: con los tests corriendo en PARALELO,
+    /// un test que la cambiaba hacía fallar a otro que se ejecutaba a la vez, y el
+    /// fallo salía en la clase equivocada.
+    private struct StubSession: AuthStateProviding {
+        let authenticated: Bool
+        var isAuthenticated: Bool { get async { authenticated } }
+    }
+
 
     private func day(_ offset: Int) -> Date {
         Calendar.current.startOfDay(
@@ -109,28 +137,17 @@ final class BodyMetricsTests: XCTestCase {
         )
     }
 
-    @MainActor
-    private func withAuthenticatedSession(_ body: () async throws -> Void) async rethrows {
-        let previous = AuthSession.shared.state
-        AuthSession.shared.setAuthenticated(
-            AuthenticatedUser(id: 1, email: "a@b.c", fullname: "Test", phone: nil)
-        )
-        defer {
-            if case .authenticated(let user) = previous {
-                AuthSession.shared.setAuthenticated(user)
-            } else {
-                AuthSession.shared.setGuest()
-            }
-        }
-        try await body()
-    }
 
     private func makeRepository(
         health: FakeHealth = FakeHealth(),
         local: FakeLocal = FakeLocal(),
-        remote: FakeRemote = FakeRemote()
+        remote: FakeRemote = FakeRemote(),
+        authenticated: Bool = true
     ) -> BodyMetricsRepository {
-        BodyMetricsRepository(health: health, local: local, remote: remote)
+        BodyMetricsRepository(
+            health: health, local: local, remote: remote,
+            session: StubSession(authenticated: authenticated)
+        )
     }
 
     // MARK: - Quién gana
@@ -139,22 +156,20 @@ final class BodyMetricsTests: XCTestCase {
         let health = FakeHealth()
         health.byDay = [day(0): 79.5]
         let remote = FakeRemote()
-        remote.stored = [BodyMeasurement(date: day(0), weightKg: 80.0, source: .manual)]
+        remote.stored = [DailyMetrics(date: day(0), weightKg: 80.0, source: .manual)]
         let repository = makeRepository(health: health, remote: remote)
 
-        try await withAuthenticatedSession {
-            let result = try await repository.getMeasurements(from: day(-7), to: day(0))
-            XCTAssertEqual(result.count, 1, "un día, una medida")
-            XCTAssertEqual(result.first?.weightKg, 79.5, "Salud es la fuente: manda su valor")
-        }
+        let result = try await repository.getMeasurements(from: day(-7), to: day(0))
+        XCTAssertEqual(result.count, 1, "un día, una medida")
+        XCTAssertEqual(result.first?.weightKg, 79.5, "Salud es la fuente: manda su valor")
     }
 
     func testDeniedHealthDoesNotHideTheOtherSources() async throws {
         let health = FakeHealth()
         health.failsOnRead = true
         let local = FakeLocal()
-        local.stored = [BodyMeasurement(date: day(-1), weightKg: 81.0).toDTO()]
-        let repository = makeRepository(health: health, local: local)
+        local.stored = [DailyMetrics(date: day(-1), weightKg: 81.0).toDTO()]
+        let repository = makeRepository(health: health, local: local, authenticated: false)
 
         let result = try await repository.getMeasurements(from: day(-7), to: day(0))
         XCTAssertEqual(result.first?.weightKg, 81.0, "sin permiso de Salud se sigue viendo lo del dispositivo")
@@ -162,15 +177,13 @@ final class BodyMetricsTests: XCTestCase {
 
     func testServerFailureDoesNotHideLocalWeights() async throws {
         let local = FakeLocal()
-        local.stored = [BodyMeasurement(date: day(-2), weightKg: 77.0).toDTO()]
+        local.stored = [DailyMetrics(date: day(-2), weightKg: 77.0).toDTO()]
         let remote = FakeRemote()
         remote.isOffline = true
         let repository = makeRepository(local: local, remote: remote)
 
-        try await withAuthenticatedSession {
-            let result = try await repository.getMeasurements(from: day(-7), to: day(0))
-            XCTAssertEqual(result.count, 1, "una caída del servidor no puede vaciar la gráfica")
-        }
+        let result = try await repository.getMeasurements(from: day(-7), to: day(0))
+        XCTAssertEqual(result.count, 1, "una caída del servidor no puede vaciar la gráfica")
     }
 
     // MARK: - Anotar
@@ -181,12 +194,10 @@ final class BodyMetricsTests: XCTestCase {
         let remote = FakeRemote()
         let repository = makeRepository(health: health, local: local, remote: remote)
 
-        try await withAuthenticatedSession {
-            try await repository.saveWeight(78.4, on: day(0))
-            XCTAssertEqual(health.saved.first?.kg, 78.4, "lo anotado tiene que acabar en Salud")
-            XCTAssertEqual(local.stored.count, 1, "y en el dispositivo")
-            XCTAssertEqual(remote.upsertCalls, 1, "y en la cuenta")
-        }
+        try await repository.saveWeight(78.4, on: day(0))
+        XCTAssertEqual(health.saved.first?.kg, 78.4, "lo anotado tiene que acabar en Salud")
+        XCTAssertEqual(local.stored.count, 1, "y en el dispositivo")
+        XCTAssertEqual(remote.upsertCalls, 1, "y en la cuenta")
     }
 
     func testWeightSurvivesWhenHealthAndServerBothFail() async throws {
@@ -197,17 +208,15 @@ final class BodyMetricsTests: XCTestCase {
         remote.isOffline = true
         let repository = makeRepository(health: health, local: local, remote: remote)
 
-        try await withAuthenticatedSession {
-            try await repository.saveWeight(78.4, on: day(0))
-            XCTAssertEqual(local.stored.first?.weightKg, 78.4, "el dato no se pierde por que fallen los otros dos")
-        }
+        try await repository.saveWeight(78.4, on: day(0))
+        XCTAssertEqual(local.stored.first?.weightKg, 78.4, "el dato no se pierde por que fallen los otros dos")
     }
 
     func testDeletingDoesNotTouchAppleHealth() async throws {
         let health = FakeHealth()
         health.byDay = [day(0): 79.5]
         let local = FakeLocal()
-        local.stored = [BodyMeasurement(date: day(0), weightKg: 79.5).toDTO()]
+        local.stored = [DailyMetrics(date: day(0), weightKg: 79.5).toDTO()]
         let repository = makeRepository(health: health, local: local)
 
         try await repository.delete(date: day(0))
@@ -216,12 +225,11 @@ final class BodyMetricsTests: XCTestCase {
     }
 
     func testGuestModeNeverCallsTheServer() async throws {
-        await MainActor.run { AuthSession.shared.setGuest() }
         let health = FakeHealth()
         let local = FakeLocal()
         let remote = FakeRemote()
         remote.isOffline = true   // cualquier llamada haría fallar el test
-        let repository = makeRepository(health: health, local: local, remote: remote)
+        let repository = makeRepository(health: health, local: local, remote: remote, authenticated: false)
 
         try await repository.saveWeight(78.4, on: day(0))
         XCTAssertEqual(local.stored.count, 1)
@@ -234,36 +242,34 @@ final class BodyMetricsTests: XCTestCase {
         let health = FakeHealth()
         health.byDay = [day(-1): 80.0, day(-2): 80.5]
         let local = FakeLocal()
-        local.stored = [BodyMeasurement(date: day(-3), weightKg: 81.0).toDTO()]
+        local.stored = [DailyMetrics(date: day(-3), weightKg: 81.0).toDTO()]
         let remote = FakeRemote()
-        remote.stored = [BodyMeasurement(date: day(-1), weightKg: 80.0, source: .health)]
+        remote.stored = [DailyMetrics(date: day(-1), weightKg: 80.0, source: .health)]
         let repository = makeRepository(health: health, local: local, remote: remote)
 
-        try await withAuthenticatedSession {
-            let pending = try await repository.pendingSyncCount()
-            XCTAssertEqual(pending, 2, "faltan los dos días que no están en la cuenta")
-            let uploaded = try await repository.syncLocalToRemote()
-            XCTAssertEqual(uploaded, 2)
-            XCTAssertEqual(remote.bulkCalls, 1, "en una sola petición, no una por día")
-            let remaining = try await repository.pendingSyncCount()
-            XCTAssertEqual(remaining, 0)
-        }
+        let pending = try await repository.pendingSyncCount()
+        XCTAssertEqual(pending, 2, "faltan los dos días que no están en la cuenta")
+        let uploaded = try await repository.syncLocalToRemote()
+        XCTAssertEqual(uploaded, 2)
+        XCTAssertEqual(remote.bulkCalls, 1, "en una sola petición, no una por día")
+        let remaining = try await repository.pendingSyncCount()
+        XCTAssertEqual(remaining, 0)
     }
 
     // MARK: - Tendencia
 
     func testTrendNeedsTwoMeasurements() {
         XCTAssertNil(
-            WeightTrend.from([BodyMeasurement(date: day(0), weightKg: 80)]),
+            WeightTrend.from([DailyMetrics(date: day(0), weightKg: 80)]),
             "una sola medida no es una tendencia"
         )
     }
 
     func testTrendComputesDeltaAndWeeklyRate() throws {
         let trend = try XCTUnwrap(WeightTrend.from([
-            BodyMeasurement(date: day(-28), weightKg: 82.0),
-            BodyMeasurement(date: day(-14), weightKg: 81.0),
-            BodyMeasurement(date: day(0), weightKg: 79.5),
+            DailyMetrics(date: day(-28), weightKg: 82.0),
+            DailyMetrics(date: day(-14), weightKg: 81.0),
+            DailyMetrics(date: day(0), weightKg: 79.5),
         ]))
         XCTAssertEqual(trend.deltaKg, -2.5)
         XCTAssertEqual(trend.days, 28)
@@ -272,8 +278,8 @@ final class BodyMetricsTests: XCTestCase {
 
     func testWeeklyRateIsNilBelowAWeek() throws {
         let trend = try XCTUnwrap(WeightTrend.from([
-            BodyMeasurement(date: day(-2), weightKg: 80.0),
-            BodyMeasurement(date: day(0), weightKg: 79.6),
+            DailyMetrics(date: day(-2), weightKg: 80.0),
+            DailyMetrics(date: day(0), weightKg: 79.6),
         ]))
         XCTAssertNil(trend.kgPerWeek, "con dos días no se puede extrapolar un ritmo semanal")
     }
@@ -288,7 +294,7 @@ final class BodyMetricsTests: XCTestCase {
         {"date": "2026-08-01", "weight_kg": 78.4, "body_fat_percentage": null, "source": "health"}
         """.data(using: .utf8)!
 
-        let dto = try JSONDecoder().decode(BodyMeasurementApiDTO.self, from: json)
+        let dto = try JSONDecoder().decode(DailyMetricsApiDTO.self, from: json)
         let measurement = dto.toDomain()
 
         var components = DateComponents()
@@ -302,14 +308,92 @@ final class BodyMetricsTests: XCTestCase {
         let json = """
         {"date": "2026-08-01", "weight_kg": 78.4, "source": "bascula-nueva"}
         """.data(using: .utf8)!
-        let dto = try JSONDecoder().decode(BodyMeasurementApiDTO.self, from: json)
+        let dto = try JSONDecoder().decode(DailyMetricsApiDTO.self, from: json)
         XCTAssertEqual(dto.toDomain().source, .manual, "una fuente desconocida no puede reventar el decodificado")
     }
 
     func testMeasurementNormalizesToStartOfDay() {
         let noon = Calendar.current.date(bySettingHour: 13, minute: 27, second: 0, of: Date())!
-        let measurement = BodyMeasurement(date: noon, weightKg: 80)
+        let measurement = DailyMetrics(date: noon, weightKg: 80)
         XCTAssertEqual(measurement.date, Calendar.current.startOfDay(for: noon),
                        "la identidad de una medida es el día, no el instante")
+    }
+
+    // MARK: - Varias métricas por día
+
+    func testHealthMetricsAreMergedIntoOneDay() async throws {
+        let health = FakeHealth()
+        health.byDay = [day(0): 79.5]
+        health.stepsByDay = [day(0): 9500]
+        health.energyByDay = [day(0): 610]
+        health.restingByDay = [day(0): 52]
+        let repository = makeRepository(health: health)
+
+        let result = try await repository.getMeasurements(from: day(-7), to: day(0))
+        XCTAssertEqual(result.count, 1, "todo lo del mismo día va en un registro")
+        XCTAssertEqual(result.first?.weightKg, 79.5)
+        XCTAssertEqual(result.first?.steps, 9500)
+        XCTAssertEqual(result.first?.activeKcal, 610)
+        XCTAssertEqual(result.first?.restingHeartRate, 52)
+    }
+
+    func testOneDeniedMetricDoesNotLoseTheRest() async throws {
+        let health = FakeHealth()
+        health.stepsByDay = [day(0): 9500]
+        health.restingFails = true
+        let repository = makeRepository(health: health)
+
+        let result = try await repository.getMeasurements(from: day(-7), to: day(0))
+        XCTAssertEqual(result.first?.steps, 9500, "sin permiso de FC se siguen viendo los pasos")
+        XCTAssertNil(result.first?.restingHeartRate)
+    }
+
+    /// El caso que rompería una fusión que reemplaza el registro entero: la cuenta
+    /// tiene el peso (que vino de otro móvil) y Salud tiene los pasos de aquí.
+    func testAccountWeightAndPhoneStepsCoexist() async throws {
+        let health = FakeHealth()
+        health.stepsByDay = [day(-1): 12000]
+        let remote = FakeRemote()
+        remote.stored = [DailyMetrics(date: day(-1), weightKg: 80.0, source: .manual)]
+        let repository = makeRepository(health: health, remote: remote)
+
+        let result = try await repository.getMeasurements(from: day(-7), to: day(0))
+        XCTAssertEqual(result.count, 1)
+        XCTAssertEqual(result.first?.weightKg, 80.0, "el peso de la cuenta no se pierde")
+        XCTAssertEqual(result.first?.steps, 12000, "y los pasos del móvil tampoco")
+    }
+
+    func testDayAlreadyInTheAccountStillUploadsTheMissingMetrics() async throws {
+        let health = FakeHealth()
+        health.stepsByDay = [day(-1): 12000]
+        let remote = FakeRemote()
+        remote.stored = [DailyMetrics(date: day(-1), weightKg: 80.0, source: .manual)]
+        let repository = makeRepository(health: health, remote: remote)
+
+        let pending = try await repository.pendingSyncCount()
+        XCTAssertEqual(pending, 1, "el día está, pero le faltan los pasos")
+        let uploaded = try await repository.syncLocalToRemote()
+        XCTAssertEqual(uploaded, 1)
+        let remaining = try await repository.pendingSyncCount()
+        XCTAssertEqual(remaining, 0, "y despues de subirlos ya no falta nada")
+    }
+
+    func testNothingNewIsNotUploadedAgain() async throws {
+        let health = FakeHealth()
+        health.stepsByDay = [day(-1): 12000]
+        let remote = FakeRemote()
+        remote.stored = [DailyMetrics(date: day(-1), steps: 12000, source: .health)]
+        let repository = makeRepository(health: health, remote: remote)
+
+        let pending = try await repository.pendingSyncCount()
+        XCTAssertEqual(pending, 0, "lo que ya está en la cuenta no se reenvía cada vez")
+    }
+
+    func testMergeKeepsTheFieldsTheOtherLacks() {
+        let base = DailyMetrics(date: day(0), weightKg: 80, source: .manual)
+        let activity = DailyMetrics(date: day(0), steps: 9000, source: .health)
+        let merged = base.merged(with: activity)
+        XCTAssertEqual(merged.weightKg, 80)
+        XCTAssertEqual(merged.steps, 9000)
     }
 }

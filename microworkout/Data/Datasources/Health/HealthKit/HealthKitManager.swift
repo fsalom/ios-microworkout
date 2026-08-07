@@ -11,6 +11,7 @@ class HealthKitManager: HealthKitManagerProtocol {
     private let activeEnergyType: HKQuantityType? = HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned)
     private let distanceType: HKQuantityType? = HKQuantityType.quantityType(forIdentifier: .distanceWalkingRunning)
     private let bodyMassType: HKQuantityType? = HKQuantityType.quantityType(forIdentifier: .bodyMass)
+    private let restingHeartRateType: HKQuantityType? = HKQuantityType.quantityType(forIdentifier: .restingHeartRate)
 
     var store: HealthStoreProtocol { healthStore }
 
@@ -46,6 +47,9 @@ class HealthKitManager: HealthKitManagerProtocol {
         // la báscula) y lo que el usuario anote en la app se devuelve allí, para
         // no acabar con dos historiales que se contradicen.
         if let bm = bodyMassType { readTypes.insert(bm); writeTypes.insert(bm) }
+        // La FC en reposo solo se lee: la calcula el reloj y no somos quién para
+        // escribirla.
+        if let rhr = restingHeartRateType { readTypes.insert(rhr) }
         readTypes.insert(HKObjectType.workoutType())
         writeTypes.insert(HKObjectType.workoutType())
 
@@ -166,37 +170,14 @@ class HealthKitManager: HealthKitManagerProtocol {
         guard let bodyMassType else {
             throw NSError(domain: "HealthKit", code: 7, userInfo: [NSLocalizedDescriptionKey: "Tipo bodyMass no disponible."])
         }
-        let predicate = HKQuery.predicateForSamples(withStart: startDate, end: endDate, options: .strictStartDate)
-        let anchor = Calendar.current.startOfDay(for: startDate)
-        return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<[Date: Double], Error>) in
-            let query = HKStatisticsCollectionQuery(
-                quantityType: bodyMassType,
-                quantitySamplePredicate: predicate,
-                options: .discreteMostRecent,
-                anchorDate: anchor,
-                intervalComponents: DateComponents(day: 1)
-            )
-            query.initialResultsHandler = { _, result, error in
-                if let error {
-                    continuation.resume(throwing: error)
-                    return
-                }
-                guard let result else {
-                    continuation.resume(returning: [:])
-                    return
-                }
-                var byDay: [Date: Double] = [:]
-                result.enumerateStatistics(from: anchor, to: endDate) { statistics, _ in
-                    // Los días sin pesada no traen cantidad: se omiten en vez de
-                    // rellenarse, porque un hueco en la serie es información.
-                    guard let quantity = statistics.mostRecentQuantity() else { return }
-                    let day = Calendar.current.startOfDay(for: statistics.startDate)
-                    byDay[day] = quantity.doubleValue(for: .gramUnit(with: .kilo))
-                }
-                continuation.resume(returning: byDay)
-            }
-            healthStore.execute(query)
-        }
+        return try await dailyStatistic(
+            quantityType: bodyMassType,
+            from: startDate,
+            to: endDate,
+            options: .discreteMostRecent,
+            unit: .gramUnit(with: .kilo),
+            value: { $0.mostRecentQuantity() }
+        )
     }
 
     /// Escribe un peso en Salud con la fecha indicada.
@@ -209,6 +190,36 @@ class HealthKitManager: HealthKitManagerProtocol {
             type: bodyMassType, quantity: quantity, start: date, end: date
         )
         try await healthStore.save(sample)
+    }
+
+    // MARK: - Energía activa y recuperación
+
+    func fetchActiveEnergy(startDate: Date, endDate: Date) async throws -> [Date: Double] {
+        guard let activeEnergyType else {
+            throw NSError(domain: "HealthKit", code: 8, userInfo: [NSLocalizedDescriptionKey: "Tipo activeEnergy no disponible."])
+        }
+        let byDay = try await dailyCumulativeSum(
+            quantityType: activeEnergyType, from: startDate, to: endDate, unit: .kilocalorie()
+        )
+        return byDay ?? [:]
+    }
+
+    /// Frecuencia cardiaca en reposo por día.
+    ///
+    /// `.discreteAverage` y no una suma: promediar es lo único que significa algo
+    /// en una medida instantánea. Aun así el reloj suele dar un valor al día.
+    func fetchRestingHeartRate(startDate: Date, endDate: Date) async throws -> [Date: Double] {
+        guard let restingHeartRateType else {
+            throw NSError(domain: "HealthKit", code: 9, userInfo: [NSLocalizedDescriptionKey: "Tipo restingHeartRate no disponible."])
+        }
+        return try await dailyStatistic(
+            quantityType: restingHeartRateType,
+            from: startDate,
+            to: endDate,
+            options: .discreteAverage,
+            unit: HKUnit(from: "count/min"),
+            value: { $0.averageQuantity() }
+        )
     }
 
     // MARK: - Workouts
@@ -240,6 +251,50 @@ class HealthKitManager: HealthKitManagerProtocol {
                     return
                 }
                 continuation.resume(returning: result?.sumQuantity()?.doubleValue(for: unit))
+            }
+            healthStore.execute(query)
+        }
+    }
+
+    /// Un valor por día para métricas que NO se suman (peso, FC en reposo).
+    ///
+    /// Los días sin muestra se omiten en vez de rellenarse con cero: un hueco en
+    /// la serie es información — "no me pesé" no es "peso cero" — y rellenarlo
+    /// hundiría cualquier media que se calcule después.
+    private func dailyStatistic(
+        quantityType: HKQuantityType,
+        from start: Date,
+        to end: Date,
+        options: HKStatisticsOptions,
+        unit: HKUnit,
+        value: @escaping (HKStatistics) -> HKQuantity?
+    ) async throws -> [Date: Double] {
+        let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: .strictStartDate)
+        let anchor = Calendar.current.startOfDay(for: start)
+        return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<[Date: Double], Error>) in
+            let query = HKStatisticsCollectionQuery(
+                quantityType: quantityType,
+                quantitySamplePredicate: predicate,
+                options: options,
+                anchorDate: anchor,
+                intervalComponents: DateComponents(day: 1)
+            )
+            query.initialResultsHandler = { _, result, error in
+                if let error {
+                    continuation.resume(throwing: error)
+                    return
+                }
+                guard let result else {
+                    continuation.resume(returning: [:])
+                    return
+                }
+                var byDay: [Date: Double] = [:]
+                result.enumerateStatistics(from: anchor, to: end) { statistics, _ in
+                    guard let quantity = value(statistics) else { return }
+                    byDay[Calendar.current.startOfDay(for: statistics.startDate)] =
+                        quantity.doubleValue(for: unit)
+                }
+                continuation.resume(returning: byDay)
             }
             healthStore.execute(query)
         }

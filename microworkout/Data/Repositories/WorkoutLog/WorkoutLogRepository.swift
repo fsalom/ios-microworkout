@@ -8,16 +8,20 @@ final class WorkoutLogRepository: WorkoutLogRepositoryProtocol {
     private let local: WorkoutLogLocalDataSourceProtocol
     private let remote: WorkoutLogRemoteDataSourceProtocol
 
+    private let session: AuthStateProviding
+
     init(
         local: WorkoutLogLocalDataSourceProtocol,
-        remote: WorkoutLogRemoteDataSourceProtocol
+        remote: WorkoutLogRemoteDataSourceProtocol,
+        session: AuthStateProviding = SharedAuthState()
     ) {
         self.local = local
         self.remote = remote
+        self.session = session
     }
 
     private func isAuthenticated() async -> Bool {
-        await MainActor.run { AuthSession.shared.state.isAuthenticated }
+        await session.isAuthenticated
     }
 
     // MARK: Sessions

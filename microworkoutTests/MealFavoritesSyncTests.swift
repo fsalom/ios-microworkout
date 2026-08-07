@@ -5,9 +5,9 @@ import XCTest
 /// sesión: la lectura pasaba a ser solo-servidor y la sincronización de login no
 /// los subía. Estos tests fijan que convivan.
 ///
-/// `MealRepository` decide por `AuthSession.shared`, que es un singleton
-/// `@MainActor`, así que los tests con sesión se ejecutan poniendo la sesión en el
-/// estado que toca y restaurándola al final.
+/// La sesión se INYECTA en el repositorio (`StubSession`) en vez de tocar
+/// `AuthSession.shared`: ese singleton lo comparte toda la suite y, con los tests
+/// corriendo en paralelo, cambiarlo hacía fallar a otra clase.
 final class MealFavoritesSyncTests: XCTestCase {
 
     // MARK: - Dobles
@@ -111,26 +111,21 @@ final class MealFavoritesSyncTests: XCTestCase {
     }
 
     private func makeRepository(
-        local: FakeLocal, remote: FakeRemote
+        local: FakeLocal, remote: FakeRemote, authenticated: Bool = true
     ) -> MealRepository {
-        MealRepository(localDataSource: local, remoteApi: FakeOpenFoodFacts(), remote: remote)
+        MealRepository(
+            localDataSource: local, remoteApi: FakeOpenFoodFacts(), remote: remote,
+            session: StubSession(authenticated: authenticated)
+        )
     }
 
-    /// Ejecuta el bloque con la sesión autenticada y restaura el estado al salir.
-    @MainActor
-    private func withAuthenticatedSession(_ body: () async throws -> Void) async rethrows {
-        let previous = AuthSession.shared.state
-        AuthSession.shared.setAuthenticated(
-            AuthenticatedUser(id: 1, email: "a@b.c", fullname: "Test", phone: nil)
-        )
-        defer {
-            if case .authenticated(let user) = previous {
-                AuthSession.shared.setAuthenticated(user)
-            } else {
-                AuthSession.shared.setGuest()
-            }
-        }
-        try await body()
+    /// Sesión propia del test. Antes se cambiaba `AuthSession.shared`, que es un
+    /// singleton compartido por toda la suite: con los tests corriendo en PARALELO,
+    /// un test que la cambiaba hacía fallar a otro que se ejecutaba a la vez, y el
+    /// fallo salía en la clase equivocada.
+    private struct StubSession: AuthStateProviding {
+        let authenticated: Bool
+        var isAuthenticated: Bool { get async { authenticated } }
     }
 
     // MARK: - El bug
@@ -142,13 +137,11 @@ final class MealFavoritesSyncTests: XCTestCase {
         remote.favorites = [dto(UUID(), "Pollo de la cuenta")]
         let repository = makeRepository(local: local, remote: remote)
 
-        try await withAuthenticatedSession {
-            let result = try await repository.getFavorites()
-            XCTAssertEqual(
-                Set(result.map(\.name)), ["Pollo de la cuenta", "Avena de invitado"],
-                "los de invitado deben convivir con los de la cuenta"
-            )
-        }
+        let result = try await repository.getFavorites()
+        XCTAssertEqual(
+            Set(result.map(\.name)), ["Pollo de la cuenta", "Avena de invitado"],
+            "los de invitado deben convivir con los de la cuenta"
+        )
     }
 
     func testMergeDoesNotDuplicateTheSameFoodPresentOnBothSides() async throws {
@@ -159,10 +152,8 @@ final class MealFavoritesSyncTests: XCTestCase {
         remote.favorites = [dto(UUID(), "Avena", barcode: "123")]
         let repository = makeRepository(local: local, remote: remote)
 
-        try await withAuthenticatedSession {
-            let result = try await repository.getFavorites()
-            XCTAssertEqual(result.count, 1, "dedup por identityKey, no por id")
-        }
+        let result = try await repository.getFavorites()
+        XCTAssertEqual(result.count, 1, "dedup por identityKey, no por id")
     }
 
     func testGuestFavoritesAreUploadedOnSync() async throws {
@@ -174,12 +165,10 @@ final class MealFavoritesSyncTests: XCTestCase {
         let remote = FakeRemote()
         let repository = makeRepository(local: local, remote: remote)
 
-        try await withAuthenticatedSession {
-            let synced = try await repository.syncLocalToRemote()
-            XCTAssertEqual(synced, 2, "los dos favoritos locales deben subirse")
-            XCTAssertEqual(remote.addedFavoriteIds.count, 2)
-            XCTAssertEqual(Set(remote.createdFoods.map(\.name)), ["Avena", "Pollo"])
-        }
+        let synced = try await repository.syncLocalToRemote()
+        XCTAssertEqual(synced, 2, "los dos favoritos locales deben subirse")
+        XCTAssertEqual(remote.addedFavoriteIds.count, 2)
+        XCTAssertEqual(Set(remote.createdFoods.map(\.name)), ["Avena", "Pollo"])
     }
 
     /// El backend genera el id al crear el alimento; usar el local hacía que
@@ -193,14 +182,12 @@ final class MealFavoritesSyncTests: XCTestCase {
         remote.idsToAssign = [serverId]
         let repository = makeRepository(local: local, remote: remote)
 
-        try await withAuthenticatedSession {
-            _ = try await repository.syncLocalToRemote()
-            XCTAssertEqual(remote.addedFavoriteIds, [serverId])
-            XCTAssertNotEqual(
-                remote.addedFavoriteIds.first, localFood.id,
-                "el id local no existe en el servidor"
-            )
-        }
+        _ = try await repository.syncLocalToRemote()
+        XCTAssertEqual(remote.addedFavoriteIds, [serverId])
+        XCTAssertNotEqual(
+            remote.addedFavoriteIds.first, localFood.id,
+            "el id local no existe en el servidor"
+        )
     }
 
     /// Si el alimento ya está en el servidor (mismo barcode) no se vuelve a crear.
@@ -212,11 +199,9 @@ final class MealFavoritesSyncTests: XCTestCase {
         remote.foodsByBarcode = ["123": dto(existingId, "Avena", barcode: "123")]
         let repository = makeRepository(local: local, remote: remote)
 
-        try await withAuthenticatedSession {
-            _ = try await repository.syncLocalToRemote()
-            XCTAssertEqual(remote.addedFavoriteIds, [existingId])
-            XCTAssertTrue(remote.createdFoods.isEmpty, "no debe duplicar el alimento")
-        }
+        _ = try await repository.syncLocalToRemote()
+        XCTAssertEqual(remote.addedFavoriteIds, [existingId])
+        XCTAssertTrue(remote.createdFoods.isEmpty, "no debe duplicar el alimento")
     }
 
     func testPendingCountSeesGuestFavorites() async throws {
@@ -226,10 +211,8 @@ final class MealFavoritesSyncTests: XCTestCase {
         remote.favorites = [dto(UUID(), "Avena")]   // uno ya está en la cuenta
         let repository = makeRepository(local: local, remote: remote)
 
-        try await withAuthenticatedSession {
-            let pending = try await repository.pendingSyncCount()
-            XCTAssertEqual(pending, 1, "solo el que falta en la cuenta")
-        }
+        let pending = try await repository.pendingSyncCount()
+        XCTAssertEqual(pending, 1, "solo el que falta en la cuenta")
     }
 
     /// Con la mezcla en la lectura, quitar un favorito local tenía que borrarlo
@@ -240,13 +223,11 @@ final class MealFavoritesSyncTests: XCTestCase {
         let remote = FakeRemote()
         let repository = makeRepository(local: local, remote: remote)
 
-        try await withAuthenticatedSession {
-            let remaining = try await repository.getFavorites().filter { $0.name != "Avena" }
-            try await repository.saveFavorites(remaining)
+        let remaining = try await repository.getFavorites().filter { $0.name != "Avena" }
+        try await repository.saveFavorites(remaining)
 
-            let after = try await repository.getFavorites()
-            XCTAssertEqual(after.map(\.name), ["Pollo"], "'Avena' no debe reaparecer")
-        }
+        let after = try await repository.getFavorites()
+        XCTAssertEqual(after.map(\.name), ["Pollo"], "'Avena' no debe reaparecer")
     }
 
     func testGuestModeStillReadsAndWritesOnlyLocal() async throws {
@@ -254,9 +235,8 @@ final class MealFavoritesSyncTests: XCTestCase {
         local.favorites = [food("Avena").toDTO()]
         let remote = FakeRemote()
         remote.favorites = [dto(UUID(), "No debería verse")]
-        let repository = makeRepository(local: local, remote: remote)
+        let repository = makeRepository(local: local, remote: remote, authenticated: false)
 
-        await MainActor.run { AuthSession.shared.setGuest() }
         let result = try await repository.getFavorites()
         XCTAssertEqual(result.map(\.name), ["Avena"])
         XCTAssertTrue(remote.addedFavoriteIds.isEmpty)
@@ -288,13 +268,11 @@ extension MealFavoritesSyncTests {
         let remote = FakeRemote()
         let repository = makeRepository(local: local, remote: remote)
 
-        try await withAuthenticatedSession {
-            let result = try await repository.getMeals(for: Date())
-            XCTAssertEqual(
-                result.map(\.id), [breakfast.id, dinner.id],
-                "las comidas locales siguen visibles, y ordenadas por hora"
-            )
-        }
+        let result = try await repository.getMeals(for: Date())
+        XCTAssertEqual(
+            result.map(\.id), [breakfast.id, dinner.id],
+            "las comidas locales siguen visibles, y ordenadas por hora"
+        )
     }
 
     func testSyncedMealIsNotDuplicatedAfterUpload() async throws {
@@ -313,10 +291,8 @@ extension MealFavoritesSyncTests {
         ]
         let repository = makeRepository(local: local, remote: remote)
 
-        try await withAuthenticatedSession {
-            let result = try await repository.getMeals(for: Date())
-            XCTAssertEqual(result.count, 1, "dedup por id, no se duplica")
-        }
+        let result = try await repository.getMeals(for: Date())
+        XCTAssertEqual(result.count, 1, "dedup por id, no se duplica")
     }
 }
 
@@ -349,15 +325,13 @@ extension MealFavoritesSyncTests {
             localDataSource: local, remoteApi: FakeOpenFoodFacts(), remote: FailingRemote()
         )
 
-        try await withAuthenticatedSession {
-            let result = try await repository.getMeals(for: Date())
-            XCTAssertEqual(result.map(\.id), [breakfast.id], "se ve lo local aunque falle el servidor")
+        let result = try await repository.getMeals(for: Date())
+        XCTAssertEqual(result.map(\.id), [breakfast.id], "se ve lo local aunque falle el servidor")
 
-            let range = try await repository.getMeals(
-                from: Date().addingTimeInterval(-86_400), to: Date()
-            )
-            XCTAssertEqual(range.count, 1)
-        }
+        let range = try await repository.getMeals(
+            from: Date().addingTimeInterval(-86_400), to: Date()
+        )
+        XCTAssertEqual(range.count, 1)
     }
 
     func testServerFailureDegradesToLocalFavorites() async throws {
@@ -367,9 +341,7 @@ extension MealFavoritesSyncTests {
             localDataSource: local, remoteApi: FakeOpenFoodFacts(), remote: FailingRemote()
         )
 
-        try await withAuthenticatedSession {
-            let result = try await repository.getFavorites()
-            XCTAssertEqual(result.map(\.name), ["Avena"])
-        }
+        let result = try await repository.getFavorites()
+        XCTAssertEqual(result.map(\.name), ["Avena"])
     }
 }

@@ -2,7 +2,7 @@ import Foundation
 import SwiftUI
 
 struct WeightProgressUiState {
-    var measurements: [BodyMeasurement] = []
+    var measurements: [DailyMetrics] = []
     var isLoading: Bool = false
     var isSaving: Bool = false
     var error: String?
@@ -14,7 +14,7 @@ struct WeightProgressUiState {
     var weightInput: String = ""
     var entryDate: Date = Date()
 
-    var latest: BodyMeasurement? { measurements.last(where: { $0.weightKg != nil }) }
+    var latest: DailyMetrics? { measurements.last(where: { $0.weightKg != nil }) }
     var trend: WeightTrend? { WeightTrend.from(measurements) }
     var hasData: Bool { measurements.contains { $0.weightKg != nil } }
 
@@ -84,7 +84,7 @@ final class WeightProgressViewModel: ObservableObject {
         }
     }
 
-    func delete(_ measurement: BodyMeasurement) {
+    func delete(_ measurement: DailyMetrics) {
         Task { @MainActor [weak self] in
             guard let self else { return }
             // Optimista: la fila desaparece al instante y se restaura si falla.

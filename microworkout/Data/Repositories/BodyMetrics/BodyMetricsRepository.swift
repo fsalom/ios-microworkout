@@ -23,60 +23,103 @@ final class BodyMetricsRepository: BodyMetricsRepositoryProtocol {
     private let local: BodyMetricsLocalDataSourceProtocol
     private let remote: BodyMetricsRemoteDataSourceProtocol
 
+    private let session: AuthStateProviding
+
     init(
         health: HealthRepositoryProtocol,
         local: BodyMetricsLocalDataSourceProtocol,
-        remote: BodyMetricsRemoteDataSourceProtocol
+        remote: BodyMetricsRemoteDataSourceProtocol,
+        session: AuthStateProviding = SharedAuthState()
     ) {
         self.health = health
         self.local = local
         self.remote = remote
+        self.session = session
     }
 
     private func isAuthenticated() async -> Bool {
-        await MainActor.run { AuthSession.shared.state.isAuthenticated }
+        await session.isAuthenticated
     }
 
     // MARK: - Lectura
 
-    func getMeasurements(from start: Date, to end: Date) async throws -> [BodyMeasurement] {
-        var byDay: [Date: BodyMeasurement] = [:]
+    func getMeasurements(from start: Date, to end: Date) async throws -> [DailyMetrics] {
+        var byDay: [Date: DailyMetrics] = [:]
 
-        // De menos a más prioritario: cada fuente pisa a la anterior.
-        for measurement in localMeasurements(from: start, to: end) {
-            byDay[measurement.date] = measurement
-        }
-        if await isAuthenticated() {
-            for dto in (try? await remote.list(from: start, to: end)) ?? [] {
-                let measurement = dto.toDomain()
-                byDay[measurement.date] = measurement
+        // De menos a más prioritario, CAMPO A CAMPO. Reemplazar el registro entero
+        // sería perder datos: el día que la cuenta tiene el peso (que vino de otro
+        // móvil) y Salud tiene los pasos, quedarse con uno de los dos borra el otro.
+        func absorb(_ measurements: [DailyMetrics]) {
+            for measurement in measurements {
+                byDay[measurement.date] = byDay[measurement.date]?.merged(with: measurement)
+                    ?? measurement
             }
         }
-        for measurement in await healthMeasurements(from: start, to: end) {
-            byDay[measurement.date] = measurement
+
+        absorb(localMeasurements(from: start, to: end))
+        if await isAuthenticated() {
+            absorb(((try? await remote.list(from: start, to: end)) ?? []).map { $0.toDomain() })
         }
+        absorb(await healthMeasurements(from: start, to: end))
 
         return byDay.values.sorted { $0.date < $1.date }
     }
 
-    private func localMeasurements(from start: Date, to end: Date) -> [BodyMeasurement] {
+    private func localMeasurements(from start: Date, to end: Date) -> [DailyMetrics] {
         local.getAll()
             .map { $0.toDomain() }
             .filter { $0.date >= Calendar.current.startOfDay(for: start) && $0.date <= end }
     }
 
-    /// Medidas de Salud. Sin permiso o sin HealthKit devuelve vacío en vez de
-    /// fallar: no tener Salud no es un error, es una app que funciona igual.
-    private func healthMeasurements(from start: Date, to end: Date) async -> [BodyMeasurement] {
+    /// El registro diario según Apple Salud: peso, actividad y recuperación.
+    ///
+    /// Cada serie se pide por separado y se fusiona por día. Cada una va con su
+    /// `try?`: que el usuario no haya dado permiso a la frecuencia cardiaca no
+    /// puede dejarnos sin los pasos. Sin permiso o sin HealthKit se devuelve vacío
+    /// en vez de fallar — no tener Salud no es un error, es una app que funciona
+    /// igual.
+    private func healthMeasurements(from start: Date, to end: Date) async -> [DailyMetrics] {
         guard health.isHealthDataAvailable else { return [] }
-        let byDay = (try? await health.fetchBodyMass(startDate: start, endDate: end)) ?? [:]
-        return byDay.map { BodyMeasurement(date: $0.key, weightKg: $0.value, source: .health) }
+
+        async let weights = try? await health.fetchBodyMass(startDate: start, endDate: end)
+        async let steps = try? await health.fetchStepsCount(startDate: start, endDate: end)
+        async let energy = try? await health.fetchActiveEnergy(startDate: start, endDate: end)
+        async let exercise = try? await health.fetchExerciseTime(startDate: start, endDate: end)
+        async let standing = try? await health.fetchStandingTime(startDate: start, endDate: end)
+        async let restingHR = try? await health.fetchRestingHeartRate(startDate: start, endDate: end)
+
+        var byDay: [Date: DailyMetrics] = [:]
+
+        func merge(_ day: Date, _ apply: (inout DailyMetrics) -> Void) {
+            let normalized = Calendar.current.startOfDay(for: day)
+            var entry = byDay[normalized] ?? DailyMetrics(date: normalized, source: .health)
+            apply(&entry)
+            byDay[normalized] = entry
+        }
+
+        // Los `fetch...` de pasos, ejercicio y de pie ya devolvían opcional, y el
+        // `try?` añade otro nivel: se aplanan aquí para que el bucle quede legible.
+        let weightByDay = await weights ?? [:]
+        let stepByDay = (await steps ?? nil) ?? [:]
+        let energyByDay = await energy ?? [:]
+        let exerciseByDay = (await exercise ?? nil) ?? [:]
+        let standingByDay = (await standing ?? nil) ?? [:]
+        let restingByDay = await restingHR ?? [:]
+
+        for (day, value) in weightByDay { merge(day) { $0.weightKg = value } }
+        for (day, value) in stepByDay { merge(day) { $0.steps = Int(value) } }
+        for (day, value) in energyByDay { merge(day) { $0.activeKcal = value } }
+        for (day, value) in exerciseByDay { merge(day) { $0.exerciseMinutes = value } }
+        for (day, value) in standingByDay { merge(day) { $0.standingMinutes = value } }
+        for (day, value) in restingByDay { merge(day) { $0.restingHeartRate = value } }
+
+        return Array(byDay.values)
     }
 
     // MARK: - Escritura
 
     func saveWeight(_ kilograms: Double, on date: Date) async throws {
-        let measurement = BodyMeasurement(date: date, weightKg: kilograms, source: .manual)
+        let measurement = DailyMetrics(date: date, weightKg: kilograms, source: .manual)
 
         // Primero el dispositivo: es la escritura que no puede fallar, así que el
         // dato queda a salvo aunque Salud lo rechace y el servidor no esté.
@@ -109,30 +152,45 @@ final class BodyMetricsRepository: BodyMetricsRepositoryProtocol {
 
     func pendingSyncCount() async throws -> Int {
         let (mine, synced) = try await syncSnapshot()
-        return mine.filter { synced[$0.date] == nil }.count
+        return mine.filter { Self.needsUpload($0, comparedTo: synced[$0.date]) }.count
     }
 
     func syncLocalToRemote() async throws -> Int {
         let (mine, synced) = try await syncSnapshot()
-        let missing = mine.filter { synced[$0.date] == nil }
+        let missing = mine.filter { Self.needsUpload($0, comparedTo: synced[$0.date]) }
         guard !missing.isEmpty else { return 0 }
         // De golpe y no una por una: la primera sincronización puede traer años de
-        // pesadas, y una petición por día sería absurda y frágil.
+        // días registrados, y una petición por día sería absurda y frágil.
         return try await remote.upsertMany(missing)
+    }
+
+    /// `true` si este dispositivo tiene algo que la cuenta no.
+    ///
+    /// No basta con "el día no está en la cuenta": ahora un día lleva varias
+    /// métricas, y el caso normal es que la cuenta ya tenga el peso de ayer y le
+    /// falten los pasos. Comparando solo por fecha, esos pasos no se subirían nunca.
+    private static func needsUpload(_ mine: DailyMetrics, comparedTo synced: DailyMetrics?) -> Bool {
+        guard !mine.isEmpty else { return false }
+        guard let synced else { return true }
+        var candidate = synced.merged(with: mine)
+        // La fuente no cuenta: que un dato venga de Salud o de la app no es motivo
+        // para reenviarlo en cada sincronización.
+        candidate.source = synced.source
+        return candidate != synced
     }
 
     /// Lo que hay en este dispositivo (Salud + copia local) y lo que ya está en la
     /// cuenta, para poder compararlos por día.
-    private func syncSnapshot() async throws -> ([BodyMeasurement], [Date: BodyMeasurement]) {
+    private func syncSnapshot() async throws -> ([DailyMetrics], [Date: DailyMetrics]) {
         let end = Date()
         let start = Calendar.current.date(byAdding: .day, value: -Self.syncWindowDays, to: end) ?? end
 
-        var byDay: [Date: BodyMeasurement] = [:]
+        var byDay: [Date: DailyMetrics] = [:]
         for measurement in localMeasurements(from: start, to: end) {
-            byDay[measurement.date] = measurement
+            byDay[measurement.date] = byDay[measurement.date]?.merged(with: measurement) ?? measurement
         }
         for measurement in await healthMeasurements(from: start, to: end) {
-            byDay[measurement.date] = measurement
+            byDay[measurement.date] = byDay[measurement.date]?.merged(with: measurement) ?? measurement
         }
 
         // Esta sí se propaga: si no se sabe qué hay en la cuenta, no se puede decir

@@ -21,6 +21,8 @@ protocol HealthKitManagerProtocol {
     /// Peso por día (kg). Un valor por día: el último de ese día.
     func fetchBodyMass(startDate: Date, endDate: Date) async throws -> [Date: Double]
     func saveBodyMass(kilograms: Double, on date: Date) async throws
+    func fetchActiveEnergy(startDate: Date, endDate: Date) async throws -> [Date: Double]
+    func fetchRestingHeartRate(startDate: Date, endDate: Date) async throws -> [Date: Double]
 
     func fetchWorkouts() async throws -> [HKWorkout]
     func fetchAverageHeartRate(for workout: HKWorkout) async -> Double?

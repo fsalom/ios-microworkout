@@ -21,7 +21,17 @@ final class SyncTracker: ObservableObject {
 
     private var task: Task<Void, Never>?
 
-    private init() {}
+    /// Cuánto se queda visible el resultado antes de esconderse solo.
+    ///
+    /// Es un parámetro y no una constante porque, si no, un test que compruebe el
+    /// estado "terminada" compite contra un reloj de pared: en una máquina cargada
+    /// el banner se esconde antes de que llegue la comprobación y el test falla sin
+    /// que nada esté roto.
+    private let visibleAfterFinish: Duration
+
+    init(visibleAfterFinish: Duration = .seconds(3.5)) {
+        self.visibleAfterFinish = visibleAfterFinish
+    }
 
     var isVisible: Bool { phase != .idle }
 
@@ -52,7 +62,7 @@ final class SyncTracker: ObservableObject {
 
             // El resultado se deja visible lo justo para poder leerlo: un banner
             // que no se va solo obliga al usuario a echarlo, y esto es informativo.
-            try? await Task.sleep(nanoseconds: 3_500_000_000)
+            try? await Task.sleep(for: self.visibleAfterFinish)
             if case .finished = self.phase { self.phase = .idle }
         }
     }

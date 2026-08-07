@@ -7,16 +7,20 @@ final class TrainingRepository: TrainingRepositoryProtocol {
     private let local: TrainingLocalDataSourceProtocol
     private let remote: TrainingRemoteDataSourceProtocol
 
+    private let session: AuthStateProviding
+
     init(
         local: TrainingLocalDataSourceProtocol,
-        remote: TrainingRemoteDataSourceProtocol
+        remote: TrainingRemoteDataSourceProtocol,
+        session: AuthStateProviding = SharedAuthState()
     ) {
         self.local = local
         self.remote = remote
+        self.session = session
     }
 
     private func isAuthenticated() async -> Bool {
-        await MainActor.run { AuthSession.shared.state.isAuthenticated }
+        await session.isAuthenticated
     }
 
     /// Hardcoded preset templates. Same list for guest and auth — auth users

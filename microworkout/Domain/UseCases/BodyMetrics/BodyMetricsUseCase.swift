@@ -14,7 +14,7 @@ enum BodyMetricsError: LocalizedError, Equatable {
 
 protocol BodyMetricsUseCaseProtocol {
     /// Serie de los últimos `days` días, de más antigua a más reciente.
-    func getRecent(days: Int) async throws -> [BodyMeasurement]
+    func getRecent(days: Int) async throws -> [DailyMetrics]
     func saveWeight(_ kilograms: Double, on date: Date) async throws
     func delete(date: Date) async throws
     /// Último peso conocido, para rellenar el campo al anotar.
@@ -32,7 +32,7 @@ final class BodyMetricsUseCase: BodyMetricsUseCaseProtocol {
         self.repository = repository
     }
 
-    func getRecent(days: Int = defaultWindowDays) async throws -> [BodyMeasurement] {
+    func getRecent(days: Int = defaultWindowDays) async throws -> [DailyMetrics] {
         let end = Date()
         let start = Calendar.current.date(byAdding: .day, value: -days, to: end) ?? end
         return try await repository.getMeasurements(from: start, to: end)
