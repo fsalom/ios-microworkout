@@ -29,6 +29,10 @@ struct ProfileUiState {
     var hasCycling: Bool = false
     var strictDayCalorieTarget: Double = 0
     var freeDayCalorieTarget: Double = 0
+    /// Cómo quiere que le hable el coach. Por defecto, como siempre.
+    var coachTone: UserProfile.CoachTone = .close
+    var coachDetail: UserProfile.CoachDetail = .normal
+    var coachAvoidWeightTalk: Bool = false
     var healthKitStatus: HealthAuthorizationStatus = .notDetermined
     var isHealthDataAvailable: Bool = false
 }
@@ -134,6 +138,9 @@ class ProfileViewModel: ObservableObject {
                 self.uiState.hasCycling = profile.hasCycling
                 self.uiState.strictDayCalorieTarget = profile.strictDayCalorieTarget
                 self.uiState.freeDayCalorieTarget = profile.freeDayCalorieTarget
+                self.uiState.coachTone = profile.coachTone ?? .close
+                self.uiState.coachDetail = profile.coachDetail ?? .normal
+                self.uiState.coachAvoidWeightTalk = profile.coachAvoidWeightTalk ?? false
             } catch {
                 // Si el token murió, SessionAwareNetwork (infra) ya pasó a invitado;
                 // aquí solo mostramos el aviso. Otros errores (red transitoria):
@@ -165,7 +172,10 @@ class ProfileViewModel: ObservableObject {
             fitnessGoal: uiState.fitnessGoal,
             macroProfile: uiState.macroProfile,
             freeDays: uiState.freeDays.isEmpty ? nil : Array(uiState.freeDays),
-            freeDayExtraCalories: uiState.freeDays.isEmpty ? nil : uiState.freeDayExtraCalories
+            freeDayExtraCalories: uiState.freeDays.isEmpty ? nil : uiState.freeDayExtraCalories,
+            coachTone: uiState.coachTone,
+            coachDetail: uiState.coachDetail,
+            coachAvoidWeightTalk: uiState.coachAvoidWeightTalk
         )
         userProfileUseCase.setOnboardingCompleted(true)
         uiState.hasProfile = true
@@ -176,6 +186,22 @@ class ProfileViewModel: ObservableObject {
         uiState.freeDayCalorieTarget = profile.freeDayCalorieTarget
         uiState.isEditing = false
         Task { try? await userProfileUseCase.saveProfile(profile) }
+    }
+
+    /// Guarda solo las preferencias del coach.
+    ///
+    /// Aparte de `save()` porque no viven dentro del modo edición del perfil: se
+    /// cambian con un toque y deben quedar guardadas al momento, sin obligar a
+    /// entrar a editar y darle a Guardar.
+    func saveCoachPreferences() {
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            guard var profile = try? await self.userProfileUseCase.getProfile() else { return }
+            profile.coachTone = self.uiState.coachTone
+            profile.coachDetail = self.uiState.coachDetail
+            profile.coachAvoidWeightTalk = self.uiState.coachAvoidWeightTalk
+            try? await self.userProfileUseCase.saveProfile(profile)
+        }
     }
 
     // MARK: - HealthKit

@@ -17,6 +17,45 @@ struct UserProfile: Codable {
     var freeDays: [Int]?              // weekday indices (Calendar: 1=Dom, 2=Lun...7=Sab)
     var freeDayExtraCalories: Double? // extra kcal por día libre, default 500
 
+    // Cómo quiere el usuario que le hable el coach. Se componen como REGLAS del
+    // system prompt en el servidor, no como texto libre: por eso son opciones
+    // cerradas y el usuario no puede reescribir las reglas de seguridad.
+    var coachTone: CoachTone?
+    var coachDetail: CoachDetail?
+    var coachAvoidWeightTalk: Bool?
+
+    enum CoachTone: String, Codable, CaseIterable, Identifiable {
+        case close = "Cercano"
+        case direct = "Directo"
+        case technical = "Técnico"
+
+        var id: String { rawValue }
+
+        var explanation: String {
+            switch self {
+            case .close: return "Como un entrenador que te conoce."
+            case .direct: return "Al grano, sin rodeos. Empieza por la conclusión."
+            case .technical: return "Con la jerga del entrenamiento y apoyado en números."
+            }
+        }
+    }
+
+    enum CoachDetail: String, Codable, CaseIterable, Identifiable {
+        case brief = "Breve"
+        case normal = "Normal"
+        case detailed = "Detallado"
+
+        var id: String { rawValue }
+
+        var explanation: String {
+            switch self {
+            case .brief: return "Dos o tres frases, solo lo esencial."
+            case .normal: return "Lo de siempre."
+            case .detailed: return "Explica el porqué de cada recomendación."
+            }
+        }
+    }
+
     enum Gender: String, Codable, CaseIterable {
         case male = "Hombre"
         case female = "Mujer"

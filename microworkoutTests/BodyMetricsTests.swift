@@ -396,4 +396,71 @@ final class BodyMetricsTests: XCTestCase {
         XCTAssertEqual(merged.weightKg, 80)
         XCTAssertEqual(merged.steps, 9000)
     }
+
+    // MARK: - Preferencias del coach
+
+    /// Las claves del backend son neutras y los raw values de iOS son el texto que
+    /// se pinta. Si alguien "simplifica" mandando el rawValue español, el backend
+    /// lo rechaza con 422 y la preferencia deja de guardarse en silencio.
+    func testCoachPreferencesUseTheBackendKeys() throws {
+        var profile = UserProfile(
+            name: "Fer", height: 178, weight: 79.6, age: 38,
+            gender: .male, activityLevel: .moderate
+        )
+        profile.coachTone = .direct
+        profile.coachDetail = .brief
+        profile.coachAvoidWeightTalk = true
+
+        let dto = UserProfileApiDTO.from(domain: profile)
+        XCTAssertEqual(dto.coachTone, "direct")
+        XCTAssertEqual(dto.coachDetail, "brief")
+        XCTAssertEqual(dto.coachAvoidWeightTalk, true)
+
+        let json = try JSONEncoder().encode(dto)
+        let keys = try XCTUnwrap(
+            JSONSerialization.jsonObject(with: json) as? [String: Any]
+        ).keys
+        XCTAssertTrue(keys.contains("coach_tone"), "snake_case, como el resto de la API")
+        XCTAssertTrue(keys.contains("coach_avoid_weight_talk"))
+    }
+
+    func testCoachPreferencesSurviveTheRoundTrip() throws {
+        let json = """
+        {"name": "Fer", "height": 178, "weight": 79.6, "age": 38, "gender": "male",
+         "activity_level": "moderate", "fitness_goal": null, "macro_profile": null,
+         "free_days": [], "free_day_extra_calories": null,
+         "coach_tone": "technical", "coach_detail": "detailed",
+         "coach_avoid_weight_talk": true}
+        """.data(using: .utf8)!
+
+        let dto = try JSONDecoder().decode(UserProfileApiDTO.self, from: json)
+        let profile = try XCTUnwrap(dto.toDomain())
+        XCTAssertEqual(profile.coachTone, .technical)
+        XCTAssertEqual(profile.coachDetail, .detailed)
+        XCTAssertEqual(profile.coachAvoidWeightTalk, true)
+    }
+
+    func testAProfileWithoutPreferencesIsStillValid() throws {
+        // Perfiles creados antes de que existieran las preferencias.
+        let json = """
+        {"name": "Fer", "height": 178, "weight": 79.6, "age": 38, "gender": "male",
+         "activity_level": "moderate", "free_days": []}
+        """.data(using: .utf8)!
+
+        let dto = try JSONDecoder().decode(UserProfileApiDTO.self, from: json)
+        let profile = try XCTUnwrap(dto.toDomain())
+        XCTAssertNil(profile.coachTone, "sin preferencia, el coach habla como siempre")
+        XCTAssertNil(profile.coachAvoidWeightTalk)
+    }
+
+    func testUnknownPreferenceFromTheServerDoesNotBreakDecoding() throws {
+        let json = """
+        {"name": "Fer", "height": 178, "weight": 79.6, "age": 38, "gender": "male",
+         "activity_level": "moderate", "free_days": [], "coach_tone": "sarcastico"}
+        """.data(using: .utf8)!
+
+        let dto = try JSONDecoder().decode(UserProfileApiDTO.self, from: json)
+        let profile = try XCTUnwrap(dto.toDomain())
+        XCTAssertNil(profile.coachTone, "un tono que iOS no conoce se ignora, no revienta el perfil")
+    }
 }

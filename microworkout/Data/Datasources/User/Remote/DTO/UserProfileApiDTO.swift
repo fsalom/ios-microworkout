@@ -13,6 +13,9 @@ struct UserProfileApiDTO: Codable {
     let macroProfile: String?
     let freeDays: [Int]
     let freeDayExtraCalories: Double?
+    let coachTone: String?
+    let coachDetail: String?
+    let coachAvoidWeightTalk: Bool?
 
     enum CodingKeys: String, CodingKey {
         case name
@@ -25,6 +28,9 @@ struct UserProfileApiDTO: Codable {
         case macroProfile = "macro_profile"
         case freeDays = "free_days"
         case freeDayExtraCalories = "free_day_extra_calories"
+        case coachTone = "coach_tone"
+        case coachDetail = "coach_detail"
+        case coachAvoidWeightTalk = "coach_avoid_weight_talk"
     }
 }
 
@@ -45,7 +51,10 @@ extension UserProfileApiDTO {
             fitnessGoal: profile.fitnessGoal.map { UserProfileApiCoding.encode(goal: $0) },
             macroProfile: profile.macroProfile.map { UserProfileApiCoding.encode(macro: $0) },
             freeDays: profile.freeDays ?? [],
-            freeDayExtraCalories: profile.freeDayExtraCalories
+            freeDayExtraCalories: profile.freeDayExtraCalories,
+            coachTone: profile.coachTone.map { UserProfileApiCoding.encode(tone: $0) },
+            coachDetail: profile.coachDetail.map { UserProfileApiCoding.encode(detail: $0) },
+            coachAvoidWeightTalk: profile.coachAvoidWeightTalk ?? false
         )
     }
 
@@ -63,12 +72,51 @@ extension UserProfileApiDTO {
             fitnessGoal: fitnessGoal.flatMap { UserProfileApiCoding.decodeGoal($0) },
             macroProfile: macroProfile.flatMap { UserProfileApiCoding.decodeMacro($0) },
             freeDays: freeDays.isEmpty ? nil : freeDays,
-            freeDayExtraCalories: freeDayExtraCalories
+            freeDayExtraCalories: freeDayExtraCalories,
+            coachTone: coachTone.flatMap { UserProfileApiCoding.decodeTone($0) },
+            coachDetail: coachDetail.flatMap { UserProfileApiCoding.decodeDetail($0) },
+            coachAvoidWeightTalk: coachAvoidWeightTalk
         )
     }
 }
 
 enum UserProfileApiCoding {
+    // Las claves del backend son neutras; los raw values de iOS son el texto que
+    // se pinta en pantalla. Se traduce en la frontera, como el resto.
+    static func encode(tone: UserProfile.CoachTone) -> String {
+        switch tone {
+        case .close: return "close"
+        case .direct: return "direct"
+        case .technical: return "technical"
+        }
+    }
+
+    static func decodeTone(_ raw: String) -> UserProfile.CoachTone? {
+        switch raw {
+        case "close": return .close
+        case "direct": return .direct
+        case "technical": return .technical
+        default: return nil
+        }
+    }
+
+    static func encode(detail: UserProfile.CoachDetail) -> String {
+        switch detail {
+        case .brief: return "brief"
+        case .normal: return "normal"
+        case .detailed: return "detailed"
+        }
+    }
+
+    static func decodeDetail(_ raw: String) -> UserProfile.CoachDetail? {
+        switch raw {
+        case "brief": return .brief
+        case "normal": return .normal
+        case "detailed": return .detailed
+        default: return nil
+        }
+    }
+
     static func encode(gender: UserProfile.Gender) -> String {
         switch gender {
         case .male: return "male"

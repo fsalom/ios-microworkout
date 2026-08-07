@@ -107,6 +107,8 @@ struct ProfileView: View {
                 }
             }
 
+            if viewModel.uiState.hasProfile { coachSection }
+
             if viewModel.uiState.isHealthDataAvailable { healthSection }
 
             appearanceSection
@@ -227,6 +229,55 @@ struct ProfileView: View {
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
+        }
+    }
+
+    /// Cómo quiere el usuario que le hable el coach.
+    ///
+    /// Opciones cerradas y no un campo de texto libre: lo que se elige aquí acaba
+    /// en las REGLAS del prompt, y dejar escribir ahí sería dejar que cualquiera
+    /// desactive las reglas de seguridad con una frase.
+    private var coachSection: some View {
+        Section {
+            Picker(selection: Binding(
+                get: { viewModel.uiState.coachTone },
+                set: { viewModel.uiState.coachTone = $0; viewModel.saveCoachPreferences() }
+            )) {
+                ForEach(UserProfile.CoachTone.allCases) { tone in
+                    Text(tone.rawValue).tag(tone)
+                }
+            } label: {
+                hubRowLabel(icon: "text.bubble", title: "Tono", iconColor: .purple)
+            }
+            Text(viewModel.uiState.coachTone.explanation)
+                .font(.caption)
+                .foregroundColor(.secondary)
+
+            Picker(selection: Binding(
+                get: { viewModel.uiState.coachDetail },
+                set: { viewModel.uiState.coachDetail = $0; viewModel.saveCoachPreferences() }
+            )) {
+                ForEach(UserProfile.CoachDetail.allCases) { detail in
+                    Text(detail.rawValue).tag(detail)
+                }
+            } label: {
+                hubRowLabel(icon: "text.alignleft", title: "Longitud", iconColor: .purple)
+            }
+            Text(viewModel.uiState.coachDetail.explanation)
+                .font(.caption)
+                .foregroundColor(.secondary)
+
+            Toggle(isOn: Binding(
+                get: { viewModel.uiState.coachAvoidWeightTalk },
+                set: { viewModel.uiState.coachAvoidWeightTalk = $0; viewModel.saveCoachPreferences() }
+            )) {
+                hubRowLabel(icon: "scalemass", title: "No hablarme del peso", iconColor: .purple)
+            }
+            Text("El coach no mencionará kilos ni calorías, aunque tenga el dato. Se centrará en rendimiento, fuerza y hábitos.")
+                .font(.caption)
+                .foregroundColor(.secondary)
+        } header: {
+            Text("Cómo te habla el coach")
         }
     }
 
