@@ -117,9 +117,5 @@ struct WeightTrend: Equatable {
     }
 }
 
-extension Double {
-    func rounded(toPlaces places: Int) -> Double {
-        let divisor = pow(10.0, Double(places))
-        return (self * divisor).rounded() / divisor
-    }
-}
+// `rounded(toPlaces:)` vive en Shared/Extensions: es un helper genérico de
+// `Double`, no parte del modelo de una medida diaria.

@@ -54,6 +54,15 @@ extension UserProfileApiDTO {
             freeDayExtraCalories: profile.freeDayExtraCalories,
             coachTone: profile.coachTone.map { UserProfileApiCoding.encode(tone: $0) },
             coachDetail: profile.coachDetail.map { UserProfileApiCoding.encode(detail: $0) },
+            // El `?? false` es DELIBERADO y no se puede quitar: en el backend
+            // `coach_tone` y `coach_detail` son `Optional[...] = None`, pero
+            // `coach_avoid_weight_talk` es `bool = False` — no acepta null, y con
+            // `extra="forbid"` mandarlo sería un 422. Tampoco tiene dónde guardar
+            // "sin elegir": la columna es `BooleanField(default=False)`.
+            //
+            // El `Bool?` del dominio existe solo para leer perfiles guardados en el
+            // dispositivo antes de que el campo existiera; nadie distingue "sin
+            // elegir" de "false", así que colapsarlo aquí no pierde nada.
             coachAvoidWeightTalk: profile.coachAvoidWeightTalk ?? false
         )
     }

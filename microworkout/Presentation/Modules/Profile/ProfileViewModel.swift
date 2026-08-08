@@ -33,6 +33,8 @@ struct ProfileUiState {
     var coachTone: UserProfile.CoachTone = .close
     var coachDetail: UserProfile.CoachDetail = .normal
     var coachAvoidWeightTalk: Bool = false
+    /// Mensaje cuando un cambio de preferencia no se pudo guardar.
+    var coachPreferencesError: String?
     var healthKitStatus: HealthAuthorizationStatus = .notDetermined
     var isHealthDataAvailable: Bool = false
 }
@@ -153,9 +155,13 @@ class ProfileViewModel: ObservableObject {
                 self.uiState.hasCycling = profile.hasCycling
                 self.uiState.strictDayCalorieTarget = profile.strictDayCalorieTarget
                 self.uiState.freeDayCalorieTarget = profile.freeDayCalorieTarget
-                self.uiState.coachTone = profile.coachTone ?? .close
-                self.uiState.coachDetail = profile.coachDetail ?? .normal
-                self.uiState.coachAvoidWeightTalk = profile.coachAvoidWeightTalk ?? false
+                // Punto de retorno si un cambio de preferencia falla al guardarse.
+                self.persistedCoachPreferences = CoachPreferences(
+                    tone: profile.coachTone ?? .close,
+                    detail: profile.coachDetail ?? .normal,
+                    avoidWeightTalk: profile.coachAvoidWeightTalk ?? false
+                )
+                self.apply(self.persistedCoachPreferences)
             } catch {
                 // Si el token murió, SessionAwareNetwork (infra) ya pasó a invitado;
                 // aquí solo mostramos el aviso. Otros errores (red transitoria):
@@ -208,15 +214,57 @@ class ProfileViewModel: ObservableObject {
     /// Aparte de `save()` porque no viven dentro del modo edición del perfil: se
     /// cambian con un toque y deben quedar guardadas al momento, sin obligar a
     /// entrar a editar y darle a Guardar.
+    ///
+    /// Si el guardado falla se REVIERTE el control y se avisa. Antes iba con `try?`
+    /// y sin feedback: el interruptor se quedaba puesto, la pantalla decía que el
+    /// coach ya te hablaba así, y no se había guardado nada. Un ajuste que se aplica
+    /// con un toque necesita decir cuándo NO se aplicó.
     func saveCoachPreferences() {
+        // Se captura lo que el usuario acaba de elegir: entre el toque y la
+        // respuesta del servidor puede haber tocado otra cosa, y lo que hay que
+        // guardar es esto, no lo que haya en `uiState` cuando vuelva.
+        let desired = CoachPreferences(
+            tone: uiState.coachTone,
+            detail: uiState.coachDetail,
+            avoidWeightTalk: uiState.coachAvoidWeightTalk
+        )
+
         Task { @MainActor [weak self] in
             guard let self else { return }
-            guard var profile = try? await self.userProfileUseCase.getProfile() else { return }
-            profile.coachTone = self.uiState.coachTone
-            profile.coachDetail = self.uiState.coachDetail
-            profile.coachAvoidWeightTalk = self.uiState.coachAvoidWeightTalk
-            try? await self.userProfileUseCase.saveProfile(profile)
+            do {
+                guard var profile = try await self.userProfileUseCase.getProfile() else {
+                    // Sin perfil no hay dónde colgar las preferencias. Para el
+                    // usuario el efecto es el mismo que un fallo: no se guardó.
+                    throw DomainError.notFound
+                }
+                profile.coachTone = desired.tone
+                profile.coachDetail = desired.detail
+                profile.coachAvoidWeightTalk = desired.avoidWeightTalk
+                try await self.userProfileUseCase.saveProfile(profile)
+                self.persistedCoachPreferences = desired
+                self.uiState.coachPreferencesError = nil
+            } catch {
+                self.apply(self.persistedCoachPreferences)
+                self.uiState.coachPreferencesError = "No se pudo guardar. Inténtalo de nuevo."
+            }
         }
+    }
+
+    /// Las tres preferencias juntas: se guardan y se revierten como una unidad.
+    struct CoachPreferences: Equatable {
+        var tone: UserProfile.CoachTone = .close
+        var detail: UserProfile.CoachDetail = .normal
+        var avoidWeightTalk: Bool = false
+    }
+
+    /// Lo último que se sabe guardado, para poder volver ahí si falla.
+    private var persistedCoachPreferences = CoachPreferences()
+
+    @MainActor
+    private func apply(_ preferences: CoachPreferences) {
+        uiState.coachTone = preferences.tone
+        uiState.coachDetail = preferences.detail
+        uiState.coachAvoidWeightTalk = preferences.avoidWeightTalk
     }
 
     // MARK: - HealthKit

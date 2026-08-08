@@ -52,14 +52,30 @@ struct AIChatUiState {
 /// No se marca `@MainActor` a propósito: los builders construyen los ViewModels
 /// desde contextos sincronos no aislados, igual que el resto de la app. Los saltos
 /// al main actor se hacen explícitos en cada mutación de `uiState`.
+///
+/// Como la clase no está aislada, el estado mutable que se toca desde MÁS DE UN
+/// dominio se aísla pieza a pieza (ver `contextTask`). Lo que se añada aquí y se
+/// lea tanto desde la vista como desde el stream necesita el mismo tratamiento.
 final class AIChatViewModel: ObservableObject {
     @Published var uiState: AIChatUiState = .init()
 
     private let contextUseCase: AIContextUseCaseProtocol
     private let chatUseCase: AICoachChatUseCaseProtocol
     private let topic: AICoachTopic
-    private var cachedContext: AIContext?
     private var streamTask: Task<Void, Never>?
+
+    /// La construcción del contexto en curso (o la ya terminada), aislada al main
+    /// actor.
+    ///
+    /// Antes era un `AIContext?` sin aislar, leído y escrito desde dos sitios que
+    /// viven en dominios distintos: `prepareContext()` (main) y `consume()` (fuera
+    /// del main). Abrir la hoja de datos y mandar un mensaje a la vez construía el
+    /// contexto DOS veces —que es leer HealthKit y todo el histórico dos veces— y
+    /// las dos escrituras se pisaban.
+    ///
+    /// Guardar la `Task` en vez del valor resuelve las dos cosas: quien llegue
+    /// segundo espera la misma construcción en lugar de lanzar otra.
+    @MainActor private var contextTask: Task<AIContext, Never>?
 
     init(
         contextUseCase: AIContextUseCaseProtocol,
@@ -176,11 +192,16 @@ final class AIChatViewModel: ObservableObject {
     /// El contexto se construye una vez por pantalla y se reutiliza en los turnos
     /// siguientes: leer HealthKit y todo el histórico en cada mensaje sería caro y
     /// entre turno y turno no cambia.
+    ///
+    /// `@MainActor` para que la comprobación "¿ya se está construyendo?" y el guardar
+    /// la tarea sean un solo paso indivisible. El trabajo pesado no se queda en el
+    /// main actor: `buildContext` es `async` y no está aislado, así que salta fuera.
+    @MainActor
     private func resolveContext() async -> AIContext {
-        if let cachedContext { return cachedContext }
-        let context = await contextUseCase.buildContext(mealDaysBack: 30, healthWeeksBack: 4)
-        cachedContext = context
-        return context
+        if let contextTask { return await contextTask.value }
+        let task = Task { await self.contextUseCase.buildContext(mealDaysBack: 30, healthWeeksBack: 4) }
+        contextTask = task
+        return await task.value
     }
 
     private func append(_ chunk: String, to messageId: UUID) {

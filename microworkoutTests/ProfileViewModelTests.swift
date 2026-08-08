@@ -21,12 +21,29 @@ final class ProfileViewModelTests: XCTestCase {
 
     private final class FakeProfileUseCase: UserProfileUseCaseProtocol {
         var profile: UserProfile?
+        var saveFails = false
         private(set) var saved: [UserProfile] = []
 
-        func saveProfile(_ profile: UserProfile) async throws { saved.append(profile) }
+        func saveProfile(_ profile: UserProfile) async throws {
+            if saveFails { throw DomainError.network(underlying: URLError(.notConnectedToInternet)) }
+            saved.append(profile)
+            self.profile = profile
+        }
         func getProfile() async throws -> UserProfile? { profile }
         func setOnboardingCompleted(_ completed: Bool) {}
         func hasCompletedOnboarding() -> Bool { true }
+    }
+
+    private func makeProfile(
+        tone: UserProfile.CoachTone? = nil,
+        detail: UserProfile.CoachDetail? = nil,
+        avoidWeightTalk: Bool? = nil
+    ) -> UserProfile {
+        UserProfile(
+            name: "Fer", height: 178, weight: 79.6, age: 38,
+            gender: .male, activityLevel: .moderate,
+            coachTone: tone, coachDetail: detail, coachAvoidWeightTalk: avoidWeightTalk
+        )
     }
 
     private struct StubHealthUseCase: HealthUseCaseProtocol {
@@ -194,6 +211,57 @@ final class ProfileViewModelTests: XCTestCase {
         await waitUntil { viewModel.uiState.lastSyncMessage != nil }
 
         XCTAssertEqual(viewModel.uiState.lastSyncMessage, ProfileViewModel.sessionExpiredMessage)
+    }
+
+    // MARK: - Preferencias del coach
+
+    func testChangingTheCoachToneIsSavedAtOnce() async throws {
+        let profileUseCase = FakeProfileUseCase()
+        profileUseCase.profile = makeProfile(tone: .close, detail: .normal, avoidWeightTalk: false)
+        let viewModel = makeViewModel(authenticated: true, profileUseCase: profileUseCase)
+        await waitUntil { viewModel.uiState.hasProfile }
+
+        viewModel.uiState.coachTone = .technical
+        viewModel.saveCoachPreferences()
+        await waitUntil { profileUseCase.saved.contains { $0.coachTone == .technical } }
+
+        XCTAssertEqual(viewModel.uiState.coachTone, .technical)
+        XCTAssertNil(viewModel.uiState.coachPreferencesError)
+    }
+
+    /// Estos ajustes se guardan al tocarlos, sin botón de Guardar. Si el guardado
+    /// falla y el control se queda puesto, la pantalla está diciendo que el coach ya
+    /// te habla así cuando no se ha guardado nada.
+    func testAFailedCoachPreferenceRevertsTheControlAndSaysSo() async throws {
+        let profileUseCase = FakeProfileUseCase()
+        profileUseCase.profile = makeProfile(tone: .close, detail: .normal, avoidWeightTalk: false)
+        let viewModel = makeViewModel(authenticated: true, profileUseCase: profileUseCase)
+        await waitUntil { viewModel.uiState.hasProfile }
+
+        profileUseCase.saveFails = true
+        viewModel.uiState.coachTone = .direct
+        viewModel.saveCoachPreferences()
+        await waitUntil { viewModel.uiState.coachPreferencesError != nil }
+
+        XCTAssertEqual(
+            viewModel.uiState.coachTone, .close,
+            "el control vuelve a lo que sí está guardado"
+        )
+        XCTAssertEqual(viewModel.uiState.coachPreferencesError, "No se pudo guardar. Inténtalo de nuevo.")
+    }
+
+    func testTheAvoidWeightTalkToggleAlsoRevertsOnFailure() async throws {
+        let profileUseCase = FakeProfileUseCase()
+        profileUseCase.profile = makeProfile(tone: .close, detail: .normal, avoidWeightTalk: false)
+        let viewModel = makeViewModel(authenticated: true, profileUseCase: profileUseCase)
+        await waitUntil { viewModel.uiState.hasProfile }
+
+        profileUseCase.saveFails = true
+        viewModel.uiState.coachAvoidWeightTalk = true
+        viewModel.saveCoachPreferences()
+        await waitUntil { viewModel.uiState.coachPreferencesError != nil }
+
+        XCTAssertFalse(viewModel.uiState.coachAvoidWeightTalk, "el interruptor no se queda puesto")
     }
 
     // MARK: - Navegación

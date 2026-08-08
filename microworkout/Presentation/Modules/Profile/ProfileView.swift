@@ -298,6 +298,15 @@ struct ProfileView: View {
             Text("El coach no mencionará kilos ni calorías, aunque tenga el dato. Se centrará en rendimiento, fuerza y hábitos.")
                 .font(.caption)
                 .foregroundColor(.secondary)
+
+            // Estos ajustes se guardan al tocarlos, así que cuando el guardado falla
+            // hay que decirlo aquí: el control ya ha vuelto a su valor anterior y sin
+            // este aviso parecería que el toque simplemente no funcionó.
+            if let error = viewModel.uiState.coachPreferencesError {
+                Label(error, systemImage: "exclamationmark.triangle.fill")
+                    .font(.caption)
+                    .foregroundColor(.orange)
+            }
         } header: {
             Text("Cómo te habla el coach")
         }
