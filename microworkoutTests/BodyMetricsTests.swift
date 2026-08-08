@@ -56,16 +56,23 @@ final class BodyMetricsTests: XCTestCase {
         }
     }
 
+    /// Réplica de `BodyMetricsLocalDataSource`, lápidas incluidas: si el doble
+    /// olvidara recordar los días borrados, los tests pasarían contra un
+    /// comportamiento que la app real no tiene.
     private final class FakeLocal: BodyMetricsLocalDataSourceProtocol {
         var stored: [DailyMetricsDTO] = []
+        var deleted: Set<Date> = []
         func getAll() -> [DailyMetricsDTO] { stored }
         func save(_ measurement: DailyMetricsDTO) {
             stored.removeAll { Calendar.current.isDate($0.date, inSameDayAs: measurement.date) }
             stored.append(measurement)
+            deleted.remove(Calendar.current.startOfDay(for: measurement.date))
         }
         func delete(date: Date) {
             stored.removeAll { Calendar.current.isDate($0.date, inSameDayAs: date) }
+            deleted.insert(Calendar.current.startOfDay(for: date))
         }
+        func deletedDates() -> Set<Date> { deleted }
     }
 
     private final class FakeRemote: BodyMetricsRemoteDataSourceProtocol {
@@ -254,6 +261,78 @@ final class BodyMetricsTests: XCTestCase {
         XCTAssertEqual(remote.bulkCalls, 1, "en una sola petición, no una por día")
         let remaining = try await repository.pendingSyncCount()
         XCTAssertEqual(remaining, 0)
+    }
+
+    // MARK: - Borrado
+
+    /// Borrar un peso tiene que durar más que hasta la siguiente lectura.
+    ///
+    /// Quitarlo solo del dispositivo no bastaba: Apple Salud conserva la muestra
+    /// —la escribió la báscula, otra app, o esta misma al anotar el peso— y
+    /// `getMeasurements` la volvía a traer. El usuario borraba, la fila desaparecía
+    /// por el borrado optimista de la pantalla, y reaparecía al volver a entrar.
+    func testDeletingADayDoesNotBringItBackFromHealth() async throws {
+        let health = FakeHealth()
+        health.byDay = [day(-1): 80.0, day(0): 79.5]
+        let repository = makeRepository(health: health, authenticated: false)
+
+        try await repository.delete(date: day(-1))
+
+        let result = try await repository.getMeasurements(from: day(-7), to: day(0))
+        XCTAssertEqual(result.map { $0.date }, [day(0)], "el día borrado no puede volver de Salud")
+    }
+
+    /// Y tampoco puede resucitar por la puerta de atrás: si sigue contándose como
+    /// pendiente, la siguiente sincronización lo vuelve a subir a la cuenta y
+    /// borrarlo allí no habrá servido de nada.
+    func testADeletedDayIsNotUploadedAgain() async throws {
+        let health = FakeHealth()
+        health.byDay = [day(-1): 80.0]
+        let remote = FakeRemote()
+        let repository = makeRepository(health: health, remote: remote)
+
+        try await repository.delete(date: day(-1))
+
+        let pending = try await repository.pendingSyncCount()
+        let uploaded = try await repository.syncLocalToRemote()
+        XCTAssertEqual(pending, 0)
+        XCTAssertEqual(uploaded, 0)
+        XCTAssertTrue(remote.stored.isEmpty, "no se resube lo que el usuario borró")
+    }
+
+    func testWeighingAgainOnADeletedDayBringsItBack() async throws {
+        let repository = makeRepository(authenticated: false)
+
+        try await repository.saveWeight(80.0, on: day(-1))
+        try await repository.delete(date: day(-1))
+        try await repository.saveWeight(78.0, on: day(-1))
+
+        let result = try await repository.getMeasurements(from: day(-7), to: day(0))
+        XCTAssertEqual(
+            result.map { $0.weightKg }, [78.0],
+            "la lápida es del borrado concreto, no del día: volver a pesarse lo revive"
+        )
+    }
+
+    /// La lápida solo vive en el dispositivo que borró. Si el borrado no llegó al
+    /// servidor (sin red), hay que rematarlo en la siguiente sincronización o el
+    /// día sigue en la cuenta y reaparece desde otro móvil.
+    func testADeleteThatNeverReachedTheAccountIsRetriedOnSync() async throws {
+        let measurement = DailyMetrics(date: day(-1), weightKg: 80.0, source: .manual)
+        let local = FakeLocal()
+        local.stored = [measurement.toDTO()]
+        let remote = FakeRemote()
+        remote.stored = [measurement]
+        let repository = makeRepository(local: local, remote: remote)
+
+        remote.isOffline = true
+        try await repository.delete(date: day(-1))
+        remote.isOffline = false
+
+        let pending = try await repository.pendingSyncCount()
+        XCTAssertEqual(pending, 1, "un borrado que no llegó a la cuenta también es trabajo pendiente")
+        _ = try await repository.syncLocalToRemote()
+        XCTAssertTrue(remote.stored.isEmpty, "la sincronización remata el borrado")
     }
 
     // MARK: - Tendencia

@@ -1,5 +1,27 @@
 import SwiftUI
 
+/// Contador de categorías ya empezadas, compartido entre el hilo desde el que el
+/// caso de uso avisa del progreso y el main actor que pinta el banner.
+///
+/// Es una clase con cerrojo y no un `var` capturado porque los dos extremos viven
+/// en dominios de aislamiento distintos: mutar desde fuera un `var` de un contexto
+/// `@MainActor` es una carrera aunque hoy no se note, y con concurrencia estricta
+/// ni siquiera compila.
+private final class SyncProgressCounter: @unchecked Sendable {
+    private let lock = NSLock()
+    private var value = 0
+
+    /// Devuelve cuántas categorías se habían completado ANTES de esta, que es lo
+    /// que el banner necesita para decir "N de M".
+    func next() -> Int {
+        lock.lock()
+        defer { lock.unlock() }
+        let current = value
+        value += 1
+        return current
+    }
+}
+
 /// Estado de la subida automática que se lanza al iniciar sesión.
 ///
 /// Vive fuera de cualquier pantalla, como `MediaProcessingTracker`: la
@@ -44,13 +66,18 @@ final class SyncTracker: ObservableObject {
         phase = .syncing(category: SyncCategory.allCases[0], done: 0, total: total)
 
         task = Task { [weak self] in
-            var done = 0
+            // El progreso se lleva en un contador propio y no en una variable
+            // capturada: el caso de uso llama a `progress` desde el hilo que le toca
+            // (lo dice su contrato), así que un `var` de este `Task` —que está
+            // aislado al main actor— se estaría mutando desde fuera. Y al leerlo
+            // dentro del salto al main actor se leía YA incrementado, de ahí que el
+            // banner enseñara siempre una categoría de más ("2 de 6" en la primera).
+            let counter = SyncProgressCounter()
             let report = await useCase.sync(progress: { category in
-                // El caso de uso no promete hilo principal.
+                let done = counter.next()
                 Task { @MainActor [weak self] in
                     self?.phase = .syncing(category: category, done: done, total: total)
                 }
-                done += 1
             })
 
             guard let self else { return }

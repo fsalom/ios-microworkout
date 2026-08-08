@@ -1,4 +1,5 @@
 import XCTest
+import Combine
 @testable import microworkout
 
 /// La subida automática al iniciar sesión se dispara desde `RootView`, que puede
@@ -110,6 +111,45 @@ final class SyncTrackerTests: XCTestCase {
             return false
         }
         XCTAssertEqual(useCase.syncCalls, 1, "solo una subida en curso")
+    }
+
+    /// Cada categoría debe anunciarse con SU número de orden.
+    ///
+    /// El contador vivía en un `var` capturado por el `Task` del tracker (aislado
+    /// al main actor) pero lo incrementaba el caso de uso desde otro hilo: además
+    /// de ser una carrera, el salto al main actor lo leía ya incrementado y el
+    /// banner enseñaba siempre una categoría de más — "2 de 6" mientras subía el
+    /// perfil, y nunca "1 de 6".
+    func testEachCategoryIsAnnouncedWithItsOwnPosition() async throws {
+        final class Seen { var pairs: [(SyncCategory, Int)] = [] }
+        let seen = Seen()
+
+        let tracker = makeTracker()
+        let useCase = FakeSyncUseCase()
+        let cancellable = tracker.$phase.sink { phase in
+            if case .syncing(let category, let done, _) = phase {
+                seen.pairs.append((category, done))
+            }
+        }
+        defer { cancellable.cancel() }
+
+        tracker.syncAfterLogin(using: useCase)
+        await useCase.gate.open()
+        await waitUntil {
+            if case .finished = tracker.phase { return true }
+            return false
+        }
+
+        XCTAssertEqual(
+            Set(seen.pairs.map { $0.0 }), Set(SyncCategory.allCases),
+            "todas las categorías se anuncian"
+        )
+        for (category, done) in seen.pairs {
+            XCTAssertEqual(
+                done, SyncCategory.allCases.firstIndex(of: category),
+                "\(category.title) se anunció como la número \(done + 1)"
+            )
+        }
     }
 
     func testErrorsAreSurfacedInTheBanner() async throws {

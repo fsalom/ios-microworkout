@@ -51,7 +51,11 @@ final class TrainingRepository: TrainingRepositoryProtocol {
     func getTrainings() async throws -> [Training] {
         let presets = Self.presets
         if await isAuthenticated() {
-            let remoteTrainings = try await remote.list().map { $0.toDomain() }
+            // Un fallo del servidor degrada al catálogo local en vez de propagarse.
+            // Los presets son constantes de la app y no dependen de la red: dejar
+            // la pantalla en blanco por una caída, cuando quien llama usa `try?`,
+            // esconde hasta lo que sí teníamos.
+            let remoteTrainings = (try? await remote.list())?.map { $0.toDomain() } ?? []
             // Show presets first, then user-created (de-duplicated by id).
             let presetIds = Set(presets.map { $0.id })
             let extras = remoteTrainings.filter { !presetIds.contains($0.id) }
@@ -125,28 +129,48 @@ final class TrainingRepository: TrainingRepositoryProtocol {
         training.completedAt ?? training.startedAt ?? .distantPast
     }
 
-    /// Modelo espejo: cuenta los entrenamientos locales cuyo id no está aún en
-    /// la cuenta. No modifica nada local.
+    /// Modelo espejo: cuenta lo que este dispositivo tiene y la cuenta no.
+    /// No modifica nada local.
     func pendingSyncCount() async throws -> Int {
-        let remoteIds = Set(try await remote.list().map { $0.id })
+        let synced = try await syncedState()
         var pending = 0
-        if let current = local.getCurrent(), !remoteIds.contains(current.id) { pending += 1 }
-        pending += local.getFinished().filter { !remoteIds.contains($0.id) }.count
+        if let current = local.getCurrent(), synced.currentId != current.id { pending += 1 }
+        pending += local.getFinished()
+            .filter { !synced.finishedKeys.contains(Self.instanceKey($0.toDomain())) }
+            .count
         return pending
     }
 
-    /// Sube los entrenamientos locales que aún no estén en la cuenta (por id).
+    /// Sube los entrenamientos locales que aún no estén en la cuenta.
     /// Nunca borra la copia local — el dispositivo conserva el respaldo.
     func syncLocalToRemote() async throws -> Int {
-        let remoteIds = Set(try await remote.list().map { $0.id })
+        let synced = try await syncedState()
         var count = 0
-        if let current = local.getCurrent(), !remoteIds.contains(current.id) {
+        if let current = local.getCurrent(), synced.currentId != current.id {
             _ = try await remote.saveCurrent(current.toDomain()); count += 1
         }
-        for dto in local.getFinished() where !remoteIds.contains(dto.id) {
+        for dto in local.getFinished()
+        where !synced.finishedKeys.contains(Self.instanceKey(dto.toDomain())) {
             _ = try await remote.finish(dto.toDomain()); count += 1
         }
         return count
+    }
+
+    /// Lo que la cuenta ya tiene, en los mismos términos con los que se compara al
+    /// leer: el historial por `instanceKey` y el entreno en curso por id.
+    ///
+    /// NO se usa `remote.list()` (el catálogo, `status=all`) ni se compara por id
+    /// a secas. Con las dos cosas a la vez, la segunda vez que hacías un preset no
+    /// subía nunca: su UUID ya estaba en el catálogo desde la primera, así que
+    /// `pendingSyncCount` decía 0 y el banner remataba con "Todo estaba ya
+    /// sincronizado" mientras esa sesión se quedaba solo en el dispositivo.
+    private func syncedState() async throws -> (finishedKeys: Set<String>, currentId: UUID?) {
+        async let finished = remote.listFinished()
+        async let current = remote.current()
+        return (
+            finishedKeys: Set(try await finished.map { Self.instanceKey($0.toDomain()) }),
+            currentId: try await current?.id
+        )
     }
 }
 

@@ -62,7 +62,14 @@ final class BodyMetricsRepository: BodyMetricsRepositoryProtocol {
         }
         absorb(await healthMeasurements(from: start, to: end))
 
-        return byDay.values.sorted { $0.date < $1.date }
+        // Los días que el usuario borró se filtran AL FINAL, después de juntar las
+        // tres fuentes. Quitarlos solo del dispositivo no servía de nada: Salud
+        // conserva la muestra y la volvía a traer, así que borrar un peso duraba
+        // hasta la siguiente lectura de la pantalla.
+        let deleted = local.deletedDates()
+        return byDay.values
+            .filter { !deleted.contains($0.date) }
+            .sorted { $0.date < $1.date }
     }
 
     private func localMeasurements(from start: Date, to end: Date) -> [DailyMetrics] {
@@ -151,17 +158,26 @@ final class BodyMetricsRepository: BodyMetricsRepositoryProtocol {
     // MARK: - Sincronización
 
     func pendingSyncCount() async throws -> Int {
-        let (mine, synced) = try await syncSnapshot()
-        return mine.filter { Self.needsUpload($0, comparedTo: synced[$0.date]) }.count
+        let snapshot = try await syncSnapshot()
+        return snapshot.missing.count + snapshot.staleDeletions.count
     }
 
     func syncLocalToRemote() async throws -> Int {
-        let (mine, synced) = try await syncSnapshot()
-        let missing = mine.filter { Self.needsUpload($0, comparedTo: synced[$0.date]) }
-        guard !missing.isEmpty else { return 0 }
+        let snapshot = try await syncSnapshot()
+        var count = 0
+
+        // Primero los borrados que no llegaron a la cuenta (sin red al borrar). Si
+        // no se reintentan, el día sigue en el servidor y reaparece en cuanto
+        // entras desde otro móvil: la lápida solo vive en el dispositivo que borró.
+        for date in snapshot.staleDeletions {
+            try await remote.delete(date: date)
+            count += 1
+        }
+
+        guard !snapshot.missing.isEmpty else { return count }
         // De golpe y no una por una: la primera sincronización puede traer años de
         // días registrados, y una petición por día sería absurda y frágil.
-        return try await remote.upsertMany(missing)
+        return count + (try await remote.upsertMany(snapshot.missing))
     }
 
     /// `true` si este dispositivo tiene algo que la cuenta no.
@@ -179,27 +195,46 @@ final class BodyMetricsRepository: BodyMetricsRepositoryProtocol {
         return candidate != synced
     }
 
-    /// Lo que hay en este dispositivo (Salud + copia local) y lo que ya está en la
-    /// cuenta, para poder compararlos por día.
-    private func syncSnapshot() async throws -> ([DailyMetrics], [Date: DailyMetrics]) {
+    /// Lo que falta por subir y lo que falta por borrar, ya resuelto contra lo que
+    /// la cuenta tiene hoy.
+    private struct SyncSnapshot {
+        /// Días de este dispositivo que la cuenta no tiene (o tiene incompletos).
+        let missing: [DailyMetrics]
+        /// Días borrados aquí que la cuenta todavía tiene.
+        let staleDeletions: [Date]
+    }
+
+    /// Compara lo que hay en este dispositivo (Salud + copia local, menos lo que el
+    /// usuario borró) con lo que ya está en la cuenta.
+    private func syncSnapshot() async throws -> SyncSnapshot {
         let end = Date()
         let start = Calendar.current.date(byAdding: .day, value: -Self.syncWindowDays, to: end) ?? end
+        let deleted = local.deletedDates()
 
         var byDay: [Date: DailyMetrics] = [:]
-        for measurement in localMeasurements(from: start, to: end) {
+        // Un día borrado no es un día pendiente de subir. Sin este filtro, Salud lo
+        // devolvía en cada sincronización y se volvía a subir eternamente: borrarlo
+        // en la cuenta no servía de nada.
+        for measurement in localMeasurements(from: start, to: end) where !deleted.contains(measurement.date) {
             byDay[measurement.date] = byDay[measurement.date]?.merged(with: measurement) ?? measurement
         }
-        for measurement in await healthMeasurements(from: start, to: end) {
+        for measurement in await healthMeasurements(from: start, to: end) where !deleted.contains(measurement.date) {
             byDay[measurement.date] = byDay[measurement.date]?.merged(with: measurement) ?? measurement
         }
 
         // Esta sí se propaga: si no se sabe qué hay en la cuenta, no se puede decir
         // qué falta, y contestar "0 pendientes" sería mentir.
-        let synced = try await remote.list(from: start, to: end)
+        let synced = try await remote.list(from: start, to: end).map { $0.toDomain() }
         let syncedByDay = Dictionary(
-            synced.map { ($0.toDomain().date, $0.toDomain()) },
+            synced.map { ($0.date, $0) },
             uniquingKeysWith: { _, last in last }
         )
-        return (byDay.values.sorted { $0.date < $1.date }, syncedByDay)
+
+        return SyncSnapshot(
+            missing: byDay.values
+                .filter { Self.needsUpload($0, comparedTo: syncedByDay[$0.date]) }
+                .sorted { $0.date < $1.date },
+            staleDeletions: deleted.filter { syncedByDay[$0] != nil }.sorted()
+        )
     }
 }

@@ -352,6 +352,78 @@ final class WorkoutHistorySyncTests: XCTestCase {
         XCTAssertEqual(result.map { $0.completedAt }, [secondRun, firstRun], "más reciente primero")
     }
 
+    /// El mismo caso que el test de arriba, pero mirando la SINCRONIZACIÓN.
+    ///
+    /// Aquí es donde se perdía de verdad: el historial se comparaba contra
+    /// `remote.list()` (el catálogo, `status=all`) y por id a secas. Como todas las
+    /// veces que haces un preset comparten UUID, en cuanto la primera llegaba a la
+    /// cuenta el catálogo ya tenía ese id y las siguientes se daban por subidas:
+    /// `pendingSyncCount` devolvía 0 y el banner remataba con "Todo estaba ya
+    /// sincronizado" mientras esas sesiones se quedaban solo en el dispositivo.
+    func testAnotherRunOfTheSamePresetIsStillPendingUpload() async throws {
+        let presetId = UUID()
+        let firstRun = Date(timeIntervalSince1970: 1_000)
+        let secondRun = Date(timeIntervalSince1970: 2_000)
+        let local = FakeTrainingLocal()
+        local.finished = [
+            trainingDTO(presetId, "Flexiones", completedAt: firstRun),
+            trainingDTO(presetId, "Flexiones", completedAt: secondRun),
+        ]
+        let remote = FakeTrainingRemote()
+        // El catálogo ya conoce el preset desde la primera subida...
+        remote.all = [finishedApiDTO(presetId, "Flexiones", completedAt: secondRun)]
+        // ...pero del historial solo está una de las dos veces que se hizo.
+        remote.finished = [finishedApiDTO(presetId, "Flexiones", completedAt: secondRun)]
+        let repository = TrainingRepository(local: local, remote: remote, session: StubSession(authenticated: true))
+
+        let pending = try await repository.pendingSyncCount()
+        XCTAssertEqual(pending, 1, "la serie que no llegó a la cuenta sigue pendiente")
+
+        let uploaded = try await repository.syncLocalToRemote()
+        XCTAssertEqual(uploaded, 1, "sube la que falta")
+        XCTAssertEqual(remote.finishedCalls, [presetId])
+    }
+
+    func testRunsAlreadyInTheAccountAreNotUploadedTwice() async throws {
+        let presetId = UUID()
+        let firstRun = Date(timeIntervalSince1970: 1_000)
+        let secondRun = Date(timeIntervalSince1970: 2_000)
+        let local = FakeTrainingLocal()
+        local.finished = [
+            trainingDTO(presetId, "Flexiones", completedAt: firstRun),
+            trainingDTO(presetId, "Flexiones", completedAt: secondRun),
+        ]
+        let remote = FakeTrainingRemote()
+        remote.finished = [
+            finishedApiDTO(presetId, "Flexiones", completedAt: firstRun),
+            finishedApiDTO(presetId, "Flexiones", completedAt: secondRun),
+        ]
+        let repository = TrainingRepository(local: local, remote: remote, session: StubSession(authenticated: true))
+
+        let pending = try await repository.pendingSyncCount()
+        let uploaded = try await repository.syncLocalToRemote()
+        XCTAssertEqual(pending, 0)
+        XCTAssertEqual(uploaded, 0, "no se reenvía lo que ya está")
+        XCTAssertTrue(remote.finishedCalls.isEmpty)
+    }
+
+    /// Los presets son constantes de la app, no dependen de la red. Antes esta
+    /// llamada propagaba el error del servidor y, como quien la consume usa `try?`,
+    /// una caída dejaba la lista de entrenamientos VACÍA — sin ni los presets.
+    func testTrainingCatalogFallsBackToPresetsWhenTheServerFails() async throws {
+        let remote = FakeTrainingRemote()
+        remote.isOffline = true
+        let repository = TrainingRepository(
+            local: FakeTrainingLocal(), remote: remote, session: StubSession(authenticated: true)
+        )
+
+        let trainings = try await repository.getTrainings()
+        XCTAssertEqual(
+            trainings.map { $0.name }, ["Flexiones", "Dominadas", "Sentadillas", "Abdominales"],
+            "sin servidor deben quedar al menos los presets"
+        )
+    }
+
     func testFinishedTrainingSurvivesWhenTheServerIsDown() async throws {
         let local = FakeTrainingLocal()
         let remote = FakeTrainingRemote()

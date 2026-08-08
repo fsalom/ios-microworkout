@@ -1,4 +1,5 @@
 import XCTest
+import TripleA
 @testable import microworkout
 
 /// El backend valida el payload con Pydantic y `extra="forbid"`, así que un nombre
@@ -369,5 +370,82 @@ final class AICoachRequestMapperTests: XCTestCase {
         let today = try XCTUnwrap(json["today"] as? [String: Any])
         let health = try XCTUnwrap(today["health"] as? [String: Any])
         XCTAssertEqual(health["steps"] as? Int, 8_200)
+    }
+
+    // MARK: - La petición HTTP
+
+    /// El idioma también viaja en la cabecera, y tenía que decir lo mismo que el
+    /// body. Iba `Locale.current`, así que con el móvil en inglés el payload pedía
+    /// "es" y la cabecera "en_US": bastaba con que el backend mirara la cabecera
+    /// para que volviera el bug de contestar en inglés dentro de una app española.
+    func testTheStreamAsksForTheAppLanguageNotTheDeviceOne() async throws {
+        RequestSpy.reset()
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.protocolClasses = [RequestSpy.self]
+
+        let dataSource = AICoachRemoteDataSource(
+            network: Network(),
+            authenticator: FakeAuthenticator(),
+            baseURL: "https://example.invalid/",
+            session: URLSession(configuration: configuration)
+        )
+
+        // Lo que se comprueba es la petición que sale; que el stub responda con un
+        // `[DONE]` inmediato solo sirve para que el stream termine.
+        for try await _ in dataSource.streamCoach(
+            AICoachRequestApiDTO(context: makeContext(), topic: .daily, question: "¿qué tal?")
+        ) {}
+
+        let sent = try XCTUnwrap(RequestSpy.lastRequest)
+        XCTAssertEqual(
+            sent.value(forHTTPHeaderField: "Accept-Language"),
+            AICoachRequestApiDTO.appLanguage,
+            "cabecera y body deben pedir el mismo idioma"
+        )
+    }
+
+    // MARK: - Dobles de red
+
+    private struct FakeAuthenticator: AuthenticatorProtocol {
+        func isLogged() async -> Bool { true }
+        func getCurrentToken() async throws -> String { "token-de-prueba" }
+        func getNewToken(with parameters: [String: Any], endpoint: Endpoint?) async throws {}
+        func logout() async throws {}
+        func get(token type: TokenType) async throws -> Token? { nil }
+        func set(token: Token, for type: TokenType) async throws {}
+    }
+
+    /// Intercepta la petición antes de que salga a la red y contesta un SSE mínimo.
+    private final class RequestSpy: URLProtocol {
+        private static let lock = NSLock()
+        private static var captured: URLRequest?
+
+        static func reset() {
+            lock.lock(); captured = nil; lock.unlock()
+        }
+
+        static var lastRequest: URLRequest? {
+            lock.lock(); defer { lock.unlock() }
+            return captured
+        }
+
+        override class func canInit(with request: URLRequest) -> Bool {
+            lock.lock(); captured = request; lock.unlock()
+            return true
+        }
+
+        override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
+
+        override func startLoading() {
+            let response = HTTPURLResponse(
+                url: request.url!, statusCode: 200, httpVersion: nil,
+                headerFields: ["Content-Type": "text/event-stream"]
+            )!
+            client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+            client?.urlProtocol(self, didLoad: Data("data: [DONE]\n\n".utf8))
+            client?.urlProtocolDidFinishLoading(self)
+        }
+
+        override func stopLoading() {}
     }
 }

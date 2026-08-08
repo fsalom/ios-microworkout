@@ -4,6 +4,8 @@ protocol BodyMetricsLocalDataSourceProtocol {
     func getAll() -> [DailyMetricsDTO]
     func save(_ measurement: DailyMetricsDTO)
     func delete(date: Date)
+    /// Días que el usuario borró explícitamente, normalizados al inicio del día.
+    func deletedDates() -> Set<Date>
 }
 
 /// Copia en el dispositivo de las medidas.
@@ -14,6 +16,7 @@ protocol BodyMetricsLocalDataSourceProtocol {
 final class BodyMetricsLocalDataSource: BodyMetricsLocalDataSourceProtocol {
     private let storage: UserDefaultsManagerProtocol
     private let key = "bodyMetrics.measurements"
+    private let deletedKey = "bodyMetrics.deletedDates"
 
     init(storage: UserDefaultsManagerProtocol) {
         self.storage = storage
@@ -29,12 +32,38 @@ final class BodyMetricsLocalDataSource: BodyMetricsLocalDataSourceProtocol {
         all.removeAll { Calendar.current.isDate($0.date, inSameDayAs: measurement.date) }
         all.append(measurement)
         storage.save(all, forKey: key)
+        // Volver a anotar un día levanta su lápida: si no, el usuario borra el
+        // martes, se pesa otra vez el martes y su peso no aparece por ningún lado.
+        setDeleted(removing: measurement.date)
     }
 
+    /// Borrado con lápida.
+    ///
+    /// Quitar la fila de aquí no basta: Apple Salud sigue teniendo la muestra (la
+    /// escribió la báscula, u otra app, o esta misma al anotar el peso) y la
+    /// siguiente lectura la traería de vuelta. Se recuerda QUÉ días borró el
+    /// usuario para poder filtrarlos después.
     func delete(date: Date) {
         var all: [DailyMetricsDTO] = storage.get(forKey: key) ?? []
         all.removeAll { Calendar.current.isDate($0.date, inSameDayAs: date) }
         storage.save(all, forKey: key)
+        setDeleted(adding: date)
+    }
+
+    func deletedDates() -> Set<Date> {
+        Set((storage.get(forKey: deletedKey) ?? [Date]()).map(Calendar.current.startOfDay(for:)))
+    }
+
+    private func setDeleted(adding date: Date) {
+        var dates = deletedDates()
+        dates.insert(Calendar.current.startOfDay(for: date))
+        storage.save(Array(dates), forKey: deletedKey)
+    }
+
+    private func setDeleted(removing date: Date) {
+        var dates = deletedDates()
+        guard dates.remove(Calendar.current.startOfDay(for: date)) != nil else { return }
+        storage.save(Array(dates), forKey: deletedKey)
     }
 }
 

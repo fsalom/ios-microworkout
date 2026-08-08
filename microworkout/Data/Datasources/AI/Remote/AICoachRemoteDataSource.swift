@@ -114,7 +114,12 @@ final class AICoachRemoteDataSource: AICoachRemoteDataSourceProtocol {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("text/event-stream", forHTTPHeaderField: "Accept")
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        request.setValue(Locale.current.identifier, forHTTPHeaderField: "Accept-Language")
+        // El MISMO idioma que va en el body. Antes aquí iba `Locale.current`, así
+        // que cabecera y payload se contradecían: con el móvil en inglés el body
+        // pedía "es" y la cabecera "en_US", y bastaba con que el backend mirara la
+        // cabecera para que volviera el bug de contestar en inglés dentro de una
+        // app en español.
+        request.setValue(AICoachRequestApiDTO.appLanguage, forHTTPHeaderField: "Accept-Language")
         request.httpBody = try JSONEncoder().encode(body)
         return request
     }
