@@ -7,11 +7,12 @@ class ProfileBuilder {
 
     func build() -> ProfileView {
         let viewModel = ProfileViewModel(
+            router: ProfileRouter(navigator: Navigator.shared, component: component),
             userProfileUseCase: component.userProfileUseCase,
             healthUseCase: component.healthUseCase,
             authService: component.authService,
             syncLocalDataUseCase: component.syncLocalDataUseCase
         )
-        return ProfileView(viewModel: viewModel, component: component)
+        return ProfileView(viewModel: viewModel)
     }
 }

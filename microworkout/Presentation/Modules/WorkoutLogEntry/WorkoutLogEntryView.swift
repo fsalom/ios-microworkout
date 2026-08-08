@@ -2,7 +2,7 @@ import SwiftUI
 
 struct WorkoutLogEntryView: View {
     @StateObject var viewModel: WorkoutLogEntryViewModel
-    let mediaUseCase: SetMediaUseCase
+    let mediaUseCase: SetMediaUseCaseProtocol
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -133,7 +133,7 @@ struct WorkoutLogEntryView: View {
 private struct LoggedExerciseCard: View {
     let exerciseLog: LoggedExercise
     let previousReference: PreviousExerciseReference?
-    let mediaUseCase: SetMediaUseCase
+    let mediaUseCase: SetMediaUseCaseProtocol
     let isNotesExpanded: Bool
     let onToggleNotes: () -> Void
     let onUpdateNotes: (String) -> Void
@@ -276,7 +276,7 @@ private struct NotesToggleButton: View {
 private struct SetRow: View {
     let index: Int
     let set: LoggedSet
-    let mediaUseCase: SetMediaUseCase
+    let mediaUseCase: SetMediaUseCaseProtocol
 
     @State private var mediaCount: Int = 0
 

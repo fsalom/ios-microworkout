@@ -96,7 +96,7 @@ struct ExerciseProgressionView: View {
 
 private struct MatchCard: View {
     let match: ExerciseProgressionMatch
-    let useCase: SetMediaUseCase
+    let useCase: SetMediaUseCaseProtocol
 
     @Environment(\.displayScale) private var displayScale
     @State private var thumbnail: UIImage?

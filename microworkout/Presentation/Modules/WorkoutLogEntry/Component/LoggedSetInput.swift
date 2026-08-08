@@ -8,7 +8,7 @@ struct LoggedSetInput: View {
     let initialRir: Float?
     var initialTags: [SetTag] = []
     var mediaSetId: UUID? = nil
-    var mediaUseCase: SetMediaUseCase? = nil
+    var mediaUseCase: SetMediaUseCaseProtocol? = nil
 
     var onSave: (Double?, Int?, Float?, [SetTag]) -> Void
     var onDelete: (() -> Void)? = nil

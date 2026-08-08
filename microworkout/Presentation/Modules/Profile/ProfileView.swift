@@ -13,7 +13,6 @@ struct ProfileView: View {
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.colorScheme) private var colorScheme
     @AppStorage("appearance_preference") private var appearanceRaw: String = AppearancePreference.system.rawValue
-    let component: AppComponentProtocol
 
     @State private var toastText: String?
     @State private var toastIsError = false
@@ -84,25 +83,23 @@ struct ProfileView: View {
                     }
                 }
 
-                NavigationLink {
-                    AIChatBuilder(component: component).build()
-                } label: {
-                    hubRowLabel(icon: "sparkles", title: "Asistente IA", iconColor: .purple)
+                hubRowButton(icon: "sparkles", title: "Asistente IA", iconColor: .purple) {
+                    viewModel.goToChat()
                 }
 
                 // Sin `if isAuthenticated`: el peso funciona como invitado (Salud +
                 // dispositivo) y solo la copia en la cuenta necesita sesión.
-                NavigationLink {
-                    WeightProgressBuilder(component: component).build()
-                } label: {
-                    hubRowLabel(icon: "scalemass", title: "Peso y progresión", iconColor: .teal)
+                hubRowButton(icon: "scalemass", title: "Peso y progresión", iconColor: .teal) {
+                    viewModel.goToWeightProgress()
                 }
 
                 if authSession.state.isAuthenticated {
-                    NavigationLink {
-                        UserReportBuilder(component: component).build()
-                    } label: {
-                        hubRowLabel(icon: "text.book.closed", title: "Informe para el coach", iconColor: .purple)
+                    hubRowButton(
+                        icon: "text.book.closed",
+                        title: "Informe para el coach",
+                        iconColor: .purple
+                    ) {
+                        viewModel.goToUserReport()
                     }
                 }
             }
@@ -205,6 +202,31 @@ struct ProfileView: View {
                 .frame(width: 24)
             Text(title)
         }
+    }
+
+    /// Fila que abre OTRO módulo, empujándolo por el router del ViewModel.
+    ///
+    /// No es `NavigationLink` porque el destino lo construye un Builder, y para eso
+    /// la vista necesitaría el contenedor de dependencias. Lo único que
+    /// `NavigationLink` daba gratis y hay que replicar es el chevron y que toda la
+    /// fila —no solo el texto— responda al toque.
+    private func hubRowButton(
+        icon: String,
+        title: String,
+        iconColor: Color = .green,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            HStack(spacing: 12) {
+                hubRowLabel(icon: icon, title: title, iconColor: iconColor)
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.tertiary)
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 
     private var healthSection: some View {

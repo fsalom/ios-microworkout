@@ -40,29 +40,44 @@ struct ProfileUiState {
 class ProfileViewModel: ObservableObject {
     @Published var uiState: ProfileUiState = .init()
 
+    private let router: ProfileRouterProtocol
     private var userProfileUseCase: UserProfileUseCaseProtocol
     private var healthUseCase: HealthUseCaseProtocol
     private let authService: AuthServiceProtocol
     private let syncLocalDataUseCase: SyncLocalDataUseCaseProtocol
+    /// Quién decide si hay sesión. Inyectado y no `AuthSession.shared`: el
+    /// singleton es estado global y hacía este ViewModel imposible de testear —
+    /// justo el motivo por el que los repositorios ya reciben su sesión.
+    private let session: AuthStateProviding
 
-    init(userProfileUseCase: UserProfileUseCaseProtocol,
+    init(router: ProfileRouterProtocol,
+         userProfileUseCase: UserProfileUseCaseProtocol,
          healthUseCase: HealthUseCaseProtocol,
          authService: AuthServiceProtocol,
-         syncLocalDataUseCase: SyncLocalDataUseCaseProtocol) {
+         syncLocalDataUseCase: SyncLocalDataUseCaseProtocol,
+         session: AuthStateProviding = SharedAuthState()) {
+        self.router = router
         self.userProfileUseCase = userProfileUseCase
         self.healthUseCase = healthUseCase
         self.authService = authService
         self.syncLocalDataUseCase = syncLocalDataUseCase
+        self.session = session
         loadProfile()
         loadHealthKitStatus()
     }
+
+    // MARK: - Navegación
+
+    func goToChat() { router.goToChat() }
+    func goToWeightProgress() { router.goToWeightProgress() }
+    func goToUserReport() { router.goToUserReport() }
 
     /// Comprueba (sin escribir nada) qué datos locales faltan por subir a la
     /// cuenta, categoría a categoría. Requiere estar autenticado.
     func loadSyncStatus() {
         Task { @MainActor [weak self] in
             guard let self else { return }
-            guard AuthSession.shared.state.isAuthenticated else { return }
+            guard await self.session.isAuthenticated else { return }
             guard !self.uiState.isSyncing, !self.uiState.isLoadingSyncStatus else { return }
             self.uiState.isLoadingSyncStatus = true
             let report = await self.syncLocalDataUseCase.status()
@@ -70,7 +85,7 @@ class ProfileViewModel: ObservableObject {
             self.uiState.hasLoadedSyncStatus = true
             self.uiState.isLoadingSyncStatus = false
             // Si el token murió, SessionAwareNetwork (infra) ya pasó a invitado; avisamos.
-            if !AuthSession.shared.state.isAuthenticated {
+            if await !self.session.isAuthenticated {
                 self.uiState.lastSyncMessage = Self.sessionExpiredMessage
             }
         }
@@ -82,7 +97,7 @@ class ProfileViewModel: ObservableObject {
     func sync() {
         Task { @MainActor [weak self] in
             guard let self else { return }
-            guard AuthSession.shared.state.isAuthenticated else { return }
+            guard await self.session.isAuthenticated else { return }
             guard !self.uiState.isSyncing else { return }
             self.uiState.isSyncing = true
             self.uiState.lastSyncMessage = nil
@@ -90,7 +105,7 @@ class ProfileViewModel: ObservableObject {
             self.uiState.syncReport = report
             self.uiState.hasLoadedSyncStatus = true
             // SessionAwareNetwork ya habrá pasado a invitado si el token murió.
-            let expired = !AuthSession.shared.state.isAuthenticated
+            let expired = await !self.session.isAuthenticated
             self.uiState.lastSyncMessage = expired ? Self.sessionExpiredMessage : Self.syncSummary(for: report)
             self.uiState.isSyncing = false
         }
@@ -145,7 +160,7 @@ class ProfileViewModel: ObservableObject {
                 // Si el token murió, SessionAwareNetwork (infra) ya pasó a invitado;
                 // aquí solo mostramos el aviso. Otros errores (red transitoria):
                 // mantenemos el último estado conocido.
-                if !AuthSession.shared.state.isAuthenticated {
+                if await !self.session.isAuthenticated {
                     self.uiState.authError = Self.sessionExpiredMessage
                 }
             }

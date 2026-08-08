@@ -9,14 +9,18 @@ protocol AppComponentProtocol: AnyObject {
     func makeUserDefaultsManager() -> UserDefaultsManagerProtocol
     func makeHealthKitManager() -> HealthKitManagerProtocol
 
-    var mealUseCase: MealUseCase { get }
-    var healthUseCase: HealthUseCase { get }
+    // Todos los use cases se exponen por PROTOCOLO, nunca por la clase concreta.
+    // Los seis primeros exponían el tipo concreto, y eso es lo que impedía escribir
+    // un test de un ViewModel que los recibiera: no había nada que doblar. Los
+    // protocolos ya existían; solo faltaba declararlos aquí.
+    var mealUseCase: MealUseCaseProtocol { get }
+    var healthUseCase: HealthUseCaseProtocol { get }
     var workoutLogUseCase: WorkoutLogUseCaseProtocol { get }
-    var workoutEntryUseCase: WorkoutEntryUseCase { get }
-    var userProfileUseCase: UserProfileUseCase { get }
+    var workoutEntryUseCase: WorkoutEntryUseCaseProtocol { get }
+    var userProfileUseCase: UserProfileUseCaseProtocol { get }
     var trainingUseCase: TrainingUseCaseProtocol { get }
-    var exerciseUseCase: ExerciseUseCase { get }
-    var setMediaUseCase: SetMediaUseCase { get }
+    var exerciseUseCase: ExerciseUseCaseProtocol { get }
+    var setMediaUseCase: SetMediaUseCaseProtocol { get }
     var aiContextUseCase: AIContextUseCaseProtocol { get }
     var coachUseCase: CoachUseCaseProtocol { get }
     var aiCoachChatUseCase: AICoachChatUseCaseProtocol { get }

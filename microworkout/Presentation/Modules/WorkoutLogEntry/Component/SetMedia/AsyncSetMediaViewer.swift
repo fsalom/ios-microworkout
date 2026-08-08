@@ -4,7 +4,7 @@ import SwiftUI
 /// Muestra estados de carga y vacío. Internamente delega el renderizado a `SetMediaViewer`.
 struct AsyncSetMediaViewer: View {
     let setId: UUID
-    let useCase: SetMediaUseCase
+    let useCase: SetMediaUseCaseProtocol
     var onCompare: ((UUID) -> Void)? = nil
 
     @Environment(\.dismiss) private var dismiss

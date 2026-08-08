@@ -5,7 +5,7 @@ import SwiftUI
 struct SetMediaViewer: View {
     let media: [SetMedia]
     let initialIndex: Int
-    let useCase: SetMediaUseCase
+    let useCase: SetMediaUseCaseProtocol
     var onDelete: ((SetMedia) -> Void)? = nil
     /// Called with the currently displayed media's `setId` when the user taps "compare".
     /// If nil, the compare button is hidden.
@@ -21,7 +21,7 @@ struct SetMediaViewer: View {
     init(
         media: [SetMedia],
         initialIndex: Int,
-        useCase: SetMediaUseCase,
+        useCase: SetMediaUseCaseProtocol,
         onDelete: ((SetMedia) -> Void)? = nil,
         onCompare: ((UUID) -> Void)? = nil
     ) {

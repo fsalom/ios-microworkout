@@ -14,7 +14,7 @@ struct ViewerSelection: Identifiable, Equatable {
     let id = UUID()
     let media: [SetMedia]
     let initialIndex: Int
-    let useCase: SetMediaUseCase
+    let useCase: SetMediaUseCaseProtocol
 
     static func == (lhs: ViewerSelection, rhs: ViewerSelection) -> Bool {
         lhs.id == rhs.id
@@ -24,7 +24,7 @@ struct ViewerSelection: Identifiable, Equatable {
 final class ExerciseProgressionViewModel: ObservableObject {
     @Published var uiState = ExerciseProgressionUiState()
 
-    let mediaUseCase: SetMediaUseCase
+    let mediaUseCase: SetMediaUseCaseProtocol
     private let progressionUseCase: ExerciseProgressionUseCaseProtocol
     private let sourceSetId: UUID
     private let router: ExerciseProgressionRouter
@@ -32,7 +32,7 @@ final class ExerciseProgressionViewModel: ObservableObject {
     init(
         sourceSetId: UUID,
         progressionUseCase: ExerciseProgressionUseCaseProtocol,
-        mediaUseCase: SetMediaUseCase,
+        mediaUseCase: SetMediaUseCaseProtocol,
         router: ExerciseProgressionRouter
     ) {
         self.sourceSetId = sourceSetId

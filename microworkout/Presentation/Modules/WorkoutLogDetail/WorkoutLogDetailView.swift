@@ -227,7 +227,7 @@ private struct ExerciseSummaryCard: View {
     let exerciseLog: LoggedExercise
     let previousReference: PreviousExerciseReference?
     let isNotesExpanded: Bool
-    let mediaUseCase: SetMediaUseCase
+    let mediaUseCase: SetMediaUseCaseProtocol
     let onToggleNotes: () -> Void
     let onTapSet: (UUID) -> Void
 

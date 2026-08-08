@@ -2,9 +2,9 @@ import Foundation
 
 final class ExerciseProgressionUseCase: ExerciseProgressionUseCaseProtocol {
     private let logUseCase: WorkoutLogUseCaseProtocol
-    private let mediaUseCase: SetMediaUseCase
+    private let mediaUseCase: SetMediaUseCaseProtocol
 
-    init(logUseCase: WorkoutLogUseCaseProtocol, mediaUseCase: SetMediaUseCase) {
+    init(logUseCase: WorkoutLogUseCaseProtocol, mediaUseCase: SetMediaUseCaseProtocol) {
         self.logUseCase = logUseCase
         self.mediaUseCase = mediaUseCase
     }

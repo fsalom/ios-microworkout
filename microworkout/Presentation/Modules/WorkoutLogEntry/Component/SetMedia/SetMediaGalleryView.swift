@@ -3,7 +3,7 @@ import SwiftUI
 
 struct SetMediaGalleryView: View {
     let setId: UUID
-    let useCase: SetMediaUseCase
+    let useCase: SetMediaUseCaseProtocol
 
     @State private var media: [SetMedia] = []
     @State private var pickerSelection: [PhotosPickerItem] = []

@@ -19,21 +19,56 @@ final class DefaultAppComponent: AppComponentProtocol {
         HealthKitManager()
     }
 
+    // MARK: Repositorios (cacheados)
+
+    // Un repositorio, UNA instancia. Antes cada use case construía el suyo dentro
+    // de su `lazy var` y `syncLocalDataUseCase` volvía a construirlos todos, así
+    // que había dos `MealRepository`, dos `TrainingRepository`… sobre los mismos
+    // datos. Hoy no se nota porque todo va a UserDefaults, pero en cuanto uno
+    // cachee en memoria el banner de sincronización contaría una cosa y la
+    // pantalla mostraría otra. `bodyMetricsRepository` tenía el mismo problema
+    // disimulado: era un `func`, así que sus dos llamantes recibían instancias
+    // distintas pese al comentario que decía que se compartía.
+
+    private lazy var mealRepository: MealRepositoryProtocol = MealRepository(
+        localDataSource: MealLocalDataSource(storage: makeUserDefaultsManager()),
+        remoteApi: OpenFoodFactsApi(),
+        remote: MealRemoteDataSource()
+    )
+
+    private lazy var workoutLogRepository: WorkoutLogRepositoryProtocol = WorkoutLogRepository(
+        local: WorkoutLogLocalDataSource(localStorage: makeUserDefaultsManager()),
+        remote: WorkoutLogRemoteDataSource()
+    )
+
+    private lazy var trainingRepository: TrainingRepositoryProtocol = TrainingRepository(
+        local: TrainingLocalDataSource(localStorage: makeUserDefaultsManager()),
+        remote: TrainingRemoteDataSource()
+    )
+
+    private lazy var exerciseRepository: ExerciseRepositoryProtocol = ExerciseRepository(
+        local: ExerciseLocalDataSource(localStorage: makeUserDefaultsManager()),
+        remote: ExerciseRemoteDataSource()
+    )
+
+    private lazy var userProfileRepository: UserProfileRepositoryProtocol = UserProfileRepository(
+        local: UserLocalDataSource(storage: makeUserDefaultsManager()),
+        remote: UserProfileRemoteDataSource()
+    )
+
+    private lazy var bodyMetricsRepository: BodyMetricsRepositoryProtocol = BodyMetricsRepository(
+        health: HealthRepository(
+            dataSource: HealthKitDataSource(healthKitManager: makeHealthKitManager())
+        ),
+        local: BodyMetricsLocalDataSource(storage: makeUserDefaultsManager()),
+        remote: BodyMetricsRemoteDataSource()
+    )
+
     // MARK: Use cases (cacheados)
 
-    lazy var mealUseCase: MealUseCase = {
-        let localDataSource = MealLocalDataSource(storage: makeUserDefaultsManager())
-        let remoteApi = OpenFoodFactsApi()
-        let remote: MealRemoteDataSourceProtocol = MealRemoteDataSource()
-        let repository = MealRepository(
-            localDataSource: localDataSource,
-            remoteApi: remoteApi,
-            remote: remote
-        )
-        return MealUseCase(repository: repository)
-    }()
+    lazy var mealUseCase: MealUseCaseProtocol = MealUseCase(repository: mealRepository)
 
-    lazy var healthUseCase: HealthUseCase = {
+    lazy var healthUseCase: HealthUseCaseProtocol = {
         let manager = makeHealthKitManager()
         let dataSource = HealthKitDataSource(healthKitManager: manager)
         let repository = HealthRepository(dataSource: dataSource)
@@ -42,82 +77,41 @@ final class DefaultAppComponent: AppComponentProtocol {
         return HealthUseCase(repository: repository, linkRepository: linkRepository)
     }()
 
-    lazy var bodyMetricsUseCase: BodyMetricsUseCaseProtocol = {
-        return BodyMetricsUseCase(repository: makeBodyMetricsRepository())
-    }()
+    lazy var bodyMetricsUseCase: BodyMetricsUseCaseProtocol =
+        BodyMetricsUseCase(repository: bodyMetricsRepository)
 
-    /// El repositorio de medidas se construye aparte porque lo usan dos sitios: el
-    /// use case de la pantalla y la sincronización.
-    private func makeBodyMetricsRepository() -> BodyMetricsRepositoryProtocol {
-        let dataSource = HealthKitDataSource(healthKitManager: makeHealthKitManager())
-        return BodyMetricsRepository(
-            health: HealthRepository(dataSource: dataSource),
-            local: BodyMetricsLocalDataSource(storage: makeUserDefaultsManager()),
-            remote: BodyMetricsRemoteDataSource()
-        )
-    }
+    lazy var workoutLogUseCase: WorkoutLogUseCaseProtocol =
+        WorkoutLogUseCase(repository: workoutLogRepository)
 
-    lazy var workoutLogUseCase: WorkoutLogUseCaseProtocol = {
-        let local = WorkoutLogLocalDataSource(localStorage: makeUserDefaultsManager())
-        let remote: WorkoutLogRemoteDataSourceProtocol = WorkoutLogRemoteDataSource()
-        let repository = WorkoutLogRepository(local: local, remote: remote)
-        return WorkoutLogUseCase(repository: repository)
-    }()
-
-    lazy var workoutEntryUseCase: WorkoutEntryUseCase = {
+    lazy var workoutEntryUseCase: WorkoutEntryUseCaseProtocol = {
         let local = WorkoutEntryLocalDataSource(storage: makeUserDefaultsManager())
         let repository = WorkoutEntryRepository(dataSource: local)
         return WorkoutEntryUseCase(repository: repository)
     }()
 
-    lazy var userProfileUseCase: UserProfileUseCase = {
-        let local = UserLocalDataSource(storage: makeUserDefaultsManager())
-        let remote: UserProfileRemoteDataSourceProtocol = UserProfileRemoteDataSource()
-        let repository = UserProfileRepository(local: local, remote: remote)
-        return UserProfileUseCase(repository: repository)
-    }()
+    lazy var userProfileUseCase: UserProfileUseCaseProtocol =
+        UserProfileUseCase(repository: userProfileRepository)
 
-    lazy var trainingUseCase: TrainingUseCaseProtocol = {
-        let local = TrainingLocalDataSource(localStorage: makeUserDefaultsManager())
-        let remote = TrainingRemoteDataSource()
-        let repository = TrainingRepository(local: local, remote: remote)
-        return TrainingUseCase(repository: repository)
-    }()
+    lazy var trainingUseCase: TrainingUseCaseProtocol =
+        TrainingUseCase(repository: trainingRepository)
 
-    lazy var exerciseUseCase: ExerciseUseCase = {
-        let local: ExerciseDataSourceProtocol = ExerciseLocalDataSource(localStorage: makeUserDefaultsManager())
-        let remote: ExerciseRemoteDataSourceProtocol = ExerciseRemoteDataSource()
-        let repository: ExerciseRepositoryProtocol = ExerciseRepository(local: local, remote: remote)
-        return ExerciseUseCase(repository: repository)
-    }()
+    lazy var exerciseUseCase: ExerciseUseCaseProtocol =
+        ExerciseUseCase(repository: exerciseRepository)
 
-    lazy var setMediaUseCase: SetMediaUseCase = {
+    lazy var setMediaUseCase: SetMediaUseCaseProtocol = {
         let local = SetMediaLocalDataSource(storage: makeUserDefaultsManager())
         let repository = SetMediaRepository(localDataSource: local)
         return SetMediaUseCase(repository: repository)
     }()
 
-    lazy var syncLocalDataUseCase: SyncLocalDataUseCaseProtocol = {
-        let workoutLog = WorkoutLogRepository(
-            local: WorkoutLogLocalDataSource(localStorage: makeUserDefaultsManager()),
-            remote: WorkoutLogRemoteDataSource())
-        let training = TrainingRepository(
-            local: TrainingLocalDataSource(localStorage: makeUserDefaultsManager()),
-            remote: TrainingRemoteDataSource())
-        let exercise = ExerciseRepository(
-            local: ExerciseLocalDataSource(localStorage: makeUserDefaultsManager()),
-            remote: ExerciseRemoteDataSource())
-        let meal = MealRepository(
-            localDataSource: MealLocalDataSource(storage: makeUserDefaultsManager()),
-            remoteApi: OpenFoodFactsApi(),
-            remote: MealRemoteDataSource())
-        let userProfile = UserProfileRepository(
-            local: UserLocalDataSource(storage: makeUserDefaultsManager()),
-            remote: UserProfileRemoteDataSource())
-        return SyncLocalDataUseCase(training: training, workoutLog: workoutLog,
-                                    exercise: exercise, meal: meal, userProfile: userProfile,
-                                    bodyMetrics: makeBodyMetricsRepository())
-    }()
+    lazy var syncLocalDataUseCase: SyncLocalDataUseCaseProtocol = SyncLocalDataUseCase(
+        training: trainingRepository,
+        workoutLog: workoutLogRepository,
+        exercise: exerciseRepository,
+        meal: mealRepository,
+        userProfile: userProfileRepository,
+        bodyMetrics: bodyMetricsRepository
+    )
 
     lazy var exerciseProgressionUseCase: ExerciseProgressionUseCaseProtocol = ExerciseProgressionUseCase(
         logUseCase: workoutLogUseCase,

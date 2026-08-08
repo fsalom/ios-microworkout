@@ -35,13 +35,13 @@ final class WorkoutLogDetailViewModel: ObservableObject {
     private let useCase: WorkoutLogUseCaseProtocol
     private let healthUseCase: HealthUseCaseProtocol
     private let router: WorkoutLogDetailRouter
-    let mediaUseCase: SetMediaUseCase
+    let mediaUseCase: SetMediaUseCaseProtocol
 
     init(log: WorkoutLog,
          useCase: WorkoutLogUseCaseProtocol,
          healthUseCase: HealthUseCaseProtocol,
          router: WorkoutLogDetailRouter,
-         mediaUseCase: SetMediaUseCase) {
+         mediaUseCase: SetMediaUseCaseProtocol) {
         self.uiState = .init(log: log)
         self.useCase = useCase
         self.healthUseCase = healthUseCase
