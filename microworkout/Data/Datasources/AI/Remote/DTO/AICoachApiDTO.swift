@@ -38,6 +38,13 @@ struct AICoachRequestApiDTO: Encodable {
         let goal: String?
         let calorieTarget: Int?    // >0, <=10000
         let language: String
+        /// Días libres de la semana, índices de `Calendar` (1=domingo … 7=sábado).
+        ///
+        /// `nil` —no lista vacía— cuando el usuario no cicla: así la clave viaja
+        /// AUSENTE, como el resto de campos sin valor. Un `[]` en cada petición es
+        /// ruido, y el backend ya tiene `default_factory=list`.
+        let freeDays: [Int]?
+        let freeDayExtraCalories: Int?
 
         enum CodingKeys: String, CodingKey {
             case name, gender, age, goal, language
@@ -45,6 +52,8 @@ struct AICoachRequestApiDTO: Encodable {
             case weightKg = "weight_kg"
             case activityLevel = "activity_level"
             case calorieTarget = "calorie_target"
+            case freeDays = "free_days"
+            case freeDayExtraCalories = "free_day_extra_calories"
         }
     }
 

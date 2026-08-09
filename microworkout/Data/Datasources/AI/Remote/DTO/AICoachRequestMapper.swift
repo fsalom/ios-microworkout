@@ -74,7 +74,8 @@ extension AICoachRequestApiDTO {
         guard let snapshot = context.profile else {
             return Profile(
                 name: nil, gender: nil, age: nil, heightCm: nil, weightKg: nil,
-                activityLevel: nil, goal: nil, calorieTarget: nil, language: language
+                activityLevel: nil, goal: nil, calorieTarget: nil, language: language,
+                freeDays: nil, freeDayExtraCalories: nil
             )
         }
 
@@ -87,7 +88,16 @@ extension AICoachRequestApiDTO {
             activityLevel: trimmed(snapshot.activityLevel, max: 40),
             goal: trimmed(snapshot.fitnessGoal, max: 40),
             calorieTarget: calorieTarget(snapshot.todayCalorieTarget),
-            language: language
+            language: language,
+            // El ciclado semanal no salía del móvil: el coach veía el objetivo de hoy
+            // pero no que el sábado es día libre, así que no podía nombrar el patrón
+            // ni entender por qué un día sube. Solo se mandan índices válidos.
+            freeDays: snapshot.hasWeeklyCycling
+                ? (snapshot.freeDaysWeekdays ?? []).filter { (1...7).contains($0) }.sorted().nilIfEmpty
+                : nil,
+            freeDayExtraCalories: snapshot.hasWeeklyCycling
+                ? snapshot.freeDayExtraCalories.flatMap { $0 > 0 ? Int($0) : nil }
+                : nil
         )
     }
 
@@ -313,7 +323,6 @@ extension AICoachRequestApiDTO {
             byDay[day] = acc
         }
 
-        let target = context.profile?.dailyCalorieTarget
         return byDay
             .sorted { $0.key < $1.key }
             .suffix(Limits.nutritionHistory)
@@ -324,9 +333,26 @@ extension AICoachRequestApiDTO {
                     proteinG: entry.value.protein.nilIfZero,
                     carbsG: entry.value.carbs.nilIfZero,
                     fatG: entry.value.fat.nilIfZero,
-                    targetCalories: target.flatMap { $0 > 0 ? $0 : nil }
+                    targetCalories: calorieTarget(of: entry.key, profile: context.profile)
                 )
             }
+    }
+
+    /// Objetivo del día que toca, no el objetivo medio.
+    ///
+    /// Antes se mandaba `dailyCalorieTarget` —la MEDIA semanal— para todos los días,
+    /// así que un sábado libre a +500 kcal llegaba comparado contra el objetivo
+    /// estricto y el modelo lo leía como pasarse. Con el tema de nutrición mandando
+    /// 14 días, eran dos sábados mal interpretados en cada consejo.
+    ///
+    /// La misma regla que `UserProfile.calorieTarget(on:)`, aquí sobre el snapshot.
+    private static func calorieTarget(of day: Date, profile: AIProfileSnapshot?) -> Double? {
+        guard let profile else { return nil }
+        guard profile.hasWeeklyCycling else { return profile.dailyCalorieTarget.nilIfZero }
+
+        let weekday = Calendar.current.component(.weekday, from: day)
+        let isFreeDay = (profile.freeDaysWeekdays ?? []).contains(weekday)
+        return (isFreeDay ? profile.freeDayCalorieTarget : profile.strictDayCalorieTarget).nilIfZero
     }
 
     // MARK: - Conversación
@@ -395,4 +421,10 @@ private extension Double {
     /// El backend valida `ge=0`, así que un 0 real y un "no hay dato" se
     /// distinguen omitiendo el campo en vez de mandando 0.
     var nilIfZero: Double? { self > 0 ? self : nil }
+}
+
+private extension Array {
+    /// Una lista vacía se manda como campo AUSENTE, igual que el resto de valores
+    /// sin dato: `[]` en cada petición es ruido en el prompt.
+    var nilIfEmpty: [Element]? { isEmpty ? nil : self }
 }

@@ -59,7 +59,9 @@ final class AICoachRequestMapperTests: XCTestCase {
             macroTargets: nutrition(2600, protein: 160),
             hasWeeklyCycling: false,
             freeDaysWeekdays: nil,
-            freeDayExtraCalories: nil
+            freeDayExtraCalories: nil,
+            strictDayCalorieTarget: 2600,
+            freeDayCalorieTarget: 3100
         )
     }
 
@@ -86,7 +88,9 @@ final class AICoachRequestMapperTests: XCTestCase {
             dailyCalorieTarget: female.dailyCalorieTarget,
             todayCalorieTarget: female.todayCalorieTarget,
             macroTargets: female.macroTargets, hasWeeklyCycling: false,
-            freeDaysWeekdays: nil, freeDayExtraCalories: nil
+            freeDaysWeekdays: nil, freeDayExtraCalories: nil,
+            strictDayCalorieTarget: female.strictDayCalorieTarget,
+            freeDayCalorieTarget: female.freeDayCalorieTarget
         )
         let femaleRequest = AICoachRequestApiDTO(
             context: makeContext(profile: female), topic: .workout, question: nil
@@ -102,7 +106,8 @@ final class AICoachRequestMapperTests: XCTestCase {
             activityLevel: "", fitnessGoal: nil,
             dailyCalorieTarget: 0, todayCalorieTarget: 0,
             macroTargets: nutrition(0), hasWeeklyCycling: false,
-            freeDaysWeekdays: nil, freeDayExtraCalories: nil
+            freeDaysWeekdays: nil, freeDayExtraCalories: nil,
+            strictDayCalorieTarget: 0, freeDayCalorieTarget: 0
         )
         let request = AICoachRequestApiDTO(
             context: makeContext(profile: empty), topic: .daily, question: nil
@@ -370,6 +375,102 @@ final class AICoachRequestMapperTests: XCTestCase {
         let today = try XCTUnwrap(json["today"] as? [String: Any])
         let health = try XCTUnwrap(today["health"] as? [String: Any])
         XCTAssertEqual(health["steps"] as? Int, 8_200)
+    }
+
+    // MARK: - Ciclado semanal de calorías
+
+    /// Un perfil que cicla: sábado libre a 3.100, resto estrictos a 2.500.
+    private func cyclingProfile() -> AIProfileSnapshot {
+        AIProfileSnapshot(
+            name: "Fer", age: 38, gender: "Hombre",
+            heightCm: 178, weightKg: 78.4,
+            activityLevel: "Moderadamente activo", fitnessGoal: "Ganar musculo",
+            dailyCalorieTarget: 2600, todayCalorieTarget: 2500,
+            macroTargets: nutrition(2600, protein: 160),
+            hasWeeklyCycling: true,
+            freeDaysWeekdays: [7],              // sábado
+            freeDayExtraCalories: 500,
+            strictDayCalorieTarget: 2500,
+            freeDayCalorieTarget: 3100
+        )
+    }
+
+    private func meal(on date: Date, kcal: Double) -> AIMealSnapshot {
+        AIMealSnapshot(
+            id: UUID().uuidString, type: "Comida", timestamp: date, myMealName: nil,
+            totalNutrition: nutrition(kcal, protein: 40), items: []
+        )
+    }
+
+    /// Una fecha concreta cuyo día de la semana conocemos, para no depender de
+    /// cuándo se ejecuten los tests.
+    private func date(_ iso: String) -> Date {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "yyyy-MM-dd HH:mm"
+        formatter.timeZone = TimeZone.current
+        return formatter.date(from: iso)!
+    }
+
+    /// El objetivo del histórico era el MISMO para todos los días: la media
+    /// semanal. Un sábado libre a 3.000 kcal llegaba comparado contra 2.500 y el
+    /// modelo lo leía como pasarse 500, cuando estaba justo en plan.
+    func testEachPastDayCarriesItsOwnCalorieTarget() throws {
+        let saturday = date("2026-08-01 13:00")   // sábado
+        let monday = date("2026-08-03 13:00")     // lunes
+        let request = AICoachRequestApiDTO(
+            context: makeContext(
+                profile: cyclingProfile(),
+                meals: [meal(on: saturday, kcal: 3_050), meal(on: monday, kcal: 2_480)]
+            ),
+            topic: .nutrition,
+            question: nil
+        )
+
+        let days = request.nutritionHistory
+        let saturdayEntry = try XCTUnwrap(days.first { $0.date == "2026-08-01" })
+        let mondayEntry = try XCTUnwrap(days.first { $0.date == "2026-08-03" })
+
+        XCTAssertEqual(saturdayEntry.targetCalories, 3_100, "el sábado es día libre")
+        XCTAssertEqual(mondayEntry.targetCalories, 2_500, "el lunes es estricto")
+    }
+
+    func testWithoutCyclingEveryDayKeepsTheAverageTarget() throws {
+        let request = AICoachRequestApiDTO(
+            context: makeContext(
+                profile: fullProfile(),
+                meals: [meal(on: date("2026-08-01 13:00"), kcal: 2_400)]
+            ),
+            topic: .nutrition,
+            question: nil
+        )
+
+        XCTAssertEqual(request.nutritionHistory.first?.targetCalories, 2_600)
+    }
+
+    /// Sin esto el coach ve el objetivo de hoy pero no sabe que el sábado es libre,
+    /// así que no puede nombrar el patrón ni explicar por qué ese día sube.
+    func testTheWeeklyCycleTravelsInTheProfile() throws {
+        let request = AICoachRequestApiDTO(
+            context: makeContext(profile: cyclingProfile()), topic: .nutrition, question: nil
+        )
+
+        XCTAssertEqual(request.profile.freeDays, [7])
+        XCTAssertEqual(request.profile.freeDayExtraCalories, 500)
+
+        let json = try encode(request)
+        let profile = try XCTUnwrap(json["profile"] as? [String: Any])
+        XCTAssertEqual(profile["free_days"] as? [Int], [7], "snake_case, como el resto")
+        XCTAssertEqual(profile["free_day_extra_calories"] as? Int, 500)
+    }
+
+    func testAProfileWithoutCyclingSendsNoFreeDays() throws {
+        let request = AICoachRequestApiDTO(
+            context: makeContext(profile: fullProfile()), topic: .nutrition, question: nil
+        )
+
+        XCTAssertNil(request.profile.freeDays, "ausente, no lista vacía")
+        XCTAssertNil(request.profile.freeDayExtraCalories)
     }
 
     // MARK: - La petición HTTP

@@ -156,13 +156,25 @@ struct UserProfile: Codable {
     }
 
     var todayIsFreeDay: Bool {
-        let weekday = Calendar.current.component(.weekday, from: Date())
-        return resolvedFreeDays.contains(weekday)
+        isFreeDay(Date())
+    }
+
+    func isFreeDay(_ date: Date) -> Bool {
+        resolvedFreeDays.contains(Calendar.current.component(.weekday, from: date))
+    }
+
+    /// Objetivo de calorías de UN día concreto, no solo de hoy.
+    ///
+    /// Existe porque el histórico que se le manda al coach también necesita saber
+    /// contra qué se comparaba cada día. Mandando el objetivo medio para todos, un
+    /// sábado libre a +500 se lee como pasarse 500 kcal cuando estaba en plan.
+    func calorieTarget(on date: Date) -> Double {
+        guard hasCycling else { return dailyCalorieTarget }
+        return isFreeDay(date) ? freeDayCalorieTarget : strictDayCalorieTarget
     }
 
     var todayCalorieTarget: Double {
-        guard hasCycling else { return dailyCalorieTarget }
-        return todayIsFreeDay ? freeDayCalorieTarget : strictDayCalorieTarget
+        calorieTarget(on: Date())
     }
 
     var todayMacroTargets: NutritionInfo {

@@ -69,7 +69,11 @@ class AIContextUseCase: AIContextUseCaseProtocol {
             macroTargets: profile.macroTargets.toSnapshot(),
             hasWeeklyCycling: profile.hasCycling,
             freeDaysWeekdays: profile.freeDays,
-            freeDayExtraCalories: profile.freeDayExtraCalories
+            // El extra RESUELTO, no el campo crudo: con días libres y sin extra
+            // guardado el dominio usa 500, y mandar `nil` diría que no hay extra.
+            freeDayExtraCalories: profile.hasCycling ? profile.resolvedFreeDayExtra : nil,
+            strictDayCalorieTarget: profile.strictDayCalorieTarget,
+            freeDayCalorieTarget: profile.freeDayCalorieTarget
         )
     }
 

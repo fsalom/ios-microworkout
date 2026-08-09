@@ -55,6 +55,13 @@ public struct AIProfileSnapshot: Codable {
     public var hasWeeklyCycling: Bool
     public var freeDaysWeekdays: [Int]?
     public var freeDayExtraCalories: Double?
+    /// Objetivo de un día estricto y de un día libre, ya calculados por el dominio.
+    ///
+    /// Van en el snapshot para que quien construya el payload pueda decir contra
+    /// qué se comparaba CADA día del histórico sin rehacer aquí el reparto del
+    /// presupuesto semanal — que es donde se colaría la divergencia.
+    public var strictDayCalorieTarget: Double
+    public var freeDayCalorieTarget: Double
 }
 
 // MARK: - Nutrition
