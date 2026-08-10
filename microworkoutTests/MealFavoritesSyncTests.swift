@@ -76,9 +76,18 @@ final class MealFavoritesSyncTests: XCTestCase {
         var meals: [MealDTO] = []
         var customFoods: [String: FoodItemDTO] = [:]
 
+        // Filtran por fecha como el `MealLocalDataSource` de verdad. Antes devolvían
+        // TODO ignorando el parámetro, así que ninguna prueba de comidas ejercitaba
+        // el filtrado por día — justo donde una comida puede desaparecer de la
+        // pantalla estando guardada.
         func saveMeal(_ meal: MealDTO) async throws { meals.append(meal) }
-        func getMeals(for date: Date) async throws -> [MealDTO] { meals }
-        func getMeals(from startDate: Date, to endDate: Date) async throws -> [MealDTO] { meals }
+        func getMeals(for date: Date) async throws -> [MealDTO] {
+            meals.filter { Calendar.current.isDate($0.timestamp, inSameDayAs: date) }
+        }
+        func getMeals(from startDate: Date, to endDate: Date) async throws -> [MealDTO] {
+            let start = Calendar.current.startOfDay(for: startDate)
+            return meals.filter { $0.timestamp >= start && $0.timestamp <= endDate }
+        }
         func getAllMeals() async throws -> [MealDTO] { meals }
         func deleteMeal(_ mealId: UUID) async throws { meals.removeAll { $0.id == mealId } }
         func getFavorites() -> [FoodItemDTO] { favorites }
