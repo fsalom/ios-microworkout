@@ -32,12 +32,21 @@ class MealRepository: MealRepositoryProtocol {
 
     // MARK: Meals
 
+    /// Se guarda SIEMPRE en el dispositivo, con sesión o sin ella.
+    ///
+    /// Antes, con sesión, escribía solo en el servidor. Dos consecuencias: al cerrar
+    /// sesión desaparecía todo lo registrado mientras estabas dentro (el dispositivo
+    /// no tenía copia), y si el servidor fallaba la comida no quedaba en ninguna
+    /// parte. Es lo mismo que `372e97b` arregló para entrenos y aquí se quedó sin
+    /// arreglar.
+    ///
+    /// El fallo del servidor no se propaga: ya está a salvo en el dispositivo y
+    /// `pendingSyncCount` la cuenta como pendiente, así que la sincronización la
+    /// sube después (`createMeal` es upsert por id, no duplica).
     func saveMeal(_ meal: Meal) async throws {
-        if await isAuthenticated() {
-            _ = try await remote.createMeal(meal)
-            return
-        }
         try await localDataSource.saveMeal(meal.toDTO())
+        guard await isAuthenticated() else { return }
+        _ = try? await remote.createMeal(meal)
     }
 
     /// Modelo espejo: cuenta las comidas y "mis comidas" locales cuyo id no está
@@ -251,10 +260,19 @@ class MealRepository: MealRepositoryProtocol {
     // MARK: My meals (recipes)
 
     func getMyMeals() async throws -> [MyMeal] {
-        if await isAuthenticated() {
-            return try await remote.listMyMeals().map { $0.toDomain() }
-        }
-        return localDataSource.getMyMeals().map { $0.toDomain() }
+        let local = localDataSource.getMyMeals().map { $0.toDomain() }
+        guard await isAuthenticated() else { return local }
+
+        // Fusión, no reemplazo. Devolver solo el servidor hacía DESAPARECER al
+        // iniciar sesión todas las recetas creadas como invitado: seguían en el
+        // dispositivo pero nadie las leía, y al cerrar sesión volvían a aparecer.
+        // Es el mismo fallo que ya se arregló en `getMeals` y `getFavorites`.
+        //
+        // Dedup por `id` y no por nombre: `createMyMeal` manda el id local y el
+        // backend lo conserva, así que las dos copias comparten identificador.
+        let synced = (try? await remote.listMyMeals())?.map { $0.toDomain() } ?? []
+        let syncedIds = Set(synced.map { $0.id })
+        return synced + local.filter { !syncedIds.contains($0.id) }
     }
 
     /// Diffea contra el servidor: crea los nuevos, borra los que ya no están.
@@ -271,6 +289,11 @@ class MealRepository: MealRepositoryProtocol {
             for meal in meals where !currentIds.contains(meal.id) {
                 _ = try await remote.createMyMeal(meal)
             }
+            // La copia local se reescribe también con sesión, igual que en
+            // `saveFavorites`: si no, borrar una receta que solo existía en local no
+            // la borraría de ninguna parte y la fusión de `getMyMeals` la
+            // resucitaría en la siguiente lectura.
+            localDataSource.saveMyMeals(meals.map { $0.toDTO() })
             return
         }
         localDataSource.saveMyMeals(meals.map { $0.toDTO() })

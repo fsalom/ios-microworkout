@@ -21,8 +21,20 @@ final class MealFavoritesSyncTests: XCTestCase {
         /// Ids que el servidor asigna al crear, en orden.
         var idsToAssign: [UUID] = []
         var meals: [MealApiDTO] = []
+        var myMeals: [MyMealApiDTO] = []
+        var isOffline = false
+        private(set) var createdMeals: [Meal] = []
+        private(set) var createdMyMeals: [MyMeal] = []
+        private(set) var deletedMyMealIds: [UUID] = []
 
-        func createMeal(_ meal: Meal) async throws -> MealApiDTO { throw Fake.unused }
+        func createMeal(_ meal: Meal) async throws -> MealApiDTO {
+            if isOffline { throw Fake.unused }
+            createdMeals.append(meal)
+            return MealApiDTO(
+                id: meal.id, type: meal.type.rawValue,
+                timestamp: meal.timestamp, items: [], myMealName: meal.myMealName
+            )
+        }
         func listMeals(for date: Date) async throws -> [MealApiDTO] { meals }
         func listMeals(from start: Date, to end: Date) async throws -> [MealApiDTO] { meals }
         func deleteMeal(id: UUID) async throws {}
@@ -63,9 +75,16 @@ final class MealFavoritesSyncTests: XCTestCase {
             )
         }
 
-        func listMyMeals() async throws -> [MyMealApiDTO] { [] }
-        func createMyMeal(_ myMeal: MyMeal) async throws -> MyMealApiDTO { throw Fake.unused }
-        func deleteMyMeal(id: UUID) async throws {}
+        func listMyMeals() async throws -> [MyMealApiDTO] {
+            if isOffline { throw Fake.unused }
+            return myMeals
+        }
+        func createMyMeal(_ myMeal: MyMeal) async throws -> MyMealApiDTO {
+            if isOffline { throw Fake.unused }
+            createdMyMeals.append(myMeal)
+            return MyMealApiDTO(id: myMeal.id, name: myMeal.name, items: [])
+        }
+        func deleteMyMeal(id: UUID) async throws { deletedMyMealIds.append(id) }
     }
 
     private enum Fake: Error { case unused, unknownFood }
@@ -282,6 +301,104 @@ extension MealFavoritesSyncTests {
             result.map(\.id), [breakfast.id, dinner.id],
             "las comidas locales siguen visibles, y ordenadas por hora"
         )
+    }
+
+    // MARK: - "Mis comidas" (recetas guardadas)
+
+    private func myMeal(_ id: UUID, _ name: String) -> MyMeal {
+        MyMeal(id: id, name: name, items: [], createdAt: Date())
+    }
+
+    /// El bug que se reportó: con sesión iniciada, "Mis comidas" leía SOLO del
+    /// servidor, así que las recetas creadas como invitado desaparecían — seguían en
+    /// el dispositivo, pero nadie las leía. Al cerrar sesión volvían a aparecer, que
+    /// es exactamente el síntoma con el que se detectó.
+    func testGuestRecipesRemainVisibleAfterLogin() async throws {
+        let local = FakeLocal()
+        local.myMeals = [myMeal(UUID(), "Tortilla de invitado").toDTO()]
+        let remote = FakeRemote()
+        remote.myMeals = [MyMealApiDTO(id: UUID(), name: "Ensalada de la cuenta", items: [])]
+        let repository = makeRepository(local: local, remote: remote)
+
+        let result = try await repository.getMyMeals()
+        XCTAssertEqual(
+            Set(result.map(\.name)), ["Ensalada de la cuenta", "Tortilla de invitado"],
+            "las recetas de invitado conviven con las de la cuenta"
+        )
+    }
+
+    func testASyncedRecipeIsNotDuplicated() async throws {
+        let shared = UUID()
+        let local = FakeLocal()
+        local.myMeals = [myMeal(shared, "Tortilla").toDTO()]
+        let remote = FakeRemote()
+        // Ya subida: `createMyMeal` manda el id local y el backend lo conserva.
+        remote.myMeals = [MyMealApiDTO(id: shared, name: "Tortilla", items: [])]
+        let repository = makeRepository(local: local, remote: remote)
+
+        let result = try await repository.getMyMeals()
+        XCTAssertEqual(result.count, 1, "dedup por id")
+    }
+
+    func testServerFailureDoesNotHideLocalRecipes() async throws {
+        let local = FakeLocal()
+        local.myMeals = [myMeal(UUID(), "Tortilla de invitado").toDTO()]
+        let remote = FakeRemote()
+        remote.isOffline = true
+        let repository = makeRepository(local: local, remote: remote)
+
+        let result = try await repository.getMyMeals()
+        XCTAssertEqual(result.map(\.name), ["Tortilla de invitado"], "degrada a local")
+    }
+
+    /// Con la fusión en la lectura, borrar una receta que solo existía en local no la
+    /// borraba de ninguna parte (el servidor no la tiene) y reaparecía. Mismo motivo
+    /// por el que `saveFavorites` reescribe la copia local estando autenticado.
+    func testDeletingALocalOnlyRecipeWhileLoggedInDoesNotResurrect() async throws {
+        let local = FakeLocal()
+        let guestRecipe = myMeal(UUID(), "Tortilla de invitado")
+        local.myMeals = [guestRecipe.toDTO()]
+        let repository = makeRepository(local: local, remote: FakeRemote())
+
+        // El usuario la quita: se guarda la lista sin ella.
+        try await repository.saveMyMeals([])
+
+        let result = try await repository.getMyMeals()
+        XCTAssertTrue(result.isEmpty, "no puede volver en la siguiente lectura")
+        XCTAssertTrue(local.myMeals.isEmpty, "y se ha ido del dispositivo")
+    }
+
+    // MARK: - La comida se guarda siempre en el dispositivo
+
+    /// La otra mitad del bug reportado: lo registrado con sesión iniciada se escribía
+    /// SOLO en el servidor, así que al cerrar sesión desaparecía todo (el dispositivo
+    /// no tenía copia).
+    func testAMealSavedWhileLoggedInIsAlsoKeptOnTheDevice() async throws {
+        let local = FakeLocal()
+        let remote = FakeRemote()
+        let repository = makeRepository(local: local, remote: remote)
+
+        let lunch = meal(UUID(), .lunch, hour: 14)
+        try await repository.saveMeal(lunch)
+
+        XCTAssertEqual(remote.createdMeals.map(\.id), [lunch.id], "llega al servidor")
+        XCTAssertEqual(local.meals.map(\.id), [lunch.id], "y se queda en el dispositivo")
+    }
+
+    /// Y si el servidor no está, la comida no se pierde: queda en el dispositivo y la
+    /// sincronización la sube después.
+    func testAMealSurvivesAServerFailureWhileLoggedIn() async throws {
+        let local = FakeLocal()
+        let remote = FakeRemote()
+        remote.isOffline = true
+        let repository = makeRepository(local: local, remote: remote)
+
+        let lunch = meal(UUID(), .lunch, hour: 14)
+        try await repository.saveMeal(lunch)
+
+        XCTAssertEqual(local.meals.map(\.id), [lunch.id], "guardada en el dispositivo")
+        let visible = try await repository.getMeals(for: Date())
+        XCTAssertEqual(visible.map(\.id), [lunch.id], "y visible en la pantalla")
     }
 
     func testSyncedMealIsNotDuplicatedAfterUpload() async throws {
