@@ -47,6 +47,7 @@ extension AICoachRequestApiDTO {
 
         self.init(
             date: Self.day(today),
+            now: Self.iso(now),
             topic: topic.rawValue,
             profile: Self.profile(from: context),
             today: Self.todaySnapshot(context: context, todayLogs: todayLogs, today: today),
@@ -205,6 +206,7 @@ extension AICoachRequestApiDTO {
             .map { meal in
                 Meal(
                     type: trimmed(meal.type, max: 40),
+                    at: iso(meal.timestamp),
                     macros: Macros(
                         calories: nonNegative(meal.totalNutrition.calories),
                         proteinG: nonNegative(meal.totalNutrition.proteinsG),
@@ -214,6 +216,12 @@ extension AICoachRequestApiDTO {
                     items: Array(meal.items.map { clamp($0.name, max: 120) }.prefix(Limits.mealItems))
                 )
             }
+
+        // Los entrenos se ordenan por hora antes de salir. Llegaban agrupados por
+        // procedencia (logs, luego el reloj, luego "Registro suelto"), y ahora que la
+        // hora de las comidas también viaja, el modelo tiene que poder leer el día
+        // como una secuencia sin recomponerla él.
+        workouts.sort { ($0.startedAt ?? "") < ($1.startedAt ?? "") }
 
         let steps = context.healthDays
             .first { calendar.isDate($0.date, inSameDayAs: today) }?
@@ -377,9 +385,17 @@ extension AICoachRequestApiDTO {
         return formatter
     }()
 
+    /// Horas en la zona del usuario, CON su offset (`19:10:00+02:00`).
+    ///
+    /// `ISO8601DateFormatter` usa GMT por defecto, así que antes las horas de los
+    /// entrenos viajaban en UTC: en verano, un entreno de las 19:10 llegaba como
+    /// "17:10Z". El modelo no sabe en qué zona vive el usuario, así que razonaba con
+    /// dos horas de desfase — y con la hora actual en el prompt eso sería decirle
+    /// que son las cinco de la tarde cuando son las siete.
     private static let isoFormatter: ISO8601DateFormatter = {
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime]
+        formatter.timeZone = .current
         return formatter
     }()
 

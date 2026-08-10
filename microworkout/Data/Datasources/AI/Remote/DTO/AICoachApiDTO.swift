@@ -11,6 +11,13 @@ import Foundation
 /// de `null`, para que apliquen sus validadores de rango.
 struct AICoachRequestApiDTO: Encodable {
     let date: String            // yyyy-MM-dd
+    /// Momento exacto de la petición, en hora local con offset.
+    ///
+    /// Sin esto el coach solo sabía el DÍA, así que no podía razonar sobre "a estas
+    /// alturas": qué queda por entrenar, si lo comido hasta ahora va bien, cuánto ha
+    /// pasado desde el entreno. No era un problema de prompt: era un dato que no
+    /// salía del móvil.
+    let now: String?
     let topic: String
     let profile: Profile
     let today: TodaySnapshot
@@ -21,7 +28,7 @@ struct AICoachRequestApiDTO: Encodable {
     let userQuestion: String?
 
     enum CodingKeys: String, CodingKey {
-        case date, topic, profile, today, history, plan, messages
+        case date, now, topic, profile, today, history, plan, messages
         case nutritionHistory = "nutrition_history"
         case userQuestion = "user_question"
     }
@@ -102,6 +109,10 @@ struct AICoachRequestApiDTO: Encodable {
 
     struct Meal: Encodable {
         let type: String?
+        /// Cuándo se comió, mismo formato que `Workout.startedAt`. Es lo que permite
+        /// cruzar comida y entreno ("cenó dos horas después de entrenar"); antes solo
+        /// se conservaba el orden relativo, sin reloj.
+        let at: String?
         let macros: Macros
         let items: [String]
     }

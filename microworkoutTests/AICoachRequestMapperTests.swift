@@ -167,7 +167,7 @@ final class AICoachRequestMapperTests: XCTestCase {
         XCTAssertEqual(
             Set(json.keys),
             [
-                "date", "topic", "profile", "today", "history", "plan",
+                "date", "now", "topic", "profile", "today", "history", "plan",
                 "nutrition_history", "messages", "user_question"
             ]
         )
@@ -375,6 +375,91 @@ final class AICoachRequestMapperTests: XCTestCase {
         let today = try XCTUnwrap(json["today"] as? [String: Any])
         let health = try XCTUnwrap(today["health"] as? [String: Any])
         XCTAssertEqual(health["steps"] as? Int, 8_200)
+    }
+
+    // MARK: - El reloj: la hora actual y la de cada comida
+
+    /// El coach solo recibía el DÍA, así que no podía razonar sobre "a estas alturas":
+    /// ni qué queda por entrenar, ni si lo comido hasta ahora encaja, ni cuánto ha
+    /// pasado desde el entreno. No era un problema del prompt: el dato no salía.
+    func testTheCurrentTimeTravelsInThePayload() throws {
+        let now = date("2026-08-10 19:10")
+        let request = AICoachRequestApiDTO(
+            context: makeContext(profile: fullProfile()), topic: .workout,
+            question: nil, now: now
+        )
+
+        let sent = try XCTUnwrap(request.now)
+        XCTAssertTrue(sent.hasPrefix("2026-08-10T19:10"), "la hora local, no el día a secas: \(sent)")
+    }
+
+    /// Con la hora en UTC (el defecto de `ISO8601DateFormatter`) un entreno de las
+    /// 19:10 de verano llegaba como "17:10Z", y el modelo no sabe en qué zona vive el
+    /// usuario: razonaría con dos horas de desfase.
+    func testTimesCarryTheUsersOwnOffsetNotUTC() throws {
+        let now = date("2026-08-10 19:10")
+        let request = AICoachRequestApiDTO(
+            context: makeContext(profile: fullProfile()), topic: .workout,
+            question: nil, now: now
+        )
+
+        let sent = try XCTUnwrap(request.now)
+        XCTAssertFalse(sent.hasSuffix("Z"), "no se manda en UTC: \(sent)")
+        let expectedOffset = TimeZone.current.secondsFromGMT(for: now) / 3600
+        XCTAssertTrue(
+            sent.contains(String(format: "%+03d:", expectedOffset)),
+            "debe llevar el offset del usuario: \(sent)"
+        )
+    }
+
+    func testEachMealCarriesTheTimeItWasEaten() throws {
+        let now = date("2026-08-10 22:00")
+        let lunch = meal(on: date("2026-08-10 14:15"), kcal: 800)
+        let dinner = meal(on: date("2026-08-10 21:30"), kcal: 600)
+        let request = AICoachRequestApiDTO(
+            context: makeContext(profile: fullProfile(), meals: [dinner, lunch]),
+            topic: .nutrition, question: nil, now: now
+        )
+
+        let times = request.today.meals.compactMap(\.at)
+        XCTAssertEqual(times.count, 2)
+        XCTAssertTrue(times[0].contains("14:15"), "en orden, y con su hora: \(times)")
+        XCTAssertTrue(times[1].contains("21:30"))
+    }
+
+    /// Los entrenos llegaban agrupados por procedencia (logs, luego los del reloj,
+    /// luego los sueltos). Ahora que las comidas llevan hora, el día tiene que poder
+    /// leerse como una secuencia sin que el modelo la recomponga.
+    func testTodaysWorkoutsComeOutInChronologicalOrder() throws {
+        let now = date("2026-08-10 22:00")
+        let context = AIContext(
+            generatedAt: now, locale: "es_ES", profile: fullProfile(),
+            workoutSessions: [],
+            // El log es de la tarde; el workout del reloj, de la mañana.
+            workoutLogs: [
+                AIWorkoutLogSnapshot(
+                    id: UUID().uuidString, sessionId: nil, sessionName: "Empuje",
+                    startedAt: date("2026-08-10 19:00"), endedAt: nil,
+                    durationSeconds: 3_600, linkedHealthWorkoutId: nil, exercises: []
+                )
+            ],
+            manualEntries: [], meals: [],
+            healthDays: [],
+            healthWorkouts: [
+                AIHealthWorkoutSnapshot(
+                    id: UUID().uuidString, activityType: "Carrera",
+                    startDate: date("2026-08-10 08:00"), endDate: date("2026-08-10 08:40"),
+                    durationSeconds: 2_400, totalCalories: 400,
+                    totalDistanceMeters: nil, averageHeartRate: 150,
+                    linkedTrainingId: nil, linkedEntryDate: nil
+                )
+            ]
+        )
+
+        let request = AICoachRequestApiDTO(context: context, topic: .daily, question: nil, now: now)
+
+        let names = request.today.workouts.map(\.name)
+        XCTAssertEqual(names, ["Carrera", "Empuje"], "primero el de la mañana")
     }
 
     // MARK: - Ciclado semanal de calorías
