@@ -176,6 +176,44 @@ final class MealsViewModel: ObservableObject {
         }
     }
 
+    /// Cambia la hora de una sección entera (p. ej. "la comida fue a las 14:30").
+    ///
+    /// La hora se edita por SECCIÓN y no por registro porque cada alimento que se
+    /// añade crea su propio `Meal`: un desayuno de tres cosas son tres registros con
+    /// horas a segundos de distancia, y pedir la hora de cada uno sería absurdo.
+    ///
+    /// Se DESPLAZAN todas por igual en vez de igualarlas: así la hora elegida es la
+    /// del primero y se conserva el orden en que se comieron las cosas.
+    func updateSectionTime(type: MealType, to newTime: Date) {
+        let meals = (uiState.mealsByType[type] ?? []).sorted { $0.timestamp < $1.timestamp }
+        guard !meals.isEmpty else { return }
+
+        let day = uiState.selectedDate
+        let timestamps = meals.map(\.timestamp)
+        guard MealTime.changes(timestamps, movingEarliestTo: newTime, within: day) else { return }
+
+        let newTimestamps = MealTime.shifted(
+            timestamps, anchoringEarliestAt: newTime, within: day
+        )
+
+        Task {
+            do {
+                for (meal, timestamp) in zip(meals, newTimestamps) {
+                    var updated = meal
+                    updated.timestamp = timestamp
+                    // `saveMeal` a secas: es upsert por id tanto en el dispositivo
+                    // como en el servidor. Borrar antes —como hacen `updateFoodItem`
+                    // y `deleteFoodItem`— abre una ventana en la que un fallo deja
+                    // la comida borrada y sin reescribir.
+                    try await mealUseCase.saveMeal(updated)
+                }
+                await MainActor.run { self.loadMeals() }
+            } catch {
+                await MainActor.run { self.uiState.error = "No se pudo cambiar la hora" }
+            }
+        }
+    }
+
     /// Guarda todos los alimentos de una sección (p.ej. todo el desayuno) como una
     /// "Mi comida" reutilizable, para poder añadirla luego de una sola vez.
     /// Funciona en local (invitado) o contra el backend (logueado), igual que el

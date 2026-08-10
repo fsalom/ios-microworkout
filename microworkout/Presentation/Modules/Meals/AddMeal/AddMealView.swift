@@ -21,6 +21,12 @@ struct AddMealView: View {
         VStack(spacing: 0) {
             HeaderBar(
                 mealTypeName: viewModel.uiState.selectedType.rawValue,
+                // Pasa por `pickTime` y no directo al estado: hay que marcar que la
+                // hora es elegida y fijarla al día que se está registrando.
+                mealTime: Binding(
+                    get: { viewModel.uiState.mealTime },
+                    set: { viewModel.pickTime($0) }
+                ),
                 onClose: { dismiss() }
             )
 
@@ -193,6 +199,7 @@ private struct ToastBanner: View {
 
 private struct HeaderBar: View {
     let mealTypeName: String
+    @Binding var mealTime: Date
     let onClose: () -> Void
 
     var body: some View {
@@ -203,9 +210,22 @@ private struct HeaderBar: View {
                     .fontWeight(.semibold)
                     .foregroundColor(.secondary)
                     .tracking(1)
-                Text(mealTypeName)
-                    .font(.title2)
-                    .fontWeight(.bold)
+                HStack(spacing: 8) {
+                    Text(mealTypeName)
+                        .font(.title2)
+                        .fontWeight(.bold)
+
+                    // La hora, junto al tipo, porque son lo mismo: "a qué comida y a
+                    // qué hora". Solo hora y minuto — el día ya lo decide la pantalla
+                    // de Comidas y dejarlo elegir aquí movería la comida de fecha.
+                    DatePicker(
+                        "Hora",
+                        selection: $mealTime,
+                        displayedComponents: .hourAndMinute
+                    )
+                    .labelsHidden()
+                    .datePickerStyle(.compact)
+                }
             }
             Spacer()
             Button(action: onClose) {

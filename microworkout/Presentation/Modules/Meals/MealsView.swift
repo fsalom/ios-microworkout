@@ -58,6 +58,9 @@ struct MealsView: View {
                             onSaveAsMyMeal: {
                                 newMyMealName = type.rawValue
                                 savingSection = type
+                            },
+                            onChangeTime: { newTime in
+                                viewModel.updateSectionTime(type: type, to: newTime)
                             }
                         )
                         .padding(.horizontal)
@@ -387,6 +390,7 @@ private struct MealSectionCard: View {
     let onDeleteMeal: (_ mealId: UUID) -> Void
     let onEdit: (_ item: FoodItem, _ mealId: UUID) -> Void
     let onSaveAsMyMeal: () -> Void
+    let onChangeTime: (Date) -> Void
 
     @State private var openSwipeRowId: UUID? = nil
 
@@ -396,7 +400,8 @@ private struct MealSectionCard: View {
          onDeleteItem: @escaping (_ itemId: UUID, _ mealId: UUID) -> Void,
          onDeleteMeal: @escaping (_ mealId: UUID) -> Void,
          onEditItem: @escaping (_ item: FoodItem, _ mealId: UUID) -> Void,
-         onSaveAsMyMeal: @escaping () -> Void) {
+         onSaveAsMyMeal: @escaping () -> Void,
+         onChangeTime: @escaping (Date) -> Void) {
         self.type = type
         self.meals = meals
         self.onAdd = onAdd
@@ -404,6 +409,16 @@ private struct MealSectionCard: View {
         self.onDeleteMeal = onDeleteMeal
         self.onEdit = onEditItem
         self.onSaveAsMyMeal = onSaveAsMyMeal
+        self.onChangeTime = onChangeTime
+    }
+
+    /// La hora que representa la sección: la del primer registro.
+    ///
+    /// Cada alimento añadido es un `Meal` propio, así que aquí hay varias horas a
+    /// segundos de distancia. La del primero es la que el usuario reconoce como
+    /// "cuándo comí"; editarla desplaza todas (ver `updateSectionTime`).
+    private var sectionTime: Date? {
+        meals.map(\.timestamp).min()
     }
 
     private var totalNutrition: NutritionInfo {
@@ -438,9 +453,25 @@ private struct MealSectionCard: View {
                 .clipShape(Circle())
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(type.rawValue)
-                    .font(.headline)
-                    .fontWeight(.bold)
+                HStack(spacing: 6) {
+                    Text(type.rawValue)
+                        .font(.headline)
+                        .fontWeight(.bold)
+
+                    // Solo con contenido: una hora en una sección vacía no significa
+                    // nada y llenaría la pantalla de selectores muertos.
+                    if let sectionTime {
+                        DatePicker(
+                            "Hora",
+                            selection: Binding(get: { sectionTime }, set: { onChangeTime($0) }),
+                            displayedComponents: .hourAndMinute
+                        )
+                        .labelsHidden()
+                        .datePickerStyle(.compact)
+                        .scaleEffect(0.85, anchor: .leading)
+                        .frame(height: 24)
+                    }
+                }
                 Text(hasContent ? macrosSummary : "Sin comidas registradas")
                     .font(.caption)
                     .foregroundColor(.secondary)

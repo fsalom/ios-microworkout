@@ -27,6 +27,17 @@ struct AddMealUiState {
     var isLoading: Bool = false
     var error: String?
 
+    /// Hora a la que se registra lo que se añada.
+    ///
+    /// Arranca en la hora actual (o, si se está registrando otro día, en esa hora
+    /// sobre ese día) y el usuario puede cambiarla: registrar la cena a media
+    /// mañana ponía la cena a media mañana.
+    var mealTime: Date = Date()
+    /// `true` en cuanto el usuario toca el selector. Mientras sea `false` se usa la
+    /// hora del reloj con sus segundos, que es lo que separaba en el tiempo dos
+    /// alimentos añadidos seguidos y mantenía su orden dentro de la sección.
+    var hasPickedTime: Bool = false
+
     /// Meals from yesterday matching the currently selected `selectedType`. Used to
     /// surface "repetir comida de ayer" suggestions. Refreshed when `selectedType` changes.
     var previousDayMeals: [Meal] = []
@@ -78,17 +89,29 @@ final class AddMealViewModel: ObservableObject {
         self.router = router
         self.mealUseCase = mealUseCase
         self.targetDate = targetDate
+        self.uiState.mealTime = Self.defaultTimestamp(for: targetDate)
         loadRecentFoods()
         loadFavorites()
         loadMyMeals()
         loadPreviousDayMeals()
     }
 
+    /// Hora con la que se registra lo que se añada.
+    ///
+    /// Si el usuario ha elegido una, esa; si no, la del reloj. La diferencia importa
+    /// más de lo que parece: sin tocar el selector se conservan los SEGUNDOS, y eso
+    /// es lo que mantiene separados en el tiempo dos alimentos añadidos seguidos.
+    /// Con una hora elegida los dos comparten instante, que es justo lo que el
+    /// usuario ha dicho: se los comió a la vez.
+    private func mealTimestamp() -> Date {
+        uiState.hasPickedTime ? uiState.mealTime : Self.defaultTimestamp(for: targetDate)
+    }
+
     /// Timestamp for a newly created meal: the `targetDate`'s day combined with the
     /// current time-of-day. For "today" this is effectively now (preserving the
     /// previous behaviour); for any other day it lands the meal on that day while
     /// keeping a sensible within-day ordering.
-    private func mealTimestamp() -> Date {
+    private static func defaultTimestamp(for targetDate: Date) -> Date {
         let calendar = Calendar.current
         if calendar.isDateInToday(targetDate) { return Date() }
         let time = calendar.dateComponents([.hour, .minute, .second], from: Date())
@@ -96,6 +119,14 @@ final class AddMealViewModel: ObservableObject {
                              minute: time.minute ?? 0,
                              second: time.second ?? 0,
                              of: targetDate) ?? targetDate
+    }
+
+    /// El usuario ha elegido una hora. Se fuerza al día que se está registrando:
+    /// el selector solo muestra hora y minuto, así que su día es irrelevante y
+    /// dejarlo pasar movería la comida a otra fecha.
+    func pickTime(_ time: Date) {
+        uiState.mealTime = MealTime.time(time, onDay: targetDate)
+        uiState.hasPickedTime = true
     }
 
     /// Fetches yesterday's meals that match the currently selected meal type.
