@@ -75,8 +75,9 @@ extension AICoachRequestApiDTO {
         guard let snapshot = context.profile else {
             return Profile(
                 name: nil, gender: nil, age: nil, heightCm: nil, weightKg: nil,
-                activityLevel: nil, goal: nil, calorieTarget: nil, language: language,
-                freeDays: nil, freeDayExtraCalories: nil
+                activityLevel: nil, goal: nil, calorieTarget: nil,
+                proteinTargetG: nil, carbsTargetG: nil, fatTargetG: nil,
+                language: language, freeDays: nil, freeDayExtraCalories: nil
             )
         }
 
@@ -89,6 +90,11 @@ extension AICoachRequestApiDTO {
             activityLevel: trimmed(snapshot.activityLevel, max: 40),
             goal: trimmed(snapshot.fitnessGoal, max: 40),
             calorieTarget: calorieTarget(snapshot.todayCalorieTarget),
+            // Los de HOY, para que cuadren con las kcal de al lado: en un día libre
+            // los de la media semanal describirían otro día.
+            proteinTargetG: grams(snapshot.todayMacroTargets.proteinsG),
+            carbsTargetG: grams(snapshot.todayMacroTargets.carbohydratesG),
+            fatTargetG: grams(snapshot.todayMacroTargets.fatsG),
             language: language,
             // El ciclado semanal no salía del móvil: el coach veía el objetivo de hoy
             // pero no que el sábado es día libre, así que no podía nombrar el patrón
@@ -100,6 +106,11 @@ extension AICoachRequestApiDTO {
                 ? snapshot.freeDayExtraCalories.flatMap { $0 > 0 ? Int($0) : nil }
                 : nil
         )
+    }
+
+    /// Gramos redondeados; ausente si no hay objetivo. Al backend no le sirve un 0.
+    private static func grams(_ value: Double) -> Int? {
+        value > 0 ? Int(value.rounded()) : nil
     }
 
     /// El `rawValue` local está en español ("Hombre"/"Mujer"); el backend solo

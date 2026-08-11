@@ -57,6 +57,7 @@ final class AICoachRequestMapperTests: XCTestCase {
             dailyCalorieTarget: 2600,
             todayCalorieTarget: 2600,
             macroTargets: nutrition(2600, protein: 160),
+            todayMacroTargets: nutrition(2600, protein: 160),
             hasWeeklyCycling: false,
             freeDaysWeekdays: nil,
             freeDayExtraCalories: nil,
@@ -87,7 +88,8 @@ final class AICoachRequestMapperTests: XCTestCase {
             activityLevel: female.activityLevel, fitnessGoal: female.fitnessGoal,
             dailyCalorieTarget: female.dailyCalorieTarget,
             todayCalorieTarget: female.todayCalorieTarget,
-            macroTargets: female.macroTargets, hasWeeklyCycling: false,
+            macroTargets: female.macroTargets,
+            todayMacroTargets: female.todayMacroTargets, hasWeeklyCycling: false,
             freeDaysWeekdays: nil, freeDayExtraCalories: nil,
             strictDayCalorieTarget: female.strictDayCalorieTarget,
             freeDayCalorieTarget: female.freeDayCalorieTarget
@@ -105,7 +107,13 @@ final class AICoachRequestMapperTests: XCTestCase {
             name: "", age: 0, gender: "", heightCm: 0, weightKg: 0,
             activityLevel: "", fitnessGoal: nil,
             dailyCalorieTarget: 0, todayCalorieTarget: 0,
-            macroTargets: nutrition(0), hasWeeklyCycling: false,
+            macroTargets: nutrition(0),
+            // Todo a cero de verdad: el helper `nutrition` fija carbos y grasas, y con
+            // ellos este perfil "vacío" mandaría objetivos de macros inventados.
+            todayMacroTargets: AINutritionSnapshot(
+                calories: 0, carbohydratesG: 0, proteinsG: 0, fatsG: 0, fiberG: nil
+            ),
+            hasWeeklyCycling: false,
             freeDaysWeekdays: nil, freeDayExtraCalories: nil,
             strictDayCalorieTarget: 0, freeDayCalorieTarget: 0
         )
@@ -472,6 +480,8 @@ final class AICoachRequestMapperTests: XCTestCase {
             activityLevel: "Moderadamente activo", fitnessGoal: "Ganar musculo",
             dailyCalorieTarget: 2600, todayCalorieTarget: 2500,
             macroTargets: nutrition(2600, protein: 160),
+            // Día estricto: 2.500 kcal con 165 g de proteína.
+            todayMacroTargets: nutrition(2500, protein: 165),
             hasWeeklyCycling: true,
             freeDaysWeekdays: [7],              // sábado
             freeDayExtraCalories: 500,
@@ -542,6 +552,10 @@ final class AICoachRequestMapperTests: XCTestCase {
 
         XCTAssertEqual(request.profile.freeDays, [7])
         XCTAssertEqual(request.profile.freeDayExtraCalories, 500)
+        // Los macros que se mandan son los del día ciclado, no los de la media: si no,
+        // el objetivo de proteína no cuadraría con las kcal de al lado.
+        XCTAssertEqual(request.profile.calorieTarget, 2_500)
+        XCTAssertEqual(request.profile.proteinTargetG, 165, "los de hoy, no los de la media")
 
         let json = try encode(request)
         let profile = try XCTUnwrap(json["profile"] as? [String: Any])

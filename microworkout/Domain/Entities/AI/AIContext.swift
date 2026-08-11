@@ -52,6 +52,12 @@ public struct AIProfileSnapshot: Codable {
     public var dailyCalorieTarget: Double
     public var todayCalorieTarget: Double
     public var macroTargets: AINutritionSnapshot
+    /// Los macros objetivo DE HOY, ya ciclados.
+    ///
+    /// `macroTargets` sale de la media semanal, pero el objetivo de calorías que se
+    /// manda es el de hoy: mezclarlos daría un objetivo de proteína que no cuadra
+    /// con las kcal de al lado. En un día libre la diferencia son cientos de kcal.
+    public var todayMacroTargets: AINutritionSnapshot
     public var hasWeeklyCycling: Bool
     public var freeDaysWeekdays: [Int]?
     public var freeDayExtraCalories: Double?

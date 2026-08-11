@@ -44,6 +44,12 @@ struct AICoachRequestApiDTO: Encodable {
         let activityLevel: String?
         let goal: String?
         let calorieTarget: Int?    // >0, <=10000
+        /// Macros objetivo de HOY, en gramos. Sin esto el coach no puede juzgar los
+        /// macros de una comida: veía "P42" y no tenía contra qué compararlo, así que
+        /// solo podía hablar de calorías.
+        let proteinTargetG: Int?
+        let carbsTargetG: Int?
+        let fatTargetG: Int?
         let language: String
         /// Días libres de la semana, índices de `Calendar` (1=domingo … 7=sábado).
         ///
@@ -59,6 +65,9 @@ struct AICoachRequestApiDTO: Encodable {
             case weightKg = "weight_kg"
             case activityLevel = "activity_level"
             case calorieTarget = "calorie_target"
+            case proteinTargetG = "protein_target_g"
+            case carbsTargetG = "carbs_target_g"
+            case fatTargetG = "fat_target_g"
             case freeDays = "free_days"
             case freeDayExtraCalories = "free_day_extra_calories"
         }

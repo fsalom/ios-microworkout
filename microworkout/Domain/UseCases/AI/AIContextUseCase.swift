@@ -67,6 +67,7 @@ class AIContextUseCase: AIContextUseCaseProtocol {
             dailyCalorieTarget: profile.dailyCalorieTarget,
             todayCalorieTarget: profile.todayCalorieTarget,
             macroTargets: profile.macroTargets.toSnapshot(),
+            todayMacroTargets: profile.todayMacroTargets.toSnapshot(),
             hasWeeklyCycling: profile.hasCycling,
             freeDaysWeekdays: profile.freeDays,
             // El extra RESUELTO, no el campo crudo: con días libres y sin extra
