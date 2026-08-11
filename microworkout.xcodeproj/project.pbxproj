@@ -133,6 +133,7 @@
 		A8E4D7523FD65FDDCEAAE9C4 /* AICoachRequestMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFDF6D6F8162E317CDE70E3A /* AICoachRequestMapper.swift */; };
 		A992C701C13C060FD443706D /* WorkoutLogRemoteDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9EB4812B5BBD5F07010BC2D /* WorkoutLogRemoteDataSource.swift */; };
 		AABCAD59BBE6B1AE3F0BF4EF /* AuthSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C78CA54ACABA556FF294AC2 /* AuthSession.swift */; };
+		AB3D3FCE5A4CCBDD74A36E8F /* MealDayBoundaryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16FECC900298B6388119B9B7 /* MealDayBoundaryTests.swift */; };
 		AB59AE6149FB352C9284557F /* LinkSuggestionSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C9687763B41709127B9F4C8 /* LinkSuggestionSheet.swift */; };
 		AF628F4E802C87A46E45CEA9 /* AICoachRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27DC2E4675A13E1A72CF5047 /* AICoachRepository.swift */; };
 		B0D15F35EDB07FC5B608849E /* AICoachApiDTO.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB75B28DAA573D6C4EE0E44F /* AICoachApiDTO.swift */; };
@@ -472,6 +473,7 @@
 		15332602834DF5736B3BB987 /* WorkoutSessionManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WorkoutSessionManager.swift; sourceTree = "<group>"; };
 		1655D1E24FA5BCB4BFBF3458 /* WorkoutSessionListView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WorkoutSessionListView.swift; sourceTree = "<group>"; };
 		16685834F9A2D210C27D8EF3 /* BodyMetricsRepositoryProtocol.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BodyMetricsRepositoryProtocol.swift; sourceTree = "<group>"; };
+		16FECC900298B6388119B9B7 /* MealDayBoundaryTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MealDayBoundaryTests.swift; sourceTree = "<group>"; };
 		17CC8923A57B38ACDC8FD158 /* UserReportBuilder.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UserReportBuilder.swift; sourceTree = "<group>"; };
 		1819EBE6D932732D33965CD8 /* AIContextUseCaseProtocol.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AIContextUseCaseProtocol.swift; sourceTree = "<group>"; };
 		1C5E8CE55CCDD4B8086A57CD /* AuthenticatedUser.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AuthenticatedUser.swift; sourceTree = "<group>"; };
@@ -2116,6 +2118,7 @@
 				6B13FFA0D2D26D826BED46AA /* AIChatContextCacheTests.swift */,
 				876F83BC6ED9AE2A98A4B9F5 /* MealTimeTests.swift */,
 				318BA538A6900881FD863BB7 /* MealLocalStoreTests.swift */,
+				16FECC900298B6388119B9B7 /* MealDayBoundaryTests.swift */,
 			);
 			path = microworkoutTests;
 			sourceTree = "<group>";
@@ -3137,6 +3140,7 @@
 				E27635E03BAED06CCAB4DA7D /* AIChatContextCacheTests.swift in Sources */,
 				6C0A1F3764753B53578DAAAE /* MealTimeTests.swift in Sources */,
 				D8EFEB8C3764B9F0C1579A9D /* MealLocalStoreTests.swift in Sources */,
+				AB3D3FCE5A4CCBDD74A36E8F /* MealDayBoundaryTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

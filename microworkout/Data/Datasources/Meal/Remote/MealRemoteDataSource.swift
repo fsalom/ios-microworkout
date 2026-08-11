@@ -51,7 +51,7 @@ final class MealRemoteDataSource: MealRemoteDataSourceProtocol {
         let endpoint = Endpoint(
             path: "v1/meals",
             httpMethod: .get,
-            query: ["date": Self.dateOnly.string(from: date)]
+            query: ["date": MealTime.daySlug(date)]
         )
         let (_, data) = try await network.loadAuthorized(this: endpoint)
         guard let data else { return [] }
@@ -63,8 +63,8 @@ final class MealRemoteDataSource: MealRemoteDataSourceProtocol {
             path: "v1/meals",
             httpMethod: .get,
             query: [
-                "from": Self.dateOnly.string(from: start),
-                "to": Self.dateOnly.string(from: end),
+                "from": MealTime.daySlug(start),
+                "to": MealTime.daySlug(end),
             ]
         )
         let (_, data) = try await network.loadAuthorized(this: endpoint)
@@ -202,15 +202,6 @@ final class MealRemoteDataSource: MealRemoteDataSourceProtocol {
     private static let iso8601: ISO8601DateFormatter = {
         let f = ISO8601DateFormatter()
         f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        return f
-    }()
-
-    private static let dateOnly: DateFormatter = {
-        let f = DateFormatter()
-        f.calendar = Calendar(identifier: .gregorian)
-        f.locale = Locale(identifier: "en_US_POSIX")
-        f.timeZone = TimeZone(secondsFromGMT: 0)
-        f.dateFormat = "yyyy-MM-dd"
         return f
     }()
 

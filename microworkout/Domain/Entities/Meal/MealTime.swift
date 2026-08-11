@@ -8,6 +8,23 @@ import Foundation
 /// se puede fijar con tests, sin routers ni casos de uso de por medio.
 enum MealTime {
 
+    /// El día de una fecha en `yyyy-MM-dd`, **en la zona del usuario**.
+    ///
+    /// Es lo que se le manda al servidor para pedirle "las comidas de este día".
+    /// Iba en UTC, y con cualquier zona por delante de Greenwich —España todo el
+    /// año— la medianoche local cae en el día UTC ANTERIOR: pidiendo hoy llegaba la
+    /// fecha de ayer, el servidor contestaba con las comidas de ayer y se sumaban a
+    /// las de hoy. El backend filtra en `Europe/Madrid`, así que lo que espera es
+    /// justamente la fecha local.
+    static func daySlug(_ date: Date, calendar: Calendar = .current) -> String {
+        let formatter = DateFormatter()
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = calendar.timeZone
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.string(from: date)
+    }
+
     /// La hora elegida, llevada al día que se está registrando.
     ///
     /// Los selectores solo muestran hora y minuto, así que la fecha que traen es la

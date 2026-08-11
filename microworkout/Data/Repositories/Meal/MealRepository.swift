@@ -135,7 +135,14 @@ class MealRepository: MealRepositoryProtocol {
         // única copia de lo registrado como invitado, y perderlo de vista por un
         // fallo de red es peor que mostrar solo una parte. Los llamantes que usan
         // `try?` (como el contexto de la IA) se quedaban sin NADA del día.
-        let synced = (try? await remote.listMeals(for: date))?.map { $0.toDomain() } ?? []
+        // Lo del servidor se REFILTRA por el día pedido. El cliente sabe qué día ha
+        // pedido; fiarse de que la respuesta corresponda ya salió mal una vez (la
+        // fecha de la consulta viajaba en UTC, así que el servidor contestaba con el
+        // día anterior y esas comidas se sumaban a las de hoy). Aunque la consulta ya
+        // vaya bien, esto hace que un desajuste de husos no pueda volver a colar días
+        // ajenos en un total.
+        let synced = ((try? await remote.listMeals(for: date))?.map { $0.toDomain() } ?? [])
+            .filter { Calendar.current.isDate($0.timestamp, inSameDayAs: date) }
         return Self.merge(synced: synced, local: local)
     }
 
@@ -144,8 +151,11 @@ class MealRepository: MealRepositoryProtocol {
             .getMeals(from: startDate, to: endDate).map { $0.toDomain() }
         guard await isAuthenticated() else { return local }
 
-        let synced = (try? await remote.listMeals(from: startDate, to: endDate))?
-            .map { $0.toDomain() } ?? []
+        // Mismo recorte que en `getMeals(for:)`, por el mismo motivo.
+        let start = Calendar.current.startOfDay(for: startDate)
+        let synced = ((try? await remote.listMeals(from: startDate, to: endDate))?
+            .map { $0.toDomain() } ?? [])
+            .filter { $0.timestamp >= start && $0.timestamp <= endDate }
         return Self.merge(synced: synced, local: local)
     }
 
