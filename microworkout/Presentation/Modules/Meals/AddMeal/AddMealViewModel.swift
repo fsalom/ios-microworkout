@@ -48,6 +48,11 @@ struct AddMealUiState {
     var searchQuery: String = ""
     var searchResults: [FoodItem] = []
     var isSearching: Bool = false
+    /// La búsqueda falló. Distinto de "no hay resultados", que es lo que se pintaba:
+    /// un fallo de red decía "Sin resultados para «pollo»" y encima no había forma de
+    /// reintentar, porque la búsqueda solo se dispara al CAMBIAR el texto y el texto
+    /// que querías buscar ya estaba escrito.
+    var searchError: String?
 
     // Manual entry
     var showManualEntry: Bool = false
@@ -73,7 +78,7 @@ struct AddMealUiState {
 
 final class AddMealViewModel: ObservableObject {
     @Published var uiState: AddMealUiState = .init()
-    private var router: AddMealRouter
+    private var router: AddMealRouterProtocol
     private var mealUseCase: MealUseCaseProtocol
     private var searchTask: Task<Void, Never>?
     /// Bumped on every search invocation; the in-flight task only resets `isSearching`
@@ -85,7 +90,7 @@ final class AddMealViewModel: ObservableObject {
     /// date, so adding food while viewing another day lands on that day, not today.
     private let targetDate: Date
 
-    init(router: AddMealRouter, mealUseCase: MealUseCaseProtocol, targetDate: Date = Date()) {
+    init(router: AddMealRouterProtocol, mealUseCase: MealUseCaseProtocol, targetDate: Date = Date()) {
         self.router = router
         self.mealUseCase = mealUseCase
         self.targetDate = targetDate
@@ -344,6 +349,7 @@ final class AddMealViewModel: ObservableObject {
             searchGeneration += 1
             uiState.searchResults = []
             uiState.isSearching = false
+            uiState.searchError = nil
             return
         }
 
@@ -352,6 +358,9 @@ final class AddMealViewModel: ObservableObject {
         let generation = searchGeneration
 
         uiState.isSearching = true
+        // Se limpia al empezar: si no, el aviso del intento anterior seguiría en
+        // pantalla mientras el nuevo carga.
+        uiState.searchError = nil
 
         searchTask = Task { [weak self] in
             // Small additional coalescing window; the SearchField already debounces 200ms.
@@ -387,10 +396,21 @@ final class AddMealViewModel: ObservableObject {
                 await MainActor.run {
                     guard self.searchGeneration == generation else { return }
                     self.uiState.searchResults = []
-                    self.uiState.error = "Error de búsqueda"
+                    // En `searchError`, no en `error`: la vista no lee `error` en
+                    // ningún sitio, así que el fallo era completamente invisible.
+                    self.uiState.searchError = "No se pudo buscar. Revisa tu conexión."
                 }
             }
         }
+    }
+
+    /// Reintenta la búsqueda actual.
+    ///
+    /// Hace falta un camino explícito: `searchFoods()` solo se dispara al cambiar el
+    /// texto, y tras un fallo el texto que quieres buscar ya está escrito, así que
+    /// volver a teclearlo no cambia nada y la pantalla se quedaba muerta.
+    func retrySearch() {
+        searchFoods()
     }
 
     func clearSearch() {
@@ -400,6 +420,18 @@ final class AddMealViewModel: ObservableObject {
         uiState.searchQuery = ""
         uiState.searchResults = []
         uiState.isSearching = false
+        uiState.searchError = nil
+    }
+
+    /// Limpia la búsqueda que la pantalla COMPARTE con la hoja de "Mi comida".
+    ///
+    /// Las dos usan este mismo ViewModel y cada una su campo de texto. La vista
+    /// limpiaba los tres campos de `uiState` a mano al cerrar la hoja, pero sin
+    /// cancelar la tarea en vuelo ni mover la generación: una búsqueda lanzada dentro
+    /// de la hoja podía terminar después de cerrarla y repoblar los resultados de una
+    /// consulta que ya no existía.
+    func resetSharedSearch() {
+        clearSearch()
     }
 
     func selectSearchResult(_ item: FoodItem) {

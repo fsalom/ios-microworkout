@@ -154,9 +154,10 @@ struct AddMealView: View {
     /// tabs (Recientes / Favoritos / Mis comidas) show their actual content
     /// after closing the create/edit flow.
     private func resetSharedSearchState() {
-        viewModel.uiState.searchQuery = ""
-        viewModel.uiState.searchResults = []
-        viewModel.uiState.isSearching = false
+        // Por el ViewModel: limpiar `uiState` a mano dejaba viva la tarea de búsqueda
+        // de la hoja, que podía terminar después de cerrarla y repoblar los
+        // resultados de una consulta que ya no existía.
+        viewModel.resetSharedSearch()
     }
 
     private func showToast(_ message: String) {
@@ -525,6 +526,8 @@ private struct FoodListContent: View {
                     SkeletonFoodRow()
                 }
             }
+        } else if let searchError = viewModel.uiState.searchError {
+            SearchErrorState(message: searchError) { viewModel.retrySearch() }
         } else if viewModel.uiState.searchResults.isEmpty {
             EmptyState(message: "Sin resultados para \"\(trimmedQuery)\"")
         } else {
@@ -898,6 +901,8 @@ private struct CreateMyMealFoodList: View {
                         SkeletonFoodRow()
                     }
                 }
+            } else if let searchError = viewModel.uiState.searchError {
+                SearchErrorState(message: searchError) { viewModel.retrySearch() }
             } else if viewModel.uiState.searchResults.isEmpty {
                 EmptyState(message: "Sin resultados para \"\(trimmedQuery)\"")
             } else {
@@ -1077,6 +1082,40 @@ private struct EmptyState: View {
             .foregroundColor(.secondary)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 40)
+    }
+}
+
+/// La búsqueda falló, que NO es lo mismo que no haber encontrado nada.
+///
+/// Antes las dos cosas pintaban "Sin resultados para «pollo»": el fallo era
+/// invisible y además mentía. Y el botón es imprescindible, no un adorno: la
+/// búsqueda solo se dispara al cambiar el texto, así que tras un fallo el texto que
+/// querías buscar ya estaba escrito y no había forma de volver a intentarlo.
+private struct SearchErrorState: View {
+    let message: String
+    let onRetry: () -> Void
+
+    var body: some View {
+        VStack(spacing: 12) {
+            Image(systemName: "wifi.exclamationmark")
+                .font(.system(size: 22, weight: .medium))
+                .foregroundColor(.orange)
+            Text(message)
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+            Button(action: onRetry) {
+                Text("Reintentar")
+                    .font(.subheadline.weight(.semibold))
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 8)
+                    .background(Capsule().fill(Color.green.opacity(0.15)))
+            }
+            .buttonStyle(.plain)
+            .foregroundColor(.green)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 32)
     }
 }
 
