@@ -71,7 +71,12 @@ class MealUseCase: MealUseCaseProtocol {
             assertionFailure("Failed to compute date 60 days ago; falling back to now")
             sixtyDaysAgo = now
         }
-        let meals = try await repository.getMeals(from: sixtyDaysAgo, to: now)
+        // Hasta el fin de hoy: con `to: now` un alimento registrado para la cena no
+        // aparecía en "Recientes" hasta que llegara esa hora.
+        let endOfToday = Calendar.current.date(
+            byAdding: .day, value: 1, to: Calendar.current.startOfDay(for: now)
+        )?.addingTimeInterval(-1) ?? now
+        let meals = try await repository.getMeals(from: sixtyDaysAgo, to: endOfToday)
 
         // Extract all food items sorted by meal timestamp (most recent first)
         let sortedMeals = meals.sorted { $0.timestamp > $1.timestamp }

@@ -145,7 +145,20 @@ class AIContextUseCase: AIContextUseCaseProtocol {
         let start = cal.startOfDay(
             for: cal.date(byAdding: .day, value: -(max(1, daysBack) - 1), to: now) ?? now
         )
-        let all = (try? await mealUseCase.getMeals(from: start, to: now)) ?? []
+        // Hasta el FIN de hoy, no hasta este instante.
+        //
+        // Con `to: now` se caían las comidas con hora posterior a la actual —posible
+        // desde que la hora es editable— mientras la cabecera de Comidas, que mira el
+        // día entero, sí las contaba. El coach decía "has comido 1.289 kcal" con la
+        // pantalla mostrando 1.551 justo encima, y el usuario no tiene forma de saber
+        // cuál de las dos miente.
+        //
+        // El modelo ya recibe la hora actual (`now` en el payload), así que puede
+        // distinguir por sí mismo lo ya comido de lo que aún no toca. Esconderle
+        // datos que la app sí muestra no le ayuda: le hace contradecirla.
+        let endOfDay = cal.date(byAdding: .day, value: 1, to: cal.startOfDay(for: now))?
+            .addingTimeInterval(-1) ?? now
+        let all = (try? await mealUseCase.getMeals(from: start, to: endOfDay)) ?? []
         return all.map {
             AIMealSnapshot(
                 id: $0.id.uuidString,
