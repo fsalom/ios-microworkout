@@ -108,6 +108,13 @@ extension AICoachRequestApiDTO {
         )
     }
 
+    /// Metros a kilómetros con un decimal. Ausente si no hay distancia: un 0 en un
+    /// entreno de fuerza sería ruido, no información.
+    private static func kilometres(_ meters: Double?) -> Double? {
+        guard let meters, meters > 0 else { return nil }
+        return (meters / 1_000).rounded(toPlaces: 1)
+    }
+
     /// Gramos redondeados; ausente si no hay objetivo. Al backend no le sirve un 0.
     private static func grams(_ value: Double) -> Int? {
         value > 0 ? Int(value.rounded()) : nil
@@ -150,6 +157,7 @@ extension AICoachRequestApiDTO {
                 durationMinutes: log.durationSeconds.map { Double($0) / 60 },
                 kcalBurned: watch?.totalCalories,
                 avgHeartRate: watch?.averageHeartRate,
+                distanceKm: kilometres(watch?.totalDistanceMeters),
                 exercises: log.exercises.map { exercise in
                     Exercise(
                         name: clamp(exercise.name.isEmpty ? "Ejercicio" : exercise.name, max: 120),
@@ -176,6 +184,7 @@ extension AICoachRequestApiDTO {
                     durationMinutes: watch.durationSeconds / 60,
                     kcalBurned: watch.totalCalories,
                     avgHeartRate: watch.averageHeartRate,
+                    distanceKm: kilometres(watch.totalDistanceMeters),
                     exercises: []
                 )
             }
@@ -193,6 +202,9 @@ extension AICoachRequestApiDTO {
                     durationMinutes: nil,
                     kcalBurned: manualToday.compactMap(\.calories).reduce(0, +).nilIfZero,
                     avgHeartRate: nil,
+                    distanceKm: kilometres(
+                        manualToday.compactMap(\.distanceMeters).reduce(0, +).nilIfZero
+                    ),
                     exercises: manualToday.map { entry in
                         Exercise(
                             name: clamp(entry.exerciseName, max: 120),
@@ -222,9 +234,19 @@ extension AICoachRequestApiDTO {
                         calories: nonNegative(meal.totalNutrition.calories),
                         proteinG: nonNegative(meal.totalNutrition.proteinsG),
                         carbsG: nonNegative(meal.totalNutrition.carbohydratesG),
-                        fatG: nonNegative(meal.totalNutrition.fatsG)
+                        fatG: nonNegative(meal.totalNutrition.fatsG),
+                        fiberG: meal.totalNutrition.fiberG.flatMap { nonNegative($0) }
                     ),
-                    items: Array(meal.items.map { clamp($0.name, max: 120) }.prefix(Limits.mealItems))
+                    items: Array(meal.items.prefix(Limits.mealItems)).map { item in
+                        MealItem(
+                            name: clamp(item.name, max: 120),
+                            grams: nonNegative(item.quantityG),
+                            calories: nonNegative(item.nutrition.calories),
+                            proteinG: nonNegative(item.nutrition.proteinsG),
+                            carbsG: nonNegative(item.nutrition.carbohydratesG),
+                            fatG: nonNegative(item.nutrition.fatsG)
+                        )
+                    }
                 )
             }
 

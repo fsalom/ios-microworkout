@@ -87,6 +87,9 @@ struct AICoachRequestApiDTO: Encodable {
         let durationMinutes: Double?
         let kcalBurned: Double?
         let avgHeartRate: Double?
+        /// Para el cardio. Sin ella una carrera llegaba como "Carrera, 42 min" y no
+        /// se podía valorar si los carbohidratos del día sostienen esa tirada.
+        let distanceKm: Double?
         let exercises: [Exercise]
 
         enum CodingKeys: String, CodingKey {
@@ -95,6 +98,7 @@ struct AICoachRequestApiDTO: Encodable {
             case durationMinutes = "duration_minutes"
             case kcalBurned = "kcal_burned"
             case avgHeartRate = "avg_heart_rate"
+            case distanceKm = "distance_km"
         }
     }
 
@@ -123,7 +127,29 @@ struct AICoachRequestApiDTO: Encodable {
         /// se conservaba el orden relativo, sin reloj.
         let at: String?
         let macros: Macros
-        let items: [String]
+        let items: [MealItem]
+    }
+
+    /// Un alimento con sus números.
+    ///
+    /// Antes de cada alimento solo viajaba el NOMBRE, y con eso el coach no podía
+    /// hacer lo más útil que hay sobre una comida: decir qué alimento concreto aporta
+    /// poco y cuánto pesa en el total ("las barritas son 138 kcal y el sándwich 108:
+    /// entre los dos, 246"). Solo podía hablar del agregado del día.
+    struct MealItem: Encodable {
+        let name: String
+        let grams: Double?
+        let calories: Double?
+        let proteinG: Double?
+        let carbsG: Double?
+        let fatG: Double?
+
+        enum CodingKeys: String, CodingKey {
+            case name, grams, calories
+            case proteinG = "protein_g"
+            case carbsG = "carbs_g"
+            case fatG = "fat_g"
+        }
     }
 
     struct Macros: Encodable {
@@ -131,12 +157,16 @@ struct AICoachRequestApiDTO: Encodable {
         let proteinG: Double?
         let carbsG: Double?
         let fatG: Double?
+        /// La app la registra pero no salía del móvil, así que el coach no podía decir
+        /// nada sobre fibra ni sobre si la dieta lleva verdura suficiente.
+        let fiberG: Double?
 
         enum CodingKeys: String, CodingKey {
             case calories
             case proteinG = "protein_g"
             case carbsG = "carbs_g"
             case fatG = "fat_g"
+            case fiberG = "fiber_g"
         }
     }
 

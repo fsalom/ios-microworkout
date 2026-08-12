@@ -385,6 +385,137 @@ final class AICoachRequestMapperTests: XCTestCase {
         XCTAssertEqual(health["steps"] as? Int, 8_200)
     }
 
+    // MARK: - Detalle por alimento, fibra y distancia
+
+    private func food(
+        _ name: String, grams: Double, kcal: Double,
+        protein: Double = 0, carbs: Double = 0, fat: Double = 0, fiber: Double? = nil
+    ) -> AIFoodItemSnapshot {
+        // `nutrition` es lo YA consumido de ese alimento (`actualNutrition` en el
+        // dominio), no por 100 g.
+        AIFoodItemSnapshot(
+            name: name,
+            quantityG: grams,
+            nutrition: AINutritionSnapshot(
+                calories: kcal, carbohydratesG: carbs, proteinsG: protein,
+                fatsG: fat, fiberG: fiber
+            )
+        )
+    }
+
+    private func mealWith(
+        _ items: [AIFoodItemSnapshot], at date: Date, fiber: Double? = nil
+    ) -> AIMealSnapshot {
+        let total = items.reduce(into: (kcal: 0.0, p: 0.0, c: 0.0, f: 0.0)) {
+            $0.kcal += $1.nutrition.calories
+            $0.p += $1.nutrition.proteinsG
+            $0.c += $1.nutrition.carbohydratesG
+            $0.f += $1.nutrition.fatsG
+        }
+        return AIMealSnapshot(
+            id: UUID().uuidString, type: "Desayuno", timestamp: date, myMealName: nil,
+            totalNutrition: AINutritionSnapshot(
+                calories: total.kcal, carbohydratesG: total.c, proteinsG: total.p,
+                fatsG: total.f, fiberG: fiber
+            ),
+            items: items
+        )
+    }
+
+    /// Lo que faltaba para poder decir "las barritas son 138 kcal y el sándwich 108:
+    /// entre los dos, 246". Antes de cada alimento solo viajaba el NOMBRE, así que el
+    /// coach solo podía hablar del agregado del día.
+    func testEachFoodTravelsWithItsGramsAndMacros() throws {
+        let now = date("2026-08-12 12:00")
+        let breakfast = mealWith([
+            food("Yogur Proteínas Natural 0%", grams: 240, kcal: 124, protein: 24, carbs: 7, fat: 1),
+            food("Barritas de trigo y arroz", grams: 40, kcal: 138, protein: 2, carbs: 21, fat: 3),
+        ], at: date("2026-08-12 09:27"))
+
+        let request = AICoachRequestApiDTO(
+            context: makeContext(profile: fullProfile(), meals: [breakfast]),
+            topic: .nutrition, question: nil, now: now
+        )
+
+        let items = try XCTUnwrap(request.today.meals.first?.items)
+        XCTAssertEqual(items.map(\.name), [
+            "Yogur Proteínas Natural 0%", "Barritas de trigo y arroz",
+        ])
+        let bar = try XCTUnwrap(items.last)
+        XCTAssertEqual(bar.grams, 40)
+        XCTAssertEqual(bar.calories, 138, "el coach puede nombrar la cifra del alimento")
+        XCTAssertEqual(bar.carbsG, 21)
+
+        // Y en snake_case, que es lo que valida Pydantic.
+        let json = try encode(request)
+        let today = try XCTUnwrap(json["today"] as? [String: Any])
+        let meals = try XCTUnwrap(today["meals"] as? [[String: Any]])
+        let sent = try XCTUnwrap((meals.first?["items"] as? [[String: Any]])?.last)
+        XCTAssertEqual(sent["calories"] as? Double, 138)
+        XCTAssertEqual(sent["carbs_g"] as? Double, 21)
+        XCTAssertEqual(sent["grams"] as? Double, 40)
+    }
+
+    func testFiberTravelsWithTheMealMacros() throws {
+        let now = date("2026-08-12 12:00")
+        let breakfast = mealWith(
+            [food("Avena", grams: 60, kcal: 220, carbs: 40, fiber: 6)],
+            at: date("2026-08-12 09:00"), fiber: 6
+        )
+        let request = AICoachRequestApiDTO(
+            context: makeContext(profile: fullProfile(), meals: [breakfast]),
+            topic: .nutrition, question: nil, now: now
+        )
+
+        XCTAssertEqual(request.today.meals.first?.macros.fiberG, 6)
+    }
+
+    /// Sin la distancia, una carrera llegaba como "Carrera, 40 min" y no se podía
+    /// valorar si los carbohidratos del día sostienen esa tirada.
+    func testARunCarriesItsDistanceInKilometres() throws {
+        let now = date("2026-08-12 12:00")
+        let context = AIContext(
+            generatedAt: now, locale: "es_ES", profile: fullProfile(),
+            workoutSessions: [], workoutLogs: [], manualEntries: [], meals: [],
+            healthDays: [],
+            healthWorkouts: [
+                AIHealthWorkoutSnapshot(
+                    id: UUID().uuidString, activityType: "Carrera",
+                    startDate: date("2026-08-12 08:00"), endDate: date("2026-08-12 08:45"),
+                    durationSeconds: 2_700, totalCalories: 620,
+                    totalDistanceMeters: 7_920, averageHeartRate: 158,
+                    linkedTrainingId: nil, linkedEntryDate: nil
+                )
+            ]
+        )
+
+        let request = AICoachRequestApiDTO(context: context, topic: .daily, question: nil, now: now)
+
+        let run = try XCTUnwrap(request.today.workouts.first)
+        XCTAssertEqual(run.name, "Carrera")
+        XCTAssertEqual(run.distanceKm, 7.9, "7.920 m son 7,9 km")
+    }
+
+    /// Un entreno de fuerza no tiene distancia: mandar 0 sería ruido.
+    func testAStrengthWorkoutSendsNoDistance() throws {
+        let now = date("2026-08-12 20:00")
+        let context = AIContext(
+            generatedAt: now, locale: "es_ES", profile: fullProfile(),
+            workoutSessions: [],
+            workoutLogs: [
+                AIWorkoutLogSnapshot(
+                    id: UUID().uuidString, sessionId: nil, sessionName: "Empuje",
+                    startedAt: date("2026-08-12 19:00"), endedAt: nil,
+                    durationSeconds: 3_600, linkedHealthWorkoutId: nil, exercises: []
+                )
+            ],
+            manualEntries: [], meals: [], healthDays: [], healthWorkouts: []
+        )
+
+        let request = AICoachRequestApiDTO(context: context, topic: .workout, question: nil, now: now)
+        XCTAssertNil(request.today.workouts.first?.distanceKm)
+    }
+
     // MARK: - El reloj: la hora actual y la de cada comida
 
     /// El coach solo recibía el DÍA, así que no podía razonar sobre "a estas alturas":
