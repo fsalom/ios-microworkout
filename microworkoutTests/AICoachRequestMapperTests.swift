@@ -456,6 +456,58 @@ final class AICoachRequestMapperTests: XCTestCase {
         XCTAssertEqual(sent["grams"] as? Double, 40)
     }
 
+    /// Los totales los suma el móvil. El modelo los sumaba él y se los inventaba:
+    /// una tarjeta dijo "415 kcal" y "114 g de proteína" —imposible, 114 g son 456
+    /// kcal— con 484 y 48 en la cabecera de la propia pantalla.
+    func testTodayCarriesTotalsAlreadyAddedUp() throws {
+        let now = date("2026-08-13 10:44")
+        let breakfast = mealWith([
+            food("Divertidas", grams: 16, kcal: 78, carbs: 4, fat: 1),
+            food("Yogur Proteínas 0%", grams: 240, kcal: 124, protein: 24, carbs: 7, fat: 1),
+            food("Shot jengibre", grams: 120, kcal: 51, carbs: 12),
+        ], at: date("2026-08-13 08:59"))
+
+        let request = AICoachRequestApiDTO(
+            context: makeContext(profile: fullProfile(), meals: [breakfast]),
+            topic: .nutrition, question: nil, now: now
+        )
+
+        let totals = try XCTUnwrap(request.today.totals)
+        XCTAssertEqual(totals.calories, 253, "78 + 124 + 51")
+        XCTAssertEqual(totals.proteinG, 24)
+        XCTAssertEqual(totals.carbsG, 23, "4 + 7 + 12")
+
+        // Y lo que queda, también restado aquí: 2600 de objetivo menos 253.
+        let remaining = try XCTUnwrap(request.today.remaining)
+        XCTAssertEqual(remaining.calories, 2_347)
+        XCTAssertEqual(remaining.proteinG, 136, "160 de objetivo menos 24")
+    }
+
+    func testWithoutMealsThereAreNoTotalsToQuote() throws {
+        let request = AICoachRequestApiDTO(
+            context: makeContext(profile: fullProfile()), topic: .nutrition,
+            question: nil, now: date("2026-08-13 10:44")
+        )
+        XCTAssertNil(request.today.totals, "un día sin comidas no tiene totales que citar")
+        XCTAssertNil(request.today.remaining)
+    }
+
+    /// Pasarse del objetivo es información: el restante puede ser negativo.
+    func testGoingOverTheTargetGivesANegativeRemainder() throws {
+        let now = date("2026-08-13 22:00")
+        let huge = mealWith(
+            [food("Pizza", grams: 800, kcal: 3_000, protein: 100, carbs: 300, fat: 120)],
+            at: date("2026-08-13 21:00")
+        )
+        let request = AICoachRequestApiDTO(
+            context: makeContext(profile: fullProfile(), meals: [huge]),
+            topic: .nutrition, question: nil, now: now
+        )
+
+        let remaining = try XCTUnwrap(request.today.remaining)
+        XCTAssertEqual(remaining.calories, -400, "2.600 de objetivo menos 3.000")
+    }
+
     func testFiberTravelsWithTheMealMacros() throws {
         let now = date("2026-08-12 12:00")
         let breakfast = mealWith(

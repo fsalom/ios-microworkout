@@ -79,6 +79,15 @@ struct AICoachRequestApiDTO: Encodable {
         let workouts: [Workout]
         let meals: [Meal]
         let health: Health?
+        /// Los totales del día YA SUMADOS, y lo que queda contra el objetivo.
+        ///
+        /// No es redundante con `meals`: son exactamente los números que el usuario
+        /// tiene en la cabecera de su pantalla. Cuando el modelo los sumaba él se los
+        /// inventaba — una tarjeta dijo "415 kcal" y "114 g de proteína" (imposible:
+        /// 114 g son 456 kcal) con 484 y 48 en pantalla. Sumar es trabajo del móvil,
+        /// que ya lo hace para pintar la cabecera.
+        let totals: Macros?
+        let remaining: Macros?
     }
 
     struct Workout: Encodable {

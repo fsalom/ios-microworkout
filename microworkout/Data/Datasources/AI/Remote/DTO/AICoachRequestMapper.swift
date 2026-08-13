@@ -263,7 +263,45 @@ extension AICoachRequestApiDTO {
             Health(steps: max(0, $0), activeKcal: nil, restingHeartRate: nil, sleepHours: nil)
         }
 
-        return TodaySnapshot(workouts: workouts, meals: meals, health: health)
+        // Los totales los suma el MÓVIL, con los mismos datos con los que pinta la
+        // cabecera. Antes se dejaba sumar al modelo y se inventaba las cifras.
+        let consumed = context.meals
+            .filter { calendar.isDate($0.timestamp, inSameDayAs: today) }
+            .reduce(into: (kcal: 0.0, p: 0.0, c: 0.0, f: 0.0, fiber: 0.0)) {
+                $0.kcal += $1.totalNutrition.calories
+                $0.p += $1.totalNutrition.proteinsG
+                $0.c += $1.totalNutrition.carbohydratesG
+                $0.f += $1.totalNutrition.fatsG
+                $0.fiber += $1.totalNutrition.fiberG ?? 0
+            }
+
+        let totals = meals.isEmpty ? nil : Macros(
+            calories: consumed.kcal.nilIfZero,
+            proteinG: consumed.p.nilIfZero,
+            carbsG: consumed.c.nilIfZero,
+            fatG: consumed.f.nilIfZero,
+            fiberG: consumed.fiber.nilIfZero
+        )
+
+        // Lo que queda contra el objetivo de HOY. Restar también es aritmética que no
+        // hace falta delegarle. Puede ser negativo: pasarse es información.
+        let profile = context.profile
+        let remaining = (totals == nil || profile == nil) ? nil : Macros(
+            calories: profile!.todayCalorieTarget > 0
+                ? profile!.todayCalorieTarget - consumed.kcal : nil,
+            proteinG: profile!.todayMacroTargets.proteinsG > 0
+                ? profile!.todayMacroTargets.proteinsG - consumed.p : nil,
+            carbsG: profile!.todayMacroTargets.carbohydratesG > 0
+                ? profile!.todayMacroTargets.carbohydratesG - consumed.c : nil,
+            fatG: profile!.todayMacroTargets.fatsG > 0
+                ? profile!.todayMacroTargets.fatsG - consumed.f : nil,
+            fiberG: nil
+        )
+
+        return TodaySnapshot(
+            workouts: workouts, meals: meals, health: health,
+            totals: totals, remaining: remaining
+        )
     }
 
     // MARK: - Histórico de entrenos
