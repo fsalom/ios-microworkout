@@ -1,4 +1,5 @@
 import XCTest
+import TripleA
 @testable import microworkout
 
 /// Los alimentos añadidos como invitado desaparecían de "Favoritos" al iniciar
@@ -37,7 +38,14 @@ final class MealFavoritesSyncTests: XCTestCase {
         }
         func listMeals(for date: Date) async throws -> [MealApiDTO] { meals }
         func listMeals(from start: Date, to end: Date) async throws -> [MealApiDTO] { meals }
-        func deleteMeal(id: UUID) async throws {}
+        /// Error con el que responde al borrar, para poder distinguir "no estaba"
+        /// (404) de "no se pudo comprobar" (red).
+        var deleteError: Error?
+        private(set) var deletedMealIds: [UUID] = []
+        func deleteMeal(id: UUID) async throws {
+            if let deleteError { throw deleteError }
+            deletedMealIds.append(id)
+        }
 
         func foodByBarcode(_ barcode: String) async throws -> FoodApiDTO? {
             foodsByBarcode[barcode]
@@ -99,7 +107,16 @@ final class MealFavoritesSyncTests: XCTestCase {
         // TODO ignorando el parámetro, así que ninguna prueba de comidas ejercitaba
         // el filtrado por día — justo donde una comida puede desaparecer de la
         // pantalla estando guardada.
-        func saveMeal(_ meal: MealDTO) async throws { meals.append(meal) }
+        /// Upsert por id, como el `MealLocalDataSource` de verdad. Con un `append` a
+        /// secas el doble duplicaba al reescribir una comida, que es justo la
+        /// operación en la que se apoya editar sin borrar.
+        func saveMeal(_ meal: MealDTO) async throws {
+            if let index = meals.firstIndex(where: { $0.id == meal.id }) {
+                meals[index] = meal
+            } else {
+                meals.append(meal)
+            }
+        }
         func getMeals(for date: Date) async throws -> [MealDTO] {
             meals.filter { Calendar.current.isDate($0.timestamp, inSameDayAs: date) }
         }
@@ -399,6 +416,63 @@ extension MealFavoritesSyncTests {
         XCTAssertEqual(local.meals.map(\.id), [lunch.id], "guardada en el dispositivo")
         let visible = try await repository.getMeals(for: Date())
         XCTAssertEqual(visible.map(\.id), [lunch.id], "y visible en la pantalla")
+    }
+
+    // MARK: - Borrar y editar una comida que solo existe en el dispositivo
+
+    /// El bug: no se podía editar la cantidad de un alimento ya introducido.
+    ///
+    /// `updateFoodItem` borraba la comida y la recreaba. Con una comida que solo está
+    /// en el dispositivo —registrada como invitado, o guardada sin cobertura porque el
+    /// POST de `saveMeal` va con `try?`— el servidor devuelve 404 al borrarla, el error
+    /// se propagaba y la edición no llegaba a ocurrir.
+    func testDeletingAMealTheServerNeverHadStillWorks() async throws {
+        let local = FakeLocal()
+        let lunch = meal(UUID(), .lunch, hour: 14)
+        local.meals = [lunch.toDTO()]
+        let remote = FakeRemote()
+        remote.deleteError = NetworkError.failure(statusCode: 404)
+        let repository = makeRepository(local: local, remote: remote)
+
+        // No debe lanzar: que no estuviera en el servidor no es un fallo.
+        try await repository.deleteMeal(lunch.id)
+
+        XCTAssertTrue(local.meals.isEmpty, "se borra del dispositivo, que es donde estaba")
+    }
+
+    /// Y al contrario: un fallo de red sí se propaga. Dar por hecho un borrado que no
+    /// ocurrió hace que la comida reaparezca en la siguiente lectura.
+    func testAServerFailureWhileDeletingIsNotSwallowed() async throws {
+        let local = FakeLocal()
+        let lunch = meal(UUID(), .lunch, hour: 14)
+        local.meals = [lunch.toDTO()]
+        let remote = FakeRemote()
+        remote.deleteError = NetworkError.failure(statusCode: 500)
+        let repository = makeRepository(local: local, remote: remote)
+
+        do {
+            try await repository.deleteMeal(lunch.id)
+            XCTFail("un 500 no se puede tragar")
+        } catch {
+            XCTAssertEqual(local.meals.count, 1, "y la copia local se conserva")
+        }
+    }
+
+    /// Lo que hace posible editar sin borrar: guardar la misma comida la REEMPLAZA.
+    func testSavingAMealAgainReplacesItInsteadOfDuplicating() async throws {
+        let local = FakeLocal()
+        let id = UUID()
+        local.meals = [meal(id, .lunch, hour: 14).toDTO()]
+        let remote = FakeRemote()
+        let repository = makeRepository(local: local, remote: remote)
+
+        var edited = meal(id, .lunch, hour: 14)
+        edited.items = [FoodItem(name: "Pollo", quantity: 300)]
+        try await repository.saveMeal(edited)
+
+        XCTAssertEqual(local.meals.count, 1, "upsert por id, no se duplica")
+        XCTAssertEqual(local.meals.first?.items.first?.quantity, 300, "con la cantidad nueva")
+        XCTAssertTrue(remote.deletedMealIds.isEmpty, "y sin pasar por un borrado")
     }
 
     func testSyncedMealIsNotDuplicatedAfterUpload() async throws {

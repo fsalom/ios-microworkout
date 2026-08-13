@@ -108,8 +108,11 @@ final class MealsViewModel: ObservableObject {
         }
     }
 
-    /// Replaces the quantity of a single food item in a meal. Re-saves the meal
-    /// (delete + save workaround since there is no `updateMeal` API).
+    /// Cambia la cantidad de un alimento de una comida.
+    ///
+    /// Se reescribe la comida con `saveMeal`, que es upsert por id. Ya no se borra
+    /// antes: no hace falta y era lo que impedía editar una comida que solo existe
+    /// en el dispositivo.
     func updateFoodItem(itemId: UUID, mealId: UUID, newQuantity: Double) {
         guard let meal = uiState.todayMeals.first(where: { $0.id == mealId }) else { return }
         guard newQuantity > 0 else { return }
@@ -121,16 +124,20 @@ final class MealsViewModel: ObservableObject {
             return copy
         }
 
-        let updatedMeal = Meal(
-            id: meal.id,
-            type: meal.type,
-            timestamp: meal.timestamp,
-            items: updatedItems
-        )
+        // Se copia la comida y se le cambian los items, en vez de construir una
+        // nueva: así no se pierde `myMealName`. Reconstruyéndola se perdía, y editar
+        // la cantidad de un alimento dentro de una receta le quitaba el nombre de la
+        // receta sin que nada lo dijera.
+        var updatedMeal = meal
+        updatedMeal.items = updatedItems
 
         Task {
             do {
-                try await mealUseCase.deleteMeal(meal.id)
+                // `saveMeal` a secas, sin borrar antes: es upsert por id en el
+                // dispositivo y en el servidor. El `deleteMeal` previo era además la
+                // causa de que esto NO funcionara: con una comida que solo existe en
+                // local, el servidor devolvía 404 al borrarla, el error se propagaba y
+                // la edición no llegaba a ocurrir.
                 try await mealUseCase.saveMeal(updatedMeal)
                 await MainActor.run { self.loadMeals() }
             } catch {
@@ -151,18 +158,20 @@ final class MealsViewModel: ObservableObject {
 
         Task {
             do {
-                try await mealUseCase.deleteMeal(mealId)
-                print("[Meals] meal deleted")
                 if meal.items.count > 1 {
-                    let remaining = meal.items.filter { $0.id != itemId }
-                    let updated = Meal(
-                        id: meal.id,
-                        type: meal.type,
-                        timestamp: meal.timestamp,
-                        items: remaining
-                    )
+                    // Quitar un alimento de una comida con varios es una EDICIÓN, no
+                    // un borrado: se reescribe la comida sin él. Borrarla y recrearla
+                    // abría una ventana en la que un fallo la dejaba borrada, y con una
+                    // comida solo-local el 404 del servidor hacía fallar la operación
+                    // entera. Se copia para no perder `myMealName`.
+                    var updated = meal
+                    updated.items = meal.items.filter { $0.id != itemId }
                     try await mealUseCase.saveMeal(updated)
-                    print("[Meals] re-saved meal with \(remaining.count) items")
+                    print("[Meals] re-saved meal with \(updated.items.count) items")
+                } else {
+                    // Era el único alimento: la comida entera se va.
+                    try await mealUseCase.deleteMeal(mealId)
+                    print("[Meals] meal deleted")
                 }
                 await MainActor.run {
                     self.loadMeals()

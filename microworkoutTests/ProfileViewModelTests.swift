@@ -8,6 +8,11 @@ import XCTest
 ///
 /// Es justo la lógica que más silenciosamente se rompe: cuando falla, la pantalla
 /// no da error — simplemente no hace nada.
+///
+/// `@MainActor` porque el test escribe en `uiState` (un `@Published`) igual que lo
+/// haría la vista: sin aislar, esas escrituras compiten con las que hace el propio
+/// ViewModel desde el main actor y se pierden, con fallos intermitentes.
+@MainActor
 final class ProfileViewModelTests: XCTestCase {
 
     // MARK: - Dobles

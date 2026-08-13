@@ -1,4 +1,7 @@
 import Foundation
+// `NetworkError` vive en TripleA: hace falta para distinguir un 404 del servidor
+// (la comida no estaba) de un fallo de red al borrar.
+import TripleA
 
 /// Dispatch igual al de Workouts/UserProfile/WorkoutLog:
 /// invitado → `UserDefaults` (todo local, offline-first);
@@ -170,14 +173,33 @@ class MealRepository: MealRepositoryProtocol {
 
     func deleteMeal(_ mealId: UUID) async throws {
         if await isAuthenticated() {
-            try await remote.deleteMeal(id: mealId)
-            // Borrar también la copia local: si se queda, la siguiente
-            // sincronización la ve como "pendiente" (no está en el servidor) y la
-            // vuelve a subir, resucitando una comida que el usuario borró.
-            try? await localDataSource.deleteMeal(mealId)
-            return
+            do {
+                try await remote.deleteMeal(id: mealId)
+            } catch {
+                // 404 = no estaba en el servidor. Pasa constantemente: comidas
+                // registradas como invitado y aún sin subir, o guardadas sin
+                // cobertura (el POST de `saveMeal` va con `try?`). Borrarlas solo del
+                // dispositivo es lo correcto, y propagar ese 404 rompía cosas que no
+                // se veían venir: `updateFoodItem` borraba y recreaba, así que editar
+                // la cantidad de un alimento de una comida no subida FALLABA.
+                //
+                // Cualquier otro error sí se propaga: dar por hecho un borrado que no
+                // ocurrió hace que la comida reaparezca en la siguiente lectura.
+                guard Self.isNotFound(error) else { throw error }
+            }
         }
+        // Borrar también la copia local: si se queda, la siguiente sincronización la
+        // ve como "pendiente" y la vuelve a subir, resucitando lo que se borró.
         try await localDataSource.deleteMeal(mealId)
+    }
+
+    /// Mismo criterio que `WorkoutLogRepository`: distinguir "no estaba" de "no se
+    /// pudo comprobar".
+    private static func isNotFound(_ error: Error) -> Bool {
+        if case NetworkError.failure(let statusCode, _, _) = error {
+            return statusCode == 404
+        }
+        return false
     }
 
     // MARK: Remote (OpenFoodFacts) — público, no depende de auth

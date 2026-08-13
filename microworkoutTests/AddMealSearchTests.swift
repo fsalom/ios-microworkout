@@ -9,6 +9,12 @@ import XCTest
 ///   sitio**, así que era invisible y la lista vacía decía "Sin resultados".
 /// - La búsqueda solo se dispara al CAMBIAR el texto, y tras un fallo el texto que
 ///   querías buscar ya estaba escrito: volver a teclearlo no disparaba nada.
+///
+/// `@MainActor`: el test escribe en `uiState` (un `@Published`) igual que lo haría
+/// la vista. Sin aislar, esas escrituras competían con las que hace el ViewModel
+/// desde el main actor y se perdían — el test fallaba de forma intermitente con
+/// "0 búsquedas" porque `searchQuery` no llegaba a asentarse.
+@MainActor
 final class AddMealSearchTests: XCTestCase {
 
     // MARK: - Dobles
