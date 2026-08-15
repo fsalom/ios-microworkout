@@ -39,7 +39,8 @@ struct ReportNoteApiDTO: Decodable {
             // Una fuente desconocida se trata como del coach: es la que el usuario
             // puede borrar, así que es el lado seguro si el backend añade otra.
             source: UserReportNote.Source(rawValue: source) ?? .coach,
-            topic: topic.flatMap { AICoachTopic(rawValue: $0) },
+            // La clave de red se sigue llamando `topic`, pero lo que trae es un ÁREA.
+            area: topic.flatMap { UserReportArea(rawValue: $0) },
             createdAt: createdAt
         )
     }

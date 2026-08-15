@@ -139,7 +139,9 @@ final class UserReportTests: XCTestCase {
           "updated_at": "2026-08-06T09:15:30.123456+00:00",
           "notes": [
             {"id": 3, "content": "Le cuesta la proteína", "source": "coach",
-             "topic": "nutrition", "created_at": "2026-08-01T10:00:00+00:00"},
+             "topic": "nutricion", "created_at": "2026-08-01T10:00:00+00:00"},
+            {"id": 5, "content": "Le molesta el hombro", "source": "coach",
+             "topic": "entreno", "created_at": "2026-08-03T10:00:00+00:00"},
             {"id": 4, "content": "Suya", "source": "user",
              "topic": null, "created_at": "2026-08-02T10:00:00+00:00"}
           ]
@@ -151,8 +153,34 @@ final class UserReportTests: XCTestCase {
 
         XCTAssertEqual(report.content, "Entreno a las 6:00")
         XCTAssertNotNil(report.updatedAt, "el backend manda microsegundos y hay que aceptarlos")
-        XCTAssertEqual(report.notes.count, 2)
-        XCTAssertEqual(report.coachNotes.map(\.id), [3])
-        XCTAssertEqual(report.coachNotes.first?.topic, .nutrition)
+        XCTAssertEqual(report.notes.count, 3)
+        XCTAssertEqual(report.coachNotes.map(\.id), [3, 5])
+        // El backend escribe ÁREAS (`nutricion`, `entreno`), no temas del coach.
+        // Este test decía `"topic": "nutrition"` y lo leía como `AICoachTopic`, que es
+        // justo la suposición equivocada que dejó pasar el bug: de las seis áreas solo
+        // `plan` coincidía por casualidad, y las otras cinco llegaban a `nil`, así que
+        // la nota salía sin etiqueta en el perfil.
+        XCTAssertEqual(report.coachNotes.map(\.area), [.nutricion, .entreno])
+    }
+
+    /// Un área que iOS no conozca no puede tumbar el informe entero: se pierde la
+    /// etiqueta, se conserva la nota.
+    func testAnUnknownAreaLeavesTheNoteWithoutALabel() throws {
+        let json = """
+        {
+          "content": "",
+          "updated_at": null,
+          "notes": [
+            {"id": 9, "content": "Algo nuevo", "source": "coach",
+             "topic": "area_que_no_existe", "created_at": "2026-08-01T10:00:00+00:00"}
+          ]
+        }
+        """.data(using: .utf8)!
+
+        let report = try UserReportRemoteDataSource.decoder
+            .decode(UserReportApiDTO.self, from: json).toDomain()
+
+        XCTAssertEqual(report.coachNotes.count, 1, "la nota se conserva")
+        XCTAssertNil(report.coachNotes.first?.area)
     }
 }

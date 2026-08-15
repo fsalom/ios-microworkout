@@ -29,6 +29,33 @@ public struct UserReport: Equatable {
     }
 }
 
+/// Área de una nota del informe. Espejo de `NoteArea` del backend.
+///
+/// NO es `AICoachTopic`. Esto era el bug: el campo se lee de una clave llamada
+/// `topic` y se parseaba como si fuera el tema del coach, pero el backend escribe
+/// áreas (`entreno`, `nutricion`…). De los seis valores solo coincidía `plan`, así
+/// que cinco de cada seis notas se quedaban sin etiqueta en el perfil.
+public enum UserReportArea: String, Equatable, CaseIterable {
+    case entreno
+    case nutricion
+    case biometria
+    case descanso
+    case plan
+    case vida
+
+    /// Etiqueta para la píldora de la nota.
+    public var label: String {
+        switch self {
+        case .entreno: return "ENTRENO"
+        case .nutricion: return "NUTRICIÓN"
+        case .biometria: return "BIOMETRÍA"
+        case .descanso: return "DESCANSO"
+        case .plan: return "PLAN"
+        case .vida: return "VIDA"
+        }
+    }
+}
+
 public struct UserReportNote: Identifiable, Equatable {
     public enum Source: String {
         case user
@@ -38,21 +65,21 @@ public struct UserReportNote: Identifiable, Equatable {
     public let id: Int
     public let content: String
     public let source: Source
-    /// Área del coach que la generó, si vino de una conversación con tema.
-    public let topic: AICoachTopic?
+    /// Área de lo aprendido, si el coach la etiquetó.
+    public let area: UserReportArea?
     public let createdAt: Date
 
     public init(
         id: Int,
         content: String,
         source: Source,
-        topic: AICoachTopic? = nil,
+        area: UserReportArea? = nil,
         createdAt: Date
     ) {
         self.id = id
         self.content = content
         self.source = source
-        self.topic = topic
+        self.area = area
         self.createdAt = createdAt
     }
 }

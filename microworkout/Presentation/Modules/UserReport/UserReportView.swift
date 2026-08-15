@@ -88,8 +88,8 @@ struct UserReportView: View {
                     Text(note.content)
                         .font(.subheadline)
                     HStack(spacing: 6) {
-                        if let topic = note.topic {
-                            Text(topic.shortLabel)
+                        if let area = note.area {
+                            Text(area.label)
                                 .font(.caption2)
                                 .fontWeight(.semibold)
                                 .foregroundColor(.orange)
