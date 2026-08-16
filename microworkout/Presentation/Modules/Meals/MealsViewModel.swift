@@ -39,15 +39,18 @@ final class MealsViewModel: ObservableObject {
     private var mealUseCase: MealUseCaseProtocol
     private var userProfileUseCase: UserProfileUseCaseProtocol
     private var coachUseCase: CoachUseCaseProtocol
+    private let coachActionUseCase: CoachActionUseCaseProtocol
 
     init(router: MealsRouter,
          mealUseCase: MealUseCaseProtocol,
          userProfileUseCase: UserProfileUseCaseProtocol,
-         coachUseCase: CoachUseCaseProtocol) {
+         coachUseCase: CoachUseCaseProtocol,
+         coachActionUseCase: CoachActionUseCaseProtocol) {
         self.router = router
         self.mealUseCase = mealUseCase
         self.userProfileUseCase = userProfileUseCase
         self.coachUseCase = coachUseCase
+        self.coachActionUseCase = coachActionUseCase
         loadProfileTargets()
         loadMeals()
         loadCoach()
@@ -58,6 +61,22 @@ final class MealsViewModel: ObservableObject {
         Task { @MainActor in
             self.uiState.coachInsight = await coachUseCase.nutritionInsight()
             self.uiState.isLoadingCoach = false
+        }
+    }
+
+    /// Ejecuta una acción que el coach propuso y el usuario ha confirmado.
+    ///
+    /// Recarga al terminar: la acción cambia el día, y la cabecera y las secciones
+    /// tienen que reflejarlo al instante o parecerá que el botón no hizo nada.
+    func applyCoachAction(_ action: CoachAction) {
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            do {
+                self.uiState.savedMyMealName = try await self.coachActionUseCase.apply(action)
+                self.loadMeals()
+            } catch {
+                self.uiState.error = "No se pudo aplicar"
+            }
         }
     }
 

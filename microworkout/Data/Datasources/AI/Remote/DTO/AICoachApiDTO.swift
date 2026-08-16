@@ -252,6 +252,9 @@ struct AIInsightApiDTO: Decodable {
     let body: String
     let bullets: [String]
     let prompt: String
+    /// Opcional: un backend anterior no las manda, y una tarjeta sin acciones es
+    /// perfectamente válida.
+    let actions: [AIActionApiDTO]?
 
     func toDomain(fallbackTopic: AICoachTopic) -> CoachInsight {
         CoachInsight(
@@ -260,7 +263,57 @@ struct AIInsightApiDTO: Decodable {
             body: body,
             bullets: bullets,
             prompt: prompt,
-            isFromModel: true
+            isFromModel: true,
+            // `compactMap`: una acción que la app no sepa ejecutar se descarta aquí y
+            // no llega a pintarse. Un botón que no hace nada es peor que no tenerlo.
+            actions: (actions ?? []).compactMap { $0.toDomain() }
         )
+    }
+}
+
+struct AIActionApiDTO: Decodable {
+    let type: String
+    let label: String
+    let mealType: String?
+    let foodName: String?
+    let grams: Double?
+    let calories: Double?
+    let proteinG: Double?
+    let carbsG: Double?
+    let fatG: Double?
+
+    enum CodingKeys: String, CodingKey {
+        case type, label, grams, calories
+        case mealType = "meal_type"
+        case foodName = "food_name"
+        case proteinG = "protein_g"
+        case carbsG = "carbs_g"
+        case fatG = "fat_g"
+    }
+
+    func toDomain() -> CoachAction? {
+        switch type {
+        case "add_food":
+            // Sin nombre o sin gramos no hay acción: un botón "añadir pollo" que no
+            // sabe cuánto añadiría aplicaría cualquier cosa.
+            guard let foodName, let grams, grams > 0 else { return nil }
+            return .addFood(
+                CoachAction.AddFood(
+                    label: label,
+                    mealType: mealType.flatMap { MealType(rawValue: $0) },
+                    foodName: foodName,
+                    grams: grams,
+                    nutrition: NutritionInfo(
+                        calories: calories ?? 0,
+                        carbohydrates: carbsG ?? 0,
+                        proteins: proteinG ?? 0,
+                        fats: fatG ?? 0,
+                        fiber: nil
+                    )
+                )
+            )
+        default:
+            return nil
+        }
     }
 }

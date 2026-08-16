@@ -136,6 +136,10 @@ final class DefaultAppComponent: AppComponentProtocol {
         storage: makeUserDefaultsManager()
     )
 
+    lazy var coachActionUseCase: CoachActionUseCaseProtocol = CoachActionUseCase(
+        mealUseCase: mealUseCase
+    )
+
     lazy var aiCoachChatUseCase: AICoachChatUseCaseProtocol = AICoachChatUseCase(
         repository: aiCoachRepository
     )

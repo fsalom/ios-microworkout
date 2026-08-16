@@ -36,7 +36,8 @@ struct MealsView: View {
                         CoachInsightCard(
                             insight: viewModel.uiState.coachInsight,
                             isLoading: viewModel.uiState.isLoadingCoach,
-                            onOpenChat: { prompt in viewModel.goToChat(prompt: prompt) }
+                            onOpenChat: { prompt in viewModel.goToChat(prompt: prompt) },
+                            onApplyAction: { action in viewModel.applyCoachAction(action) }
                         )
                         .padding(.horizontal)
                     }

@@ -23,6 +23,7 @@ protocol AppComponentProtocol: AnyObject {
     var setMediaUseCase: SetMediaUseCaseProtocol { get }
     var aiContextUseCase: AIContextUseCaseProtocol { get }
     var coachUseCase: CoachUseCaseProtocol { get }
+    var coachActionUseCase: CoachActionUseCaseProtocol { get }
     var aiCoachChatUseCase: AICoachChatUseCaseProtocol { get }
     var userReportUseCase: UserReportUseCaseProtocol { get }
     var bodyMetricsUseCase: BodyMetricsUseCaseProtocol { get }

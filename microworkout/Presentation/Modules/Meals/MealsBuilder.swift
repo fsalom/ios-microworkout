@@ -17,7 +17,8 @@ class MealsBuilder {
             router: MealsRouter(navigator: Navigator.shared, component: component),
             mealUseCase: component.mealUseCase,
             userProfileUseCase: component.userProfileUseCase,
-            coachUseCase: component.coachUseCase
+            coachUseCase: component.coachUseCase,
+            coachActionUseCase: component.coachActionUseCase
         )
         return MealsView(viewModel: viewModel, component: component)
     }
