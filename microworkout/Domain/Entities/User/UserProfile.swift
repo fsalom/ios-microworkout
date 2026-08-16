@@ -16,6 +16,13 @@ struct UserProfile: Codable {
     var macroProfile: MacroProfile?
     var freeDays: [Int]?              // weekday indices (Calendar: 1=Dom, 2=Lun...7=Sab)
     var freeDayExtraCalories: Double? // extra kcal por día libre, default 500
+    /// Objetivo diario puesto a mano, si el usuario no quiere el calculado.
+    ///
+    /// `nil` = usar Mifflin-St Jeor. La fórmula es una estimación de partida, no una
+    /// verdad: dos personas con los mismos datos gastan distinto, y quien lleva meses
+    /// midiéndose sabe mejor que la ecuación cuál es su objetivo. Hasta ahora no había
+    /// forma de cambiarlo salvo mintiendo en el nivel de actividad.
+    var calorieTargetOverride: Double?
 
     // Cómo quiere el usuario que le hable el coach. Se componen como REGLAS del
     // system prompt en el servidor, no como texto libre: por eso son opciones
@@ -109,8 +116,20 @@ struct UserProfile: Codable {
         fitnessGoal ?? .maintain
     }
 
-    /// Calcula las calorías diarias objetivo usando la fórmula Mifflin-St Jeor.
+    /// Objetivo diario en vigor: el que el usuario haya puesto, o el calculado.
+    ///
+    /// Todo lo demás cuelga de aquí —macros, día estricto, día libre—, así que el
+    /// override se propaga solo sin tocar el resto de fórmulas.
     var dailyCalorieTarget: Double {
+        if let override = calorieTargetOverride, override > 0 { return override }
+        return calculatedCalorieTarget
+    }
+
+    /// El de la fórmula (Mifflin-St Jeor), siempre disponible.
+    ///
+    /// Se conserva aparte del efectivo para poder ofrecerlo como punto de partida y
+    /// para que el usuario pueda volver a él si su número deja de cuadrarle.
+    var calculatedCalorieTarget: Double {
         let bmr: Double
         switch gender {
         case .male:
@@ -119,6 +138,11 @@ struct UserProfile: Codable {
             bmr = 10 * weight + 6.25 * height - 5 * Double(age) - 161
         }
         return bmr * activityLevel.multiplier + resolvedGoal.calorieAdjustment
+    }
+
+    /// `true` si el objetivo lo puso el usuario y no la fórmula.
+    var usesManualCalorieTarget: Bool {
+        (calorieTargetOverride ?? 0) > 0
     }
 
     var resolvedMacroProfile: MacroProfile {

@@ -532,6 +532,81 @@ final class BodyMetricsTests: XCTestCase {
         XCTAssertNil(profile.coachAvoidWeightTalk)
     }
 
+    // MARK: - Objetivo de calorías puesto a mano
+
+    private func profile(weight: Double = 80, override: Double? = nil) -> UserProfile {
+        UserProfile(
+            name: "Fer", height: 178, weight: weight, age: 38,
+            gender: .male, activityLevel: .moderate, fitnessGoal: .maintain,
+            calorieTargetOverride: override
+        )
+    }
+
+    func testWithoutAnOverrideTheTargetIsTheCalculatedOne() {
+        let p = profile()
+        XCTAssertEqual(p.dailyCalorieTarget, p.calculatedCalorieTarget)
+        XCTAssertFalse(p.usesManualCalorieTarget)
+    }
+
+    func testTheOverrideWinsOverTheFormula() {
+        let p = profile(override: 1_900)
+        XCTAssertEqual(p.dailyCalorieTarget, 1_900)
+        XCTAssertTrue(p.usesManualCalorieTarget)
+        XCTAssertNotEqual(p.calculatedCalorieTarget, 1_900, "el calculado sigue disponible")
+    }
+
+    /// Todo lo demás cuelga del objetivo diario, así que el override tiene que
+    /// arrastrar macros y ciclado sin tocar esas fórmulas.
+    func testTheOverrideFlowsIntoMacrosAndCycling() {
+        var p = profile(override: 1_900)
+        p.freeDays = [7]
+        p.freeDayExtraCalories = 500
+
+        XCTAssertEqual(p.freeDayCalorieTarget, 2_400, "1.900 + 500")
+        // Presupuesto semanal repartido: 1.900×7 menos el sábado a 2.400, entre 6.
+        XCTAssertEqual(p.strictDayCalorieTarget, (1_900 * 7 - 2_400) / 6, accuracy: 0.01)
+        XCTAssertEqual(p.macroTargets.calories, 1_900, accuracy: 1)
+    }
+
+    /// Un cero o un negativo no son un objetivo: se ignoran y manda la fórmula.
+    func testAnInvalidOverrideFallsBackToTheFormula() {
+        XCTAssertEqual(profile(override: 0).dailyCalorieTarget,
+                       profile().calculatedCalorieTarget)
+        XCTAssertEqual(profile(override: -100).dailyCalorieTarget,
+                       profile().calculatedCalorieTarget)
+    }
+
+    /// Lo que decide si se guarda override: solo si difiere del calculado. Si no, el
+    /// objetivo debe seguir moviéndose con el peso en vez de congelarse.
+    func testTheFormValueOnlyBecomesAnOverrideWhenItDiffers() {
+        let calculated = profile().calculatedCalorieTarget
+        let asShown = String(Int(calculated.rounded()))
+
+        XCTAssertNil(
+            ProfileViewModel.calorieOverride(from: asShown, calculated: calculated),
+            "dejar el número precargado no es elegir un objetivo propio"
+        )
+        XCTAssertEqual(
+            ProfileViewModel.calorieOverride(from: "1900", calculated: calculated), 1_900
+        )
+        XCTAssertNil(ProfileViewModel.calorieOverride(from: "", calculated: calculated))
+        XCTAssertNil(ProfileViewModel.calorieOverride(from: "abc", calculated: calculated))
+    }
+
+    func testTheOverrideSurvivesTheRoundTripToTheBackend() throws {
+        let dto = UserProfileApiDTO.from(domain: profile(override: 1_900))
+        XCTAssertEqual(dto.calorieTargetOverride, 1_900)
+
+        let data = try JSONEncoder().encode(dto)
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        XCTAssertEqual(json["calorie_target_override"] as? Double, 1_900, "snake_case")
+
+        let back = try XCTUnwrap(
+            JSONDecoder().decode(UserProfileApiDTO.self, from: data).toDomain()
+        )
+        XCTAssertEqual(back.dailyCalorieTarget, 1_900)
+    }
+
     func testUnknownPreferenceFromTheServerDoesNotBreakDecoding() throws {
         let json = """
         {"name": "Fer", "height": 178, "weight": 79.6, "age": 38, "gender": "male",

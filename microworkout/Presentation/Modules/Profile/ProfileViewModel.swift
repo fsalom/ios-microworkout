@@ -26,6 +26,18 @@ struct ProfileUiState {
     var isEditing: Bool = false
     var freeDays: Set<Int> = []
     var freeDayExtraCalories: Double = 500
+    /// Objetivo diario en el formulario, en texto. Arranca con el CALCULADO, así que
+    /// el campo nunca sale vacío y ajustarlo es tocar un número, no inventarlo.
+    var calorieTargetInput: String = ""
+    /// El de la fórmula, para poder mostrarlo y volver a él.
+    var calculatedCalorieTarget: Double = 0
+
+    /// `true` si lo escrito difiere del calculado, o sea si el usuario ha puesto lo suyo.
+    var isUsingCustomCalorieTarget: Bool {
+        ProfileViewModel.calorieOverride(
+            from: calorieTargetInput, calculated: calculatedCalorieTarget
+        ) != nil
+    }
     var hasCycling: Bool = false
     var strictDayCalorieTarget: Double = 0
     var freeDayCalorieTarget: Double = 0
@@ -113,6 +125,18 @@ class ProfileViewModel: ObservableObject {
         }
     }
 
+    /// El objetivo escrito, o `nil` si es el calculado (o no es un número usable).
+    static func calorieOverride(from input: String, calculated: Double) -> Double? {
+        let normalized = input
+            .replacingOccurrences(of: ".", with: "")
+            .replacingOccurrences(of: ",", with: ".")
+            .trimmingCharacters(in: .whitespaces)
+        guard let value = Double(normalized), value > 0 else { return nil }
+        // Un redondeo de menos de 1 kcal no es una elección del usuario.
+        guard abs(value - calculated.rounded()) >= 1 else { return nil }
+        return value
+    }
+
     static let sessionExpiredMessage = "Tu sesión ha caducado. Vuelve a iniciar sesión."
 
     /// Resumen legible del resultado de una sincronización.
@@ -152,6 +176,10 @@ class ProfileViewModel: ObservableObject {
                 self.uiState.macroTargets = profile.macroTargets
                 self.uiState.freeDays = profile.resolvedFreeDays
                 self.uiState.freeDayExtraCalories = profile.resolvedFreeDayExtra
+                self.uiState.calculatedCalorieTarget = profile.calculatedCalorieTarget
+                // Precargado con el objetivo en vigor: el suyo si lo puso, el
+                // calculado si no.
+                self.uiState.calorieTargetInput = String(Int(profile.dailyCalorieTarget.rounded()))
                 self.uiState.hasCycling = profile.hasCycling
                 self.uiState.strictDayCalorieTarget = profile.strictDayCalorieTarget
                 self.uiState.freeDayCalorieTarget = profile.freeDayCalorieTarget
@@ -171,6 +199,11 @@ class ProfileViewModel: ObservableObject {
                 }
             }
         }
+    }
+
+    /// Devuelve el campo al valor de la fórmula.
+    func resetCalorieTargetToCalculated() {
+        uiState.calorieTargetInput = String(Int(uiState.calculatedCalorieTarget.rounded()))
     }
 
     func startEditing() {
@@ -194,6 +227,13 @@ class ProfileViewModel: ObservableObject {
             macroProfile: uiState.macroProfile,
             freeDays: uiState.freeDays.isEmpty ? nil : Array(uiState.freeDays),
             freeDayExtraCalories: uiState.freeDays.isEmpty ? nil : uiState.freeDayExtraCalories,
+            // Solo se guarda como override si DIFIERE del calculado: si el usuario no
+            // lo toca, el objetivo debe seguir moviéndose con su peso y su actividad
+            // en vez de quedarse congelado el día que abrió el formulario.
+            calorieTargetOverride: Self.calorieOverride(
+                from: uiState.calorieTargetInput,
+                calculated: uiState.calculatedCalorieTarget
+            ),
             coachTone: uiState.coachTone,
             coachDetail: uiState.coachDetail,
             coachAvoidWeightTalk: uiState.coachAvoidWeightTalk

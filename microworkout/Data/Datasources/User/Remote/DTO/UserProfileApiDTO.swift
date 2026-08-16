@@ -13,6 +13,7 @@ struct UserProfileApiDTO: Codable {
     let macroProfile: String?
     let freeDays: [Int]
     let freeDayExtraCalories: Double?
+    let calorieTargetOverride: Double?
     let coachTone: String?
     let coachDetail: String?
     let coachAvoidWeightTalk: Bool?
@@ -28,6 +29,7 @@ struct UserProfileApiDTO: Codable {
         case macroProfile = "macro_profile"
         case freeDays = "free_days"
         case freeDayExtraCalories = "free_day_extra_calories"
+        case calorieTargetOverride = "calorie_target_override"
         case coachTone = "coach_tone"
         case coachDetail = "coach_detail"
         case coachAvoidWeightTalk = "coach_avoid_weight_talk"
@@ -52,6 +54,7 @@ extension UserProfileApiDTO {
             macroProfile: profile.macroProfile.map { UserProfileApiCoding.encode(macro: $0) },
             freeDays: profile.freeDays ?? [],
             freeDayExtraCalories: profile.freeDayExtraCalories,
+            calorieTargetOverride: profile.calorieTargetOverride,
             coachTone: profile.coachTone.map { UserProfileApiCoding.encode(tone: $0) },
             coachDetail: profile.coachDetail.map { UserProfileApiCoding.encode(detail: $0) },
             // El `?? false` es DELIBERADO y no se puede quitar: en el backend
@@ -82,6 +85,7 @@ extension UserProfileApiDTO {
             macroProfile: macroProfile.flatMap { UserProfileApiCoding.decodeMacro($0) },
             freeDays: freeDays.isEmpty ? nil : freeDays,
             freeDayExtraCalories: freeDayExtraCalories,
+            calorieTargetOverride: calorieTargetOverride,
             coachTone: coachTone.flatMap { UserProfileApiCoding.decodeTone($0) },
             coachDetail: coachDetail.flatMap { UserProfileApiCoding.decodeDetail($0) },
             coachAvoidWeightTalk: coachAvoidWeightTalk

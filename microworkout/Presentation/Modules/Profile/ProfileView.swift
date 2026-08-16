@@ -453,6 +453,29 @@ struct ProfileEditView: View {
                 }
             }
 
+            Section {
+                HStack {
+                    Text("kcal/día")
+                    Spacer()
+                    TextField("", text: $viewModel.uiState.calorieTargetInput)
+                        .keyboardType(.numberPad)
+                        .multilineTextAlignment(.trailing)
+                        .frame(maxWidth: 90)
+                }
+                if viewModel.uiState.isUsingCustomCalorieTarget {
+                    Button("Volver al calculado (\(Int(viewModel.uiState.calculatedCalorieTarget.rounded())) kcal)") {
+                        viewModel.resetCalorieTargetToCalculated()
+                    }
+                    .font(.caption)
+                }
+            } header: {
+                Text("Objetivo de calorías")
+            } footer: {
+                Text(viewModel.uiState.isUsingCustomCalorieTarget
+                     ? "Estás usando tu propio objetivo. Los macros y los días libres se recalculan sobre él."
+                     : "Calculado a partir de tu peso, altura, edad, actividad y objetivo. Puedes cambiarlo si tu experiencia dice otra cosa.")
+            }
+
             Section("Perfil de macros") {
                 Picker("Macros", selection: $viewModel.uiState.macroProfile) {
                     ForEach(UserProfile.MacroProfile.allCases, id: \.self) { profile in
