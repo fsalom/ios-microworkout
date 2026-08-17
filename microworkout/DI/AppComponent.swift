@@ -56,6 +56,11 @@ final class DefaultAppComponent: AppComponentProtocol {
         remote: UserProfileRemoteDataSource()
     )
 
+    private lazy var weeklyPlanRepository: WeeklyPlanRepositoryProtocol = WeeklyPlanRepository(
+        local: WeeklyPlanLocalDataSource(storage: makeUserDefaultsManager()),
+        remote: WeeklyPlanRemoteDataSource()
+    )
+
     private lazy var bodyMetricsRepository: BodyMetricsRepositoryProtocol = BodyMetricsRepository(
         health: HealthRepository(
             dataSource: HealthKitDataSource(healthKitManager: makeHealthKitManager())
@@ -95,6 +100,11 @@ final class DefaultAppComponent: AppComponentProtocol {
     lazy var trainingUseCase: TrainingUseCaseProtocol =
         TrainingUseCase(repository: trainingRepository)
 
+    lazy var weeklyPlanUseCase: WeeklyPlanUseCaseProtocol = WeeklyPlanUseCase(
+        repository: weeklyPlanRepository,
+        workoutLogUseCase: workoutLogUseCase
+    )
+
     lazy var exerciseUseCase: ExerciseUseCaseProtocol =
         ExerciseUseCase(repository: exerciseRepository)
 
@@ -110,7 +120,8 @@ final class DefaultAppComponent: AppComponentProtocol {
         exercise: exerciseRepository,
         meal: mealRepository,
         userProfile: userProfileRepository,
-        bodyMetrics: bodyMetricsRepository
+        bodyMetrics: bodyMetricsRepository,
+        weeklyPlan: weeklyPlanRepository
     )
 
     lazy var exerciseProgressionUseCase: ExerciseProgressionUseCaseProtocol = ExerciseProgressionUseCase(

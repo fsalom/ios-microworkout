@@ -27,6 +27,7 @@ protocol AppComponentProtocol: AnyObject {
     var aiCoachChatUseCase: AICoachChatUseCaseProtocol { get }
     var userReportUseCase: UserReportUseCaseProtocol { get }
     var bodyMetricsUseCase: BodyMetricsUseCaseProtocol { get }
+    var weeklyPlanUseCase: WeeklyPlanUseCaseProtocol { get }
     var exerciseProgressionUseCase: ExerciseProgressionUseCaseProtocol { get }
     var syncLocalDataUseCase: SyncLocalDataUseCaseProtocol { get }
 
