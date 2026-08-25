@@ -29,6 +29,8 @@ extension AICoachRequestApiDTO {
         static let planExercises = 40
         static let question = 500
         static let turnContent = 4_000
+        static let weeklyPlanNote = 200
+        static let sessionName = 120
     }
 
     init(
@@ -53,6 +55,7 @@ extension AICoachRequestApiDTO {
             today: Self.todaySnapshot(context: context, todayLogs: todayLogs, today: today),
             history: Self.history(from: pastLogs),
             plan: Self.plan(context: context, logs: logs),
+            weeklyPlan: Self.weeklyPlan(from: context),
             nutritionHistory: Self.nutritionHistory(context: context, today: today),
             messages: Self.messages(from: conversation),
             userQuestion: Self.trimmed(question, max: Limits.question)
@@ -347,6 +350,23 @@ extension AICoachRequestApiDTO {
         log.exercises.reduce(0) { total, exercise in
             total + exercise.sets.reduce(0) { $0 + ($1.weightKg ?? 0) * Double($1.reps ?? 0) }
         }
+    }
+
+    // MARK: - Plan semanal
+
+    private static func weeklyPlan(from context: AIContext) -> [WeeklyPlanDay] {
+        // El backend valida `ge=1, le=7` con `extra="forbid"`: un weekday fuera de
+        // rango sería un 422 de TODA la petición, así que se filtra aquí.
+        context.weeklyPlan
+            .filter { (1...7).contains($0.weekday) }
+            .prefix(7)
+            .map {
+                WeeklyPlanDay(
+                    weekday: $0.weekday,
+                    sessionName: trimmed($0.sessionName, max: Limits.sessionName),
+                    note: trimmed($0.note, max: Limits.weeklyPlanNote)
+                )
+            }
     }
 
     // MARK: - Plan

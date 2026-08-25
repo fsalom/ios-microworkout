@@ -6,17 +6,20 @@ class AIContextUseCase: AIContextUseCaseProtocol {
     private let workoutEntryUseCase: WorkoutEntryUseCaseProtocol
     private let mealUseCase: MealUseCaseProtocol
     private let healthUseCase: HealthUseCaseProtocol
+    private let weeklyPlanUseCase: WeeklyPlanUseCaseProtocol
 
     init(userProfileUseCase: UserProfileUseCaseProtocol,
          workoutLogUseCase: WorkoutLogUseCaseProtocol,
          workoutEntryUseCase: WorkoutEntryUseCaseProtocol,
          mealUseCase: MealUseCaseProtocol,
-         healthUseCase: HealthUseCaseProtocol) {
+         healthUseCase: HealthUseCaseProtocol,
+         weeklyPlanUseCase: WeeklyPlanUseCaseProtocol) {
         self.userProfileUseCase = userProfileUseCase
         self.workoutLogUseCase = workoutLogUseCase
         self.workoutEntryUseCase = workoutEntryUseCase
         self.mealUseCase = mealUseCase
         self.healthUseCase = healthUseCase
+        self.weeklyPlanUseCase = weeklyPlanUseCase
     }
 
     func buildContext(mealDaysBack: Int = 30, healthWeeksBack: Int = 4) async -> AIContext {
@@ -27,6 +30,7 @@ class AIContextUseCase: AIContextUseCaseProtocol {
         async let meals = await buildMeals(daysBack: mealDaysBack)
         async let healthDays = await buildHealthDays(weeksBack: healthWeeksBack)
         async let healthWorkouts = await buildHealthWorkouts()
+        async let weeklyPlan = await buildWeeklyPlan()
 
         return await AIContext(
             generatedAt: Date(),
@@ -37,7 +41,8 @@ class AIContextUseCase: AIContextUseCaseProtocol {
             manualEntries: manualEntries,
             meals: meals,
             healthDays: healthDays,
-            healthWorkouts: healthWorkouts
+            healthWorkouts: healthWorkouts,
+            weeklyPlan: weeklyPlan
         )
     }
 
@@ -53,6 +58,19 @@ class AIContextUseCase: AIContextUseCaseProtocol {
     }
 
     // MARK: - Builders
+
+    private func buildWeeklyPlan() async -> [AIPlannedDaySnapshot] {
+        guard let week = try? await weeklyPlanUseCase.getResolvedWeek() else { return [] }
+        return week.map { day in
+            AIPlannedDaySnapshot(
+                weekday: day.weekday,
+                // Una sesión borrada no es un descanso: el usuario quería entrenar
+                // ese día. Se dice tal cual para que el coach pueda avisar.
+                sessionName: day.isMissingSession ? "(sesión eliminada)" : day.session?.name,
+                note: day.note
+            )
+        }
+    }
 
     private func buildProfileSnapshot() async -> AIProfileSnapshot? {
         guard let profile = try? await userProfileUseCase.getProfile() else { return nil }

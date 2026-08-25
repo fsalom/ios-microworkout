@@ -23,14 +23,31 @@ struct AICoachRequestApiDTO: Encodable {
     let today: TodaySnapshot
     let history: [HistoryEntry]
     let plan: [PlanSession]
+    /// La semana planificada: qué sesión toca cada día. Distinto de `plan`, que
+    /// son las plantillas con su adherencia — esto es el calendario.
+    let weeklyPlan: [WeeklyPlanDay]
     let nutritionHistory: [NutritionDay]
     let messages: [ChatTurn]
     let userQuestion: String?
 
     enum CodingKeys: String, CodingKey {
         case date, now, topic, profile, today, history, plan, messages
+        case weeklyPlan = "weekly_plan"
         case nutritionHistory = "nutrition_history"
         case userQuestion = "user_question"
+    }
+
+    // MARK: - Plan semanal
+
+    struct WeeklyPlanDay: Encodable {
+        let weekday: Int           // 1=domingo … 7=sábado (Calendar)
+        let sessionName: String?   // nil = descanso planificado
+        let note: String?
+
+        enum CodingKeys: String, CodingKey {
+            case weekday, note
+            case sessionName = "session_name"
+        }
     }
 
     // MARK: - Perfil

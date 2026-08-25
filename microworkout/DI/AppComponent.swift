@@ -134,7 +134,8 @@ final class DefaultAppComponent: AppComponentProtocol {
         workoutLogUseCase: workoutLogUseCase,
         workoutEntryUseCase: workoutEntryUseCase,
         mealUseCase: mealUseCase,
-        healthUseCase: healthUseCase
+        healthUseCase: healthUseCase,
+        weeklyPlanUseCase: weeklyPlanUseCase
     )
 
     lazy var aiCoachRepository: AICoachRepositoryProtocol = AICoachRepository(

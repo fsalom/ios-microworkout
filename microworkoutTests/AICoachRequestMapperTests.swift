@@ -20,7 +20,8 @@ final class AICoachRequestMapperTests: XCTestCase {
         meals: [AIMealSnapshot] = [],
         healthDays: [AIHealthDaySnapshot] = [],
         healthWorkouts: [AIHealthWorkoutSnapshot] = [],
-        manualEntries: [AIWorkoutEntrySnapshot] = []
+        manualEntries: [AIWorkoutEntrySnapshot] = [],
+        weeklyPlan: [AIPlannedDaySnapshot] = []
     ) -> AIContext {
         AIContext(
             generatedAt: Date(),
@@ -31,7 +32,8 @@ final class AICoachRequestMapperTests: XCTestCase {
             manualEntries: manualEntries,
             meals: meals,
             healthDays: healthDays,
-            healthWorkouts: healthWorkouts
+            healthWorkouts: healthWorkouts,
+            weeklyPlan: weeklyPlan
         )
     }
 
@@ -176,7 +178,7 @@ final class AICoachRequestMapperTests: XCTestCase {
             Set(json.keys),
             [
                 "date", "now", "topic", "profile", "today", "history", "plan",
-                "nutrition_history", "messages", "user_question"
+                "weekly_plan", "nutrition_history", "messages", "user_question"
             ]
         )
         XCTAssertEqual(json["topic"] as? String, "nutrition")
@@ -383,6 +385,44 @@ final class AICoachRequestMapperTests: XCTestCase {
         let today = try XCTUnwrap(json["today"] as? [String: Any])
         let health = try XCTUnwrap(today["health"] as? [String: Any])
         XCTAssertEqual(health["steps"] as? Int, 8_200)
+    }
+
+    // MARK: - Plan semanal
+
+    /// El calendario viaja con las claves que espera el backend (`weekly_plan`,
+    /// `session_name`) y el descanso viaja como ausencia de sesión, no como "".
+    /// Este payload está acoplado a Pydantic con `extra="forbid"`: si esto cambia,
+    /// el DTO del backend cambia con él.
+    func testWeeklyPlanTravelsWithBackendKeys() throws {
+        let request = AICoachRequestApiDTO(
+            context: makeContext(weeklyPlan: [
+                AIPlannedDaySnapshot(weekday: 2, sessionName: "Empuje"),
+                AIPlannedDaySnapshot(weekday: 3, sessionName: nil, note: "paseo"),
+                AIPlannedDaySnapshot(weekday: 9, sessionName: "Rota")  // fuera de rango
+            ]),
+            topic: .daily, question: nil, now: Date()
+        )
+
+        let json = try encode(request)
+        let days = try XCTUnwrap(json["weekly_plan"] as? [[String: Any]])
+        // El día 9 no puede llegar al backend: `ge=1, le=7` + `extra="forbid"`
+        // convierten un día inválido en un 422 de toda la petición.
+        XCTAssertEqual(days.count, 2)
+        XCTAssertEqual(days[0]["weekday"] as? Int, 2)
+        XCTAssertEqual(days[0]["session_name"] as? String, "Empuje")
+        XCTAssertNil(days[1]["session_name"], "descanso = sin clave, no cadena vacía")
+        XCTAssertEqual(days[1]["note"] as? String, "paseo")
+    }
+
+    func testWithoutWeeklyPlanTheKeyIsAnEmptyList() throws {
+        let request = AICoachRequestApiDTO(
+            context: makeContext(), topic: .daily, question: nil, now: Date()
+        )
+        let json = try encode(request)
+        // Lista vacía, no ausencia: el campo existe en el modelo Pydantic con
+        // default, y mandarlo vacío es lo que un cliente antiguo parece desde el
+        // backend. Así los dos casos recorren el mismo camino.
+        XCTAssertNotNil(json["weekly_plan"] as? [[String: Any]])
     }
 
     // MARK: - Detalle por alimento, fibra y distancia

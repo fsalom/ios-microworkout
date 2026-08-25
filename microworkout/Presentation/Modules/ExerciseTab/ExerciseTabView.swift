@@ -47,6 +47,9 @@ struct ExerciseTabView: View {
                     onTapLinkedLog: { log, _ in viewModel.goTo(log: log) }
                 )
                 .padding(.horizontal, 16)
+
+                WeeklyPlanRow { viewModel.goToWeeklyPlan() }
+                    .padding(.horizontal, 16)
             }
             .padding(.bottom, 24)
         }
@@ -75,6 +78,40 @@ struct ExerciseTabView: View {
 }
 
 // MARK: - Header
+
+// MARK: - Weekly plan
+
+/// Acceso al plan semanal: qué sesión toca cada día.
+private struct WeeklyPlanRow: View {
+    let onTap: () -> Void
+
+    var body: some View {
+        Button(action: onTap) {
+            HStack(spacing: 12) {
+                Image(systemName: "calendar")
+                    .font(.body)
+                    .foregroundColor(.accentColor)
+                    .frame(width: 28)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Plan semanal")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundColor(.primary)
+                    Text("Qué sesión toca cada día")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.caption.weight(.semibold))
+                    .foregroundColor(Color(.tertiaryLabel))
+            }
+            .padding(14)
+            .background(Color(.secondarySystemGroupedBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 14))
+        }
+        .buttonStyle(.plain)
+    }
+}
 
 // MARK: - Calendar Section
 

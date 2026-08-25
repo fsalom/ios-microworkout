@@ -175,6 +175,8 @@ final class ExerciseTabViewModel: ObservableObject {
         router.goToLogDetail(log)
     }
 
+    func goToWeeklyPlan() { router.goToWeeklyPlan() }
+
     func goToChat(prompt: String) {
         router.goToChat(prompt: prompt, topic: .workout)
     }

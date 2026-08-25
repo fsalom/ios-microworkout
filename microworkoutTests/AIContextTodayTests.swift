@@ -93,13 +93,21 @@ final class AIContextTodayTests: XCTestCase {
         func unlinkEntryFromWorkout(_ workoutID: String) {}
     }
 
+    private struct StubWeeklyPlan: WeeklyPlanUseCaseProtocol {
+        func getPlan() async throws -> WeeklyPlan { .empty }
+        func savePlan(_ plan: WeeklyPlan) async throws {}
+        func getResolvedWeek() async throws -> [ResolvedPlannedDay] { [] }
+        func plannedDay(on date: Date) async throws -> ResolvedPlannedDay? { nil }
+    }
+
     private func makeUseCase(_ meals: SpyMealUseCase) -> AIContextUseCase {
         AIContextUseCase(
             userProfileUseCase: StubProfile(),
             workoutLogUseCase: StubLogs(),
             workoutEntryUseCase: StubEntries(),
             mealUseCase: meals,
-            healthUseCase: StubHealth()
+            healthUseCase: StubHealth(),
+            weeklyPlanUseCase: StubWeeklyPlan()
         )
     }
 

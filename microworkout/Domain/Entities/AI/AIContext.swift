@@ -15,6 +15,8 @@ public struct AIContext: Codable {
     public var meals: [AIMealSnapshot]
     public var healthDays: [AIHealthDaySnapshot]
     public var healthWorkouts: [AIHealthWorkoutSnapshot]
+    /// La semana planificada, con los nombres de sesión ya resueltos.
+    public var weeklyPlan: [AIPlannedDaySnapshot]
 
     public init(
         generatedAt: Date = Date(),
@@ -25,7 +27,8 @@ public struct AIContext: Codable {
         manualEntries: [AIWorkoutEntrySnapshot] = [],
         meals: [AIMealSnapshot] = [],
         healthDays: [AIHealthDaySnapshot] = [],
-        healthWorkouts: [AIHealthWorkoutSnapshot] = []
+        healthWorkouts: [AIHealthWorkoutSnapshot] = [],
+        weeklyPlan: [AIPlannedDaySnapshot] = []
     ) {
         self.generatedAt = generatedAt
         self.locale = locale
@@ -36,6 +39,26 @@ public struct AIContext: Codable {
         self.meals = meals
         self.healthDays = healthDays
         self.healthWorkouts = healthWorkouts
+        self.weeklyPlan = weeklyPlan
+    }
+}
+
+// MARK: - Weekly plan
+
+/// Un día del plan semanal, listo para mandar: nombre de sesión, no id.
+///
+/// Los ids solo significan algo dentro de la base de sesiones del dispositivo; el
+/// modelo necesita "lunes: Empuje". `sessionName` a nil = descanso planificado.
+public struct AIPlannedDaySnapshot: Codable {
+    /// Índice de `Calendar`: 1=domingo … 7=sábado.
+    public var weekday: Int
+    public var sessionName: String?
+    public var note: String?
+
+    public init(weekday: Int, sessionName: String? = nil, note: String? = nil) {
+        self.weekday = weekday
+        self.sessionName = sessionName
+        self.note = note
     }
 }
 

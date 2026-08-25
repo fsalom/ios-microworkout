@@ -25,6 +25,10 @@ class ExerciseTabRouter {
         navigator.push(to: WorkoutLogDetailBuilder(component: component).build(log: log))
     }
 
+    func goToWeeklyPlan() {
+        navigator.push(to: WeeklyPlanBuilder(component: component).build())
+    }
+
     func goToChat(prompt: String, topic: AICoachTopic) {
         navigator.push(
             to: AIChatBuilder(component: component).build(topic: topic, initialPrompt: prompt)
