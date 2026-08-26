@@ -177,6 +177,12 @@ final class ExerciseTabViewModel: ObservableObject {
 
     func goToWeeklyPlan() { router.goToWeeklyPlan() }
 
+    /// Pulgar del usuario sobre la tarjeta. En segundo plano: valorar no bloquea.
+    func rateCoachInsight(helpful: Bool, reason: String?) {
+        guard let insight = uiState.coachInsight else { return }
+        Task { await self.coachUseCase.rate(insight, helpful: helpful, reason: reason) }
+    }
+
     func goToChat(prompt: String) {
         router.goToChat(prompt: prompt, topic: .workout)
     }

@@ -13,16 +13,23 @@ protocol CoachActionUseCaseProtocol {
 
 final class CoachActionUseCase: CoachActionUseCaseProtocol {
     private let mealUseCase: MealUseCaseProtocol
+    private let feedback: CoachFeedbackUseCaseProtocol?
 
-    init(mealUseCase: MealUseCaseProtocol) {
+    init(mealUseCase: MealUseCaseProtocol, feedback: CoachFeedbackUseCaseProtocol? = nil) {
         self.mealUseCase = mealUseCase
+        self.feedback = feedback
     }
 
     func apply(_ action: CoachAction) async throws -> String {
+        let confirmation: String
         switch action {
         case .addFood(let food):
-            return try await addFood(food)
+            confirmation = try await addFood(food)
         }
+        // Solo tras aplicarse de verdad: una acción que falló no es una aceptada.
+        // Las acciones de hoy son de comida, de ahí el tema.
+        await feedback?.actionApplied(action, topic: .nutrition)
+        return confirmation
     }
 
     private func addFood(_ food: CoachAction.AddFood) async throws -> String {

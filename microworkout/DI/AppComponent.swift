@@ -142,14 +142,21 @@ final class DefaultAppComponent: AppComponentProtocol {
         remote: AICoachRemoteDataSource()
     )
 
-    lazy var coachUseCase: CoachUseCaseProtocol = CoachUseCase(
-        contextUseCase: aiContextUseCase,
-        repository: aiCoachRepository,
+    lazy var coachFeedbackUseCase: CoachFeedbackUseCaseProtocol = CoachFeedbackUseCase(
+        repository: CoachFeedbackRepository(remote: CoachFeedbackRemoteDataSource()),
         storage: makeUserDefaultsManager()
     )
 
+    lazy var coachUseCase: CoachUseCaseProtocol = CoachUseCase(
+        contextUseCase: aiContextUseCase,
+        repository: aiCoachRepository,
+        storage: makeUserDefaultsManager(),
+        feedback: coachFeedbackUseCase
+    )
+
     lazy var coachActionUseCase: CoachActionUseCaseProtocol = CoachActionUseCase(
-        mealUseCase: mealUseCase
+        mealUseCase: mealUseCase,
+        feedback: coachFeedbackUseCase
     )
 
     lazy var aiCoachChatUseCase: AICoachChatUseCaseProtocol = AICoachChatUseCase(

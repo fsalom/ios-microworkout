@@ -14,6 +14,7 @@ class AIChatBuilder {
         let viewModel = AIChatViewModel(
             contextUseCase: component.aiContextUseCase,
             chatUseCase: component.aiCoachChatUseCase,
+            feedbackUseCase: component.coachFeedbackUseCase,
             topic: topic,
             initialPrompt: initialPrompt
         )

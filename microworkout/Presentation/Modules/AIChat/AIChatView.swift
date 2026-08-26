@@ -48,10 +48,15 @@ struct AIChatView: View {
             ScrollView {
                 VStack(spacing: 10) {
                     ForEach(viewModel.uiState.messages) { message in
+                        let isStreamingThis = viewModel.uiState.isStreaming
+                            && message.id == viewModel.uiState.messages.last?.id
                         MessageBubble(
                             message: message,
-                            isStreaming: viewModel.uiState.isStreaming
-                                && message.id == viewModel.uiState.messages.last?.id
+                            isStreaming: isStreamingThis,
+                            isRated: viewModel.uiState.ratedMessageIds.contains(message.id),
+                            onRate: { helpful, reason in
+                                viewModel.rate(message: message, helpful: helpful, reason: reason)
+                            }
                         )
                         .id(message.id)
                     }
@@ -102,29 +107,85 @@ struct AIChatView: View {
 private struct MessageBubble: View {
     let message: AIChatMessage
     let isStreaming: Bool
+    var isRated: Bool = false
+    /// (`helpful`, `motivo?`). Solo se pinta en respuestas del coach terminadas.
+    var onRate: ((Bool, String?) -> Void)? = nil
+
+    @State private var isAskingReason = false
+    @State private var reasonText = ""
 
     var body: some View {
         HStack(alignment: .bottom) {
             if message.role == .user { Spacer(minLength: 40) }
 
-            Group {
-                if message.text.isEmpty && isStreaming {
-                    TypingIndicator()
-                } else {
-                    // El coach responde en markdown (títulos `##`, viñetas), así que
-                    // `Text` a secas dejaría los `##` a la vista.
-                    MarkdownText(raw: message.text)
+            VStack(alignment: .leading, spacing: 6) {
+                Group {
+                    if message.text.isEmpty && isStreaming {
+                        TypingIndicator()
+                    } else {
+                        // El coach responde en markdown (títulos `##`, viñetas), así que
+                        // `Text` a secas dejaría los `##` a la vista.
+                        MarkdownText(raw: message.text)
+                    }
+                }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 10)
+                .background(
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(bubbleColor)
+                )
+                .foregroundColor(textColor)
+
+                if showsRating {
+                    ratingRow
                 }
             }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 10)
-            .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(bubbleColor)
-            )
-            .foregroundColor(textColor)
 
             if message.role != .user { Spacer(minLength: 40) }
+        }
+    }
+
+    private var showsRating: Bool {
+        onRate != nil && message.role == .assistant && !isStreaming && !message.text.isEmpty
+    }
+
+    @ViewBuilder
+    private var ratingRow: some View {
+        if isRated {
+            Text("Gracias")
+                .font(.caption2)
+                .foregroundColor(.secondary)
+                .padding(.leading, 8)
+        } else {
+            HStack(spacing: 14) {
+                Button {
+                    onRate?(true, nil)
+                } label: {
+                    Image(systemName: "hand.thumbsup")
+                        .font(.system(size: 13))
+                        .foregroundColor(.secondary)
+                }
+                Button {
+                    reasonText = ""
+                    isAskingReason = true
+                } label: {
+                    Image(systemName: "hand.thumbsdown")
+                        .font(.system(size: 13))
+                        .foregroundColor(.secondary)
+                }
+            }
+            .buttonStyle(.plain)
+            .padding(.leading, 8)
+            .alert("¿Qué ha fallado en la respuesta?", isPresented: $isAskingReason) {
+                TextField("Opcional", text: $reasonText)
+                Button("Enviar") {
+                    let reason = reasonText.trimmingCharacters(in: .whitespacesAndNewlines)
+                    onRate?(false, reason.isEmpty ? nil : reason)
+                }
+                Button("Cancelar", role: .cancel) {}
+            } message: {
+                Text("Ayuda al coach a afinar las siguientes.")
+            }
         }
     }
 

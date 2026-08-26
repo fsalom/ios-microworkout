@@ -18,17 +18,22 @@ final class CoachUseCase: CoachUseCaseProtocol {
     private let storage: UserDefaultsManagerProtocol
     private let heuristics = HeuristicCoach()
     private let ttl: TimeInterval
+    /// Opcional: sin él, todo funciona igual pero el coach no se entera de qué
+    /// propuestas se ignoran ni de las valoraciones.
+    private let feedback: CoachFeedbackUseCaseProtocol?
 
     init(
         contextUseCase: AIContextUseCaseProtocol,
         repository: AICoachRepositoryProtocol,
         storage: UserDefaultsManagerProtocol,
-        ttl: TimeInterval = 6 * 60 * 60
+        ttl: TimeInterval = 6 * 60 * 60,
+        feedback: CoachFeedbackUseCaseProtocol? = nil
     ) {
         self.contextUseCase = contextUseCase
         self.repository = repository
         self.storage = storage
         self.ttl = ttl
+        self.feedback = feedback
     }
 
     // MARK: - API
@@ -39,6 +44,13 @@ final class CoachUseCase: CoachUseCaseProtocol {
 
     func refreshInsight(for topic: AICoachTopic) async -> CoachInsight {
         await resolve(topic: topic, ignoringCache: true)
+    }
+
+    func rate(_ insight: CoachInsight, helpful: Bool, reason: String?) async {
+        // Solo lo que dijo el modelo: valorar el consejo heurístico local no le
+        // enseña nada a nadie.
+        guard insight.isFromModel else { return }
+        await feedback?.insightRated(insight, helpful: helpful, reason: reason)
     }
 
     private func resolve(topic: AICoachTopic, ignoringCache: Bool) async -> CoachInsight {
@@ -59,10 +71,18 @@ final class CoachUseCase: CoachUseCaseProtocol {
 
         do {
             let insight = try await repository.insight(context: context, topic: topic)
+            // La tarjeta que se va a reemplazar: si proponía acciones y ninguna se
+            // llegó a tocar, eso es una señal ("ignoradas") que el coach necesita.
+            // Se mira ANTES de sobrescribir la caché, que es donde viven.
+            let superseded: CachedInsight? = storage.get(forKey: key)
             storage.save(
                 CachedInsight(insight: insight, fingerprint: fingerprint),
                 forKey: key
             )
+            if let feedback, let old = superseded?.domainActions(), !old.isEmpty {
+                // En segundo plano: reportar señal no puede retrasar la tarjeta.
+                Task { await feedback.actionsSuperseded(old, topic: topic) }
+            }
             return insight
         } catch {
             // Invitado o fallo de red: no es un error que merezca UI propia, la
@@ -136,6 +156,50 @@ final class CoachUseCase: CoachUseCaseProtocol {
         let prompt: String
         let fingerprint: String
         let createdAt: Date
+        /// Opcional para poder decodificar cachés guardadas antes de que existiera.
+        let actions: [CachedAction]?
+
+        /// `CoachAction` es un enum con asociados y no es `Codable`; esto es su
+        /// forma persistible. Guardarlas arregla además que una tarjeta servida
+        /// desde caché perdiera sus botones.
+        struct CachedAction: Codable {
+            let label: String
+            let mealType: String?
+            let foodName: String
+            let grams: Double
+            let calories: Double
+            let carbohydrates: Double
+            let proteins: Double
+            let fats: Double
+
+            init(_ food: CoachAction.AddFood) {
+                label = food.label
+                mealType = food.mealType?.rawValue
+                foodName = food.foodName
+                grams = food.grams
+                calories = food.nutrition.calories
+                carbohydrates = food.nutrition.carbohydrates
+                proteins = food.nutrition.proteins
+                fats = food.nutrition.fats
+            }
+
+            func toDomain() -> CoachAction {
+                .addFood(CoachAction.AddFood(
+                    label: label,
+                    mealType: mealType.flatMap { MealType(rawValue: $0) },
+                    foodName: foodName,
+                    grams: grams,
+                    nutrition: NutritionInfo(
+                        calories: calories, carbohydrates: carbohydrates,
+                        proteins: proteins, fats: fats
+                    )
+                ))
+            }
+        }
+
+        func domainActions() -> [CoachAction] {
+            (actions ?? []).map { $0.toDomain() }
+        }
 
         init(insight: CoachInsight, fingerprint: String, createdAt: Date = Date()) {
             self.title = insight.title
@@ -144,6 +208,11 @@ final class CoachUseCase: CoachUseCaseProtocol {
             self.prompt = insight.prompt
             self.fingerprint = fingerprint
             self.createdAt = createdAt
+            self.actions = insight.actions.map { action in
+                switch action {
+                case .addFood(let food): return CachedAction(food)
+                }
+            }
         }
 
         func toDomain(topic: AICoachTopic) -> CoachInsight {
@@ -153,7 +222,8 @@ final class CoachUseCase: CoachUseCaseProtocol {
                 body: body,
                 bullets: bullets,
                 prompt: prompt,
-                isFromModel: true
+                isFromModel: true,
+                actions: domainActions()
             )
         }
     }

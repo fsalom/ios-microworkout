@@ -10,12 +10,19 @@ struct CoachInsightCard: View {
     /// Se invoca al confirmar una acción propuesta. `nil` en las pantallas que aún
     /// no saben ejecutarlas: entonces la tarjeta no las pinta.
     var onApplyAction: ((CoachAction) -> Void)? = nil
+    /// Pulgar arriba/abajo del usuario sobre la tarjeta (`helpful`, `motivo?`).
+    /// `nil` = la pantalla no recoge valoraciones y los pulgares no se pintan.
+    var onFeedback: ((Bool, String?) -> Void)? = nil
 
     /// Acción pendiente de confirmar. El coach propone, el usuario decide: aplicar
     /// algo de un solo toque, con macros que ha estimado un modelo, sería registrar
     /// comida en su nombre sin que lo haya visto.
     @State private var pendingAction: CoachAction?
     @State private var appliedActionIds: Set<String> = []
+    /// Ya valoró esta tarjeta: los pulgares se sustituyen por un "gracias".
+    @State private var feedbackSent = false
+    @State private var isAskingReason = false
+    @State private var reasonText = ""
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -64,7 +71,15 @@ struct CoachInsightCard: View {
                     actionButtons(insight.actions, onApply: onApplyAction)
                 }
 
-                openChatButton(prompt: insight.prompt)
+                HStack(alignment: .center) {
+                    openChatButton(prompt: insight.prompt)
+                    // Solo se valora lo que dijo el modelo: el cálculo local no
+                    // tiene a quién enseñar.
+                    if onFeedback != nil, insight.isFromModel {
+                        Spacer()
+                        feedbackButtons
+                    }
+                }
             } else if isLoading {
                 Text("Preparando análisis…")
                     .font(.subheadline)
@@ -85,6 +100,46 @@ struct CoachInsightCard: View {
             RoundedRectangle(cornerRadius: 18)
                 .stroke(Color.orange.opacity(0.25), lineWidth: 1)
         )
+    }
+
+    @ViewBuilder
+    private var feedbackButtons: some View {
+        if feedbackSent {
+            Text("Gracias")
+                .font(.caption2)
+                .foregroundColor(.white.opacity(0.5))
+        } else {
+            HStack(spacing: 14) {
+                Button {
+                    feedbackSent = true
+                    onFeedback?(true, nil)
+                } label: {
+                    Image(systemName: "hand.thumbsup")
+                        .font(.system(size: 14))
+                        .foregroundColor(.white.opacity(0.55))
+                }
+                Button {
+                    reasonText = ""
+                    isAskingReason = true
+                } label: {
+                    Image(systemName: "hand.thumbsdown")
+                        .font(.system(size: 14))
+                        .foregroundColor(.white.opacity(0.55))
+                }
+            }
+            .buttonStyle(.plain)
+            .alert("¿Qué no te ha servido?", isPresented: $isAskingReason) {
+                TextField("Opcional", text: $reasonText)
+                Button("Enviar") {
+                    feedbackSent = true
+                    let reason = reasonText.trimmingCharacters(in: .whitespacesAndNewlines)
+                    onFeedback?(false, reason.isEmpty ? nil : reason)
+                }
+                Button("Cancelar", role: .cancel) {}
+            } message: {
+                Text("Ayuda al coach a afinar los próximos consejos.")
+            }
+        }
     }
 
     private var header: some View {

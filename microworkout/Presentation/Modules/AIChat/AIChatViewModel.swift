@@ -43,6 +43,8 @@ struct AIChatUiState {
     var isContextSheetVisible: Bool = false
     var isContextReady: Bool = false
     var error: String?
+    /// Respuestas ya valoradas: sus pulgares se apagan para no contar doble.
+    var ratedMessageIds: Set<UUID> = []
 
     var canSend: Bool {
         !isStreaming && !input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
@@ -61,6 +63,8 @@ final class AIChatViewModel: ObservableObject {
 
     private let contextUseCase: AIContextUseCaseProtocol
     private let chatUseCase: AICoachChatUseCaseProtocol
+    /// `nil` en previews y tests: los pulgares simplemente no reportan.
+    private let feedbackUseCase: CoachFeedbackUseCaseProtocol?
     private let topic: AICoachTopic
     private var streamTask: Task<Void, Never>?
 
@@ -80,11 +84,13 @@ final class AIChatViewModel: ObservableObject {
     init(
         contextUseCase: AIContextUseCaseProtocol,
         chatUseCase: AICoachChatUseCaseProtocol,
+        feedbackUseCase: CoachFeedbackUseCaseProtocol? = nil,
         topic: AICoachTopic = .free,
         initialPrompt: String? = nil
     ) {
         self.contextUseCase = contextUseCase
         self.chatUseCase = chatUseCase
+        self.feedbackUseCase = feedbackUseCase
         self.topic = topic
         if let initialPrompt {
             self.uiState.input = initialPrompt
@@ -93,6 +99,21 @@ final class AIChatViewModel: ObservableObject {
 
     deinit {
         streamTask?.cancel()
+    }
+
+    // MARK: - Valoración
+
+    /// Pulgar sobre una respuesta del coach. El envío va en segundo plano y sin
+    /// error hacia la UI: el feedback nunca puede romper el chat.
+    func rate(message: AIChatMessage, helpful: Bool, reason: String?) {
+        guard message.role == .assistant, !message.text.isEmpty else { return }
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            self.uiState.ratedMessageIds.insert(message.id)
+            await self.feedbackUseCase?.chatRated(
+                topic: self.topic, answer: message.text, helpful: helpful, reason: reason
+            )
+        }
     }
 
     // MARK: - Contexto

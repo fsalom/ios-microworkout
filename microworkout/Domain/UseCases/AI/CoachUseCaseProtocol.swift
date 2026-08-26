@@ -4,6 +4,9 @@ protocol CoachUseCaseProtocol {
     func insight(for topic: AICoachTopic) async -> CoachInsight
     /// Ignora la caché y vuelve a preguntar al modelo.
     func refreshInsight(for topic: AICoachTopic) async -> CoachInsight
+    /// Pulgar arriba/abajo del usuario sobre una tarjeta. No lanza ni bloquea:
+    /// el feedback nunca puede romper la UX.
+    func rate(_ insight: CoachInsight, helpful: Bool, reason: String?) async
 
     func workoutInsight() async -> CoachInsight
     func planInsight() async -> CoachInsight
