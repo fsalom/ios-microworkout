@@ -49,12 +49,33 @@ struct ProfileUiState {
     var coachPreferencesError: String?
     var healthKitStatus: HealthAuthorizationStatus = .notDetermined
     var isHealthDataAvailable: Bool = false
+    /// Gasto real estimado a partir de comidas y peso. `nil` = aún sin datos.
+    var tdeeEstimate: TDEEEstimate?
+
+    /// Objetivo coherente con el gasto real medido y el objetivo físico elegido.
+    var tdeeSuggestedTarget: Double? {
+        tdeeEstimate.map { $0.suggestedTarget(for: fitnessGoal).rounded() }
+    }
+
+    /// `true` si merece la pena ofrecer el ajuste: la sugerencia existe y se
+    /// separa de lo que hay puesto. Por debajo de 50 kcal es ruido de medición,
+    /// no una desviación que corregir.
+    var tdeeSuggestionDiffers: Bool {
+        guard let suggested = tdeeSuggestedTarget else { return false }
+        let current = ProfileViewModel.calorieOverride(
+            from: calorieTargetInput, calculated: calculatedCalorieTarget
+        ) ?? calculatedCalorieTarget
+        return abs(suggested - current) >= 50
+    }
 }
 
 class ProfileViewModel: ObservableObject {
     @Published var uiState: ProfileUiState = .init()
 
     private let router: ProfileRouterProtocol
+    /// Opcional: los tests del formulario no lo necesitan y el resto de la
+    /// pantalla funciona igual sin él (la sección simplemente no aparece).
+    private let adaptiveTDEEUseCase: AdaptiveTDEEUseCaseProtocol?
     private var userProfileUseCase: UserProfileUseCaseProtocol
     private var healthUseCase: HealthUseCaseProtocol
     private let authService: AuthServiceProtocol
@@ -65,12 +86,14 @@ class ProfileViewModel: ObservableObject {
     private let session: AuthStateProviding
 
     init(router: ProfileRouterProtocol,
+         adaptiveTDEEUseCase: AdaptiveTDEEUseCaseProtocol? = nil,
          userProfileUseCase: UserProfileUseCaseProtocol,
          healthUseCase: HealthUseCaseProtocol,
          authService: AuthServiceProtocol,
          syncLocalDataUseCase: SyncLocalDataUseCaseProtocol,
          session: AuthStateProviding = SharedAuthState()) {
         self.router = router
+        self.adaptiveTDEEUseCase = adaptiveTDEEUseCase
         self.userProfileUseCase = userProfileUseCase
         self.healthUseCase = healthUseCase
         self.authService = authService
@@ -199,6 +222,25 @@ class ProfileViewModel: ObservableObject {
                 }
             }
         }
+    }
+
+    /// Calcula el gasto real en segundo plano. Se llama al cargar el perfil; si
+    /// no hay datos suficientes, el estado se queda en `nil` y no se pinta nada.
+    func loadRealExpenditure() {
+        guard let adaptiveTDEEUseCase else { return }
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            self.uiState.tdeeEstimate = await adaptiveTDEEUseCase.estimate()
+        }
+    }
+
+    /// Adopta como objetivo el que sale del gasto medido. Pasa por `save()` para
+    /// que siga la misma regla de siempre: si coincide con el calculado no se
+    /// guarda como override, y los macros y días libres se recalculan sobre él.
+    func applyTDEESuggestedTarget() {
+        guard let suggested = uiState.tdeeSuggestedTarget else { return }
+        uiState.calorieTargetInput = String(Int(suggested))
+        save()
     }
 
     /// Devuelve el campo al valor de la fórmula.

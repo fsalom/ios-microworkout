@@ -27,6 +27,7 @@ protocol AppComponentProtocol: AnyObject {
     var aiCoachChatUseCase: AICoachChatUseCaseProtocol { get }
     var userReportUseCase: UserReportUseCaseProtocol { get }
     var coachFeedbackUseCase: CoachFeedbackUseCaseProtocol { get }
+    var adaptiveTDEEUseCase: AdaptiveTDEEUseCaseProtocol { get }
     var bodyMetricsUseCase: BodyMetricsUseCaseProtocol { get }
     var weeklyPlanUseCase: WeeklyPlanUseCaseProtocol { get }
     var exerciseProgressionUseCase: ExerciseProgressionUseCaseProtocol { get }

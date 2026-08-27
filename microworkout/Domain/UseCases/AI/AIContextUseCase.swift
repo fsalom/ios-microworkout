@@ -7,19 +7,22 @@ class AIContextUseCase: AIContextUseCaseProtocol {
     private let mealUseCase: MealUseCaseProtocol
     private let healthUseCase: HealthUseCaseProtocol
     private let weeklyPlanUseCase: WeeklyPlanUseCaseProtocol
+    private let adaptiveTDEEUseCase: AdaptiveTDEEUseCaseProtocol
 
     init(userProfileUseCase: UserProfileUseCaseProtocol,
          workoutLogUseCase: WorkoutLogUseCaseProtocol,
          workoutEntryUseCase: WorkoutEntryUseCaseProtocol,
          mealUseCase: MealUseCaseProtocol,
          healthUseCase: HealthUseCaseProtocol,
-         weeklyPlanUseCase: WeeklyPlanUseCaseProtocol) {
+         weeklyPlanUseCase: WeeklyPlanUseCaseProtocol,
+         adaptiveTDEEUseCase: AdaptiveTDEEUseCaseProtocol) {
         self.userProfileUseCase = userProfileUseCase
         self.workoutLogUseCase = workoutLogUseCase
         self.workoutEntryUseCase = workoutEntryUseCase
         self.mealUseCase = mealUseCase
         self.healthUseCase = healthUseCase
         self.weeklyPlanUseCase = weeklyPlanUseCase
+        self.adaptiveTDEEUseCase = adaptiveTDEEUseCase
     }
 
     func buildContext(mealDaysBack: Int = 30, healthWeeksBack: Int = 4) async -> AIContext {
@@ -74,6 +77,9 @@ class AIContextUseCase: AIContextUseCaseProtocol {
 
     private func buildProfileSnapshot() async -> AIProfileSnapshot? {
         guard let profile = try? await userProfileUseCase.getProfile() else { return nil }
+        // El gasto medido viaja junto al objetivo: es lo que permite al coach decir
+        // "tu objetivo es 2.200 pero tú gastas 2.350" con números y no con fórmulas.
+        let estimate = await adaptiveTDEEUseCase.estimate()
         return AIProfileSnapshot(
             name: profile.name,
             age: profile.age,
@@ -92,7 +98,9 @@ class AIContextUseCase: AIContextUseCaseProtocol {
             // guardado el dominio usa 500, y mandar `nil` diría que no hay extra.
             freeDayExtraCalories: profile.hasCycling ? profile.resolvedFreeDayExtra : nil,
             strictDayCalorieTarget: profile.strictDayCalorieTarget,
-            freeDayCalorieTarget: profile.freeDayCalorieTarget
+            freeDayCalorieTarget: profile.freeDayCalorieTarget,
+            estimatedTDEE: estimate?.tdee,
+            measuredWeeklyChangeKg: estimate?.weeklyChangeKg
         )
     }
 

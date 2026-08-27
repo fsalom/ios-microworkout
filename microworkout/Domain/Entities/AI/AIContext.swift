@@ -91,6 +91,11 @@ public struct AIProfileSnapshot: Codable {
     /// presupuesto semanal — que es donde se colaría la divergencia.
     public var strictDayCalorieTarget: Double
     public var freeDayCalorieTarget: Double
+    /// Gasto real medido con los registros (ingesta + tendencia de peso), si hay
+    /// datos suficientes. Es el número que corrige a la fórmula.
+    public var estimatedTDEE: Double? = nil
+    /// Tendencia de peso medida en esa misma ventana (negativo = baja).
+    public var measuredWeeklyChangeKg: Double? = nil
 }
 
 // MARK: - Nutrition

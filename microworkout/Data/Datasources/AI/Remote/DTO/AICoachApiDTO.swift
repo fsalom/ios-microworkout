@@ -67,6 +67,9 @@ struct AICoachRequestApiDTO: Encodable {
         let proteinTargetG: Int?
         let carbsTargetG: Int?
         let fatTargetG: Int?
+        /// Gasto real medido con los registros del usuario, si hay datos.
+        let estimatedTdeeKcal: Int?
+        let measuredWeeklyChangeKg: Double?
         let language: String
         /// Días libres de la semana, índices de `Calendar` (1=domingo … 7=sábado).
         ///
@@ -87,6 +90,8 @@ struct AICoachRequestApiDTO: Encodable {
             case fatTargetG = "fat_target_g"
             case freeDays = "free_days"
             case freeDayExtraCalories = "free_day_extra_calories"
+            case estimatedTdeeKcal = "estimated_tdee_kcal"
+            case measuredWeeklyChangeKg = "measured_weekly_change_kg"
         }
     }
 

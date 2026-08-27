@@ -80,6 +80,7 @@ extension AICoachRequestApiDTO {
                 name: nil, gender: nil, age: nil, heightCm: nil, weightKg: nil,
                 activityLevel: nil, goal: nil, calorieTarget: nil,
                 proteinTargetG: nil, carbsTargetG: nil, fatTargetG: nil,
+                estimatedTdeeKcal: nil, measuredWeeklyChangeKg: nil,
                 language: language, freeDays: nil, freeDayExtraCalories: nil
             )
         }
@@ -98,6 +99,14 @@ extension AICoachRequestApiDTO {
             proteinTargetG: grams(snapshot.todayMacroTargets.proteinsG),
             carbsTargetG: grams(snapshot.todayMacroTargets.carbohydratesG),
             fatTargetG: grams(snapshot.todayMacroTargets.fatsG),
+            // El gasto medido, redondeado: el backend valida 0<x<=10000 y decimales
+            // de kcal son falsa precisión. La tendencia va con dos decimales.
+            estimatedTdeeKcal: snapshot.estimatedTDEE.flatMap {
+                (1...10_000).contains(Int($0.rounded())) ? Int($0.rounded()) : nil
+            },
+            measuredWeeklyChangeKg: snapshot.measuredWeeklyChangeKg.flatMap {
+                abs($0) <= 5 ? ($0 * 100).rounded() / 100 : nil
+            },
             language: language,
             // El ciclado semanal no salía del móvil: el coach veía el objetivo de hoy
             // pero no que el sábado es día libre, así que no podía nombrar el patrón

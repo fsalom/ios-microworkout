@@ -30,6 +30,7 @@ struct ProfileView: View {
             // si hay sesión, el estado de sincronización — así el hub refleja los
             // datos correctos sin reiniciar la app.
             viewModel.loadProfile()
+            viewModel.loadRealExpenditure()
             if newState.isAuthenticated { viewModel.loadSyncStatus() }
         }
         // Feedback como toast (no como alert): un toast es una vista en la jerarquía,
@@ -119,6 +120,7 @@ struct ProfileView: View {
             }
         }
         .onAppear {
+            viewModel.loadRealExpenditure()
             // Carga el estado de sincronización una vez para poder mostrar el
             // badge de pendientes en la fila de "Sincronización".
             if authSession.state.isAuthenticated, !viewModel.uiState.hasLoadedSyncStatus {
@@ -468,6 +470,9 @@ struct ProfileEditView: View {
                     }
                     .font(.caption)
                 }
+                if let estimate = viewModel.uiState.tdeeEstimate {
+                    realExpenditureRow(estimate)
+                }
             } header: {
                 Text("Objetivo de calorías")
             } footer: {
@@ -539,6 +544,47 @@ struct ProfileEditView: View {
         }
         .navigationTitle("Editar perfil")
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    /// El gasto medido con tus registros, con el ajuste a un toque si se desvía.
+    ///
+    /// Enseña de dónde sale el número (días registrados y pesadas): un "gastas
+    /// 2.350" sin procedencia es tan opaco como la fórmula a la que corrige.
+    @ViewBuilder
+    private func realExpenditureRow(_ estimate: TDEEEstimate) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Label {
+                Text("Tu gasto real ronda las \(Int(estimate.tdee.rounded())) kcal/día")
+                    .font(.footnote.weight(.semibold))
+            } icon: {
+                Image(systemName: "chart.line.uptrend.xyaxis")
+                    .foregroundColor(.accentColor)
+            }
+            Text(Self.expenditureDetail(estimate))
+                .font(.caption2)
+                .foregroundColor(.secondary)
+            if viewModel.uiState.tdeeSuggestionDiffers,
+               let suggested = viewModel.uiState.tdeeSuggestedTarget {
+                Button("Ajustar objetivo a \(Int(suggested)) kcal") {
+                    viewModel.applyTDEESuggestedTarget()
+                }
+                .font(.footnote.weight(.semibold))
+            }
+        }
+        .padding(.vertical, 2)
+    }
+
+    private static func expenditureDetail(_ estimate: TDEEEstimate) -> String {
+        let trend: String
+        let weekly = estimate.weeklyChangeKg
+        if abs(weekly) < 0.05 {
+            trend = "peso estable"
+        } else {
+            let verb = weekly < 0 ? "bajando" : "subiendo"
+            trend = String(format: "%@ %.1f kg/semana", verb, abs(weekly))
+        }
+        return "Medido con \(estimate.loggedDays) días de comidas y "
+            + "\(estimate.weighInCount) pesadas en \(estimate.spanDays) días (\(trend))."
     }
 }
 

@@ -93,6 +93,10 @@ final class AIContextTodayTests: XCTestCase {
         func unlinkEntryFromWorkout(_ workoutID: String) {}
     }
 
+    private struct StubTDEE: AdaptiveTDEEUseCaseProtocol {
+        func estimate() async -> TDEEEstimate? { nil }
+    }
+
     private struct StubWeeklyPlan: WeeklyPlanUseCaseProtocol {
         func getPlan() async throws -> WeeklyPlan { .empty }
         func savePlan(_ plan: WeeklyPlan) async throws {}
@@ -107,7 +111,8 @@ final class AIContextTodayTests: XCTestCase {
             workoutEntryUseCase: StubEntries(),
             mealUseCase: meals,
             healthUseCase: StubHealth(),
-            weeklyPlanUseCase: StubWeeklyPlan()
+            weeklyPlanUseCase: StubWeeklyPlan(),
+            adaptiveTDEEUseCase: StubTDEE()
         )
     }
 

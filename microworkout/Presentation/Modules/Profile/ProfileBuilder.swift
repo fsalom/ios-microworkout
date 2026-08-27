@@ -8,6 +8,7 @@ class ProfileBuilder {
     func build() -> ProfileView {
         let viewModel = ProfileViewModel(
             router: ProfileRouter(navigator: Navigator.shared, component: component),
+            adaptiveTDEEUseCase: component.adaptiveTDEEUseCase,
             userProfileUseCase: component.userProfileUseCase,
             healthUseCase: component.healthUseCase,
             authService: component.authService,

@@ -387,6 +387,32 @@ final class AICoachRequestMapperTests: XCTestCase {
         XCTAssertEqual(health["steps"] as? Int, 8_200)
     }
 
+    // MARK: - Gasto real medido
+
+    /// El TDEE medido viaja en el perfil con las claves del backend. Redondeado:
+    /// el backend valida `0<x<=10000` y decimales de kcal son falsa precisión.
+    func testMeasuredTDEETravelsInTheProfile() throws {
+        var snapshot = fullProfile()
+        snapshot.estimatedTDEE = 2_347.6
+        snapshot.measuredWeeklyChangeKg = -0.316
+
+        let json = try encode(AICoachRequestApiDTO(
+            context: makeContext(profile: snapshot), topic: .nutrition, question: nil
+        ))
+        let profile = try XCTUnwrap(json["profile"] as? [String: Any])
+        XCTAssertEqual(profile["estimated_tdee_kcal"] as? Int, 2_348)
+        XCTAssertEqual(profile["measured_weekly_change_kg"] as? Double, -0.32)
+    }
+
+    func testWithoutEstimateTheTDEEKeysAreAbsent() throws {
+        let json = try encode(AICoachRequestApiDTO(
+            context: makeContext(profile: fullProfile()), topic: .nutrition, question: nil
+        ))
+        let profile = try XCTUnwrap(json["profile"] as? [String: Any])
+        XCTAssertNil(profile["estimated_tdee_kcal"])
+        XCTAssertNil(profile["measured_weekly_change_kg"])
+    }
+
     // MARK: - Plan semanal
 
     /// El calendario viaja con las claves que espera el backend (`weekly_plan`,

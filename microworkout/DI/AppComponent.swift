@@ -85,6 +85,11 @@ final class DefaultAppComponent: AppComponentProtocol {
     lazy var bodyMetricsUseCase: BodyMetricsUseCaseProtocol =
         BodyMetricsUseCase(repository: bodyMetricsRepository)
 
+    lazy var adaptiveTDEEUseCase: AdaptiveTDEEUseCaseProtocol = AdaptiveTDEEUseCase(
+        mealUseCase: mealUseCase,
+        bodyMetricsUseCase: bodyMetricsUseCase
+    )
+
     lazy var workoutLogUseCase: WorkoutLogUseCaseProtocol =
         WorkoutLogUseCase(repository: workoutLogRepository)
 
@@ -135,7 +140,8 @@ final class DefaultAppComponent: AppComponentProtocol {
         workoutEntryUseCase: workoutEntryUseCase,
         mealUseCase: mealUseCase,
         healthUseCase: healthUseCase,
-        weeklyPlanUseCase: weeklyPlanUseCase
+        weeklyPlanUseCase: weeklyPlanUseCase,
+        adaptiveTDEEUseCase: adaptiveTDEEUseCase
     )
 
     lazy var aiCoachRepository: AICoachRepositoryProtocol = AICoachRepository(
