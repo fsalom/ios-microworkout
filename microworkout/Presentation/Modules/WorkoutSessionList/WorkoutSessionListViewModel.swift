@@ -13,15 +13,18 @@ final class WorkoutSessionListViewModel: ObservableObject {
     private let router: WorkoutSessionListRouter
     private let useCase: WorkoutLogUseCaseProtocol
     private let coachUseCase: CoachUseCaseProtocol
+    private let coachActionUseCase: CoachActionUseCaseProtocol
 
     init(
         router: WorkoutSessionListRouter,
         useCase: WorkoutLogUseCaseProtocol,
-        coachUseCase: CoachUseCaseProtocol
+        coachUseCase: CoachUseCaseProtocol,
+        coachActionUseCase: CoachActionUseCaseProtocol
     ) {
         self.router = router
         self.useCase = useCase
         self.coachUseCase = coachUseCase
+        self.coachActionUseCase = coachActionUseCase
     }
 
     func load() {
@@ -41,6 +44,12 @@ final class WorkoutSessionListViewModel: ObservableObject {
             self.uiState.coachInsight = await self.coachUseCase.planInsight()
             self.uiState.isLoadingCoach = false
         }
+    }
+
+    /// Aplica una acción propuesta por la tarjeta (guardar un objetivo de
+    /// progresión). En segundo plano; la tarjeta ya marca el botón como hecho.
+    func applyCoachAction(_ action: CoachAction) {
+        Task { _ = try? await self.coachActionUseCase.apply(action) }
     }
 
     /// Pulgar del usuario sobre la tarjeta. En segundo plano: valorar no bloquea.

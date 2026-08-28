@@ -13,7 +13,8 @@ class ExerciseTabBuilder {
             healthUseCase: component.healthUseCase,
             workoutEntryUseCase: component.workoutEntryUseCase,
             workoutLogUseCase: component.workoutLogUseCase,
-            coachUseCase: component.coachUseCase
+            coachUseCase: component.coachUseCase,
+            coachActionUseCase: component.coachActionUseCase
         )
         return ExerciseTabView(viewModel: viewModel)
     }

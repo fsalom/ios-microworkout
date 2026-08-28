@@ -24,7 +24,8 @@ class WorkoutLogEntryBuilder {
             log: log,
             isNew: isNew,
             useCase: component.workoutLogUseCase,
-            exerciseUseCase: component.exerciseUseCase
+            exerciseUseCase: component.exerciseUseCase,
+            progressionStore: component.progressionSuggestionStore
         )
         let mediaUseCase = component.setMediaUseCase
         return WorkoutLogEntryView(viewModel: viewModel, mediaUseCase: mediaUseCase)

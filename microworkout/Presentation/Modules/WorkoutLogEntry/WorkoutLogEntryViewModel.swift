@@ -30,6 +30,8 @@ struct WorkoutLogEntryUiState {
     var searchResults: [Exercise] = []
     /// Most recent LoggedExercise of the same session for each Exercise.id in this log, with its log date.
     var previousByExerciseId: [UUID: PreviousExerciseReference] = [:]
+    /// Objetivo del coach aceptado para cada ejercicio de este registro, si lo hay.
+    var suggestionByExerciseId: [UUID: ProgressionSuggestion] = [:]
 }
 
 final class WorkoutLogEntryViewModel: ObservableObject {
@@ -37,18 +39,36 @@ final class WorkoutLogEntryViewModel: ObservableObject {
 
     private let useCase: WorkoutLogUseCaseProtocol
     private let exerciseUseCase: ExerciseUseCaseProtocol
+    /// Opcional: sin él la pantalla funciona igual, solo que sin objetivos del coach.
+    private let progressionStore: ProgressionSuggestionStoreProtocol?
     private let isNew: Bool
     private var searchTask: Task<Void, Never>?
 
     init(log: WorkoutLog,
          isNew: Bool,
          useCase: WorkoutLogUseCaseProtocol,
-         exerciseUseCase: ExerciseUseCaseProtocol) {
+         exerciseUseCase: ExerciseUseCaseProtocol,
+         progressionStore: ProgressionSuggestionStoreProtocol? = nil) {
         self.uiState = .init(log: log)
         self.isNew = isNew
         self.useCase = useCase
         self.exerciseUseCase = exerciseUseCase
+        self.progressionStore = progressionStore
         loadPreviousReferences()
+        loadCoachSuggestions()
+    }
+
+    /// El objetivo del coach para cada ejercicio del registro. Por NOMBRE: es el
+    /// idioma en el que el coach propone (no conoce los ids del dispositivo).
+    private func loadCoachSuggestions() {
+        guard let progressionStore else { return }
+        var map: [UUID: ProgressionSuggestion] = [:]
+        for exerciseLog in uiState.log.exercises {
+            if let suggestion = progressionStore.suggestion(for: exerciseLog.exercise.name) {
+                map[exerciseLog.exercise.id] = suggestion
+            }
+        }
+        uiState.suggestionByExerciseId = map
     }
 
     private func loadPreviousReferences() {

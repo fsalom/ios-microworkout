@@ -160,8 +160,12 @@ final class DefaultAppComponent: AppComponentProtocol {
         feedback: coachFeedbackUseCase
     )
 
+    lazy var progressionSuggestionStore: ProgressionSuggestionStoreProtocol =
+        ProgressionSuggestionStore(storage: makeUserDefaultsManager())
+
     lazy var coachActionUseCase: CoachActionUseCaseProtocol = CoachActionUseCase(
         mealUseCase: mealUseCase,
+        progressionStore: progressionSuggestionStore,
         feedback: coachFeedbackUseCase
     )
 

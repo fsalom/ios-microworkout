@@ -182,7 +182,7 @@ struct CoachInsightCard: View {
                     HStack(spacing: 6) {
                         Image(systemName: isApplied ? "checkmark" : "plus.circle.fill")
                             .font(.caption)
-                        Text(isApplied ? "Añadido" : action.label)
+                        Text(isApplied ? "Hecho" : action.label)
                             .font(.subheadline)
                             .fontWeight(.semibold)
                             .lineLimit(1)
@@ -208,7 +208,9 @@ struct CoachInsightCard: View {
             titleVisibility: .visible
         ) {
             if let action = pendingAction {
-                Button("Añadir a mi diario") {
+                // El texto del botón según lo que hace: añadir comida al diario o
+                // guardar un objetivo de entreno.
+                Button(Self.confirmTitle(for: action)) {
                     appliedActionIds.insert(action.id)
                     onApply(action)
                     pendingAction = nil
@@ -217,6 +219,13 @@ struct CoachInsightCard: View {
             }
         } message: {
             Text("Lo estima el coach a partir de tus datos; revísalo si no te cuadra.")
+        }
+    }
+
+    private static func confirmTitle(for action: CoachAction) -> String {
+        switch action {
+        case .addFood: return "Añadir a mi diario"
+        case .suggestProgression: return "Guardar como objetivo"
         }
     }
 

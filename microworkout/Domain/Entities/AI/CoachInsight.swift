@@ -13,6 +13,10 @@ import Foundation
 public enum CoachAction: Identifiable, Equatable {
     /// Añadir un alimento a una comida de hoy, con sus macros ya resueltos.
     case addFood(AddFood)
+    /// Objetivo para la próxima sesión de un ejercicio. Aplicarlo lo guarda, y la
+    /// pantalla de registro lo enseña cuando toque ese ejercicio — el único
+    /// momento en que "sube a 62,5" sirve de algo.
+    case suggestProgression(Progression)
 
     public struct AddFood: Equatable {
         /// Texto del botón, tal y como lo propone el coach.
@@ -36,15 +40,39 @@ public enum CoachAction: Identifiable, Equatable {
         }
     }
 
+    public struct Progression: Equatable {
+        public let label: String
+        /// Tal y como se llama el ejercicio en los registros del usuario: es la
+        /// clave con la que la pantalla de registro lo encontrará.
+        public let exerciseName: String
+        public let weightKg: Double?
+        public let reps: Int?
+        public let sets: Int?
+
+        public init(
+            label: String, exerciseName: String,
+            weightKg: Double?, reps: Int?, sets: Int?
+        ) {
+            self.label = label
+            self.exerciseName = exerciseName
+            self.weightKg = weightKg
+            self.reps = reps
+            self.sets = sets
+        }
+    }
+
     public var id: String {
         switch self {
         case .addFood(let food): return "add_food:\(food.foodName):\(food.grams)"
+        case .suggestProgression(let progression):
+            return "progression:\(progression.exerciseName):\(progression.weightKg ?? 0):\(progression.reps ?? 0)"
         }
     }
 
     public var label: String {
         switch self {
         case .addFood(let food): return food.label
+        case .suggestProgression(let progression): return progression.label
         }
     }
 }

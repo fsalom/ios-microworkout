@@ -10,6 +10,7 @@ struct WorkoutSessionListView: View {
                     insight: viewModel.uiState.coachInsight,
                     isLoading: viewModel.uiState.isLoadingCoach,
                     onOpenChat: { prompt in viewModel.goToChat(prompt: prompt) },
+                    onApplyAction: { action in viewModel.applyCoachAction(action) },
                     onFeedback: { helpful, reason in
                         viewModel.rateCoachInsight(helpful: helpful, reason: reason)
                     }

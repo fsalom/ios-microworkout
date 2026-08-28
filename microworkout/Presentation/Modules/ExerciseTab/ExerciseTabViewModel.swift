@@ -45,17 +45,20 @@ final class ExerciseTabViewModel: ObservableObject {
     private let workoutEntryUseCase: WorkoutEntryUseCaseProtocol
     private let workoutLogUseCase: WorkoutLogUseCaseProtocol
     private let coachUseCase: CoachUseCaseProtocol
+    private let coachActionUseCase: CoachActionUseCaseProtocol
 
     init(router: ExerciseTabRouter,
          healthUseCase: HealthUseCaseProtocol,
          workoutEntryUseCase: WorkoutEntryUseCaseProtocol,
          workoutLogUseCase: WorkoutLogUseCaseProtocol,
-         coachUseCase: CoachUseCaseProtocol) {
+         coachUseCase: CoachUseCaseProtocol,
+         coachActionUseCase: CoachActionUseCaseProtocol) {
         self.router = router
         self.healthUseCase = healthUseCase
         self.workoutEntryUseCase = workoutEntryUseCase
         self.workoutLogUseCase = workoutLogUseCase
         self.coachUseCase = coachUseCase
+        self.coachActionUseCase = coachActionUseCase
     }
 
     func load() {
@@ -176,6 +179,12 @@ final class ExerciseTabViewModel: ObservableObject {
     }
 
     func goToWeeklyPlan() { router.goToWeeklyPlan() }
+
+    /// Aplica una acción propuesta por la tarjeta (guardar un objetivo de
+    /// progresión). En segundo plano; la tarjeta ya marca el botón como hecho.
+    func applyCoachAction(_ action: CoachAction) {
+        Task { _ = try? await self.coachActionUseCase.apply(action) }
+    }
 
     /// Pulgar del usuario sobre la tarjeta. En segundo plano: valorar no bloquea.
     func rateCoachInsight(helpful: Bool, reason: String?) {

@@ -57,9 +57,19 @@ final class CoachActionTests: XCTestCase {
 
     // MARK: - Lo que se registra es lo que dijo el coach
 
+    private final class SpyProgressionStore: ProgressionSuggestionStoreProtocol {
+        private(set) var saved: [ProgressionSuggestion] = []
+        func save(_ suggestion: ProgressionSuggestion) { saved.append(suggestion) }
+        func suggestion(for exerciseName: String) -> ProgressionSuggestion? {
+            saved.last {
+                $0.exerciseName.lowercased() == exerciseName.lowercased()
+            }
+        }
+    }
+
     func testTheFoodIsLoggedWithExactlyTheMacrosTheCoachProposed() async throws {
         let meals = FakeMealUseCase()
-        let useCase = CoachActionUseCase(mealUseCase: meals)
+        let useCase = CoachActionUseCase(mealUseCase: meals, progressionStore: SpyProgressionStore())
 
         let message = try await useCase.apply(addChicken())
 
@@ -79,7 +89,7 @@ final class CoachActionTests: XCTestCase {
     /// La conversión intermedia: por dentro se guarda por 100 g.
     func testMacrosAreStoredPer100gSoTheQuantityCanChangeLater() async throws {
         let meals = FakeMealUseCase()
-        let useCase = CoachActionUseCase(mealUseCase: meals)
+        let useCase = CoachActionUseCase(mealUseCase: meals, progressionStore: SpyProgressionStore())
 
         _ = try await useCase.apply(addChicken())
 
@@ -92,7 +102,7 @@ final class CoachActionTests: XCTestCase {
     /// Y sigue cuadrando con una cantidad que no sea 100 ni 150.
     func testTheConversionHoldsForAnyQuantity() async throws {
         let meals = FakeMealUseCase()
-        let useCase = CoachActionUseCase(mealUseCase: meals)
+        let useCase = CoachActionUseCase(mealUseCase: meals, progressionStore: SpyProgressionStore())
 
         _ = try await useCase.apply(addChicken(grams: 37))
 
@@ -104,7 +114,7 @@ final class CoachActionTests: XCTestCase {
 
     func testItGoesToTheMealTheCoachSaid() async throws {
         let meals = FakeMealUseCase()
-        _ = try await CoachActionUseCase(mealUseCase: meals).apply(addChicken(mealType: .dinner))
+        _ = try await CoachActionUseCase(mealUseCase: meals, progressionStore: SpyProgressionStore()).apply(addChicken(mealType: .dinner))
         XCTAssertEqual(meals.saved.first?.type, .dinner)
     }
 
@@ -112,7 +122,7 @@ final class CoachActionTests: XCTestCase {
     /// que dejarlo caer en una fija.
     func testWithoutAMealTypeItUsesTheOneForTheCurrentTime() async throws {
         let meals = FakeMealUseCase()
-        _ = try await CoachActionUseCase(mealUseCase: meals).apply(addChicken(mealType: nil))
+        _ = try await CoachActionUseCase(mealUseCase: meals, progressionStore: SpyProgressionStore()).apply(addChicken(mealType: nil))
         XCTAssertEqual(meals.saved.first?.type, MealType.forCurrentTime())
     }
 
@@ -121,7 +131,7 @@ final class CoachActionTests: XCTestCase {
         meals.saveFails = true
 
         do {
-            _ = try await CoachActionUseCase(mealUseCase: meals).apply(addChicken())
+            _ = try await CoachActionUseCase(mealUseCase: meals, progressionStore: SpyProgressionStore()).apply(addChicken())
             XCTFail("un fallo al guardar no se puede tragar")
         } catch {
             XCTAssertTrue(meals.saved.isEmpty)
@@ -132,6 +142,80 @@ final class CoachActionTests: XCTestCase {
 
     /// Una acción de un tipo que la app no sabe ejecutar se descarta al mapear, en
     /// vez de llegar a la pantalla como un botón que no hace nada.
+    // MARK: - Objetivos de progresión
+
+    private final class InMemoryStorage: UserDefaultsManagerProtocol {
+        var store: [String: Data] = [:]
+        func save<T: Codable>(_ object: T, forKey key: String) {
+            let encoder = JSONEncoder(); encoder.dateEncodingStrategy = .iso8601
+            store[key] = try? encoder.encode(object)
+        }
+        func get<T: Codable>(forKey key: String) -> T? {
+            let decoder = JSONDecoder(); decoder.dateDecodingStrategy = .iso8601
+            return store[key].flatMap { try? decoder.decode(T.self, from: $0) }
+        }
+        func remove(forKey key: String) { store[key] = nil }
+    }
+
+    /// El coach escribe el nombre como lo vio ("Press banca"); la pantalla pregunta
+    /// con el nombre del ejercicio del usuario, que puede variar en mayúsculas o
+    /// espacios. Y un objetivo de hace 15 días ya no describe tu estado.
+    func testStoreNormalizesNamesAndExpiresOldTargets() {
+        let store = ProgressionSuggestionStore(storage: InMemoryStorage())
+
+        store.save(ProgressionSuggestion(
+            exerciseName: "Press banca", weightKg: 62.5, reps: 8, sets: nil, savedAt: Date()
+        ))
+        XCTAssertNotNil(store.suggestion(for: "  press BANCA "))
+        XCTAssertNil(store.suggestion(for: "Sentadilla"))
+
+        store.save(ProgressionSuggestion(
+            exerciseName: "Sentadilla", weightKg: 100, reps: 5, sets: nil,
+            savedAt: Date().addingTimeInterval(-15 * 86_400)
+        ))
+        XCTAssertNil(store.suggestion(for: "Sentadilla"), "caducado a los 14 días")
+    }
+
+
+    /// Aplicar la propuesta la guarda con el nombre EXACTO del ejercicio: es la
+    /// clave con la que la pantalla de registro la buscará.
+    func testApplyingAProgressionStoresTheTarget() async throws {
+        let store = SpyProgressionStore()
+        let useCase = CoachActionUseCase(mealUseCase: FakeMealUseCase(), progressionStore: store)
+
+        let confirmation = try await useCase.apply(.suggestProgression(CoachAction.Progression(
+            label: "Banca: 62,5 kg × 8", exerciseName: "Press banca",
+            weightKg: 62.5, reps: 8, sets: 3
+        )))
+
+        XCTAssertEqual(store.saved.count, 1)
+        XCTAssertEqual(store.saved.first?.exerciseName, "Press banca")
+        XCTAssertEqual(store.saved.first?.weightKg, 62.5)
+        XCTAssertTrue(confirmation.contains("62,5 kg × 8"))
+    }
+
+    func testProgressionDecodesFromBackendKeys() throws {
+        let json = """
+        {"type": "suggest_progression", "label": "Banca: 62,5 kg × 8",
+         "exercise_name": "Press banca", "weight_kg": 62.5, "reps": 8, "sets": 3}
+        """
+        let action = try JSONDecoder()
+            .decode(AIActionApiDTO.self, from: Data(json.utf8)).toDomain()
+        guard case .suggestProgression(let progression) = action else {
+            return XCTFail("debía ser una progresión, es \(String(describing: action))")
+        }
+        XCTAssertEqual(progression.exerciseName, "Press banca")
+        XCTAssertEqual(progression.reps, 8)
+    }
+
+    /// "Progresa en banca" sin peso ni reps es un consejo, no una acción.
+    func testProgressionWithoutAnyTargetIsDropped() throws {
+        let json = """
+        {"type": "suggest_progression", "label": "Progresa", "exercise_name": "Press banca", "sets": 3}
+        """
+        XCTAssertNil(try JSONDecoder().decode(AIActionApiDTO.self, from: Data(json.utf8)).toDomain())
+    }
+
     func testAnUnknownActionTypeIsDropped() throws {
         let json = """
         {"topic": "nutrition", "title": "t", "body": "b", "bullets": [], "prompt": "p",

@@ -162,43 +162,77 @@ final class CoachUseCase: CoachUseCaseProtocol {
         /// `CoachAction` es un enum con asociados y no es `Codable`; esto es su
         /// forma persistible. Guardarlas arregla además que una tarjeta servida
         /// desde caché perdiera sus botones.
+        ///
+        /// `type` es opcional para poder decodificar cachés guardadas cuando solo
+        /// existía `add_food`; los campos de cada caso, también.
         struct CachedAction: Codable {
+            let type: String?
             let label: String
             let mealType: String?
-            let foodName: String
-            let grams: Double
-            let calories: Double
-            let carbohydrates: Double
-            let proteins: Double
-            let fats: Double
+            let foodName: String?
+            let grams: Double?
+            let calories: Double?
+            let carbohydrates: Double?
+            let proteins: Double?
+            let fats: Double?
+            let exerciseName: String?
+            let weightKg: Double?
+            let reps: Int?
+            let sets: Int?
 
-            init(_ food: CoachAction.AddFood) {
-                label = food.label
-                mealType = food.mealType?.rawValue
-                foodName = food.foodName
-                grams = food.grams
-                calories = food.nutrition.calories
-                carbohydrates = food.nutrition.carbohydrates
-                proteins = food.nutrition.proteins
-                fats = food.nutrition.fats
+            init(_ action: CoachAction) {
+                switch action {
+                case .addFood(let food):
+                    type = "add_food"
+                    label = food.label
+                    mealType = food.mealType?.rawValue
+                    foodName = food.foodName
+                    grams = food.grams
+                    calories = food.nutrition.calories
+                    carbohydrates = food.nutrition.carbohydrates
+                    proteins = food.nutrition.proteins
+                    fats = food.nutrition.fats
+                    exerciseName = nil; weightKg = nil; reps = nil; sets = nil
+                case .suggestProgression(let progression):
+                    type = "suggest_progression"
+                    label = progression.label
+                    exerciseName = progression.exerciseName
+                    weightKg = progression.weightKg
+                    reps = progression.reps
+                    sets = progression.sets
+                    mealType = nil; foodName = nil; grams = nil; calories = nil
+                    carbohydrates = nil; proteins = nil; fats = nil
+                }
             }
 
-            func toDomain() -> CoachAction {
-                .addFood(CoachAction.AddFood(
-                    label: label,
-                    mealType: mealType.flatMap { MealType(rawValue: $0) },
-                    foodName: foodName,
-                    grams: grams,
-                    nutrition: NutritionInfo(
-                        calories: calories, carbohydrates: carbohydrates,
-                        proteins: proteins, fats: fats
-                    )
-                ))
+            func toDomain() -> CoachAction? {
+                switch type ?? "add_food" {
+                case "add_food":
+                    guard let foodName, let grams else { return nil }
+                    return .addFood(CoachAction.AddFood(
+                        label: label,
+                        mealType: mealType.flatMap { MealType(rawValue: $0) },
+                        foodName: foodName,
+                        grams: grams,
+                        nutrition: NutritionInfo(
+                            calories: calories ?? 0, carbohydrates: carbohydrates ?? 0,
+                            proteins: proteins ?? 0, fats: fats ?? 0
+                        )
+                    ))
+                case "suggest_progression":
+                    guard let exerciseName else { return nil }
+                    return .suggestProgression(CoachAction.Progression(
+                        label: label, exerciseName: exerciseName,
+                        weightKg: weightKg, reps: reps, sets: sets
+                    ))
+                default:
+                    return nil
+                }
             }
         }
 
         func domainActions() -> [CoachAction] {
-            (actions ?? []).map { $0.toDomain() }
+            (actions ?? []).compactMap { $0.toDomain() }
         }
 
         init(insight: CoachInsight, fingerprint: String, createdAt: Date = Date()) {
@@ -208,11 +242,7 @@ final class CoachUseCase: CoachUseCaseProtocol {
             self.prompt = insight.prompt
             self.fingerprint = fingerprint
             self.createdAt = createdAt
-            self.actions = insight.actions.map { action in
-                switch action {
-                case .addFood(let food): return CachedAction(food)
-                }
-            }
+            self.actions = insight.actions.map(CachedAction.init)
         }
 
         func toDomain(topic: AICoachTopic) -> CoachInsight {

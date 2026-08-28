@@ -53,6 +53,7 @@ struct WorkoutLogEntryView: View {
                 LoggedExerciseCard(
                     exerciseLog: exerciseLog,
                     previousReference: viewModel.uiState.previousByExerciseId[exerciseLog.exercise.id],
+                    coachSuggestion: viewModel.uiState.suggestionByExerciseId[exerciseLog.exercise.id],
                     mediaUseCase: mediaUseCase,
                     isNotesExpanded: viewModel.uiState.expandedNotes.contains(exerciseLog.id),
                     onToggleNotes: { viewModel.toggleNotes(for: exerciseLog.id) },
@@ -133,6 +134,7 @@ struct WorkoutLogEntryView: View {
 private struct LoggedExerciseCard: View {
     let exerciseLog: LoggedExercise
     let previousReference: PreviousExerciseReference?
+    let coachSuggestion: ProgressionSuggestion?
     let mediaUseCase: SetMediaUseCaseProtocol
     let isNotesExpanded: Bool
     let onToggleNotes: () -> Void
@@ -156,6 +158,25 @@ private struct LoggedExerciseCard: View {
                         .foregroundColor(.green)
                 }
                 .buttonStyle(.plain)
+            }
+
+            if let coachSuggestion {
+                // El objetivo aceptado en la tarjeta del coach, en el único sitio
+                // donde sirve: delante del ejercicio al que apunta.
+                HStack(spacing: 6) {
+                    Image(systemName: "sparkles")
+                        .font(.system(size: 11, weight: .semibold))
+                    Text("Objetivo del coach: \(coachSuggestion.displayTarget)")
+                        .font(.system(size: 13, weight: .semibold))
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 7)
+                .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color.orange.opacity(0.12))
+                )
+                .foregroundColor(.orange)
             }
 
             if let previousReference {

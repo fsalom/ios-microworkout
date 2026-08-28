@@ -13,23 +13,45 @@ protocol CoachActionUseCaseProtocol {
 
 final class CoachActionUseCase: CoachActionUseCaseProtocol {
     private let mealUseCase: MealUseCaseProtocol
+    private let progressionStore: ProgressionSuggestionStoreProtocol
     private let feedback: CoachFeedbackUseCaseProtocol?
 
-    init(mealUseCase: MealUseCaseProtocol, feedback: CoachFeedbackUseCaseProtocol? = nil) {
+    init(
+        mealUseCase: MealUseCaseProtocol,
+        progressionStore: ProgressionSuggestionStoreProtocol,
+        feedback: CoachFeedbackUseCaseProtocol? = nil
+    ) {
         self.mealUseCase = mealUseCase
+        self.progressionStore = progressionStore
         self.feedback = feedback
     }
 
     func apply(_ action: CoachAction) async throws -> String {
         let confirmation: String
+        let topic: AICoachTopic
         switch action {
         case .addFood(let food):
             confirmation = try await addFood(food)
+            topic = .nutrition
+        case .suggestProgression(let progression):
+            confirmation = saveProgression(progression)
+            topic = .workout
         }
         // Solo tras aplicarse de verdad: una acción que falló no es una aceptada.
-        // Las acciones de hoy son de comida, de ahí el tema.
-        await feedback?.actionApplied(action, topic: .nutrition)
+        await feedback?.actionApplied(action, topic: topic)
         return confirmation
+    }
+
+    private func saveProgression(_ progression: CoachAction.Progression) -> String {
+        let suggestion = ProgressionSuggestion(
+            exerciseName: progression.exerciseName,
+            weightKg: progression.weightKg,
+            reps: progression.reps,
+            sets: progression.sets,
+            savedAt: Date()
+        )
+        progressionStore.save(suggestion)
+        return "Objetivo guardado: \(progression.exerciseName), \(suggestion.displayTarget). Lo verás al registrar ese ejercicio."
     }
 
     private func addFood(_ food: CoachAction.AddFood) async throws -> String {

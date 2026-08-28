@@ -11,7 +11,8 @@ class WorkoutSessionListBuilder {
         let viewModel = WorkoutSessionListViewModel(
             router: WorkoutSessionListRouter(navigator: Navigator.shared, component: component),
             useCase: component.workoutLogUseCase,
-            coachUseCase: component.coachUseCase
+            coachUseCase: component.coachUseCase,
+            coachActionUseCase: component.coachActionUseCase
         )
         return WorkoutSessionListView(viewModel: viewModel)
     }

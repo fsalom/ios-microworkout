@@ -303,14 +303,20 @@ struct AIActionApiDTO: Decodable {
     let proteinG: Double?
     let carbsG: Double?
     let fatG: Double?
+    let exerciseName: String?
+    let weightKg: Double?
+    let reps: Int?
+    let sets: Int?
 
     enum CodingKeys: String, CodingKey {
-        case type, label, grams, calories
+        case type, label, grams, calories, reps, sets
         case mealType = "meal_type"
         case foodName = "food_name"
         case proteinG = "protein_g"
         case carbsG = "carbs_g"
         case fatG = "fat_g"
+        case exerciseName = "exercise_name"
+        case weightKg = "weight_kg"
     }
 
     func toDomain() -> CoachAction? {
@@ -334,7 +340,21 @@ struct AIActionApiDTO: Decodable {
                     )
                 )
             )
+        case "suggest_progression":
+            // Sin ejercicio no hay a quién apuntar; sin peso NI reps no hay
+            // objetivo, solo un "progresa" vacío con forma de botón.
+            guard let exerciseName, weightKg != nil || reps != nil else { return nil }
+            return .suggestProgression(
+                CoachAction.Progression(
+                    label: label,
+                    exerciseName: exerciseName,
+                    weightKg: weightKg,
+                    reps: reps,
+                    sets: sets
+                )
+            )
         default:
+            // Un tipo que esta versión de la app no conoce: se ignora, no se rompe.
             return nil
         }
     }
