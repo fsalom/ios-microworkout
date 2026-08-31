@@ -2,40 +2,48 @@
 //  microworkoutUITests.swift
 //  microworkoutUITests
 //
-//  Created by Fernando Salom Carratala on 2/6/23.
-//
 
 import XCTest
 
+/// Humo de arranque: la app abre y enseña una de sus dos pantallas iniciales.
+///
+/// La app decide en el init entre onboarding (primera vez) y el tab bar (resto),
+/// y el simulador conserva UserDefaults entre ejecuciones, así que el test acepta
+/// las dos en vez de suponer un estado limpio. Lo que caza es la regresión gorda:
+/// un crash al arrancar o una raíz que no pinta nada.
 final class microworkoutUITests: XCTestCase {
 
     override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-
-        // In UI tests it is usually best to stop immediately when a failure occurs.
         continueAfterFailure = false
-
-        // In UI tests it’s important to set the initial state - such as interface orientation - required for your tests before they run. The setUp method is a good place to do this.
     }
 
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-    }
-
-    func testExample() throws {
-        // UI tests must launch the application that they test.
+    func testAppLaunchesToOnboardingOrHome() throws {
         let app = XCUIApplication()
         app.launch()
 
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-    }
+        let tabBar = app.tabBars.firstMatch
+        let onboarding = app.staticTexts["Bienvenido"]
 
-    func testLaunchPerformance() throws {
-        if #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 7.0, *) {
-            // This measures how long it takes to launch your application.
-            measure(metrics: [XCTApplicationLaunchMetric()]) {
-                XCUIApplication().launch()
+        // La que llegue primero: tab bar (usuario con perfil) u onboarding.
+        let deadline = Date().addingTimeInterval(15)
+        var launched = false
+        while Date() < deadline {
+            if tabBar.exists || onboarding.exists { launched = true; break }
+            RunLoop.current.run(until: Date().addingTimeInterval(0.25))
+        }
+        XCTAssertTrue(launched, "ni el tab bar ni el onboarding aparecieron")
+
+        // Si hay tab bar, las cinco pestañas deben existir y Perfil debe abrir.
+        if tabBar.exists {
+            for name in ["Inicio", "Ejercicios", "Entrenos", "Comidas", "Perfil"] {
+                XCTAssertTrue(tabBar.buttons[name].exists, "falta la pestaña \(name)")
             }
+            tabBar.buttons["Perfil"].tap()
+            XCTAssertTrue(
+                app.staticTexts["Perfil"].waitForExistence(timeout: 5)
+                    || app.staticTexts["PERFIL"].waitForExistence(timeout: 2),
+                "la pestaña Perfil no pintó su cabecera"
+            )
         }
     }
 }

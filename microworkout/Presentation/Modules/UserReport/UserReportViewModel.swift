@@ -66,6 +66,26 @@ final class UserReportViewModel: ObservableObject {
         }
     }
 
+    /// Corrige el texto de una nota del coach. Optimista con reversión, como el
+    /// borrado: la lista refleja el cambio ya, y se restaura si el servidor falla.
+    func updateNote(_ note: UserReportNote, content: String) {
+        let trimmed = content.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty, trimmed != note.content else { return }
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            let previous = self.uiState.coachNotes
+            if let index = self.uiState.coachNotes.firstIndex(where: { $0.id == note.id }) {
+                self.uiState.coachNotes[index].content = trimmed
+            }
+            do {
+                try await self.useCase.updateNote(id: note.id, content: trimmed)
+            } catch {
+                self.uiState.coachNotes = previous
+                self.handle(error)
+            }
+        }
+    }
+
     func deleteNote(_ note: UserReportNote) {
         Task { @MainActor [weak self] in
             guard let self else { return }

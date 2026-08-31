@@ -5,6 +5,7 @@ protocol UserReportRemoteDataSourceProtocol {
     func get() async throws -> UserReportApiDTO
     func setContent(_ content: String) async throws -> UserReportApiDTO
     func deleteNote(id: Int) async throws
+    func updateNote(id: Int, content: String) async throws
 }
 
 /// Habla con `/v1/profile/report` del backend FastAPI.
@@ -31,6 +32,16 @@ final class UserReportRemoteDataSource: UserReportRemoteDataSourceProtocol {
 
     func deleteNote(id: Int) async throws {
         let endpoint = Endpoint(path: "v1/profile/report/notes/\(id)", httpMethod: .delete)
+        let (status, _) = try await network.loadAuthorized(this: endpoint)
+        guard status < 400 else { throw Self.mapStatus(status) }
+    }
+
+    func updateNote(id: Int, content: String) async throws {
+        let endpoint = Endpoint(
+            path: "v1/profile/report/notes/\(id)",
+            httpMethod: .put,
+            parameters: ["content": content]
+        )
         let (status, _) = try await network.loadAuthorized(this: endpoint)
         guard status < 400 else { throw Self.mapStatus(status) }
     }

@@ -40,6 +40,16 @@
                ReferencedContainer = "container:microworkout.xcodeproj">
             </BuildableReference>
          </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "C192BF362A2A976C00982F33"
+               BuildableName = "microworkoutUITests.xctest"
+               BlueprintName = "microworkoutUITests"
+               ReferencedContainer = "container:microworkout.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction

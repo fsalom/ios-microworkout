@@ -63,7 +63,8 @@ public struct UserReportNote: Identifiable, Equatable {
     }
 
     public let id: Int
-    public let content: String
+    /// Mutable: el usuario puede corregir la nota desde su informe.
+    public var content: String
     public let source: Source
     /// Área de lo aprendido, si el coach la etiquetó.
     public let area: UserReportArea?

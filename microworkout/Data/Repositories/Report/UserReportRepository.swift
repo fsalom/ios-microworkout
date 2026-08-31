@@ -28,4 +28,9 @@ final class UserReportRepository: UserReportRepositoryProtocol {
         guard await isAuthenticated() else { throw DomainError.notAuthorized }
         try await remote.deleteNote(id: id)
     }
+
+    func updateNote(id: Int, content: String) async throws {
+        guard await isAuthenticated() else { throw DomainError.notAuthorized }
+        try await remote.updateNote(id: id, content: content)
+    }
 }

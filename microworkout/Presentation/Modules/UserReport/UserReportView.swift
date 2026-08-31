@@ -6,6 +6,9 @@ import SwiftUI
 struct UserReportView: View {
     @StateObject var viewModel: UserReportViewModel
     @FocusState private var isEditorFocused: Bool
+    /// Nota en edición y su texto de trabajo. La hoja se abre cuando hay nota.
+    @State private var editingNote: UserReportNote?
+    @State private var editingText = ""
 
     var body: some View {
         Form {
@@ -40,6 +43,9 @@ struct UserReportView: View {
             }
         }
         .onAppear { viewModel.load() }
+        .sheet(item: $editingNote) { note in
+            noteEditorSheet(note)
+        }
     }
 
     // MARK: - Secciones
@@ -105,14 +111,55 @@ struct UserReportView: View {
                     } label: {
                         Label("Borrar", systemImage: "trash")
                     }
+                    Button {
+                        editingText = note.content
+                        editingNote = note
+                    } label: {
+                        Label("Corregir", systemImage: "pencil")
+                    }
+                    .tint(.orange)
                 }
             }
         } header: {
             Text("Lo que ha anotado el coach")
         } footer: {
-            Text("Conclusiones que ha sacado de vuestras conversaciones, no cosas que hayas dicho tú. Desliza para borrar la que no te encaje.")
+            Text("Conclusiones que ha sacado de vuestras conversaciones, no cosas que hayas dicho tú. Desliza para corregir la que esté mal o borrar la que no te encaje.")
                 .font(.footnote)
         }
+    }
+
+    /// Hoja de corrección de una nota. Es el informe del usuario: si el coach
+    /// dedujo mal ("entrena 3 días" cuando son 4), corregirlo conserva la nota y
+    /// su fecha en vez de obligar a elegir entre el dato mal y ningún dato.
+    private func noteEditorSheet(_ note: UserReportNote) -> some View {
+        NavigationStack {
+            Form {
+                Section {
+                    TextEditor(text: $editingText)
+                        .frame(minHeight: 120)
+                } footer: {
+                    Text("\(max(0, 500 - editingText.count)) caracteres restantes")
+                }
+            }
+            .navigationTitle("Corregir nota")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancelar") { editingNote = nil }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Guardar") {
+                        viewModel.updateNote(note, content: editingText)
+                        editingNote = nil
+                    }
+                    .disabled(
+                        editingText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                            || editingText.count > 500
+                    )
+                }
+            }
+        }
+        .presentationDetents([.medium])
     }
 
     private var accountRequiredSection: some View {

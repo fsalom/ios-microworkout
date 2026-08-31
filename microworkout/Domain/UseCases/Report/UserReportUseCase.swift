@@ -4,6 +4,7 @@ protocol UserReportUseCaseProtocol {
     func getReport() async throws -> UserReport
     func save(content: String) async throws -> UserReport
     func deleteNote(id: Int) async throws
+    func updateNote(id: Int, content: String) async throws
 }
 
 final class UserReportUseCase: UserReportUseCaseProtocol {
@@ -31,5 +32,13 @@ final class UserReportUseCase: UserReportUseCaseProtocol {
 
     func deleteNote(id: Int) async throws {
         try await repository.deleteNote(id: id)
+    }
+
+    func updateNote(id: Int, content: String) async throws {
+        // Vacía no se manda: el backend la rechazaría (min_length=1), y la UI ya
+        // desactiva guardar sin texto — esto es el cinturón además del tirante.
+        let trimmed = content.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        try await repository.updateNote(id: id, content: String(trimmed.prefix(500)))
     }
 }

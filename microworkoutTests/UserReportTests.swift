@@ -10,11 +10,17 @@ final class UserReportTests: XCTestCase {
         var report = UserReport()
         var savedContent: String?
         var deletedIds: [Int] = []
+        var updatedNotes: [(id: Int, content: String)] = []
         var errorToThrow: Error?
 
         func getReport() async throws -> UserReport {
             if let errorToThrow { throw errorToThrow }
             return report
+        }
+
+        func updateNote(id: Int, content: String) async throws {
+            if let errorToThrow { throw errorToThrow }
+            updatedNotes.append((id: id, content: content))
         }
 
         func setContent(_ content: String) async throws -> UserReport {
