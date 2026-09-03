@@ -26,6 +26,7 @@ enum AppearancePreference: String, CaseIterable, Identifiable {
 
 @main
 struct MicroWorkoutApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @StateObject var appState: AppState
     @StateObject var mirrorManager = WorkoutMirrorManager.shared
     @StateObject var authSession: AuthSession
@@ -41,6 +42,11 @@ struct MicroWorkoutApp: App {
             .hasCompletedOnboarding() ? .home : .onboarding
         _appState = StateObject(wrappedValue: AppState(initialScreen: initialScreen))
         _authSession = StateObject(wrappedValue: component.authSession)
+        // El token de APNs entra por el AppDelegate, que no conoce el grafo de
+        // dependencias: el relé lo trae hasta el use case.
+        PushTokenRelay.shared.onToken = { token in
+            Task { await component.coachBriefsUseCase.handleToken(token) }
+        }
         // Register mirroring handler early
         _ = WorkoutMirrorManager.shared
     }
@@ -54,6 +60,9 @@ struct MicroWorkoutApp: App {
                 .preferredColorScheme(AppearancePreference(rawValue: appearanceRaw)?.colorScheme)
                 .task {
                     await authSession.bootstrap()
+                    // APNs rota tokens cuando quiere: con los avisos encendidos,
+                    // cada arranque refresca el registro.
+                    await component.coachBriefsUseCase.refreshOnLaunch()
                 }
                 .onOpenURL { url in
                     component.authService.handleOpenURL(url)

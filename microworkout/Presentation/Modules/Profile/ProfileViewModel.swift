@@ -49,6 +49,10 @@ struct ProfileUiState {
     var coachPreferencesError: String?
     var healthKitStatus: HealthAuthorizationStatus = .notDetermined
     var isHealthDataAvailable: Bool = false
+    /// Avisos proactivos del coach (brief de la mañana, cierre de la noche).
+    var coachBriefsEnabled: Bool = false
+    /// Mensaje cuando el sistema denegó el permiso de notificaciones.
+    var coachBriefsError: String?
     /// Gasto real estimado a partir de comidas y peso. `nil` = aún sin datos.
     var tdeeEstimate: TDEEEstimate?
 
@@ -76,6 +80,8 @@ class ProfileViewModel: ObservableObject {
     /// Opcional: los tests del formulario no lo necesitan y el resto de la
     /// pantalla funciona igual sin él (la sección simplemente no aparece).
     private let adaptiveTDEEUseCase: AdaptiveTDEEUseCaseProtocol?
+    /// Ídem: sin él, el interruptor de avisos no se pinta.
+    private let coachBriefsUseCase: CoachBriefsUseCaseProtocol?
     private var userProfileUseCase: UserProfileUseCaseProtocol
     private var healthUseCase: HealthUseCaseProtocol
     private let authService: AuthServiceProtocol
@@ -87,6 +93,7 @@ class ProfileViewModel: ObservableObject {
 
     init(router: ProfileRouterProtocol,
          adaptiveTDEEUseCase: AdaptiveTDEEUseCaseProtocol? = nil,
+         coachBriefsUseCase: CoachBriefsUseCaseProtocol? = nil,
          userProfileUseCase: UserProfileUseCaseProtocol,
          healthUseCase: HealthUseCaseProtocol,
          authService: AuthServiceProtocol,
@@ -94,6 +101,7 @@ class ProfileViewModel: ObservableObject {
          session: AuthStateProviding = SharedAuthState()) {
         self.router = router
         self.adaptiveTDEEUseCase = adaptiveTDEEUseCase
+        self.coachBriefsUseCase = coachBriefsUseCase
         self.userProfileUseCase = userProfileUseCase
         self.healthUseCase = healthUseCase
         self.authService = authService
@@ -222,6 +230,31 @@ class ProfileViewModel: ObservableObject {
                 }
             }
         }
+    }
+
+    /// El interruptor de los avisos. Si el sistema deniega el permiso, el toggle
+    /// vuelve a apagado y se explica dónde encenderlo — dejarlo en verde sin
+    /// permiso sería mentir.
+    func setCoachBriefs(enabled: Bool) {
+        guard let coachBriefsUseCase else { return }
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            if enabled {
+                let granted = await coachBriefsUseCase.enable()
+                self.uiState.coachBriefsEnabled = granted
+                self.uiState.coachBriefsError = granted
+                    ? nil
+                    : "Las notificaciones están desactivadas. Actívalas en Ajustes > microworkout."
+            } else {
+                await coachBriefsUseCase.disable()
+                self.uiState.coachBriefsEnabled = false
+                self.uiState.coachBriefsError = nil
+            }
+        }
+    }
+
+    func loadCoachBriefsState() {
+        uiState.coachBriefsEnabled = coachBriefsUseCase?.isEnabled ?? false
     }
 
     /// Calcula el gasto real en segundo plano. Se llama al cargar el perfil; si

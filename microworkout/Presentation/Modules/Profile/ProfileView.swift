@@ -102,6 +102,8 @@ struct ProfileView: View {
                     ) {
                         viewModel.goToUserReport()
                     }
+
+                    coachBriefsRow
                 }
             }
 
@@ -120,6 +122,7 @@ struct ProfileView: View {
             }
         }
         .onAppear {
+            viewModel.loadCoachBriefsState()
             viewModel.loadRealExpenditure()
             // Carga el estado de sincronización una vez para poder mostrar el
             // badge de pendientes en la fila de "Sincronización".
@@ -194,6 +197,27 @@ struct ProfileView: View {
             ProfileStatTile(icon: "scalemass", value: String(format: "%.0f", viewModel.uiState.weight), unit: "kg", label: "Peso")
             ProfileStatTile(icon: "ruler", value: String(format: "%.0f", viewModel.uiState.height), unit: "cm", label: "Altura")
             ProfileStatTile(icon: "calendar", value: "\(viewModel.uiState.age)", unit: "años", label: "Edad")
+        }
+    }
+
+    /// Interruptor de los avisos proactivos (brief de la mañana, cierre del día).
+    private var coachBriefsRow: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Toggle(isOn: Binding(
+                get: { viewModel.uiState.coachBriefsEnabled },
+                set: { viewModel.setCoachBriefs(enabled: $0) }
+            )) {
+                hubRowLabel(icon: "bell.badge", title: "Avisos del coach", iconColor: .orange)
+            }
+            if let error = viewModel.uiState.coachBriefsError {
+                Text(error)
+                    .font(.caption2)
+                    .foregroundColor(.orange)
+            } else if viewModel.uiState.coachBriefsEnabled {
+                Text("Por la mañana, qué toca hoy; por la noche, cómo ha ido el día.")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+            }
         }
     }
 

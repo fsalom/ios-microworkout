@@ -173,6 +173,12 @@ final class DefaultAppComponent: AppComponentProtocol {
         repository: aiCoachRepository
     )
 
+    lazy var coachBriefsUseCase: CoachBriefsUseCaseProtocol = CoachBriefsUseCase(
+        repository: DeviceRepository(remote: DeviceRemoteDataSource()),
+        registrar: SystemPushRegistrar(),
+        storage: makeUserDefaultsManager()
+    )
+
     lazy var userReportUseCase: UserReportUseCaseProtocol = UserReportUseCase(
         repository: UserReportRepository(remote: UserReportRemoteDataSource())
     )
