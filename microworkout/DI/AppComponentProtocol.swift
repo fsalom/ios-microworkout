@@ -30,6 +30,7 @@ protocol AppComponentProtocol: AnyObject {
     var adaptiveTDEEUseCase: AdaptiveTDEEUseCaseProtocol { get }
     var progressionSuggestionStore: ProgressionSuggestionStoreProtocol { get }
     var coachBriefsUseCase: CoachBriefsUseCaseProtocol { get }
+    var healthWorkoutSync: HealthWorkoutSyncRepositoryProtocol { get }
     var bodyMetricsUseCase: BodyMetricsUseCaseProtocol { get }
     var weeklyPlanUseCase: WeeklyPlanUseCaseProtocol { get }
     var exerciseProgressionUseCase: ExerciseProgressionUseCaseProtocol { get }

@@ -46,19 +46,23 @@ final class ExerciseTabViewModel: ObservableObject {
     private let workoutLogUseCase: WorkoutLogUseCaseProtocol
     private let coachUseCase: CoachUseCaseProtocol
     private let coachActionUseCase: CoachActionUseCaseProtocol
+    /// Opcional: sin él, los entrenos del reloj solo se espejan en la sync normal.
+    private let healthWorkoutSync: HealthWorkoutSyncRepositoryProtocol?
 
     init(router: ExerciseTabRouter,
          healthUseCase: HealthUseCaseProtocol,
          workoutEntryUseCase: WorkoutEntryUseCaseProtocol,
          workoutLogUseCase: WorkoutLogUseCaseProtocol,
          coachUseCase: CoachUseCaseProtocol,
-         coachActionUseCase: CoachActionUseCaseProtocol) {
+         coachActionUseCase: CoachActionUseCaseProtocol,
+         healthWorkoutSync: HealthWorkoutSyncRepositoryProtocol? = nil) {
         self.router = router
         self.healthUseCase = healthUseCase
         self.workoutEntryUseCase = workoutEntryUseCase
         self.workoutLogUseCase = workoutLogUseCase
         self.coachUseCase = coachUseCase
         self.coachActionUseCase = coachActionUseCase
+        self.healthWorkoutSync = healthWorkoutSync
     }
 
     func load() {
@@ -66,6 +70,12 @@ final class ExerciseTabViewModel: ObservableObject {
         loadWorkouts()
         loadTodayHealth()
         loadCoach()
+        // Espeja en la cuenta los entrenos del reloj recién aparecidos, para que
+        // la web los vea sin esperar a la sincronización de login. Con acelerador
+        // dentro: recargar la pestaña no bombardea el servidor.
+        if let healthWorkoutSync {
+            Task { await healthWorkoutSync.uploadOpportunistically() }
+        }
     }
 
     private func loadCoach() {

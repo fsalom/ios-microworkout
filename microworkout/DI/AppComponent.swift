@@ -119,6 +119,14 @@ final class DefaultAppComponent: AppComponentProtocol {
         return SetMediaUseCase(repository: repository)
     }()
 
+    lazy var healthWorkoutSync: HealthWorkoutSyncRepositoryProtocol = healthWorkoutSyncRepository
+
+    private lazy var healthWorkoutSyncRepository: HealthWorkoutSyncRepositoryProtocol =
+        HealthWorkoutSyncRepository(
+            health: healthUseCase,
+            remote: HealthWorkoutRemoteDataSource()
+        )
+
     lazy var syncLocalDataUseCase: SyncLocalDataUseCaseProtocol = SyncLocalDataUseCase(
         training: trainingRepository,
         workoutLog: workoutLogRepository,
@@ -126,7 +134,8 @@ final class DefaultAppComponent: AppComponentProtocol {
         meal: mealRepository,
         userProfile: userProfileRepository,
         bodyMetrics: bodyMetricsRepository,
-        weeklyPlan: weeklyPlanRepository
+        weeklyPlan: weeklyPlanRepository,
+        healthWorkouts: healthWorkoutSyncRepository
     )
 
     lazy var exerciseProgressionUseCase: ExerciseProgressionUseCaseProtocol = ExerciseProgressionUseCase(
