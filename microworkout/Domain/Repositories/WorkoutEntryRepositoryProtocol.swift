@@ -7,4 +7,8 @@ protocol WorkoutEntryRepositoryProtocol {
     func add(_ entry: WorkoutEntry) async throws
     func update(_ entry: WorkoutEntry) async throws
     func delete(entryID: UUID) async throws
+    /// Cuántas entradas locales faltan en la cuenta.
+    func pendingSyncCount() async throws -> Int
+    /// Sube las que falten (modelo espejo). Devuelve cuántas subió.
+    func syncLocalToRemote() async throws -> Int
 }

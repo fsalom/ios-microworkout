@@ -93,11 +93,13 @@ final class DefaultAppComponent: AppComponentProtocol {
     lazy var workoutLogUseCase: WorkoutLogUseCaseProtocol =
         WorkoutLogUseCase(repository: workoutLogRepository)
 
-    lazy var workoutEntryUseCase: WorkoutEntryUseCaseProtocol = {
-        let local = WorkoutEntryLocalDataSource(storage: makeUserDefaultsManager())
-        let repository = WorkoutEntryRepository(dataSource: local)
-        return WorkoutEntryUseCase(repository: repository)
-    }()
+    private lazy var workoutEntryRepository: WorkoutEntryRepositoryProtocol = WorkoutEntryRepository(
+        dataSource: WorkoutEntryLocalDataSource(storage: makeUserDefaultsManager()),
+        remote: WorkoutEntryRemoteDataSource()
+    )
+
+    lazy var workoutEntryUseCase: WorkoutEntryUseCaseProtocol =
+        WorkoutEntryUseCase(repository: workoutEntryRepository)
 
     lazy var userProfileUseCase: UserProfileUseCaseProtocol =
         UserProfileUseCase(repository: userProfileRepository)
@@ -135,7 +137,8 @@ final class DefaultAppComponent: AppComponentProtocol {
         userProfile: userProfileRepository,
         bodyMetrics: bodyMetricsRepository,
         weeklyPlan: weeklyPlanRepository,
-        healthWorkouts: healthWorkoutSyncRepository
+        healthWorkouts: healthWorkoutSyncRepository,
+        workoutEntries: workoutEntryRepository
     )
 
     lazy var exerciseProgressionUseCase: ExerciseProgressionUseCaseProtocol = ExerciseProgressionUseCase(

@@ -15,6 +15,7 @@ enum SyncCategory: String, CaseIterable, Identifiable {
     case bodyMetrics
     case weeklyPlan
     case healthWorkouts
+    case workoutEntries
 
     var id: String { rawValue }
 
@@ -29,6 +30,7 @@ enum SyncCategory: String, CaseIterable, Identifiable {
         case .bodyMetrics: return "Peso"
         case .weeklyPlan:  return "Plan semanal"
         case .healthWorkouts: return "Entrenos del reloj"
+        case .workoutEntries: return "Registros manuales"
         }
     }
 
@@ -42,6 +44,7 @@ enum SyncCategory: String, CaseIterable, Identifiable {
         case .bodyMetrics: return "scalemass"
         case .weeklyPlan:  return "calendar"
         case .healthWorkouts: return "applewatch"
+        case .workoutEntries: return "square.and.pencil"
         }
     }
 }
@@ -124,6 +127,7 @@ final class SyncLocalDataUseCase: SyncLocalDataUseCaseProtocol {
     private let bodyMetrics: BodyMetricsRepositoryProtocol
     private let weeklyPlan: WeeklyPlanRepositoryProtocol
     private let healthWorkouts: HealthWorkoutSyncRepositoryProtocol
+    private let workoutEntries: WorkoutEntryRepositoryProtocol
 
     init(training: TrainingRepositoryProtocol,
          workoutLog: WorkoutLogRepositoryProtocol,
@@ -132,7 +136,8 @@ final class SyncLocalDataUseCase: SyncLocalDataUseCaseProtocol {
          userProfile: UserProfileRepositoryProtocol,
          bodyMetrics: BodyMetricsRepositoryProtocol,
          weeklyPlan: WeeklyPlanRepositoryProtocol,
-         healthWorkouts: HealthWorkoutSyncRepositoryProtocol) {
+         healthWorkouts: HealthWorkoutSyncRepositoryProtocol,
+         workoutEntries: WorkoutEntryRepositoryProtocol) {
         self.training = training
         self.workoutLog = workoutLog
         self.exercise = exercise
@@ -141,6 +146,7 @@ final class SyncLocalDataUseCase: SyncLocalDataUseCaseProtocol {
         self.bodyMetrics = bodyMetrics
         self.weeklyPlan = weeklyPlan
         self.healthWorkouts = healthWorkouts
+        self.workoutEntries = workoutEntries
     }
 
     func status() async -> SyncReport {
@@ -184,6 +190,7 @@ final class SyncLocalDataUseCase: SyncLocalDataUseCaseProtocol {
         case .bodyMetrics: return try await bodyMetrics.pendingSyncCount()
         case .weeklyPlan:  return try await weeklyPlan.pendingSyncCount()
         case .healthWorkouts: return try await healthWorkouts.pendingSyncCount()
+        case .workoutEntries: return try await workoutEntries.pendingSyncCount()
         }
     }
 
@@ -197,6 +204,7 @@ final class SyncLocalDataUseCase: SyncLocalDataUseCaseProtocol {
         case .bodyMetrics: return try await bodyMetrics.syncLocalToRemote()
         case .weeklyPlan:  return try await weeklyPlan.syncLocalToRemote()
         case .healthWorkouts: return try await healthWorkouts.syncLocalToRemote()
+        case .workoutEntries: return try await workoutEntries.syncLocalToRemote()
         }
     }
 
