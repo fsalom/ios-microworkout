@@ -66,6 +66,9 @@ struct MealsView: View {
                             onChangeTime: { newTime in
                                 viewModel.updateSectionTime(type: type, to: newTime)
                             }
+                            ,
+                            isFavorite: { viewModel.isFavorite($0) },
+                            onToggleFavorite: { viewModel.toggleFavorite($0) }
                         )
                         .padding(.horizontal)
                     }
@@ -395,6 +398,8 @@ private struct MealSectionCard: View {
     let onEdit: (_ item: FoodItem, _ mealId: UUID) -> Void
     let onSaveAsMyMeal: () -> Void
     let onChangeTime: (Date) -> Void
+    let isFavorite: (_ item: FoodItem) -> Bool
+    let onToggleFavorite: (_ item: FoodItem) -> Void
 
     @State private var openSwipeRowId: UUID? = nil
 
@@ -405,7 +410,9 @@ private struct MealSectionCard: View {
          onDeleteMeal: @escaping (_ mealId: UUID) -> Void,
          onEditItem: @escaping (_ item: FoodItem, _ mealId: UUID) -> Void,
          onSaveAsMyMeal: @escaping () -> Void,
-         onChangeTime: @escaping (Date) -> Void) {
+         onChangeTime: @escaping (Date) -> Void,
+         isFavorite: @escaping (_ item: FoodItem) -> Bool = { _ in false },
+         onToggleFavorite: @escaping (_ item: FoodItem) -> Void = { _ in }) {
         self.type = type
         self.meals = meals
         self.onAdd = onAdd
@@ -414,6 +421,8 @@ private struct MealSectionCard: View {
         self.onEdit = onEditItem
         self.onSaveAsMyMeal = onSaveAsMyMeal
         self.onChangeTime = onChangeTime
+        self.isFavorite = isFavorite
+        self.onToggleFavorite = onToggleFavorite
     }
 
     /// La hora que representa la sección: la del primer registro.
@@ -541,6 +550,13 @@ private struct MealSectionCard: View {
                                     onEdit(entry.item, entry.mealId)
                                 } label: {
                                     Label("Editar cantidad", systemImage: "pencil")
+                                }
+                                Button {
+                                    onToggleFavorite(entry.item)
+                                } label: {
+                                    isFavorite(entry.item)
+                                        ? Label("Quitar de favoritos", systemImage: "star.slash")
+                                        : Label("Añadir a favoritos", systemImage: "star")
                                 }
                                 Button(role: .destructive) {
                                     onDelete(entry.item.id, entry.mealId)

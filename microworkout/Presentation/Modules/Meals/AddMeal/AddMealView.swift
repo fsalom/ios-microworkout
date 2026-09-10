@@ -109,7 +109,11 @@ struct AddMealView: View {
         .fullScreenCover(isPresented: $showScanner, onDismiss: {
             if let food = scannedFood {
                 scannedFood = nil
-                pendingFood = food
+                // El escáner YA pidió la cantidad en su overlay ("Añadir"): se
+                // registra directo. Reabrir aquí el selector era confirmar dos
+                // veces lo mismo.
+                viewModel.quickAdd(food)
+                showToast("\(food.name) añadido")
             }
         }) {
             NavigationStack {
@@ -835,7 +839,8 @@ private struct CreateMyMealSheet: View {
         .fullScreenCover(isPresented: $showScanner, onDismiss: {
             if let food = scannedFood {
                 scannedFood = nil
-                pickingIngredient = food
+                // Misma regla que en AddMeal: la cantidad ya vino del escáner.
+                ingredients.append(food)
             }
         }) {
             NavigationStack {

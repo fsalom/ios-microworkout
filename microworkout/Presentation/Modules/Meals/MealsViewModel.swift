@@ -15,6 +15,9 @@ struct MealsUiState {
     var isLoading: Bool = false
     var error: String?
     var savedMyMealName: String?   // confirmación tras guardar una sección como "Mi comida"
+    /// Claves de identidad de los alimentos favoritos, para pintar la estrella
+    /// en lo ya registrado y poder marcarlo/quitarlo desde ahí.
+    var favoriteKeys: Set<String> = []
     var coachInsight: CoachInsight? = nil
     var isLoadingCoach: Bool = false
 
@@ -85,6 +88,9 @@ final class MealsViewModel: ObservableObject {
         Task {
             do {
                 let meals = try await mealUseCase.getMeals(for: uiState.selectedDate)
+                if let favorites = try? await mealUseCase.getFavorites() {
+                    self.uiState.favoriteKeys = Set(favorites.map(\.identityKey))
+                }
                 let totals = meals.reduce(NutritionInfo.zero) { $0 + $1.totalNutrition }
                 let recipeCount = meals.filter { $0.myMealName != nil }.count
                 print("[Meals] loadMeals fetched \(meals.count) total, \(recipeCount) recipe(s) for \(uiState.selectedDate)")
@@ -167,6 +173,27 @@ final class MealsViewModel: ObservableObject {
 
     /// Deletes a single food item from a meal. If the meal had only that item,
     /// the entire meal is removed. Otherwise the meal is updated removing the item.
+    func isFavorite(_ item: FoodItem) -> Bool {
+        uiState.favoriteKeys.contains(item.identityKey)
+    }
+
+    /// Marca/quita un alimento YA registrado como favorito. Optimista: la
+    /// estrella responde al momento y se revierte si el guardado falla.
+    func toggleFavorite(_ item: FoodItem) {
+        let key = item.identityKey
+        let wasFavorite = uiState.favoriteKeys.contains(key)
+        if wasFavorite { uiState.favoriteKeys.remove(key) } else { uiState.favoriteKeys.insert(key) }
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            do {
+                try await self.mealUseCase.toggleFavorite(item)
+            } catch {
+                if wasFavorite { self.uiState.favoriteKeys.insert(key) }
+                else { self.uiState.favoriteKeys.remove(key) }
+            }
+        }
+    }
+
     func deleteFoodItem(itemId: UUID, mealId: UUID) {
         print("[Meals] deleteFoodItem called itemId=\(itemId) mealId=\(mealId)")
         guard let meal = uiState.todayMeals.first(where: { $0.id == mealId }) else {
